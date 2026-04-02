@@ -574,6 +574,7 @@ type AssistantMessageTokens struct {
 	Input     float64                     `json:"input,required"`
 	Output    float64                     `json:"output,required"`
 	Reasoning float64                     `json:"reasoning,required"`
+	Total     float64                     `json:"total"`
 	JSON      assistantMessageTokensJSON  `json:"-"`
 }
 
@@ -584,6 +585,7 @@ type assistantMessageTokensJSON struct {
 	Input       apijson.Field
 	Output      apijson.Field
 	Reasoning   apijson.Field
+	Total       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1278,9 +1280,9 @@ func (r Part) AsUnion() PartUnion {
 	return r.union
 }
 
-// Union satisfied by [TextPart], [ReasoningPart], [FilePart], [ToolPart],
-// [StepStartPart], [StepFinishPart], [SnapshotPart], [PartPatchPart], [AgentPart]
-// or [PartRetryPart].
+// Union satisfied by [TextPart], [SubtaskPart], [ReasoningPart], [FilePart],
+// [ToolPart], [StepStartPart], [StepFinishPart], [SnapshotPart], [PartPatchPart],
+// [AgentPart], [PartRetryPart] or [CompactionPart].
 type PartUnion interface {
 	implementsPart()
 }
@@ -1292,6 +1294,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(TextPart{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SubtaskPart{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1328,6 +1334,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(PartRetryPart{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(CompactionPart{}),
 		},
 	)
 }
@@ -1849,16 +1859,16 @@ type StepFinishPartTokens struct {
 	Input     float64                   `json:"input,required"`
 	Output    float64                   `json:"output,required"`
 	Reasoning float64                   `json:"reasoning,required"`
+	Total     *float64                  `json:"total"`
 	JSON      stepFinishPartTokensJSON  `json:"-"`
 }
 
-// stepFinishPartTokensJSON contains the JSON metadata for the struct
-// [StepFinishPartTokens]
 type stepFinishPartTokensJSON struct {
 	Cache       apijson.Field
 	Input       apijson.Field
 	Output      apijson.Field
 	Reasoning   apijson.Field
+	Total       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2144,6 +2154,123 @@ func (r textPartJSON) RawJSON() string {
 }
 
 func (r TextPart) implementsPart() {}
+
+type SubtaskPart struct {
+	ID          string           `json:"id,required"`
+	MessageID   string           `json:"messageID,required"`
+	SessionID   string           `json:"sessionID,required"`
+	Type        SubtaskPartType  `json:"type,required"`
+	Prompt      string           `json:"prompt,required"`
+	Description string           `json:"description,required"`
+	Agent       string           `json:"agent,required"`
+	Model       SubtaskPartModel `json:"model"`
+	Command     string           `json:"command"`
+	JSON        subtaskPartJSON  `json:"-"`
+}
+
+type subtaskPartJSON struct {
+	ID          apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Type        apijson.Field
+	Prompt      apijson.Field
+	Description apijson.Field
+	Agent       apijson.Field
+	Model       apijson.Field
+	Command     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SubtaskPart) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r subtaskPartJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r SubtaskPart) implementsPart() {}
+
+type SubtaskPartType string
+
+const (
+	SubtaskPartTypeSubtask SubtaskPartType = "subtask"
+)
+
+func (r SubtaskPartType) IsKnown() bool {
+	switch r {
+	case SubtaskPartTypeSubtask:
+		return true
+	}
+	return false
+}
+
+type SubtaskPartModel struct {
+	ProviderID string               `json:"providerID,required"`
+	ModelID    string               `json:"modelID,required"`
+	JSON       subtaskPartModelJSON `json:"-"`
+}
+
+type subtaskPartModelJSON struct {
+	ProviderID  apijson.Field
+	ModelID     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SubtaskPartModel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r subtaskPartModelJSON) RawJSON() string {
+	return r.raw
+}
+
+type CompactionPart struct {
+	ID        string             `json:"id,required"`
+	MessageID string             `json:"messageID,required"`
+	SessionID string             `json:"sessionID,required"`
+	Type      CompactionPartType `json:"type,required"`
+	Auto      bool               `json:"auto,required"`
+	Overflow  bool               `json:"overflow"`
+	JSON      compactionPartJSON `json:"-"`
+}
+
+type compactionPartJSON struct {
+	ID          apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Type        apijson.Field
+	Auto        apijson.Field
+	Overflow    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *CompactionPart) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r compactionPartJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r CompactionPart) implementsPart() {}
+
+type CompactionPartType string
+
+const (
+	CompactionPartTypeCompaction CompactionPartType = "compaction"
+)
+
+func (r CompactionPartType) IsKnown() bool {
+	switch r {
+	case CompactionPartTypeCompaction:
+		return true
+	}
+	return false
+}
 
 type TextPartType string
 
