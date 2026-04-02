@@ -712,6 +712,70 @@ func (r EventListResponseEventQuestionRejectedType) IsKnown() bool {
 }
 
 // =============================================================================
+// EventListResponseEventQuestionReplied
+// =============================================================================
+
+type EventListResponseEventQuestionReplied struct {
+	Properties EventListResponseEventQuestionRepliedProperties `json:"properties,required"`
+	Type       EventListResponseEventQuestionRepliedType       `json:"type,required"`
+	JSON       eventListResponseEventQuestionRepliedJSON       `json:"-"`
+}
+
+type eventListResponseEventQuestionRepliedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionReplied) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionRepliedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventQuestionReplied) implementsEventListResponse() {}
+
+type EventListResponseEventQuestionRepliedProperties struct {
+	Answers   [][]string `json:"answers,required"`
+	RequestID string     `json:"requestID,required"`
+	SessionID string     `json:"sessionID,required"`
+	JSON      eventListResponseEventQuestionRepliedPropertiesJSON
+}
+
+type eventListResponseEventQuestionRepliedPropertiesJSON struct {
+	Answers     apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionRepliedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionRepliedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventQuestionRepliedType string
+
+const (
+	EventListResponseEventQuestionRepliedTypeQuestionReplied EventListResponseEventQuestionRepliedType = "question.replied"
+)
+
+func (r EventListResponseEventQuestionRepliedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventQuestionRepliedTypeQuestionReplied:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
 // EventListResponseEventTuiPromptAppend
 // =============================================================================
 
@@ -1264,7 +1328,7 @@ func (r eventListResponseEventVcsBranchUpdatedJSON) RawJSON() string {
 func (r EventListResponseEventVcsBranchUpdated) implementsEventListResponse() {}
 
 type EventListResponseEventVcsBranchUpdatedProperties struct {
-	Branch *string `json:"branch,omitempty"`
+	Branch string `json:"branch,required"`
 	JSON   eventListResponseEventVcsBranchUpdatedPropertiesJSON
 }
 

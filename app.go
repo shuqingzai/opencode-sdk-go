@@ -65,7 +65,14 @@ type Model struct {
 	Modalities   ModelModalities        `json:"modalities"`
 	Provider     ModelProvider          `json:"provider"`
 	Status       ModelStatus            `json:"status"`
-	JSON         modelJSON              `json:"-"`
+	ProviderID   string                 `json:"providerID"`
+	API          ModelAPI               `json:"api"`
+	Family       string                 `json:"family"`
+	Capabilities ModelCapabilities      `json:"capabilities"`
+	Headers      map[string]string      `json:"headers"`
+	// This field can have the runtime type of map of model variants.
+	Variants interface{} `json:"variants"`
+	JSON     modelJSON   `json:"-"`
 }
 
 // modelJSON contains the JSON metadata for the struct [Model]
@@ -84,6 +91,12 @@ type modelJSON struct {
 	Modalities   apijson.Field
 	Provider     apijson.Field
 	Status       apijson.Field
+	ProviderID   apijson.Field
+	API          apijson.Field
+	Family       apijson.Field
+	Capabilities apijson.Field
+	Headers      apijson.Field
+	Variants     apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -97,21 +110,24 @@ func (r modelJSON) RawJSON() string {
 }
 
 type ModelCost struct {
-	Input      float64       `json:"input,required"`
-	Output     float64       `json:"output,required"`
-	CacheRead  float64       `json:"cache_read"`
-	CacheWrite float64       `json:"cache_write"`
-	JSON       modelCostJSON `json:"-"`
+	Input      float64 `json:"input,required"`
+	Output     float64 `json:"output,required"`
+	CacheRead  float64 `json:"cache_read"`
+	CacheWrite float64 `json:"cache_write"`
+	// This field can have the runtime type of object with read, write, input, output.
+	ExperimentalOver200K interface{}   `json:"experimentalOver200K"`
+	JSON                 modelCostJSON `json:"-"`
 }
 
 // modelCostJSON contains the JSON metadata for the struct [ModelCost]
 type modelCostJSON struct {
-	Input       apijson.Field
-	Output      apijson.Field
-	CacheRead   apijson.Field
-	CacheWrite  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Input                apijson.Field
+	Output               apijson.Field
+	CacheRead            apijson.Field
+	CacheWrite           apijson.Field
+	ExperimentalOver200K apijson.Field
+	raw                  string
+	ExtraFields          map[string]apijson.Field
 }
 
 func (r *ModelCost) UnmarshalJSON(data []byte) (err error) {
@@ -222,6 +238,49 @@ func (r modelProviderJSON) RawJSON() string {
 	return r.raw
 }
 
+type ModelAPI struct {
+	ID   string       `json:"id"`
+	URL  string       `json:"url"`
+	Npm  string       `json:"npm"`
+	JSON modelAPIJSON `json:"-"`
+}
+
+type modelAPIJSON struct {
+	ID          apijson.Field
+	URL         apijson.Field
+	Npm         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ModelAPI) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r modelAPIJSON) RawJSON() string {
+	return r.raw
+}
+
+type ModelCapabilities struct {
+	// This field can have the runtime type of [bool] or object.
+	Interleaved interface{}           `json:"interleaved"`
+	JSON        modelCapabilitiesJSON `json:"-"`
+}
+
+type modelCapabilitiesJSON struct {
+	Interleaved apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ModelCapabilities) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r modelCapabilitiesJSON) RawJSON() string {
+	return r.raw
+}
+
 type ModelStatus string
 
 const (
@@ -237,6 +296,23 @@ func (r ModelStatus) IsKnown() bool {
 	return false
 }
 
+type ProviderSource string
+
+const (
+	ProviderSourceEnv    ProviderSource = "env"
+	ProviderSourceConfig ProviderSource = "config"
+	ProviderSourceCustom ProviderSource = "custom"
+	ProviderSourceAPI    ProviderSource = "api"
+)
+
+func (r ProviderSource) IsKnown() bool {
+	switch r {
+	case ProviderSourceEnv, ProviderSourceConfig, ProviderSourceCustom, ProviderSourceAPI:
+		return true
+	}
+	return false
+}
+
 type Provider struct {
 	ID     string           `json:"id,required"`
 	Env    []string         `json:"env,required"`
@@ -244,7 +320,11 @@ type Provider struct {
 	Name   string           `json:"name,required"`
 	API    string           `json:"api"`
 	Npm    string           `json:"npm"`
-	JSON   providerJSON     `json:"-"`
+	Source ProviderSource   `json:"source"`
+	Key    string           `json:"key"`
+	// This field can have the runtime type of object.
+	Options interface{}  `json:"options"`
+	JSON    providerJSON `json:"-"`
 }
 
 // providerJSON contains the JSON metadata for the struct [Provider]
@@ -255,6 +335,9 @@ type providerJSON struct {
 	Name        apijson.Field
 	API         apijson.Field
 	Npm         apijson.Field
+	Source      apijson.Field
+	Key         apijson.Field
+	Options     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

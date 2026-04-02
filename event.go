@@ -137,6 +137,7 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventProjectUpdated],
 // [EventListResponseEventQuestionAsked],
 // [EventListResponseEventQuestionRejected],
+// [EventListResponseEventQuestionReplied],
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
@@ -186,6 +187,7 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventProjectUpdated],
 // [EventListResponseEventQuestionAsked],
 // [EventListResponseEventQuestionRejected],
+// [EventListResponseEventQuestionReplied],
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
@@ -347,6 +349,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventQuestionRejected{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionReplied{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -661,9 +667,11 @@ func (r eventListResponseEventMessagePartUpdatedJSON) RawJSON() string {
 func (r EventListResponseEventMessagePartUpdated) implementsEventListResponse() {}
 
 type EventListResponseEventMessagePartUpdatedProperties struct {
-	Part  Part                                                   `json:"part,required"`
-	Delta string                                                 `json:"delta"`
-	JSON  eventListResponseEventMessagePartUpdatedPropertiesJSON `json:"-"`
+	Part      Part                                                   `json:"part,required"`
+	Delta     string                                                 `json:"delta"`
+	SessionID string                                                 `json:"sessionID,required"`
+	Time      string                                                 `json:"time,required"`
+	JSON      eventListResponseEventMessagePartUpdatedPropertiesJSON `json:"-"`
 }
 
 // eventListResponseEventMessagePartUpdatedPropertiesJSON contains the JSON
@@ -671,6 +679,8 @@ type EventListResponseEventMessagePartUpdatedProperties struct {
 type eventListResponseEventMessagePartUpdatedPropertiesJSON struct {
 	Part        apijson.Field
 	Delta       apijson.Field
+	SessionID   apijson.Field
+	Time        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -887,6 +897,7 @@ func (r EventListResponseEventPermissionReplied) implementsEventListResponse() {
 
 type EventListResponseEventPermissionRepliedProperties struct {
 	PermissionID string                                                `json:"permissionID,required"`
+	RequestID    string                                                `json:"requestID,required"`
 	Response     string                                                `json:"response,required"`
 	SessionID    string                                                `json:"sessionID,required"`
 	JSON         eventListResponseEventPermissionRepliedPropertiesJSON `json:"-"`
@@ -896,6 +907,7 @@ type EventListResponseEventPermissionRepliedProperties struct {
 // for the struct [EventListResponseEventPermissionRepliedProperties]
 type eventListResponseEventPermissionRepliedPropertiesJSON struct {
 	PermissionID apijson.Field
+	RequestID    apijson.Field
 	Response     apijson.Field
 	SessionID    apijson.Field
 	raw          string
@@ -1421,7 +1433,7 @@ func (r eventListResponseEventSessionErrorJSON) RawJSON() string {
 func (r EventListResponseEventSessionError) implementsEventListResponse() {}
 
 type EventListResponseEventSessionErrorProperties struct {
-	Error     EventListResponseEventSessionErrorPropertiesError `json:"error"`
+	Error     EventListResponseEventSessionErrorPropertiesError `json:"error,required"`
 	SessionID string                                            `json:"sessionID"`
 	JSON      eventListResponseEventSessionErrorPropertiesJSON  `json:"-"`
 }

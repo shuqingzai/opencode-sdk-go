@@ -65,17 +65,25 @@ type Config struct {
 	Autoupdate bool `json:"autoupdate"`
 	// Command configuration, see https://opencode.ai/docs/commands
 	Command map[string]ConfigCommand `json:"command"`
+	// Compaction settings for session history
+	Compaction ConfigCompaction `json:"compaction"`
 	// Disable providers that are loaded automatically
-	DisabledProviders []string                   `json:"disabled_providers"`
-	Experimental      ConfigExperimental         `json:"experimental"`
-	Formatter         map[string]ConfigFormatter `json:"formatter"`
+	DisabledProviders []string `json:"disabled_providers"`
+	// Enable specific providers
+	EnabledProviders []string `json:"enabled_providers"`
+	// Enterprise configuration
+	Enterprise   EnterpriseConfig           `json:"enterprise"`
+	Experimental ConfigExperimental         `json:"experimental"`
+	Formatter    map[string]ConfigFormatter `json:"formatter"`
 	// Additional instruction files or patterns to include
 	Instructions []string `json:"instructions"`
 	// Custom keybind configurations
 	Keybinds KeybindsConfig `json:"keybinds"`
 	// @deprecated Always uses stretch layout.
-	Layout ConfigLayout         `json:"layout"`
-	Lsp    map[string]ConfigLsp `json:"lsp"`
+	Layout ConfigLayout `json:"layout"`
+	// Log level for the application
+	LogLevel ConfigLogLevel       `json:"logLevel"`
+	Lsp      map[string]ConfigLsp `json:"lsp"`
 	// MCP (Model Context Protocol) server configurations
 	Mcp map[string]ConfigMcp `json:"mcp"`
 	// @deprecated Use `agent` field instead.
@@ -89,6 +97,10 @@ type Config struct {
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
 	Share ConfigShare `json:"share"`
+	// Server configuration
+	Server ServerConfig `json:"server"`
+	// Skills configuration for paths and URLs
+	Skills ConfigSkills `json:"skills"`
 	// Small model to use for tasks like title generation in the format of
 	// provider/model
 	SmallModel string `json:"small_model"`
@@ -101,7 +113,9 @@ type Config struct {
 	// Custom username to display in conversations instead of system username
 	Username string        `json:"username"`
 	Watcher  ConfigWatcher `json:"watcher"`
-	JSON     configJSON    `json:"-"`
+	// Default agent ID to use
+	DefaultAgent string     `json:"default_agent"`
+	JSON         configJSON `json:"-"`
 }
 
 // configJSON contains the JSON metadata for the struct [Config]
@@ -111,12 +125,16 @@ type configJSON struct {
 	Autoshare         apijson.Field
 	Autoupdate        apijson.Field
 	Command           apijson.Field
+	Compaction        apijson.Field
 	DisabledProviders apijson.Field
+	EnabledProviders  apijson.Field
+	Enterprise        apijson.Field
 	Experimental      apijson.Field
 	Formatter         apijson.Field
 	Instructions      apijson.Field
 	Keybinds          apijson.Field
 	Layout            apijson.Field
+	LogLevel          apijson.Field
 	Lsp               apijson.Field
 	Mcp               apijson.Field
 	Mode              apijson.Field
@@ -125,6 +143,8 @@ type configJSON struct {
 	Plugin            apijson.Field
 	Provider          apijson.Field
 	Share             apijson.Field
+	Server            apijson.Field
+	Skills            apijson.Field
 	SmallModel        apijson.Field
 	Snapshot          apijson.Field
 	Theme             apijson.Field
@@ -132,6 +152,7 @@ type configJSON struct {
 	Tui               apijson.Field
 	Username          apijson.Field
 	Watcher           apijson.Field
+	DefaultAgent      apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -144,11 +165,122 @@ func (r configJSON) RawJSON() string {
 	return r.raw
 }
 
+type ConfigLogLevel string
+
+const (
+	ConfigLogLevelDebug ConfigLogLevel = "DEBUG"
+	ConfigLogLevelInfo  ConfigLogLevel = "INFO"
+	ConfigLogLevelWarn  ConfigLogLevel = "WARN"
+	ConfigLogLevelError ConfigLogLevel = "ERROR"
+)
+
+func (r ConfigLogLevel) IsKnown() bool {
+	switch r {
+	case ConfigLogLevelDebug, ConfigLogLevelInfo, ConfigLogLevelWarn, ConfigLogLevelError:
+		return true
+	}
+	return false
+}
+
+type ServerConfig struct {
+	Port       float64          `json:"port"`
+	Hostname   string           `json:"hostname"`
+	Mdns       bool             `json:"mdns"`
+	MdnsDomain string           `json:"mdnsDomain"`
+	Cors       []string         `json:"cors"`
+	JSON       serverConfigJSON `json:"-"`
+}
+
+type serverConfigJSON struct {
+	Port        apijson.Field
+	Hostname    apijson.Field
+	Mdns        apijson.Field
+	MdnsDomain  apijson.Field
+	Cors        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ServerConfig) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r serverConfigJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigSkills struct {
+	Paths []string         `json:"paths"`
+	Urls  []string         `json:"urls"`
+	JSON  configSkillsJSON `json:"-"`
+}
+
+type configSkillsJSON struct {
+	Paths       apijson.Field
+	Urls        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigSkills) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configSkillsJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigCompaction struct {
+	Auto     bool                 `json:"auto"`
+	Prune    bool                 `json:"prune"`
+	Reserved float64              `json:"reserved"`
+	JSON     configCompactionJSON `json:"-"`
+}
+
+type configCompactionJSON struct {
+	Auto        apijson.Field
+	Prune       apijson.Field
+	Reserved    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigCompaction) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configCompactionJSON) RawJSON() string {
+	return r.raw
+}
+
+type EnterpriseConfig struct {
+	URL  string               `json:"url"`
+	JSON enterpriseConfigJSON `json:"-"`
+}
+
+type enterpriseConfigJSON struct {
+	URL         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EnterpriseConfig) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r enterpriseConfigJSON) RawJSON() string {
+	return r.raw
+}
+
 // Agent configuration, see https://opencode.ai/docs/agent
 type ConfigAgent struct {
 	Build       ConfigAgentBuild       `json:"build"`
+	Compaction  ConfigAgentCompaction  `json:"compaction"`
+	Explore     ConfigAgentExplore     `json:"explore"`
 	General     ConfigAgentGeneral     `json:"general"`
 	Plan        ConfigAgentPlan        `json:"plan"`
+	Summary     ConfigAgentSummary     `json:"summary"`
+	Title       ConfigAgentTitle       `json:"title"`
 	ExtraFields map[string]ConfigAgent `json:"-,extras"`
 	JSON        configAgentJSON        `json:"-"`
 }
@@ -156,8 +288,12 @@ type ConfigAgent struct {
 // configAgentJSON contains the JSON metadata for the struct [ConfigAgent]
 type configAgentJSON struct {
 	Build       apijson.Field
+	Compaction  apijson.Field
+	Explore     apijson.Field
 	General     apijson.Field
 	Plan        apijson.Field
+	Summary     apijson.Field
+	Title       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -677,6 +813,734 @@ const (
 func (r ConfigAgentPlanPermissionWebfetch) IsKnown() bool {
 	switch r {
 	case ConfigAgentPlanPermissionWebfetchAsk, ConfigAgentPlanPermissionWebfetchAllow, ConfigAgentPlanPermissionWebfetchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentExplore struct {
+	Description string                       `json:"description"`
+	Disable     bool                         `json:"disable"`
+	Mode        ConfigAgentExploreMode       `json:"mode"`
+	Model       string                       `json:"model"`
+	Permission  ConfigAgentExplorePermission `json:"permission"`
+	Prompt      string                       `json:"prompt"`
+	Temperature float64                      `json:"temperature"`
+	Tools       map[string]bool              `json:"tools"`
+	TopP        float64                      `json:"top_p"`
+	Variant     string                       `json:"variant"`
+	Hidden      bool                         `json:"hidden"`
+	Options     map[string]string            `json:"options"`
+	Color       string                       `json:"color"`
+	Steps       float64                      `json:"steps"`
+	MaxSteps    float64                      `json:"max_steps"`
+	ExtraFields map[string]interface{}       `json:"-,extras"`
+	JSON        configAgentExploreJSON       `json:"-"`
+}
+
+// configAgentExploreJSON contains the JSON metadata for the struct
+// [ConfigAgentExplore]
+type configAgentExploreJSON struct {
+	Description apijson.Field
+	Disable     apijson.Field
+	Mode        apijson.Field
+	Model       apijson.Field
+	Permission  apijson.Field
+	Prompt      apijson.Field
+	Temperature apijson.Field
+	Tools       apijson.Field
+	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentExplore) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentExploreJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigAgentExploreMode string
+
+const (
+	ConfigAgentExploreModeSubagent ConfigAgentExploreMode = "subagent"
+	ConfigAgentExploreModePrimary  ConfigAgentExploreMode = "primary"
+	ConfigAgentExploreModeAll      ConfigAgentExploreMode = "all"
+)
+
+func (r ConfigAgentExploreMode) IsKnown() bool {
+	switch r {
+	case ConfigAgentExploreModeSubagent, ConfigAgentExploreModePrimary, ConfigAgentExploreModeAll:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentExplorePermission struct {
+	Bash     ConfigAgentExplorePermissionBashUnion `json:"bash"`
+	Edit     ConfigAgentExplorePermissionEdit      `json:"edit"`
+	Webfetch ConfigAgentExplorePermissionWebfetch  `json:"webfetch"`
+	JSON     configAgentExplorePermissionJSON      `json:"-"`
+}
+
+// configAgentExplorePermissionJSON contains the JSON metadata for the struct
+// [ConfigAgentExplorePermission]
+type configAgentExplorePermissionJSON struct {
+	Bash        apijson.Field
+	Edit        apijson.Field
+	Webfetch    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentExplorePermission) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentExplorePermissionJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [ConfigAgentExplorePermissionBashString] or
+// [ConfigAgentExplorePermissionBashMap].
+type ConfigAgentExplorePermissionBashUnion interface {
+	implementsConfigAgentExplorePermissionBashUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigAgentExplorePermissionBashUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigAgentExplorePermissionBashString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigAgentExplorePermissionBashMap{}),
+		},
+	)
+}
+
+type ConfigAgentExplorePermissionBashString string
+
+const (
+	ConfigAgentExplorePermissionBashStringAsk   ConfigAgentExplorePermissionBashString = "ask"
+	ConfigAgentExplorePermissionBashStringAllow ConfigAgentExplorePermissionBashString = "allow"
+	ConfigAgentExplorePermissionBashStringDeny  ConfigAgentExplorePermissionBashString = "deny"
+)
+
+func (r ConfigAgentExplorePermissionBashString) IsKnown() bool {
+	switch r {
+	case ConfigAgentExplorePermissionBashStringAsk, ConfigAgentExplorePermissionBashStringAllow, ConfigAgentExplorePermissionBashStringDeny:
+		return true
+	}
+	return false
+}
+
+func (r ConfigAgentExplorePermissionBashString) implementsConfigAgentExplorePermissionBashUnion() {}
+
+type ConfigAgentExplorePermissionBashMap map[string]ConfigAgentExplorePermissionBashMapItem
+
+func (r ConfigAgentExplorePermissionBashMap) implementsConfigAgentExplorePermissionBashUnion() {}
+
+type ConfigAgentExplorePermissionBashMapItem string
+
+const (
+	ConfigAgentExplorePermissionBashMapAsk   ConfigAgentExplorePermissionBashMapItem = "ask"
+	ConfigAgentExplorePermissionBashMapAllow ConfigAgentExplorePermissionBashMapItem = "allow"
+	ConfigAgentExplorePermissionBashMapDeny  ConfigAgentExplorePermissionBashMapItem = "deny"
+)
+
+func (r ConfigAgentExplorePermissionBashMapItem) IsKnown() bool {
+	switch r {
+	case ConfigAgentExplorePermissionBashMapAsk, ConfigAgentExplorePermissionBashMapAllow, ConfigAgentExplorePermissionBashMapDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentExplorePermissionEdit string
+
+const (
+	ConfigAgentExplorePermissionEditAsk   ConfigAgentExplorePermissionEdit = "ask"
+	ConfigAgentExplorePermissionEditAllow ConfigAgentExplorePermissionEdit = "allow"
+	ConfigAgentExplorePermissionEditDeny  ConfigAgentExplorePermissionEdit = "deny"
+)
+
+func (r ConfigAgentExplorePermissionEdit) IsKnown() bool {
+	switch r {
+	case ConfigAgentExplorePermissionEditAsk, ConfigAgentExplorePermissionEditAllow, ConfigAgentExplorePermissionEditDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentExplorePermissionWebfetch string
+
+const (
+	ConfigAgentExplorePermissionWebfetchAsk   ConfigAgentExplorePermissionWebfetch = "ask"
+	ConfigAgentExplorePermissionWebfetchAllow ConfigAgentExplorePermissionWebfetch = "allow"
+	ConfigAgentExplorePermissionWebfetchDeny  ConfigAgentExplorePermissionWebfetch = "deny"
+)
+
+func (r ConfigAgentExplorePermissionWebfetch) IsKnown() bool {
+	switch r {
+	case ConfigAgentExplorePermissionWebfetchAsk, ConfigAgentExplorePermissionWebfetchAllow, ConfigAgentExplorePermissionWebfetchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentTitle struct {
+	Description string                     `json:"description"`
+	Disable     bool                       `json:"disable"`
+	Mode        ConfigAgentTitleMode       `json:"mode"`
+	Model       string                     `json:"model"`
+	Permission  ConfigAgentTitlePermission `json:"permission"`
+	Prompt      string                     `json:"prompt"`
+	Temperature float64                    `json:"temperature"`
+	Tools       map[string]bool            `json:"tools"`
+	TopP        float64                    `json:"top_p"`
+	Variant     string                     `json:"variant"`
+	Hidden      bool                       `json:"hidden"`
+	Options     map[string]string          `json:"options"`
+	Color       string                     `json:"color"`
+	Steps       float64                    `json:"steps"`
+	MaxSteps    float64                    `json:"max_steps"`
+	ExtraFields map[string]interface{}     `json:"-,extras"`
+	JSON        configAgentTitleJSON       `json:"-"`
+}
+
+// configAgentTitleJSON contains the JSON metadata for the struct [ConfigAgentTitle]
+type configAgentTitleJSON struct {
+	Description apijson.Field
+	Disable     apijson.Field
+	Mode        apijson.Field
+	Model       apijson.Field
+	Permission  apijson.Field
+	Prompt      apijson.Field
+	Temperature apijson.Field
+	Tools       apijson.Field
+	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentTitle) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentTitleJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigAgentTitleMode string
+
+const (
+	ConfigAgentTitleModeSubagent ConfigAgentTitleMode = "subagent"
+	ConfigAgentTitleModePrimary  ConfigAgentTitleMode = "primary"
+	ConfigAgentTitleModeAll      ConfigAgentTitleMode = "all"
+)
+
+func (r ConfigAgentTitleMode) IsKnown() bool {
+	switch r {
+	case ConfigAgentTitleModeSubagent, ConfigAgentTitleModePrimary, ConfigAgentTitleModeAll:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentTitlePermission struct {
+	Bash     ConfigAgentTitlePermissionBashUnion `json:"bash"`
+	Edit     ConfigAgentTitlePermissionEdit      `json:"edit"`
+	Webfetch ConfigAgentTitlePermissionWebfetch  `json:"webfetch"`
+	JSON     configAgentTitlePermissionJSON      `json:"-"`
+}
+
+// configAgentTitlePermissionJSON contains the JSON metadata for the struct
+// [ConfigAgentTitlePermission]
+type configAgentTitlePermissionJSON struct {
+	Bash        apijson.Field
+	Edit        apijson.Field
+	Webfetch    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentTitlePermission) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentTitlePermissionJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [ConfigAgentTitlePermissionBashString] or
+// [ConfigAgentTitlePermissionBashMap].
+type ConfigAgentTitlePermissionBashUnion interface {
+	implementsConfigAgentTitlePermissionBashUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigAgentTitlePermissionBashUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigAgentTitlePermissionBashString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigAgentTitlePermissionBashMap{}),
+		},
+	)
+}
+
+type ConfigAgentTitlePermissionBashString string
+
+const (
+	ConfigAgentTitlePermissionBashStringAsk   ConfigAgentTitlePermissionBashString = "ask"
+	ConfigAgentTitlePermissionBashStringAllow ConfigAgentTitlePermissionBashString = "allow"
+	ConfigAgentTitlePermissionBashStringDeny  ConfigAgentTitlePermissionBashString = "deny"
+)
+
+func (r ConfigAgentTitlePermissionBashString) IsKnown() bool {
+	switch r {
+	case ConfigAgentTitlePermissionBashStringAsk, ConfigAgentTitlePermissionBashStringAllow, ConfigAgentTitlePermissionBashStringDeny:
+		return true
+	}
+	return false
+}
+
+func (r ConfigAgentTitlePermissionBashString) implementsConfigAgentTitlePermissionBashUnion() {}
+
+type ConfigAgentTitlePermissionBashMap map[string]ConfigAgentTitlePermissionBashMapItem
+
+func (r ConfigAgentTitlePermissionBashMap) implementsConfigAgentTitlePermissionBashUnion() {}
+
+type ConfigAgentTitlePermissionBashMapItem string
+
+const (
+	ConfigAgentTitlePermissionBashMapAsk   ConfigAgentTitlePermissionBashMapItem = "ask"
+	ConfigAgentTitlePermissionBashMapAllow ConfigAgentTitlePermissionBashMapItem = "allow"
+	ConfigAgentTitlePermissionBashMapDeny  ConfigAgentTitlePermissionBashMapItem = "deny"
+)
+
+func (r ConfigAgentTitlePermissionBashMapItem) IsKnown() bool {
+	switch r {
+	case ConfigAgentTitlePermissionBashMapAsk, ConfigAgentTitlePermissionBashMapAllow, ConfigAgentTitlePermissionBashMapDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentTitlePermissionEdit string
+
+const (
+	ConfigAgentTitlePermissionEditAsk   ConfigAgentTitlePermissionEdit = "ask"
+	ConfigAgentTitlePermissionEditAllow ConfigAgentTitlePermissionEdit = "allow"
+	ConfigAgentTitlePermissionEditDeny  ConfigAgentTitlePermissionEdit = "deny"
+)
+
+func (r ConfigAgentTitlePermissionEdit) IsKnown() bool {
+	switch r {
+	case ConfigAgentTitlePermissionEditAsk, ConfigAgentTitlePermissionEditAllow, ConfigAgentTitlePermissionEditDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentTitlePermissionWebfetch string
+
+const (
+	ConfigAgentTitlePermissionWebfetchAsk   ConfigAgentTitlePermissionWebfetch = "ask"
+	ConfigAgentTitlePermissionWebfetchAllow ConfigAgentTitlePermissionWebfetch = "allow"
+	ConfigAgentTitlePermissionWebfetchDeny  ConfigAgentTitlePermissionWebfetch = "deny"
+)
+
+func (r ConfigAgentTitlePermissionWebfetch) IsKnown() bool {
+	switch r {
+	case ConfigAgentTitlePermissionWebfetchAsk, ConfigAgentTitlePermissionWebfetchAllow, ConfigAgentTitlePermissionWebfetchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentSummary struct {
+	Description string                       `json:"description"`
+	Disable     bool                         `json:"disable"`
+	Mode        ConfigAgentSummaryMode       `json:"mode"`
+	Model       string                       `json:"model"`
+	Permission  ConfigAgentSummaryPermission `json:"permission"`
+	Prompt      string                       `json:"prompt"`
+	Temperature float64                      `json:"temperature"`
+	Tools       map[string]bool              `json:"tools"`
+	TopP        float64                      `json:"top_p"`
+	Variant     string                       `json:"variant"`
+	Hidden      bool                         `json:"hidden"`
+	Options     map[string]string            `json:"options"`
+	Color       string                       `json:"color"`
+	Steps       float64                      `json:"steps"`
+	MaxSteps    float64                      `json:"max_steps"`
+	ExtraFields map[string]interface{}       `json:"-,extras"`
+	JSON        configAgentSummaryJSON       `json:"-"`
+}
+
+// configAgentSummaryJSON contains the JSON metadata for the struct [ConfigAgentSummary]
+type configAgentSummaryJSON struct {
+	Description apijson.Field
+	Disable     apijson.Field
+	Mode        apijson.Field
+	Model       apijson.Field
+	Permission  apijson.Field
+	Prompt      apijson.Field
+	Temperature apijson.Field
+	Tools       apijson.Field
+	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentSummary) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentSummaryJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigAgentSummaryMode string
+
+const (
+	ConfigAgentSummaryModeSubagent ConfigAgentSummaryMode = "subagent"
+	ConfigAgentSummaryModePrimary  ConfigAgentSummaryMode = "primary"
+	ConfigAgentSummaryModeAll      ConfigAgentSummaryMode = "all"
+)
+
+func (r ConfigAgentSummaryMode) IsKnown() bool {
+	switch r {
+	case ConfigAgentSummaryModeSubagent, ConfigAgentSummaryModePrimary, ConfigAgentSummaryModeAll:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentSummaryPermission struct {
+	Bash     ConfigAgentSummaryPermissionBashUnion `json:"bash"`
+	Edit     ConfigAgentSummaryPermissionEdit      `json:"edit"`
+	Webfetch ConfigAgentSummaryPermissionWebfetch  `json:"webfetch"`
+	JSON     configAgentSummaryPermissionJSON      `json:"-"`
+}
+
+// configAgentSummaryPermissionJSON contains the JSON metadata for the struct
+// [ConfigAgentSummaryPermission]
+type configAgentSummaryPermissionJSON struct {
+	Bash        apijson.Field
+	Edit        apijson.Field
+	Webfetch    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentSummaryPermission) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentSummaryPermissionJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [ConfigAgentSummaryPermissionBashString] or
+// [ConfigAgentSummaryPermissionBashMap].
+type ConfigAgentSummaryPermissionBashUnion interface {
+	implementsConfigAgentSummaryPermissionBashUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigAgentSummaryPermissionBashUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigAgentSummaryPermissionBashString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigAgentSummaryPermissionBashMap{}),
+		},
+	)
+}
+
+type ConfigAgentSummaryPermissionBashString string
+
+const (
+	ConfigAgentSummaryPermissionBashStringAsk   ConfigAgentSummaryPermissionBashString = "ask"
+	ConfigAgentSummaryPermissionBashStringAllow ConfigAgentSummaryPermissionBashString = "allow"
+	ConfigAgentSummaryPermissionBashStringDeny  ConfigAgentSummaryPermissionBashString = "deny"
+)
+
+func (r ConfigAgentSummaryPermissionBashString) IsKnown() bool {
+	switch r {
+	case ConfigAgentSummaryPermissionBashStringAsk, ConfigAgentSummaryPermissionBashStringAllow, ConfigAgentSummaryPermissionBashStringDeny:
+		return true
+	}
+	return false
+}
+
+func (r ConfigAgentSummaryPermissionBashString) implementsConfigAgentSummaryPermissionBashUnion() {}
+
+type ConfigAgentSummaryPermissionBashMap map[string]ConfigAgentSummaryPermissionBashMapItem
+
+func (r ConfigAgentSummaryPermissionBashMap) implementsConfigAgentSummaryPermissionBashUnion() {}
+
+type ConfigAgentSummaryPermissionBashMapItem string
+
+const (
+	ConfigAgentSummaryPermissionBashMapAsk   ConfigAgentSummaryPermissionBashMapItem = "ask"
+	ConfigAgentSummaryPermissionBashMapAllow ConfigAgentSummaryPermissionBashMapItem = "allow"
+	ConfigAgentSummaryPermissionBashMapDeny  ConfigAgentSummaryPermissionBashMapItem = "deny"
+)
+
+func (r ConfigAgentSummaryPermissionBashMapItem) IsKnown() bool {
+	switch r {
+	case ConfigAgentSummaryPermissionBashMapAsk, ConfigAgentSummaryPermissionBashMapAllow, ConfigAgentSummaryPermissionBashMapDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentSummaryPermissionEdit string
+
+const (
+	ConfigAgentSummaryPermissionEditAsk   ConfigAgentSummaryPermissionEdit = "ask"
+	ConfigAgentSummaryPermissionEditAllow ConfigAgentSummaryPermissionEdit = "allow"
+	ConfigAgentSummaryPermissionEditDeny  ConfigAgentSummaryPermissionEdit = "deny"
+)
+
+func (r ConfigAgentSummaryPermissionEdit) IsKnown() bool {
+	switch r {
+	case ConfigAgentSummaryPermissionEditAsk, ConfigAgentSummaryPermissionEditAllow, ConfigAgentSummaryPermissionEditDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentSummaryPermissionWebfetch string
+
+const (
+	ConfigAgentSummaryPermissionWebfetchAsk   ConfigAgentSummaryPermissionWebfetch = "ask"
+	ConfigAgentSummaryPermissionWebfetchAllow ConfigAgentSummaryPermissionWebfetch = "allow"
+	ConfigAgentSummaryPermissionWebfetchDeny  ConfigAgentSummaryPermissionWebfetch = "deny"
+)
+
+func (r ConfigAgentSummaryPermissionWebfetch) IsKnown() bool {
+	switch r {
+	case ConfigAgentSummaryPermissionWebfetchAsk, ConfigAgentSummaryPermissionWebfetchAllow, ConfigAgentSummaryPermissionWebfetchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentCompaction struct {
+	Description string                          `json:"description"`
+	Disable     bool                            `json:"disable"`
+	Mode        ConfigAgentCompactionMode       `json:"mode"`
+	Model       string                          `json:"model"`
+	Permission  ConfigAgentCompactionPermission `json:"permission"`
+	Prompt      string                          `json:"prompt"`
+	Temperature float64                         `json:"temperature"`
+	Tools       map[string]bool                 `json:"tools"`
+	TopP        float64                         `json:"top_p"`
+	Variant     string                          `json:"variant"`
+	Hidden      bool                            `json:"hidden"`
+	Options     map[string]string               `json:"options"`
+	Color       string                          `json:"color"`
+	Steps       float64                         `json:"steps"`
+	MaxSteps    float64                         `json:"max_steps"`
+	ExtraFields map[string]interface{}          `json:"-,extras"`
+	JSON        configAgentCompactionJSON       `json:"-"`
+}
+
+// configAgentCompactionJSON contains the JSON metadata for the struct
+// [ConfigAgentCompaction]
+type configAgentCompactionJSON struct {
+	Description apijson.Field
+	Disable     apijson.Field
+	Mode        apijson.Field
+	Model       apijson.Field
+	Permission  apijson.Field
+	Prompt      apijson.Field
+	Temperature apijson.Field
+	Tools       apijson.Field
+	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentCompaction) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentCompactionJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigAgentCompactionMode string
+
+const (
+	ConfigAgentCompactionModeSubagent ConfigAgentCompactionMode = "subagent"
+	ConfigAgentCompactionModePrimary  ConfigAgentCompactionMode = "primary"
+	ConfigAgentCompactionModeAll      ConfigAgentCompactionMode = "all"
+)
+
+func (r ConfigAgentCompactionMode) IsKnown() bool {
+	switch r {
+	case ConfigAgentCompactionModeSubagent, ConfigAgentCompactionModePrimary, ConfigAgentCompactionModeAll:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentCompactionPermission struct {
+	Bash     ConfigAgentCompactionPermissionBashUnion `json:"bash"`
+	Edit     ConfigAgentCompactionPermissionEdit      `json:"edit"`
+	Webfetch ConfigAgentCompactionPermissionWebfetch  `json:"webfetch"`
+	JSON     configAgentCompactionPermissionJSON      `json:"-"`
+}
+
+// configAgentCompactionPermissionJSON contains the JSON metadata for the struct
+// [ConfigAgentCompactionPermission]
+type configAgentCompactionPermissionJSON struct {
+	Bash        apijson.Field
+	Edit        apijson.Field
+	Webfetch    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigAgentCompactionPermission) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configAgentCompactionPermissionJSON) RawJSON() string {
+	return r.raw
+}
+
+// Union satisfied by [ConfigAgentCompactionPermissionBashString] or
+// [ConfigAgentCompactionPermissionBashMap].
+type ConfigAgentCompactionPermissionBashUnion interface {
+	implementsConfigAgentCompactionPermissionBashUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigAgentCompactionPermissionBashUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigAgentCompactionPermissionBashString("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigAgentCompactionPermissionBashMap{}),
+		},
+	)
+}
+
+type ConfigAgentCompactionPermissionBashString string
+
+const (
+	ConfigAgentCompactionPermissionBashStringAsk   ConfigAgentCompactionPermissionBashString = "ask"
+	ConfigAgentCompactionPermissionBashStringAllow ConfigAgentCompactionPermissionBashString = "allow"
+	ConfigAgentCompactionPermissionBashStringDeny  ConfigAgentCompactionPermissionBashString = "deny"
+)
+
+func (r ConfigAgentCompactionPermissionBashString) IsKnown() bool {
+	switch r {
+	case ConfigAgentCompactionPermissionBashStringAsk, ConfigAgentCompactionPermissionBashStringAllow, ConfigAgentCompactionPermissionBashStringDeny:
+		return true
+	}
+	return false
+}
+
+func (r ConfigAgentCompactionPermissionBashString) implementsConfigAgentCompactionPermissionBashUnion() {
+}
+
+type ConfigAgentCompactionPermissionBashMap map[string]ConfigAgentCompactionPermissionBashMapItem
+
+func (r ConfigAgentCompactionPermissionBashMap) implementsConfigAgentCompactionPermissionBashUnion() {
+}
+
+type ConfigAgentCompactionPermissionBashMapItem string
+
+const (
+	ConfigAgentCompactionPermissionBashMapAsk   ConfigAgentCompactionPermissionBashMapItem = "ask"
+	ConfigAgentCompactionPermissionBashMapAllow ConfigAgentCompactionPermissionBashMapItem = "allow"
+	ConfigAgentCompactionPermissionBashMapDeny  ConfigAgentCompactionPermissionBashMapItem = "deny"
+)
+
+func (r ConfigAgentCompactionPermissionBashMapItem) IsKnown() bool {
+	switch r {
+	case ConfigAgentCompactionPermissionBashMapAsk, ConfigAgentCompactionPermissionBashMapAllow, ConfigAgentCompactionPermissionBashMapDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentCompactionPermissionEdit string
+
+const (
+	ConfigAgentCompactionPermissionEditAsk   ConfigAgentCompactionPermissionEdit = "ask"
+	ConfigAgentCompactionPermissionEditAllow ConfigAgentCompactionPermissionEdit = "allow"
+	ConfigAgentCompactionPermissionEditDeny  ConfigAgentCompactionPermissionEdit = "deny"
+)
+
+func (r ConfigAgentCompactionPermissionEdit) IsKnown() bool {
+	switch r {
+	case ConfigAgentCompactionPermissionEditAsk, ConfigAgentCompactionPermissionEditAllow, ConfigAgentCompactionPermissionEditDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigAgentCompactionPermissionWebfetch string
+
+const (
+	ConfigAgentCompactionPermissionWebfetchAsk   ConfigAgentCompactionPermissionWebfetch = "ask"
+	ConfigAgentCompactionPermissionWebfetchAllow ConfigAgentCompactionPermissionWebfetch = "allow"
+	ConfigAgentCompactionPermissionWebfetchDeny  ConfigAgentCompactionPermissionWebfetch = "deny"
+)
+
+func (r ConfigAgentCompactionPermissionWebfetch) IsKnown() bool {
+	switch r {
+	case ConfigAgentCompactionPermissionWebfetchAsk, ConfigAgentCompactionPermissionWebfetchAllow, ConfigAgentCompactionPermissionWebfetchDeny:
 		return true
 	}
 	return false
@@ -1431,17 +2295,51 @@ type ConfigPermission struct {
 	Bash     ConfigPermissionBashUnion `json:"bash"`
 	Edit     ConfigPermissionEdit      `json:"edit"`
 	Webfetch ConfigPermissionWebfetch  `json:"webfetch"`
-	JSON     configPermissionJSON      `json:"-"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	ExternalDirectory interface{} `json:"external_directory"`
+	Todowrite         string      `json:"todowrite"`
+	Question          string      `json:"question"`
+	Websearch         string      `json:"websearch"`
+	Codesearch        string      `json:"codesearch"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Lsp      interface{} `json:"lsp"`
+	DoomLoop string      `json:"doom_loop"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Skill interface{}          `json:"skill"`
+	JSON  configPermissionJSON `json:"-"`
 }
 
 // configPermissionJSON contains the JSON metadata for the struct
 // [ConfigPermission]
 type configPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Codesearch        apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigPermission) UnmarshalJSON(data []byte) (err error) {
@@ -1542,6 +2440,104 @@ func (r ConfigPermissionWebfetch) IsKnown() bool {
 	return false
 }
 
+type ConfigPermissionTodowrite string
+
+const (
+	ConfigPermissionTodowriteAsk   ConfigPermissionTodowrite = "ask"
+	ConfigPermissionTodowriteAllow ConfigPermissionTodowrite = "allow"
+	ConfigPermissionTodowriteDeny  ConfigPermissionTodowrite = "deny"
+)
+
+func (r ConfigPermissionTodowrite) IsKnown() bool {
+	switch r {
+	case ConfigPermissionTodowriteAsk, ConfigPermissionTodowriteAllow, ConfigPermissionTodowriteDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigPermissionQuestion string
+
+const (
+	ConfigPermissionQuestionAsk   ConfigPermissionQuestion = "ask"
+	ConfigPermissionQuestionAllow ConfigPermissionQuestion = "allow"
+	ConfigPermissionQuestionDeny  ConfigPermissionQuestion = "deny"
+)
+
+func (r ConfigPermissionQuestion) IsKnown() bool {
+	switch r {
+	case ConfigPermissionQuestionAsk, ConfigPermissionQuestionAllow, ConfigPermissionQuestionDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigPermissionWebsearch string
+
+const (
+	ConfigPermissionWebsearchAsk   ConfigPermissionWebsearch = "ask"
+	ConfigPermissionWebsearchAllow ConfigPermissionWebsearch = "allow"
+	ConfigPermissionWebsearchDeny  ConfigPermissionWebsearch = "deny"
+)
+
+func (r ConfigPermissionWebsearch) IsKnown() bool {
+	switch r {
+	case ConfigPermissionWebsearchAsk, ConfigPermissionWebsearchAllow, ConfigPermissionWebsearchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigPermissionCodesearch string
+
+const (
+	ConfigPermissionCodesearchAsk   ConfigPermissionCodesearch = "ask"
+	ConfigPermissionCodesearchAllow ConfigPermissionCodesearch = "allow"
+	ConfigPermissionCodesearchDeny  ConfigPermissionCodesearch = "deny"
+)
+
+func (r ConfigPermissionCodesearch) IsKnown() bool {
+	switch r {
+	case ConfigPermissionCodesearchAsk, ConfigPermissionCodesearchAllow, ConfigPermissionCodesearchDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigPermissionDoomLoop string
+
+const (
+	ConfigPermissionDoomLoopAsk   ConfigPermissionDoomLoop = "ask"
+	ConfigPermissionDoomLoopAllow ConfigPermissionDoomLoop = "allow"
+	ConfigPermissionDoomLoopDeny  ConfigPermissionDoomLoop = "deny"
+)
+
+func (r ConfigPermissionDoomLoop) IsKnown() bool {
+	switch r {
+	case ConfigPermissionDoomLoopAsk, ConfigPermissionDoomLoopAllow, ConfigPermissionDoomLoopDeny:
+		return true
+	}
+	return false
+}
+
+// ConfigProviderSource represents the source of a config provider.
+type ConfigProviderSource string
+
+const (
+	ConfigProviderSourceEnv    ConfigProviderSource = "env"
+	ConfigProviderSourceConfig ConfigProviderSource = "config"
+	ConfigProviderSourceCustom ConfigProviderSource = "custom"
+	ConfigProviderSourceAPI    ConfigProviderSource = "api"
+)
+
+func (r ConfigProviderSource) IsKnown() bool {
+	switch r {
+	case ConfigProviderSourceEnv, ConfigProviderSourceConfig, ConfigProviderSourceCustom, ConfigProviderSourceAPI:
+		return true
+	}
+	return false
+}
+
 type ConfigProvider struct {
 	ID      string                         `json:"id"`
 	API     string                         `json:"api"`
@@ -1550,6 +2546,8 @@ type ConfigProvider struct {
 	Name    string                         `json:"name"`
 	Npm     string                         `json:"npm"`
 	Options ConfigProviderOptions          `json:"options"`
+	Source  ConfigProviderSource           `json:"source"`
+	Key     string                         `json:"key"`
 	JSON    configProviderJSON             `json:"-"`
 }
 
@@ -1562,6 +2560,8 @@ type configProviderJSON struct {
 	Name        apijson.Field
 	Npm         apijson.Field
 	Options     apijson.Field
+	Source      apijson.Field
+	Key         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1575,21 +2575,27 @@ func (r configProviderJSON) RawJSON() string {
 }
 
 type ConfigProviderModel struct {
-	ID           string                         `json:"id"`
-	Attachment   bool                           `json:"attachment"`
-	Cost         ConfigProviderModelsCost       `json:"cost"`
-	Experimental bool                           `json:"experimental"`
-	Limit        ConfigProviderModelsLimit      `json:"limit"`
-	Modalities   ConfigProviderModelsModalities `json:"modalities"`
-	Name         string                         `json:"name"`
-	Options      map[string]interface{}         `json:"options"`
-	Provider     ConfigProviderModelsProvider   `json:"provider"`
-	Reasoning    bool                           `json:"reasoning"`
-	ReleaseDate  string                         `json:"release_date"`
-	Status       ConfigProviderModelsStatus     `json:"status"`
-	Temperature  bool                           `json:"temperature"`
-	ToolCall     bool                           `json:"tool_call"`
-	JSON         configProviderModelJSON        `json:"-"`
+	ID           string                   `json:"id"`
+	Attachment   bool                     `json:"attachment"`
+	Cost         ConfigProviderModelsCost `json:"cost"`
+	Experimental bool                     `json:"experimental"`
+	Family       string                   `json:"family"`
+	Headers      map[string]string        `json:"headers"`
+	// This field can have the runtime type of [bool] or object.
+	Interleaved interface{}                    `json:"interleaved"`
+	Limit       ConfigProviderModelsLimit      `json:"limit"`
+	Modalities  ConfigProviderModelsModalities `json:"modalities"`
+	Name        string                         `json:"name"`
+	Options     map[string]interface{}         `json:"options"`
+	Provider    ConfigProviderModelsProvider   `json:"provider"`
+	Reasoning   bool                           `json:"reasoning"`
+	ReleaseDate string                         `json:"release_date"`
+	Status      ConfigProviderModelsStatus     `json:"status"`
+	Temperature bool                           `json:"temperature"`
+	ToolCall    bool                           `json:"tool_call"`
+	// This field can have the runtime type of object.
+	Variants interface{}             `json:"variants"`
+	JSON     configProviderModelJSON `json:"-"`
 }
 
 // configProviderModelJSON contains the JSON metadata for the struct
@@ -1599,6 +2605,9 @@ type configProviderModelJSON struct {
 	Attachment   apijson.Field
 	Cost         apijson.Field
 	Experimental apijson.Field
+	Family       apijson.Field
+	Headers      apijson.Field
+	Interleaved  apijson.Field
 	Limit        apijson.Field
 	Modalities   apijson.Field
 	Name         apijson.Field
@@ -1609,6 +2618,7 @@ type configProviderModelJSON struct {
 	Status       apijson.Field
 	Temperature  apijson.Field
 	ToolCall     apijson.Field
+	Variants     apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -1622,22 +2632,31 @@ func (r configProviderModelJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsCost struct {
-	Input      float64                      `json:"input,required"`
-	Output     float64                      `json:"output,required"`
-	CacheRead  float64                      `json:"cache_read"`
-	CacheWrite float64                      `json:"cache_write"`
-	JSON       configProviderModelsCostJSON `json:"-"`
+	Input           float64                                 `json:"input,required"`
+	Output          float64                                 `json:"output,required"`
+	CacheRead       float64                                 `json:"cache_read"`
+	CacheWrite      float64                                 `json:"cache_write"`
+	ContextOver200k ConfigProviderModelsCostContextOver200k `json:"contextOver200k"`
+	JSON            configProviderModelsCostJSON            `json:"-"`
+}
+
+type ConfigProviderModelsCostContextOver200k struct {
+	Read   float64 `json:"read"`
+	Write  float64 `json:"write"`
+	Input  float64 `json:"input"`
+	Output float64 `json:"output"`
 }
 
 // configProviderModelsCostJSON contains the JSON metadata for the struct
 // [ConfigProviderModelsCost]
 type configProviderModelsCostJSON struct {
-	Input       apijson.Field
-	Output      apijson.Field
-	CacheRead   apijson.Field
-	CacheWrite  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Input           apijson.Field
+	Output          apijson.Field
+	CacheRead       apijson.Field
+	CacheWrite      apijson.Field
+	ContextOver200k apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
 func (r *ConfigProviderModelsCost) UnmarshalJSON(data []byte) (err error) {

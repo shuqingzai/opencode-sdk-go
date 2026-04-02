@@ -1618,17 +1618,21 @@ func (r ReasoningPartType) IsKnown() bool {
 }
 
 type Session struct {
-	ID        string         `json:"id,required"`
-	Directory string         `json:"directory,required"`
-	ProjectID string         `json:"projectID,required"`
-	Time      SessionTime    `json:"time,required"`
-	Title     string         `json:"title,required"`
-	Version   string         `json:"version,required"`
-	ParentID  string         `json:"parentID"`
-	Revert    SessionRevert  `json:"revert"`
-	Share     SessionShare   `json:"share"`
-	Summary   SessionSummary `json:"summary"`
-	JSON      sessionJSON    `json:"-"`
+	ID          string         `json:"id,required"`
+	Directory   string         `json:"directory,required"`
+	ProjectID   string         `json:"projectID,required"`
+	Time        SessionTime    `json:"time,required"`
+	Title       string         `json:"title,required"`
+	Version     string         `json:"version,required"`
+	ParentID    string         `json:"parentID"`
+	Revert      SessionRevert  `json:"revert"`
+	Share       SessionShare   `json:"share"`
+	Summary     SessionSummary `json:"summary"`
+	Slug        string         `json:"slug"`
+	WorkspaceID string         `json:"workspaceID"`
+	// This field can have the runtime type of [[]PermissionRule].
+	Permission interface{} `json:"permission"`
+	JSON       sessionJSON `json:"-"`
 }
 
 // sessionJSON contains the JSON metadata for the struct [Session]
@@ -1643,6 +1647,9 @@ type sessionJSON struct {
 	Revert      apijson.Field
 	Share       apijson.Field
 	Summary     apijson.Field
+	Slug        apijson.Field
+	WorkspaceID apijson.Field
+	Permission  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1659,6 +1666,7 @@ type SessionTime struct {
 	Created    float64         `json:"created,required"`
 	Updated    float64         `json:"updated,required"`
 	Compacting float64         `json:"compacting"`
+	Archived   float64         `json:"archived"`
 	JSON       sessionTimeJSON `json:"-"`
 }
 
@@ -1667,6 +1675,7 @@ type sessionTimeJSON struct {
 	Created     apijson.Field
 	Updated     apijson.Field
 	Compacting  apijson.Field
+	Archived    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2127,6 +2136,7 @@ type TextPart struct {
 	Type      TextPartType           `json:"type,required"`
 	Metadata  map[string]interface{} `json:"metadata"`
 	Synthetic bool                   `json:"synthetic"`
+	Ignored   bool                   `json:"ignored"`
 	Time      TextPartTime           `json:"time"`
 	JSON      textPartJSON           `json:"-"`
 }
@@ -2140,6 +2150,7 @@ type textPartJSON struct {
 	Type        apijson.Field
 	Metadata    apijson.Field
 	Synthetic   apijson.Field
+	Ignored     apijson.Field
 	Time        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
