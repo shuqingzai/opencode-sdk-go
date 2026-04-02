@@ -103,34 +103,98 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 //
 // Possible runtime types of the union are
 // [EventListResponseEventInstallationUpdated],
+// [EventListResponseEventInstallationUpdateAvailable],
 // [EventListResponseEventLspClientDiagnostics],
+// [EventListResponseEventLspUpdated],
 // [EventListResponseEventMessageUpdated], [EventListResponseEventMessageRemoved],
 // [EventListResponseEventMessagePartUpdated],
+// [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventSessionCompacted],
 // [EventListResponseEventPermissionUpdated],
-// [EventListResponseEventPermissionReplied], [EventListResponseEventFileEdited],
-// [EventListResponseEventFileWatcherUpdated], [EventListResponseEventTodoUpdated],
-// [EventListResponseEventSessionIdle], [EventListResponseEventSessionCreated],
-// [EventListResponseEventSessionUpdated], [EventListResponseEventSessionDeleted],
-// [EventListResponseEventSessionError], [EventListResponseEventServerConnected],
+// [EventListResponseEventPermissionAsked],
+// [EventListResponseEventPermissionReplied],
+// [EventListResponseEventFileEdited],
+// [EventListResponseEventFileWatcherUpdated],
+// [EventListResponseEventTodoUpdated],
+// [EventListResponseEventTuiPromptAppend],
+// [EventListResponseEventTuiCommandExecute],
+// [EventListResponseEventTuiToastShow],
+// [EventListResponseEventTuiSessionSelect],
+// [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventMcpBrowserOpenFailed],
+// [EventListResponseEventCommandExecuted],
+// [EventListResponseEventSessionIdle],
+// [EventListResponseEventSessionStatus],
+// [EventListResponseEventSessionDiff],
+// [EventListResponseEventSessionError],
+// [EventListResponseEventSessionCreated],
+// [EventListResponseEventSessionUpdated],
+// [EventListResponseEventSessionDeleted],
+// [EventListResponseEventServerConnected],
+// [EventListResponseEventServerInstanceDisposed],
+// [EventListResponseEventGlobalDisposed],
+// [EventListResponseEventProjectUpdated],
+// [EventListResponseEventQuestionAsked],
+// [EventListResponseEventQuestionRejected],
+// [EventListResponseEventVcsBranchUpdated],
+// [EventListResponseEventWorkspaceReady],
+// [EventListResponseEventWorkspaceFailed],
+// [EventListResponseEventPtyCreated],
+// [EventListResponseEventPtyUpdated],
+// [EventListResponseEventPtyExited],
+// [EventListResponseEventPtyDeleted],
+// [EventListResponseEventWorktreeReady],
+// [EventListResponseEventWorktreeFailed],
 // [EventListResponseEventIdeInstalled].
 func (r EventListResponse) AsUnion() EventListResponseUnion {
 	return r.union
 }
 
 // Union satisfied by [EventListResponseEventInstallationUpdated],
+// [EventListResponseEventInstallationUpdateAvailable],
 // [EventListResponseEventLspClientDiagnostics],
+// [EventListResponseEventLspUpdated],
 // [EventListResponseEventMessageUpdated], [EventListResponseEventMessageRemoved],
 // [EventListResponseEventMessagePartUpdated],
+// [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventSessionCompacted],
 // [EventListResponseEventPermissionUpdated],
-// [EventListResponseEventPermissionReplied], [EventListResponseEventFileEdited],
-// [EventListResponseEventFileWatcherUpdated], [EventListResponseEventTodoUpdated],
-// [EventListResponseEventSessionIdle], [EventListResponseEventSessionCreated],
-// [EventListResponseEventSessionUpdated], [EventListResponseEventSessionDeleted],
-// [EventListResponseEventSessionError], [EventListResponseEventServerConnected] or
+// [EventListResponseEventPermissionAsked],
+// [EventListResponseEventPermissionReplied],
+// [EventListResponseEventFileEdited],
+// [EventListResponseEventFileWatcherUpdated],
+// [EventListResponseEventTodoUpdated],
+// [EventListResponseEventTuiPromptAppend],
+// [EventListResponseEventTuiCommandExecute],
+// [EventListResponseEventTuiToastShow],
+// [EventListResponseEventTuiSessionSelect],
+// [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventMcpBrowserOpenFailed],
+// [EventListResponseEventCommandExecuted],
+// [EventListResponseEventSessionIdle],
+// [EventListResponseEventSessionStatus],
+// [EventListResponseEventSessionDiff],
+// [EventListResponseEventSessionError],
+// [EventListResponseEventSessionCreated],
+// [EventListResponseEventSessionUpdated],
+// [EventListResponseEventSessionDeleted],
+// [EventListResponseEventServerConnected],
+// [EventListResponseEventServerInstanceDisposed],
+// [EventListResponseEventGlobalDisposed],
+// [EventListResponseEventProjectUpdated],
+// [EventListResponseEventQuestionAsked],
+// [EventListResponseEventQuestionRejected],
+// [EventListResponseEventVcsBranchUpdated],
+// [EventListResponseEventWorkspaceReady],
+// [EventListResponseEventWorkspaceFailed],
+// [EventListResponseEventPtyCreated],
+// [EventListResponseEventPtyUpdated],
+// [EventListResponseEventPtyExited],
+// [EventListResponseEventPtyDeleted],
+// [EventListResponseEventWorktreeReady],
+// [EventListResponseEventWorktreeFailed],
 // [EventListResponseEventIdeInstalled].
 type EventListResponseUnion interface {
 	implementsEventListResponse()
@@ -146,7 +210,15 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdateAvailable{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventLspClientDiagnostics{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventLspUpdated{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -162,6 +234,10 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMessagePartDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventMessagePartRemoved{}),
 		},
 		apijson.UnionVariant{
@@ -171,6 +247,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventPermissionUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPermissionAsked{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -190,7 +270,47 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventTuiPromptAppend{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventTuiCommandExecute{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventTuiToastShow{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventTuiSessionSelect{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMcpToolsChanged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMcpBrowserOpenFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCommandExecuted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventSessionIdle{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionStatus{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionDiff{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -206,11 +326,63 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionError{}),
+			Type:       reflect.TypeOf(EventListResponseEventServerConnected{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventServerConnected{}),
+			Type:       reflect.TypeOf(EventListResponseEventServerInstanceDisposed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventGlobalDisposed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventProjectUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionAsked{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionRejected{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventVcsBranchUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorkspaceReady{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorkspaceFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPtyCreated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPtyUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPtyExited{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPtyDeleted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorktreeReady{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorktreeFailed{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
