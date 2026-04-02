@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestProjectListWithOptionalParams(t *testing.T) {
+func TestWorktreeList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.List(context.TODO(), opencode.ProjectListParams{
+	_, err := client.Worktree.List(context.TODO(), opencode.WorktreeListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectCurrentWithOptionalParams(t *testing.T) {
+func TestWorktreeCreate(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,8 +49,10 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Current(context.TODO(), opencode.ProjectCurrentParams{
-		Directory: opencode.F("directory"),
+	_, err := client.Worktree.Create(context.TODO(), opencode.WorktreeCreateParams{
+		Name:         opencode.F("name"),
+		StartCommand: opencode.F("cmd"),
+		Directory:    opencode.F("directory"),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -61,7 +63,7 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectUpdate(t *testing.T) {
+func TestWorktreeRemove(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -73,16 +75,10 @@ func TestProjectUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Update(
-		context.TODO(),
-		"projectID",
-		opencode.ProjectUpdateParams{
-			Name: opencode.F("name"),
-		},
-		opencode.ProjectUpdateParamsQuery{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Worktree.Remove(context.TODO(), opencode.WorktreeRemoveParams{
+		Directory: opencode.F("/path/to/worktree"),
+		Workspace: opencode.F("workspace"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
@@ -92,7 +88,7 @@ func TestProjectUpdate(t *testing.T) {
 	}
 }
 
-func TestProjectInitGit(t *testing.T) {
+func TestWorktreeReset(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -104,12 +100,10 @@ func TestProjectInitGit(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.InitGit(
-		context.TODO(),
-		opencode.ProjectInitGitParams{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Worktree.Reset(context.TODO(), opencode.WorktreeResetParams{
+		Directory: opencode.F("/path/to/worktree"),
+		Workspace: opencode.F("workspace"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

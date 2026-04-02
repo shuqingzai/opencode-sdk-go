@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestProjectListWithOptionalParams(t *testing.T) {
+func TestPtyList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.List(context.TODO(), opencode.ProjectListParams{
+	_, err := client.Pty.List(context.TODO(), opencode.PtyListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectCurrentWithOptionalParams(t *testing.T) {
+func TestPtyCreate(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,7 +49,11 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Current(context.TODO(), opencode.ProjectCurrentParams{
+	_, err := client.Pty.Create(context.TODO(), opencode.PtyCreateParams{
+		Command:   opencode.F("cmd"),
+		Args:      opencode.F([]string{"arg1"}),
+		Cwd:       opencode.F("/tmp"),
+		Title:     opencode.F("title"),
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -61,7 +65,7 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectUpdate(t *testing.T) {
+func TestPtyGet(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -73,16 +77,9 @@ func TestProjectUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Update(
-		context.TODO(),
-		"projectID",
-		opencode.ProjectUpdateParams{
-			Name: opencode.F("name"),
-		},
-		opencode.ProjectUpdateParamsQuery{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Pty.Get(context.TODO(), "ptyID", opencode.PtyGetParams{
+		Directory: opencode.F("directory"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
@@ -92,7 +89,7 @@ func TestProjectUpdate(t *testing.T) {
 	}
 }
 
-func TestProjectInitGit(t *testing.T) {
+func TestPtyUpdate(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -104,12 +101,58 @@ func TestProjectInitGit(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.InitGit(
-		context.TODO(),
-		opencode.ProjectInitGitParams{
-			Directory: opencode.F("directory"),
-		},
+	_, err := client.Pty.Update(context.TODO(), "ptyID", opencode.PtyUpdateParams{
+		Title:     opencode.F("newTitle"),
+		Directory: opencode.F("directory"),
+	})
+	if err != nil {
+		var apierr *opencode.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestPtyRemove(t *testing.T) {
+	t.Skip("Prism tests are disabled")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := opencode.NewClient(
+		option.WithBaseURL(baseURL),
 	)
+	_, err := client.Pty.Remove(context.TODO(), "ptyID", opencode.PtyRemoveParams{
+		Directory: opencode.F("directory"),
+	})
+	if err != nil {
+		var apierr *opencode.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestPtyConnect(t *testing.T) {
+	t.Skip("Prism tests are disabled")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := opencode.NewClient(
+		option.WithBaseURL(baseURL),
+	)
+	_, err := client.Pty.Connect(context.TODO(), "ptyID", opencode.PtyConnectParams{
+		Directory: opencode.F("directory"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

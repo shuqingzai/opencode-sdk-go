@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestConfigGetWithOptionalParams(t *testing.T) {
+func TestPermissionList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestConfigGetWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Get(context.TODO(), opencode.ConfigGetParams{
+	_, err := client.Permission.List(context.TODO(), opencode.PermissionListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestConfigGetWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestConfigUpdate(t *testing.T) {
+func TestPermissionReply(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,13 +49,10 @@ func TestConfigUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Update(
-		context.TODO(),
-		opencode.Config{},
-		opencode.ConfigUpdateParams{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Permission.Reply(context.TODO(), "requestID", opencode.PermissionReplyParams{
+		Reply:   opencode.F(opencode.PermissionReplyParamsReplyOnce),
+		Message: opencode.F("optional message"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

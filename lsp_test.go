@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestConfigGetWithOptionalParams(t *testing.T) {
+func TestLspStatus(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,37 +25,9 @@ func TestConfigGetWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Get(context.TODO(), opencode.ConfigGetParams{
+	_, err := client.Lsp.Status(context.TODO(), opencode.LspStatusParams{
 		Directory: opencode.F("directory"),
 	})
-	if err != nil {
-		var apierr *opencode.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestConfigUpdate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := opencode.NewClient(
-		option.WithBaseURL(baseURL),
-	)
-	_, err := client.Config.Update(
-		context.TODO(),
-		opencode.Config{},
-		opencode.ConfigUpdateParams{
-			Directory: opencode.F("directory"),
-		},
-	)
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

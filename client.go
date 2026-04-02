@@ -16,18 +16,31 @@ import (
 // interacting with the opencode API. You should not instantiate this client
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
-	Options []option.RequestOption
-	Event   *EventService
-	Path    *PathService
-	App     *AppService
-	Agent   *AgentService
-	Find    *FindService
-	File    *FileService
-	Config  *ConfigService
-	Command *CommandService
-	Project *ProjectService
-	Session *SessionService
-	Tui     *TuiService
+	Options      []option.RequestOption
+	Event        *EventService
+	Path         *PathService
+	App          *AppService
+	Agent        *AgentService
+	Find         *FindService
+	File         *FileService
+	Config       *ConfigService
+	Command      *CommandService
+	Project      *ProjectService
+	Session      *SessionService
+	Tui          *TuiService
+	Auth         *AuthService
+	Global       *GlobalService
+	Experimental *ExperimentalService
+	Pty          *PtyService
+	Mcp          *McpService
+	Worktree     *WorktreeService
+	Permission   *PermissionService
+	Question     *QuestionService
+	Provider     *ProviderService
+	Instance     *InstanceService
+	Vcs          *VcsService
+	Lsp          *LspService
+	Formatter    *FormatterService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should
@@ -60,6 +73,19 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Project = NewProjectService(opts...)
 	r.Session = NewSessionService(opts...)
 	r.Tui = NewTuiService(opts...)
+	r.Auth = NewAuthService(opts...)
+	r.Global = NewGlobalService(opts...)
+	r.Experimental = NewExperimentalService(opts...)
+	r.Pty = NewPtyService(opts...)
+	r.Mcp = NewMcpService(opts...)
+	r.Worktree = NewWorktreeService(opts...)
+	r.Permission = NewPermissionService(opts...)
+	r.Question = NewQuestionService(opts...)
+	r.Provider = NewProviderService(opts...)
+	r.Instance = NewInstanceService(opts...)
+	r.Vcs = NewVcsService(opts...)
+	r.Lsp = NewLspService(opts...)
+	r.Formatter = NewFormatterService(opts...)
 
 	return
 }

@@ -45,6 +45,14 @@ func (r *ConfigService) Get(ctx context.Context, query ConfigGetParams, opts ...
 	return
 }
 
+// Update config
+func (r *ConfigService) Update(ctx context.Context, body Config, query ConfigUpdateParams, opts ...option.RequestOption) (res *Config, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "config"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, query, &res, opts...)
+	return
+}
+
 type Config struct {
 	// JSON schema reference for configuration validation
 	Schema string `json:"$schema"`
@@ -2139,6 +2147,19 @@ type ConfigGetParams struct {
 
 // URLQuery serializes [ConfigGetParams]'s query parameters as `url.Values`.
 func (r ConfigGetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ConfigUpdateParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ConfigUpdateParams]'s query parameters as `url.Values`.
+func (r ConfigUpdateParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

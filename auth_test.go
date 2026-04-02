@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestConfigGetWithOptionalParams(t *testing.T) {
+func TestAuthSet(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,8 +25,11 @@ func TestConfigGetWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Get(context.TODO(), opencode.ConfigGetParams{
-		Directory: opencode.F("directory"),
+	_, err := client.Auth.Set(context.TODO(), "providerID", opencode.OAuth{
+		Type:    "oauth",
+		Refresh: "refresh_token",
+		Access:  "access_token",
+		Expires: 3600,
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -37,7 +40,7 @@ func TestConfigGetWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestConfigUpdate(t *testing.T) {
+func TestAuthRemove(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,13 +52,7 @@ func TestConfigUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Update(
-		context.TODO(),
-		opencode.Config{},
-		opencode.ConfigUpdateParams{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Auth.Remove(context.TODO(), "providerID")
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

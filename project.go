@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -47,6 +48,22 @@ func (r *ProjectService) Current(ctx context.Context, query ProjectCurrentParams
 	opts = slices.Concat(r.Options, opts)
 	path := "project/current"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Update a project
+func (r *ProjectService) Update(ctx context.Context, projectID string, body ProjectUpdateParams, query ProjectUpdateParamsQuery, opts ...option.RequestOption) (res *Project, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := fmt.Sprintf("project/%s", projectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	return
+}
+
+// Initialize git for a project
+func (r *ProjectService) InitGit(ctx context.Context, query ProjectInitGitParams, opts ...option.RequestOption) (res *Project, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "project/git/init"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return
 }
 
@@ -114,6 +131,7 @@ func (r ProjectVcs) IsKnown() bool {
 
 type ProjectListParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [ProjectListParams]'s query parameters as `url.Values`.
@@ -126,10 +144,53 @@ func (r ProjectListParams) URLQuery() (v url.Values) {
 
 type ProjectCurrentParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [ProjectCurrentParams]'s query parameters as `url.Values`.
 func (r ProjectCurrentParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ProjectUpdateParams struct {
+	Name     param.Field[string]          `json:"name"`
+	Icon     param.Field[ProjectIcon]     `json:"icon"`
+	Commands param.Field[ProjectCommands] `json:"commands"`
+}
+
+type ProjectIcon struct {
+	URL      string `json:"url"`
+	Override string `json:"override"`
+	Color    string `json:"color"`
+}
+
+type ProjectCommands struct {
+	Start string `json:"start"`
+}
+
+type ProjectUpdateParamsQuery struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ProjectUpdateParamsQuery]'s query parameters as `url.Values`.
+func (r ProjectUpdateParamsQuery) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ProjectInitGitParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ProjectInitGitParams]'s query parameters as `url.Values`.
+func (r ProjectInitGitParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

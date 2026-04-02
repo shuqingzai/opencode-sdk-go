@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestProjectListWithOptionalParams(t *testing.T) {
+func TestProviderList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.List(context.TODO(), opencode.ProjectListParams{
+	_, err := client.Provider.List(context.TODO(), opencode.ProviderListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectCurrentWithOptionalParams(t *testing.T) {
+func TestProviderAuth(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,7 +49,7 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Current(context.TODO(), opencode.ProjectCurrentParams{
+	_, err := client.Provider.Auth(context.TODO(), opencode.ProviderAuthParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -61,7 +61,7 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectUpdate(t *testing.T) {
+func TestProviderOauthAuthorize(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -73,16 +73,9 @@ func TestProjectUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Update(
-		context.TODO(),
-		"projectID",
-		opencode.ProjectUpdateParams{
-			Name: opencode.F("name"),
-		},
-		opencode.ProjectUpdateParamsQuery{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Provider.OauthAuthorize(context.TODO(), "providerID", opencode.ProviderOauthAuthorizeBody{
+		Method: "auto",
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
@@ -92,7 +85,7 @@ func TestProjectUpdate(t *testing.T) {
 	}
 }
 
-func TestProjectInitGit(t *testing.T) {
+func TestProviderOauthCallback(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -104,12 +97,10 @@ func TestProjectInitGit(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.InitGit(
-		context.TODO(),
-		opencode.ProjectInitGitParams{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Provider.OauthCallback(context.TODO(), "providerID", opencode.ProviderOauthCallbackBody{
+		Method: "auto",
+		Code:   "code",
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

@@ -253,6 +253,106 @@ func (r *SessionService) Unshare(ctx context.Context, id string, body SessionUns
 	return
 }
 
+// Get session status
+func (r *SessionService) SessionStatus(ctx context.Context, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "session/status"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// Fork a session
+func (r *SessionService) SessionFork(ctx context.Context, id string, params SessionForkParams, opts ...option.RequestOption) (res *Session, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/fork", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Get session diff
+func (r *SessionService) SessionDiff(ctx context.Context, id string, query SessionDiffParams, opts ...option.RequestOption) (res *[]FileDiff, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/diff", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Delete a message from a session
+func (r *SessionService) SessionDeleteMessage(ctx context.Context, id string, messageID string, body SessionDeleteMessageParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/message/%s", id, messageID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	return
+}
+
+// Delete a part from a message
+func (r *SessionService) PartDelete(ctx context.Context, id string, messageID string, partID string, body PartDeleteParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return
+	}
+	if partID == "" {
+		err = errors.New("missing required partID parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/message/%s/part/%s", id, messageID, partID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	return
+}
+
+// Update a part in a message
+func (r *SessionService) PartUpdate(ctx context.Context, id string, messageID string, partID string, params PartUpdateParams, opts ...option.RequestOption) (res *Part, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return
+	}
+	if partID == "" {
+		err = errors.New("missing required partID parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/message/%s/part/%s", id, messageID, partID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
+	return
+}
+
+// Send a new message to a session asynchronously
+func (r *SessionService) SessionPromptAsync(ctx context.Context, id string, params SessionPromptParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/prompt_async", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
+	return
+}
+
 type AgentPart struct {
 	ID        string          `json:"id,required"`
 	MessageID string          `json:"messageID,required"`
@@ -2759,7 +2859,12 @@ func (r SessionUpdateParams) URLQuery() (v url.Values) {
 }
 
 type SessionListParams struct {
-	Directory param.Field[string] `query:"directory"`
+	Directory param.Field[string]  `query:"directory"`
+	Workspace param.Field[string]  `query:"workspace"`
+	Roots     param.Field[bool]    `query:"roots"`
+	Start     param.Field[float64] `query:"start"`
+	Search    param.Field[string]  `query:"search"`
+	Limit     param.Field[float64] `query:"limit"`
 }
 
 // URLQuery serializes [SessionListParams]'s query parameters as `url.Values`.
@@ -2987,9 +3092,11 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 }
 
 type SessionShellParams struct {
-	Agent     param.Field[string] `json:"agent,required"`
-	Command   param.Field[string] `json:"command,required"`
-	Directory param.Field[string] `query:"directory"`
+	Agent     param.Field[string]                   `json:"agent,required"`
+	Command   param.Field[string]                   `json:"command,required"`
+	Directory param.Field[string]                   `query:"directory"`
+	Model     param.Field[SessionPromptParamsModel] `json:"model"`
+	Workspace param.Field[string]                   `query:"workspace"`
 }
 
 func (r SessionShellParams) MarshalJSON() (data []byte, err error) {
@@ -3040,6 +3147,166 @@ type SessionUnshareParams struct {
 
 // URLQuery serializes [SessionUnshareParams]'s query parameters as `url.Values`.
 func (r SessionUnshareParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// SessionStatusIdle represents an idle session status
+type SessionStatusIdle struct {
+	Type string                `json:"type,required"`
+	JSON sessionStatusIdleJSON `json:"-"`
+}
+
+type sessionStatusIdleJSON struct {
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r sessionStatusIdleJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r SessionStatusIdle) ImplementsSessionStatus() {}
+
+// SessionStatusRetry represents a retry session status
+type SessionStatusRetry struct {
+	Type    string                 `json:"type,required"`
+	Attempt int64                  `json:"attempt,required"`
+	Message string                 `json:"message,required"`
+	Next    int64                  `json:"next,required"`
+	JSON    sessionStatusRetryJSON `json:"-"`
+}
+
+type sessionStatusRetryJSON struct {
+	Type        apijson.Field
+	Attempt     apijson.Field
+	Message     apijson.Field
+	Next        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r sessionStatusRetryJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r SessionStatusRetry) ImplementsSessionStatus() {}
+
+// SessionStatusBusy represents a busy session status
+type SessionStatusBusy struct {
+	Type string                `json:"type,required"`
+	JSON sessionStatusBusyJSON `json:"-"`
+}
+
+type sessionStatusBusyJSON struct {
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r sessionStatusBusyJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r SessionStatusBusy) ImplementsSessionStatus() {}
+
+// Union satisfied by [SessionStatusIdle], [SessionStatusRetry], [SessionStatusBusy].
+type SessionStatus interface {
+	ImplementsSessionStatus()
+}
+
+// FileDiff represents a diff for a file
+type FileDiff struct {
+	After     string       `json:"after,required"`
+	Before    string       `json:"before,required"`
+	Diff      string       `json:"diff,required"`
+	File      string       `json:"file,required"`
+	Additions float64      `json:"additions,required"`
+	Deletions float64      `json:"deletions,required"`
+	JSON      fileDiffJSON `json:"-"`
+}
+
+type fileDiffJSON struct {
+	After       apijson.Field
+	Before      apijson.Field
+	Diff        apijson.Field
+	File        apijson.Field
+	Additions   apijson.Field
+	Deletions   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *FileDiff) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r fileDiffJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionForkParams struct {
+	MessageID param.Field[string] `json:"messageID"`
+	Directory param.Field[string] `query:"directory"`
+}
+
+func (r SessionForkParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r SessionForkParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SessionDiffParams struct {
+	MessageID param.Field[string] `query:"messageID"`
+	Directory param.Field[string] `query:"directory"`
+}
+
+func (r SessionDiffParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SessionDeleteMessageParams struct {
+	Directory param.Field[string] `query:"directory"`
+}
+
+func (r SessionDeleteMessageParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type PartDeleteParams struct {
+	Directory param.Field[string] `query:"directory"`
+}
+
+func (r PartDeleteParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type PartUpdateParams struct {
+	Directory param.Field[string] `query:"directory"`
+}
+
+func (r PartUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r PartUpdateParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

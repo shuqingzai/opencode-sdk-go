@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestProjectListWithOptionalParams(t *testing.T) {
+func TestToolIds(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.List(context.TODO(), opencode.ProjectListParams{
+	_, err := client.Experimental.ToolIds(context.TODO(), opencode.ExperimentalToolIdsParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestProjectListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectCurrentWithOptionalParams(t *testing.T) {
+func TestToolList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -49,7 +49,9 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Current(context.TODO(), opencode.ProjectCurrentParams{
+	_, err := client.Experimental.ToolList(context.TODO(), opencode.ExperimentalToolListParams{
+		Provider:  opencode.F("openai"),
+		Model:     opencode.F("gpt-4"),
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -61,7 +63,7 @@ func TestProjectCurrentWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestProjectUpdate(t *testing.T) {
+func TestExperimentalWorkspaceList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -73,16 +75,9 @@ func TestProjectUpdate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.Update(
-		context.TODO(),
-		"projectID",
-		opencode.ProjectUpdateParams{
-			Name: opencode.F("name"),
-		},
-		opencode.ProjectUpdateParamsQuery{
-			Directory: opencode.F("directory"),
-		},
-	)
+	_, err := client.Experimental.ExperimentalWorkspaceList(context.TODO(), opencode.ExperimentalWorkspaceListParams{
+		Directory: opencode.F("directory"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
@@ -92,7 +87,7 @@ func TestProjectUpdate(t *testing.T) {
 	}
 }
 
-func TestProjectInitGit(t *testing.T) {
+func TestExperimentalWorkspaceCreate(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -104,12 +99,34 @@ func TestProjectInitGit(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Project.InitGit(
-		context.TODO(),
-		opencode.ProjectInitGitParams{
-			Directory: opencode.F("directory"),
-		},
+	_, err := client.Experimental.ExperimentalWorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateInput{
+		Type:   opencode.F("type"),
+		Branch: opencode.F("main"),
+	})
+	if err != nil {
+		var apierr *opencode.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestExperimentalWorkspaceRemove(t *testing.T) {
+	t.Skip("Prism tests are disabled")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := opencode.NewClient(
+		option.WithBaseURL(baseURL),
 	)
+	_, err := client.Experimental.ExperimentalWorkspaceRemove(context.TODO(), "workspaceID", opencode.ExperimentalWorkspaceRemoveParams{
+		Directory: opencode.F("directory"),
+	})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
