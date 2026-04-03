@@ -353,6 +353,7 @@ func (r providerJSON) RawJSON() string {
 type AppProvidersResponse struct {
 	Default   map[string]string        `json:"default,required"`
 	Providers []Provider               `json:"providers,required"`
+	Connected []string                 `json:"connected"`
 	JSON      appProvidersResponseJSON `json:"-"`
 }
 
@@ -361,6 +362,7 @@ type AppProvidersResponse struct {
 type appProvidersResponseJSON struct {
 	Default     apijson.Field
 	Providers   apijson.Field
+	Connected   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

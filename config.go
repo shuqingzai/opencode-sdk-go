@@ -61,8 +61,9 @@ type Config struct {
 	// @deprecated Use 'share' field instead. Share newly created sessions
 	// automatically
 	Autoshare bool `json:"autoshare"`
-	// Automatically update to the latest version
-	Autoupdate bool `json:"autoupdate"`
+	// Automatically update to the latest version. Set to true to auto-update, false to disable, or 'notify' to show update notifications
+	// This field can have the runtime type of [bool] or "notify".
+	Autoupdate interface{} `json:"autoupdate"`
 	// Command configuration, see https://opencode.ai/docs/commands
 	Command map[string]ConfigCommand `json:"command"`
 	// Compaction settings for session history
@@ -1575,7 +1576,12 @@ func (r configCommandJSON) RawJSON() string {
 }
 
 type ConfigExperimental struct {
+	BatchTool           bool                   `json:"batch_tool"`
+	ContinueLoopOnDeny  bool                   `json:"continue_loop_on_deny"`
 	DisablePasteSummary bool                   `json:"disable_paste_summary"`
+	McpTimeout          float64                `json:"mcp_timeout"`
+	OpenTelemetry       bool                   `json:"openTelemetry"`
+	PrimaryTools        []string               `json:"primary_tools"`
 	Hook                ConfigExperimentalHook `json:"hook"`
 	JSON                configExperimentalJSON `json:"-"`
 }
@@ -1583,7 +1589,12 @@ type ConfigExperimental struct {
 // configExperimentalJSON contains the JSON metadata for the struct
 // [ConfigExperimental]
 type configExperimentalJSON struct {
+	BatchTool           apijson.Field
+	ContinueLoopOnDeny  apijson.Field
 	DisablePasteSummary apijson.Field
+	McpTimeout          apijson.Field
+	OpenTelemetry       apijson.Field
+	PrimaryTools        apijson.Field
 	Hook                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
@@ -1844,15 +1855,15 @@ func (r ConfigLspObject) implementsConfigLsp() {}
 type ConfigMcp struct {
 	// Type of MCP server connection
 	Type ConfigMcpType `json:"type,required"`
-	// This field can have the runtime type of [[]string].
+	// This field can have the runtime type of [[]string]. Command and arguments to run the MCP server (for "local" type).
 	Command interface{} `json:"command"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
-	// This field can have the runtime type of [map[string]string].
+	// This field can have the runtime type of [map[string]string]. Environment variables to set when running the MCP server (for "local" type).
 	Environment interface{} `json:"environment"`
-	// This field can have the runtime type of [map[string]string].
+	// This field can have the runtime type of [map[string]string]. Headers to send with the request (for "remote" type).
 	Headers interface{} `json:"headers"`
-	// URL of the remote MCP server
+	// URL of the remote MCP server (for "remote" type).
 	URL   string        `json:"url"`
 	JSON  configMcpJSON `json:"-"`
 	union ConfigMcpUnion

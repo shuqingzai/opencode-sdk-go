@@ -1735,12 +1735,18 @@ func (r sessionShareJSON) RawJSON() string {
 }
 
 type SessionSummary struct {
-	Diffs []SessionSummaryDiff `json:"diffs,required"`
-	JSON  sessionSummaryJSON   `json:"-"`
+	Additions float64              `json:"additions,required"`
+	Deletions float64              `json:"deletions,required"`
+	Files     float64              `json:"files,required"`
+	Diffs     []SessionSummaryDiff `json:"diffs,required"`
+	JSON      sessionSummaryJSON   `json:"-"`
 }
 
 // sessionSummaryJSON contains the JSON metadata for the struct [SessionSummary]
 type sessionSummaryJSON struct {
+	Additions   apijson.Field
+	Deletions   apijson.Field
+	Files       apijson.Field
 	Diffs       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -3059,6 +3065,7 @@ type SessionCommandParams struct {
 	Agent     param.Field[string] `json:"agent"`
 	MessageID param.Field[string] `json:"messageID"`
 	Model     param.Field[string] `json:"model"`
+	Variant   param.Field[string] `json:"variant"`
 }
 
 func (r SessionCommandParams) MarshalJSON() (data []byte, err error) {
@@ -3091,6 +3098,7 @@ type SessionInitParams struct {
 	ModelID    param.Field[string] `json:"modelID,required"`
 	ProviderID param.Field[string] `json:"providerID,required"`
 	Directory  param.Field[string] `query:"directory"`
+	Workspace  param.Field[string] `query:"workspace"`
 }
 
 func (r SessionInitParams) MarshalJSON() (data []byte, err error) {
@@ -3247,6 +3255,7 @@ type SessionShellParams struct {
 	Directory param.Field[string]                   `query:"directory"`
 	Model     param.Field[SessionPromptParamsModel] `json:"model"`
 	Workspace param.Field[string]                   `query:"workspace"`
+	Variant   param.Field[string]                   `json:"variant"`
 }
 
 func (r SessionShellParams) MarshalJSON() (data []byte, err error) {
@@ -3265,6 +3274,7 @@ type SessionSummarizeParams struct {
 	ModelID    param.Field[string] `json:"modelID,required"`
 	ProviderID param.Field[string] `json:"providerID,required"`
 	Directory  param.Field[string] `query:"directory"`
+	Workspace  param.Field[string] `query:"workspace"`
 }
 
 func (r SessionSummarizeParams) MarshalJSON() (data []byte, err error) {
@@ -3281,6 +3291,7 @@ func (r SessionSummarizeParams) URLQuery() (v url.Values) {
 
 type SessionUnrevertParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionUnrevertParams]'s query parameters as `url.Values`.
