@@ -318,6 +318,12 @@ type ConfigAgentBuild struct {
 	Temperature float64                    `json:"temperature"`
 	Tools       map[string]bool            `json:"tools"`
 	TopP        float64                    `json:"top_p"`
+	Variant     string                     `json:"variant"`
+	Hidden      bool                       `json:"hidden"`
+	Options     map[string]string          `json:"options"`
+	Color       string                     `json:"color"`
+	Steps       float64                    `json:"steps"`
+	MaxSteps    float64                    `json:"max_steps"`
 	ExtraFields map[string]interface{}     `json:"-,extras"`
 	JSON        configAgentBuildJSON       `json:"-"`
 }
@@ -334,6 +340,12 @@ type configAgentBuildJSON struct {
 	Temperature apijson.Field
 	Tools       apijson.Field
 	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -489,6 +501,12 @@ type ConfigAgentGeneral struct {
 	Temperature float64                      `json:"temperature"`
 	Tools       map[string]bool              `json:"tools"`
 	TopP        float64                      `json:"top_p"`
+	Variant     string                       `json:"variant"`
+	Hidden      bool                         `json:"hidden"`
+	Options     map[string]string            `json:"options"`
+	Color       string                       `json:"color"`
+	Steps       float64                      `json:"steps"`
+	MaxSteps    float64                      `json:"max_steps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentGeneralJSON       `json:"-"`
 }
@@ -505,6 +523,12 @@ type configAgentGeneralJSON struct {
 	Temperature apijson.Field
 	Tools       apijson.Field
 	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -660,6 +684,12 @@ type ConfigAgentPlan struct {
 	Temperature float64                   `json:"temperature"`
 	Tools       map[string]bool           `json:"tools"`
 	TopP        float64                   `json:"top_p"`
+	Variant     string                    `json:"variant"`
+	Hidden      bool                      `json:"hidden"`
+	Options     map[string]string         `json:"options"`
+	Color       string                    `json:"color"`
+	Steps       float64                   `json:"steps"`
+	MaxSteps    float64                   `json:"max_steps"`
 	ExtraFields map[string]interface{}    `json:"-,extras"`
 	JSON        configAgentPlanJSON       `json:"-"`
 }
@@ -675,6 +705,12 @@ type configAgentPlanJSON struct {
 	Temperature apijson.Field
 	Tools       apijson.Field
 	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

@@ -2656,13 +2656,18 @@ func (r toolStateErrorTimeJSON) RawJSON() string {
 
 type ToolStatePending struct {
 	Status ToolStatePendingStatus `json:"status,required"`
-	JSON   toolStatePendingJSON   `json:"-"`
+	// This field can have the runtime type of map[string]interface{}.
+	Input interface{}          `json:"input,required"`
+	Raw   string               `json:"raw,required"`
+	JSON  toolStatePendingJSON `json:"-"`
 }
 
 // toolStatePendingJSON contains the JSON metadata for the struct
 // [ToolStatePending]
 type toolStatePendingJSON struct {
 	Status      apijson.Field
+	Input       apijson.Field
+	Raw         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2692,6 +2697,7 @@ func (r ToolStatePendingStatus) IsKnown() bool {
 }
 
 type ToolStateRunning struct {
+	// This field can have the runtime type of map[string]interface{}.
 	Input    interface{}            `json:"input,required"`
 	Status   ToolStateRunningStatus `json:"status,required"`
 	Time     ToolStateRunningTime   `json:"time,required"`
