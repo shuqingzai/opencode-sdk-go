@@ -109,6 +109,7 @@ func (r *TuiService) SubmitPrompt(ctx context.Context, body TuiSubmitPromptParam
 type TuiAppendPromptParams struct {
 	Text      param.Field[string] `json:"text,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r TuiAppendPromptParams) MarshalJSON() (data []byte, err error) {
@@ -125,6 +126,7 @@ func (r TuiAppendPromptParams) URLQuery() (v url.Values) {
 
 type TuiClearPromptParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiClearPromptParams]'s query parameters as `url.Values`.
@@ -138,6 +140,7 @@ func (r TuiClearPromptParams) URLQuery() (v url.Values) {
 type TuiExecuteCommandParams struct {
 	Command   param.Field[string] `json:"command,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r TuiExecuteCommandParams) MarshalJSON() (data []byte, err error) {
@@ -155,6 +158,7 @@ func (r TuiExecuteCommandParams) URLQuery() (v url.Values) {
 
 type TuiOpenHelpParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiOpenHelpParams]'s query parameters as `url.Values`.
@@ -167,6 +171,7 @@ func (r TuiOpenHelpParams) URLQuery() (v url.Values) {
 
 type TuiOpenModelsParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiOpenModelsParams]'s query parameters as `url.Values`.
@@ -179,6 +184,7 @@ func (r TuiOpenModelsParams) URLQuery() (v url.Values) {
 
 type TuiOpenSessionsParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiOpenSessionsParams]'s query parameters as `url.Values`.
@@ -191,6 +197,7 @@ func (r TuiOpenSessionsParams) URLQuery() (v url.Values) {
 
 type TuiOpenThemesParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiOpenThemesParams]'s query parameters as `url.Values`.
@@ -205,7 +212,9 @@ type TuiShowToastParams struct {
 	Message   param.Field[string]                    `json:"message,required"`
 	Variant   param.Field[TuiShowToastParamsVariant] `json:"variant,required"`
 	Directory param.Field[string]                    `query:"directory"`
+	Workspace param.Field[string]                    `query:"workspace"`
 	Title     param.Field[string]                    `json:"title"`
+	Duration  param.Field[int64]                     `json:"duration"`
 }
 
 func (r TuiShowToastParams) MarshalJSON() (data []byte, err error) {
@@ -239,6 +248,7 @@ func (r TuiShowToastParamsVariant) IsKnown() bool {
 
 type TuiSubmitPromptParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [TuiSubmitPromptParams]'s query parameters as `url.Values`.

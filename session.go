@@ -3015,6 +3015,7 @@ func (r SessionListParams) URLQuery() (v url.Values) {
 
 type SessionDeleteParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionDeleteParams]'s query parameters as `url.Values`.
@@ -3027,6 +3028,7 @@ func (r SessionDeleteParams) URLQuery() (v url.Values) {
 
 type SessionAbortParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionAbortParams]'s query parameters as `url.Values`.
@@ -3039,6 +3041,7 @@ func (r SessionAbortParams) URLQuery() (v url.Values) {
 
 type SessionChildrenParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionChildrenParams]'s query parameters as `url.Values`.
@@ -3072,6 +3075,7 @@ func (r SessionCommandParams) URLQuery() (v url.Values) {
 
 type SessionGetParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionGetParams]'s query parameters as `url.Values`.
@@ -3103,6 +3107,7 @@ func (r SessionInitParams) URLQuery() (v url.Values) {
 
 type SessionMessageParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionMessageParams]'s query parameters as `url.Values`.
@@ -3115,6 +3120,9 @@ func (r SessionMessageParams) URLQuery() (v url.Values) {
 
 type SessionMessagesParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Limit     param.Field[int64]  `query:"limit"`
+	Before    param.Field[string] `query:"before"`
 }
 
 // URLQuery serializes [SessionMessagesParams]'s query parameters as `url.Values`.
@@ -3134,6 +3142,8 @@ type SessionPromptParams struct {
 	NoReply   param.Field[bool]                           `json:"noReply"`
 	System    param.Field[string]                         `json:"system"`
 	Tools     param.Field[map[string]bool]                `json:"tools"`
+	Format    param.Field[string]                         `json:"format"`
+	Variant   param.Field[string]                         `json:"variant"`
 }
 
 func (r SessionPromptParams) MarshalJSON() (data []byte, err error) {
@@ -3201,8 +3211,9 @@ func (r SessionPromptParamsModel) MarshalJSON() (data []byte, err error) {
 
 type SessionRevertParams struct {
 	MessageID param.Field[string] `json:"messageID,required"`
-	Directory param.Field[string] `query:"directory"`
 	PartID    param.Field[string] `json:"partID"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r SessionRevertParams) MarshalJSON() (data []byte, err error) {
@@ -3219,6 +3230,7 @@ func (r SessionRevertParams) URLQuery() (v url.Values) {
 
 type SessionShareParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionShareParams]'s query parameters as `url.Values`.
@@ -3281,6 +3293,7 @@ func (r SessionUnrevertParams) URLQuery() (v url.Values) {
 
 type SessionUnshareParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [SessionUnshareParams]'s query parameters as `url.Values`.
@@ -3389,6 +3402,7 @@ func (r fileDiffJSON) RawJSON() string {
 type SessionForkParams struct {
 	MessageID param.Field[string] `json:"messageID"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r SessionForkParams) MarshalJSON() (data []byte, err error) {
@@ -3405,6 +3419,7 @@ func (r SessionForkParams) URLQuery() (v url.Values) {
 type SessionDiffParams struct {
 	MessageID param.Field[string] `query:"messageID"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r SessionDiffParams) URLQuery() (v url.Values) {
@@ -3416,6 +3431,7 @@ func (r SessionDiffParams) URLQuery() (v url.Values) {
 
 type SessionDeleteMessageParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r SessionDeleteMessageParams) URLQuery() (v url.Values) {
@@ -3427,6 +3443,7 @@ func (r SessionDeleteMessageParams) URLQuery() (v url.Values) {
 
 type PartDeleteParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r PartDeleteParams) URLQuery() (v url.Values) {
@@ -3438,6 +3455,7 @@ func (r PartDeleteParams) URLQuery() (v url.Values) {
 
 type PartUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r PartUpdateParams) MarshalJSON() (data []byte, err error) {

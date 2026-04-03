@@ -381,6 +381,7 @@ type AppLogParams struct {
 	// Service name for the log entry
 	Service   param.Field[string] `json:"service,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 	// Additional metadata for the log entry
 	Extra param.Field[map[string]interface{}] `json:"extra"`
 }
@@ -417,6 +418,7 @@ func (r AppLogParamsLevel) IsKnown() bool {
 
 type AppProvidersParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [AppProvidersParams]'s query parameters as `url.Values`.

@@ -3162,6 +3162,7 @@ func (r McpRemoteConfigType) IsKnown() bool {
 
 type ConfigGetParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [ConfigGetParams]'s query parameters as `url.Values`.
