@@ -68,11 +68,15 @@ func (r *ProjectService) InitGit(ctx context.Context, query ProjectInitGitParams
 }
 
 type Project struct {
-	ID       string      `json:"id,required"`
-	Time     ProjectTime `json:"time,required"`
-	Worktree string      `json:"worktree,required"`
-	Vcs      ProjectVcs  `json:"vcs"`
-	JSON     projectJSON `json:"-"`
+	ID        string          `json:"id,required"`
+	Time      ProjectTime     `json:"time,required"`
+	Worktree  string          `json:"worktree,required"`
+	Sandboxes []string        `json:"sandboxes,required"`
+	Name      string          `json:"name"`
+	Icon      ProjectIcon     `json:"icon"`
+	Commands  ProjectCommands `json:"commands"`
+	Vcs       ProjectVcs      `json:"vcs"`
+	JSON      projectJSON     `json:"-"`
 }
 
 // projectJSON contains the JSON metadata for the struct [Project]
@@ -80,6 +84,10 @@ type projectJSON struct {
 	ID          apijson.Field
 	Time        apijson.Field
 	Worktree    apijson.Field
+	Sandboxes   apijson.Field
+	Name        apijson.Field
+	Icon        apijson.Field
+	Commands    apijson.Field
 	Vcs         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

@@ -1868,7 +1868,7 @@ type StepFinishPartTokens struct {
 	Input     float64                   `json:"input,required"`
 	Output    float64                   `json:"output,required"`
 	Reasoning float64                   `json:"reasoning,required"`
-	Total     *float64                  `json:"total"`
+	Total     float64                   `json:"total"`
 	JSON      stepFinishPartTokensJSON  `json:"-"`
 }
 

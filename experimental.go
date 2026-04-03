@@ -107,9 +107,9 @@ func (r toolListItemJSON) RawJSON() string {
 type Workspace struct {
 	Id        string        `json:"id,required"`
 	Type      string        `json:"type,required"`
-	Branch    *string       `json:"branch"`
-	Name      *string       `json:"name"`
-	Directory *string       `json:"directory"`
+	Branch    string        `json:"branch"`
+	Name      string        `json:"name"`
+	Directory string        `json:"directory"`
 	Extra     any           `json:"extra"`
 	ProjectID string        `json:"projectID,required"`
 	JSON      workspaceJSON `json:"-"`

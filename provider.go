@@ -139,20 +139,20 @@ type ProviderModelInfo struct {
 	Id           string                          `json:"id,required"`
 	Name         string                          `json:"name,required"`
 	Family       string                          `json:"family"`
-	ReleaseDate  string                          `json:"releaseDate,required"`
+	ReleaseDate  string                          `json:"release_date,required"`
 	Attachment   bool                            `json:"attachment,required"`
 	Reasoning    bool                            `json:"reasoning,required"`
 	Temperature  bool                            `json:"temperature,required"`
-	ToolCall     bool                            `json:"toolCall,required"`
+	ToolCall     bool                            `json:"tool_call,required"`
 	Interleaved  interface{}                     `json:"interleaved"`
-	Cost         *ProviderModelCost              `json:"cost"`
+	Cost         ProviderModelCost               `json:"cost"`
 	Limit        ProviderModelLimit              `json:"limit,required"`
-	Modalities   *ProviderModelModalities        `json:"modalities"`
+	Modalities   ProviderModelModalities         `json:"modalities"`
 	Experimental bool                            `json:"experimental"`
 	Status       string                          `json:"status"`
 	Options      map[string]interface{}          `json:"options,required"`
 	Headers      map[string]string               `json:"headers"`
-	Provider     *ProviderModelProvider          `json:"provider"`
+	Provider     ProviderModelProvider           `json:"provider"`
 	Variants     map[string]ProviderModelVariant `json:"variants"`
 	JSON         providerModelInfoJSON           `json:"-"`
 }
@@ -191,12 +191,12 @@ func (r providerModelInfoJSON) RawJSON() string {
 
 // ProviderModelCost represents the cost structure for a model.
 type ProviderModelCost struct {
-	Input           float64                           `json:"input,required"`
-	Output          float64                           `json:"output,required"`
-	CacheRead       float64                           `json:"cacheRead"`
-	CacheWrite      float64                           `json:"cacheWrite"`
-	ContextOver200k *ProviderModelCostContextOver200k `json:"contextOver200k"`
-	JSON            providerModelCostJSON             `json:"-"`
+	Input           float64                          `json:"input,required"`
+	Output          float64                          `json:"output,required"`
+	CacheRead       float64                          `json:"cache_read"`
+	CacheWrite      float64                          `json:"cache_write"`
+	ContextOver200k ProviderModelCostContextOver200k `json:"context_over_200k"`
+	JSON            providerModelCostJSON            `json:"-"`
 }
 
 // providerModelCostJSON contains the JSON metadata for the struct [ProviderModelCost]
@@ -222,8 +222,8 @@ func (r providerModelCostJSON) RawJSON() string {
 type ProviderModelCostContextOver200k struct {
 	Input      float64                              `json:"input,required"`
 	Output     float64                              `json:"output,required"`
-	CacheRead  float64                              `json:"cacheRead"`
-	CacheWrite float64                              `json:"cacheWrite"`
+	CacheRead  float64                              `json:"cache_read"`
+	CacheWrite float64                              `json:"cache_write"`
 	JSON       providerModelCostContextOver200kJSON `json:"-"`
 }
 
@@ -391,7 +391,7 @@ type ProviderAuthMethodPromptText struct {
 	Key         string                           `json:"key,required"`
 	Message     string                           `json:"message,required"`
 	Placeholder string                           `json:"placeholder"`
-	When        *ProviderAuthMethodPromptWhen    `json:"when"`
+	When        ProviderAuthMethodPromptWhen     `json:"when"`
 	JSON        providerAuthMethodPromptTextJSON `json:"-"`
 }
 
@@ -423,7 +423,7 @@ type ProviderAuthMethodPromptSelect struct {
 	Key     string                                 `json:"key,required"`
 	Message string                                 `json:"message,required"`
 	Options []ProviderAuthMethodPromptSelectOption `json:"options,required"`
-	When    *ProviderAuthMethodPromptWhen          `json:"when"`
+	When    ProviderAuthMethodPromptWhen           `json:"when"`
 	JSON    providerAuthMethodPromptSelectJSON     `json:"-"`
 }
 

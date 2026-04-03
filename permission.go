@@ -69,7 +69,7 @@ type PermissionRequest struct {
 	Patterns   []string               `json:"patterns,required"`
 	Metadata   map[string]interface{} `json:"metadata,required"`
 	Always     []string               `json:"always,required"`
-	Tool       *PermissionRequestTool `json:"tool"`
+	Tool       PermissionRequestTool  `json:"tool"`
 	JSON       permissionRequestJSON  `json:"-"`
 }
 

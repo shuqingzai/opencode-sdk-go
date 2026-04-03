@@ -59,11 +59,11 @@ func (r *QuestionService) Reject(ctx context.Context, requestID string, opts ...
 }
 
 type QuestionRequest struct {
-	ID        string               `json:"id,required"`
-	SessionID string               `json:"sessionID,required"`
-	Questions []QuestionInfo       `json:"questions,required"`
-	Tool      *QuestionRequestTool `json:"tool"`
-	JSON      questionRequestJSON  `json:"-"`
+	ID        string              `json:"id,required"`
+	SessionID string              `json:"sessionID,required"`
+	Questions []QuestionInfo      `json:"questions,required"`
+	Tool      QuestionRequestTool `json:"tool"`
+	JSON      questionRequestJSON `json:"-"`
 }
 
 // questionRequestJSON contains the JSON metadata for the struct
