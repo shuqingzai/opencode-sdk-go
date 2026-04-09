@@ -54,21 +54,51 @@ func (r *EventService) ListStreaming(ctx context.Context, query EventListParams,
 type EventListResponse struct {
 	// This field can have the runtime type of
 	// [EventListResponseEventInstallationUpdatedProperties],
+	// [EventListResponseEventInstallationUpdateAvailableProperties],
 	// [EventListResponseEventLspClientDiagnosticsProperties],
+	// [EventListResponseEventLspUpdatedProperties],
 	// [EventListResponseEventMessageUpdatedProperties],
 	// [EventListResponseEventMessageRemovedProperties],
 	// [EventListResponseEventMessagePartUpdatedProperties],
+	// [EventListResponseEventMessagePartDeltaProperties],
 	// [EventListResponseEventMessagePartRemovedProperties],
-	// [EventListResponseEventSessionCompactedProperties], [Permission],
+	// [EventListResponseEventSessionCompactedProperties],
+	// [Permission],
+	// [EventListResponseEventPermissionAskedProperties],
 	// [EventListResponseEventPermissionRepliedProperties],
 	// [EventListResponseEventFileEditedProperties],
 	// [EventListResponseEventFileWatcherUpdatedProperties],
 	// [EventListResponseEventTodoUpdatedProperties],
+	// [EventListResponseEventTuiPromptAppendProperties],
+	// [EventListResponseEventTuiCommandExecuteProperties],
+	// [EventListResponseEventTuiToastShowProperties],
+	// [EventListResponseEventTuiSessionSelectProperties],
+	// [EventListResponseEventMcpToolsChangedProperties],
+	// [EventListResponseEventMcpBrowserOpenFailedProperties],
+	// [EventListResponseEventCommandExecutedProperties],
 	// [EventListResponseEventSessionIdleProperties],
+	// [EventListResponseEventSessionStatusProperties],
+	// [EventListResponseEventSessionDiffProperties],
+	// [EventListResponseEventSessionErrorProperties],
 	// [EventListResponseEventSessionCreatedProperties],
 	// [EventListResponseEventSessionUpdatedProperties],
 	// [EventListResponseEventSessionDeletedProperties],
-	// [EventListResponseEventSessionErrorProperties], [interface{}],
+	// [EventListResponseEventServerConnectedProperties],
+	// [EventListResponseEventServerInstanceDisposedProperties],
+	// [EventListResponseEventGlobalDisposedProperties],
+	// [EventListResponseEventProjectUpdatedProperties],
+	// [EventListResponseEventQuestionAskedProperties],
+	// [EventListResponseEventQuestionRejectedProperties],
+	// [EventListResponseEventQuestionRepliedProperties],
+	// [EventListResponseEventVcsBranchUpdatedProperties],
+	// [EventListResponseEventWorkspaceReadyProperties],
+	// [EventListResponseEventWorkspaceFailedProperties],
+	// [EventListResponseEventPtyCreatedProperties],
+	// [EventListResponseEventPtyUpdatedProperties],
+	// [EventListResponseEventPtyExitedProperties],
+	// [EventListResponseEventPtyDeletedProperties],
+	// [EventListResponseEventWorktreeReadyProperties],
+	// [EventListResponseEventWorktreeFailedProperties],
 	// [EventListResponseEventIdeInstalledProperties].
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
@@ -1679,9 +1709,9 @@ func (r EventListResponseEventSessionErrorType) IsKnown() bool {
 }
 
 type EventListResponseEventServerConnected struct {
-	Properties interface{}                               `json:"properties,required"`
-	Type       EventListResponseEventServerConnectedType `json:"type,required"`
-	JSON       eventListResponseEventServerConnectedJSON `json:"-"`
+	Properties EventListResponseEventServerConnectedProperties `json:"properties,required"`
+	Type       EventListResponseEventServerConnectedType       `json:"type,required"`
+	JSON       eventListResponseEventServerConnectedJSON       `json:"-"`
 }
 
 // eventListResponseEventServerConnectedJSON contains the JSON metadata for the
@@ -1702,6 +1732,23 @@ func (r eventListResponseEventServerConnectedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventServerConnected) implementsEventListResponse() {}
+
+type EventListResponseEventServerConnectedProperties struct {
+	JSON eventListResponseEventServerConnectedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventServerConnectedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventServerConnectedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventServerConnectedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
 
 type EventListResponseEventServerConnectedType string
 

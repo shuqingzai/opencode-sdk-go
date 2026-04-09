@@ -189,9 +189,9 @@ func (r EventListResponseEventServerInstanceDisposedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventGlobalDisposed struct {
-	Properties interface{}                              `json:"properties,required"`
-	Type       EventListResponseEventGlobalDisposedType `json:"type,required"`
-	JSON       eventListResponseEventGlobalDisposedJSON `json:"-"`
+	Properties EventListResponseEventGlobalDisposedProperties `json:"properties,required"`
+	Type       EventListResponseEventGlobalDisposedType       `json:"type,required"`
+	JSON       eventListResponseEventGlobalDisposedJSON       `json:"-"`
 }
 
 type eventListResponseEventGlobalDisposedJSON struct {
@@ -210,6 +210,23 @@ func (r eventListResponseEventGlobalDisposedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventGlobalDisposed) implementsEventListResponse() {}
+
+type EventListResponseEventGlobalDisposedProperties struct {
+	JSON eventListResponseEventGlobalDisposedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventGlobalDisposedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventGlobalDisposedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventGlobalDisposedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
 
 type EventListResponseEventGlobalDisposedType string
 
@@ -230,9 +247,9 @@ func (r EventListResponseEventGlobalDisposedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventLspUpdated struct {
-	Properties interface{}                          `json:"properties,required"`
-	Type       EventListResponseEventLspUpdatedType `json:"type,required"`
-	JSON       eventListResponseEventLspUpdatedJSON `json:"-"`
+	Properties EventListResponseEventLspUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventLspUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventLspUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventLspUpdatedJSON struct {
@@ -251,6 +268,23 @@ func (r eventListResponseEventLspUpdatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventLspUpdated) implementsEventListResponse() {}
+
+type EventListResponseEventLspUpdatedProperties struct {
+	JSON eventListResponseEventLspUpdatedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventLspUpdatedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventLspUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventLspUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
 
 type EventListResponseEventLspUpdatedType string
 
