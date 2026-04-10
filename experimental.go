@@ -53,7 +53,7 @@ func (r *ExperimentalService) ToolList(ctx context.Context, query ExperimentalTo
 }
 
 // List workspaces
-func (r *ExperimentalService) ExperimentalWorkspaceList(ctx context.Context, query ExperimentalWorkspaceListParams, opts ...option.RequestOption) (res *[]Workspace, err error) {
+func (r *ExperimentalService) WorkspaceList(ctx context.Context, query ExperimentalWorkspaceListParams, opts ...option.RequestOption) (res *[]Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/workspace"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -61,7 +61,7 @@ func (r *ExperimentalService) ExperimentalWorkspaceList(ctx context.Context, que
 }
 
 // Create a workspace
-func (r *ExperimentalService) ExperimentalWorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateInput, opts ...option.RequestOption) (res *Workspace, err error) {
+func (r *ExperimentalService) WorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateInput, opts ...option.RequestOption) (res *Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/workspace"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -69,7 +69,7 @@ func (r *ExperimentalService) ExperimentalWorkspaceCreate(ctx context.Context, b
 }
 
 // Remove a workspace
-func (r *ExperimentalService) ExperimentalWorkspaceRemove(ctx context.Context, id string, query ExperimentalWorkspaceRemoveParams, opts ...option.RequestOption) (res *Workspace, err error) {
+func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, query ExperimentalWorkspaceRemoveParams, opts ...option.RequestOption) (res *Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")

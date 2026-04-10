@@ -254,7 +254,7 @@ func (r *SessionService) Unshare(ctx context.Context, id string, body SessionUns
 }
 
 // Get session status
-func (r *SessionService) SessionStatus(ctx context.Context, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
+func (r *SessionService) Status(ctx context.Context, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "session/status"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
@@ -262,7 +262,7 @@ func (r *SessionService) SessionStatus(ctx context.Context, opts ...option.Reque
 }
 
 // Fork a session
-func (r *SessionService) SessionFork(ctx context.Context, id string, params SessionForkParams, opts ...option.RequestOption) (res *Session, err error) {
+func (r *SessionService) Fork(ctx context.Context, id string, params SessionForkParams, opts ...option.RequestOption) (res *Session, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -274,7 +274,7 @@ func (r *SessionService) SessionFork(ctx context.Context, id string, params Sess
 }
 
 // Get session diff
-func (r *SessionService) SessionDiff(ctx context.Context, id string, query SessionDiffParams, opts ...option.RequestOption) (res *[]FileDiff, err error) {
+func (r *SessionService) Diff(ctx context.Context, id string, query SessionDiffParams, opts ...option.RequestOption) (res *[]FileDiff, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -286,7 +286,7 @@ func (r *SessionService) SessionDiff(ctx context.Context, id string, query Sessi
 }
 
 // Delete a message from a session
-func (r *SessionService) SessionDeleteMessage(ctx context.Context, id string, messageID string, body SessionDeleteMessageParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *SessionService) DeleteMessage(ctx context.Context, id string, messageID string, body SessionDeleteMessageParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -342,7 +342,7 @@ func (r *SessionService) PartUpdate(ctx context.Context, id string, messageID st
 }
 
 // Send a new message to a session asynchronously
-func (r *SessionService) SessionPromptAsync(ctx context.Context, id string, params SessionPromptParams, opts ...option.RequestOption) (err error) {
+func (r *SessionService) PromptAsync(ctx context.Context, id string, params SessionPromptParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
