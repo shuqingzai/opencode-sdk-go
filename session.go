@@ -93,6 +93,18 @@ func (r *SessionService) Abort(ctx context.Context, id string, body SessionAbort
 	return
 }
 
+// Get session todos
+func (r *SessionService) Todo(ctx context.Context, id string, query SessionTodoParams, opts ...option.RequestOption) (res *[]Todo, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("session/%s/todo", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
 // Get a session's children
 func (r *SessionService) Children(ctx context.Context, id string, query SessionChildrenParams, opts ...option.RequestOption) (res *[]Session, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -353,6 +365,36 @@ func (r *SessionService) PromptAsync(ctx context.Context, id string, params Sess
 	return
 }
 
+type Todo struct {
+	Content  string `json:"content,required"`
+	Status   string `json:"status,required"`
+	Priority string `json:"priority,required"`
+}
+
+type PermissionAction string
+
+const (
+	PermissionActionAllow PermissionAction = "allow"
+	PermissionActionDeny  PermissionAction = "deny"
+	PermissionActionAsk   PermissionAction = "ask"
+)
+
+func (r PermissionAction) IsKnown() bool {
+	switch r {
+	case PermissionActionAllow, PermissionActionDeny, PermissionActionAsk:
+		return true
+	}
+	return false
+}
+
+type PermissionRule struct {
+	Permission param.Field[string]         `json:"permission,required"`
+	Pattern    param.Field[string]         `json:"pattern,required"`
+	Action     param.Field[PermissionAction] `json:"action,required"`
+}
+
+type PermissionRuleset []PermissionRule
+
 type AgentPart struct {
 	ID        string          `json:"id,required"`
 	MessageID string          `json:"messageID,required"`
@@ -445,6 +487,36 @@ const (
 func (r AgentPartInputType) IsKnown() bool {
 	switch r {
 	case AgentPartInputTypeAgent:
+		return true
+	}
+	return false
+}
+
+type SubtaskPartInputParam struct {
+	ID          param.Field[string]                 `json:"id"`
+	Type        param.Field[SubtaskPartInputType]  `json:"type,required"`
+	Prompt      param.Field[string]                 `json:"prompt,required"`
+	Description param.Field[string]                 `json:"description,required"`
+	Agent       param.Field[string]                 `json:"agent,required"`
+	Model       param.Field[SubtaskPartModel]      `json:"model"`
+	Command     param.Field[string]                 `json:"command"`
+}
+
+func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r SubtaskPartInputParam) implementsSessionPromptParamsPartUnion() {}
+
+type SubtaskPartInputType string
+
+const (
+	SubtaskPartInputTypeSubtask SubtaskPartInputType = "subtask"
+)
+
+func (r SubtaskPartInputType) IsKnown() bool {
+	switch r {
+	case SubtaskPartInputTypeSubtask:
 		return true
 	}
 	return false
@@ -2331,6 +2403,7 @@ type TextPartInputParam struct {
 	ID        param.Field[string]                 `json:"id"`
 	Metadata  param.Field[map[string]interface{}] `json:"metadata"`
 	Synthetic param.Field[bool]                   `json:"synthetic"`
+	Ignored   param.Field[bool]                    `json:"ignored"`
 	Time      param.Field[TextPartInputTimeParam] `json:"time"`
 }
 
@@ -2974,9 +3047,11 @@ func (r sessionPromptResponseJSON) RawJSON() string {
 }
 
 type SessionNewParams struct {
-	Directory param.Field[string] `query:"directory"`
-	ParentID  param.Field[string] `json:"parentID"`
-	Title     param.Field[string] `json:"title"`
+	Directory   param.Field[string]         `query:"directory"`
+	ParentID    param.Field[string]         `json:"parentID"`
+	Title       param.Field[string]         `json:"title"`
+	Permission  param.Field[PermissionRuleset] `json:"permission"`
+	WorkspaceID param.Field[string]         `json:"workspaceID"`
 }
 
 func (r SessionNewParams) MarshalJSON() (data []byte, err error) {
@@ -2992,8 +3067,14 @@ func (r SessionNewParams) URLQuery() (v url.Values) {
 }
 
 type SessionUpdateParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Title     param.Field[string] `json:"title"`
+	Directory  param.Field[string]          `query:"directory"`
+	Title      param.Field[string]          `json:"title"`
+	Permission param.Field[PermissionRuleset] `json:"permission"`
+	Time       param.Field[SessionUpdateParamsTime] `json:"time"`
+}
+
+type SessionUpdateParamsTime struct {
+	Archived param.Field[float64] `json:"archived"`
 }
 
 func (r SessionUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3064,14 +3145,37 @@ func (r SessionChildrenParams) URLQuery() (v url.Values) {
 	})
 }
 
-type SessionCommandParams struct {
-	Arguments param.Field[string] `json:"arguments,required"`
-	Command   param.Field[string] `json:"command,required"`
+type SessionTodoParams struct {
 	Directory param.Field[string] `query:"directory"`
-	Agent     param.Field[string] `json:"agent"`
-	MessageID param.Field[string] `json:"messageID"`
-	Model     param.Field[string] `json:"model"`
-	Variant   param.Field[string] `json:"variant"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [SessionTodoParams]'s query parameters as `url.Values`.
+func (r SessionTodoParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SessionCommandParams struct {
+	Arguments param.Field[string]                       `json:"arguments,required"`
+	Command   param.Field[string]                       `json:"command,required"`
+	Directory param.Field[string]                        `query:"directory"`
+	Agent     param.Field[string]                       `json:"agent"`
+	MessageID param.Field[string]                       `json:"messageID"`
+	Model     param.Field[string]                       `json:"model"`
+	Variant   param.Field[string]                       `json:"variant"`
+	Parts     param.Field[[]SessionCommandParamsPart] `json:"parts"`
+}
+
+type SessionCommandParamsPart struct {
+	ID       param.Field[string]                   `json:"id"`
+	Type     param.Field[string]                   `json:"type,required"`
+	Mime     param.Field[string]                   `json:"mime,required"`
+	Filename param.Field[string]                   `json:"filename"`
+	URL      param.Field[string]                   `json:"url,required"`
+	Source   param.Field[FilePartSourceUnionParam] `json:"source"`
 }
 
 func (r SessionCommandParams) MarshalJSON() (data []byte, err error) {
@@ -3201,14 +3305,15 @@ type SessionPromptParamsPartUnion interface {
 type SessionPromptParamsPartsType string
 
 const (
-	SessionPromptParamsPartsTypeText  SessionPromptParamsPartsType = "text"
-	SessionPromptParamsPartsTypeFile  SessionPromptParamsPartsType = "file"
-	SessionPromptParamsPartsTypeAgent SessionPromptParamsPartsType = "agent"
+	SessionPromptParamsPartsTypeText   SessionPromptParamsPartsType = "text"
+	SessionPromptParamsPartsTypeFile   SessionPromptParamsPartsType = "file"
+	SessionPromptParamsPartsTypeAgent  SessionPromptParamsPartsType = "agent"
+	SessionPromptParamsPartsTypeSubtask SessionPromptParamsPartsType = "subtask"
 )
 
 func (r SessionPromptParamsPartsType) IsKnown() bool {
 	switch r {
-	case SessionPromptParamsPartsTypeText, SessionPromptParamsPartsTypeFile, SessionPromptParamsPartsTypeAgent:
+	case SessionPromptParamsPartsTypeText, SessionPromptParamsPartsTypeFile, SessionPromptParamsPartsTypeAgent, SessionPromptParamsPartsTypeSubtask:
 		return true
 	}
 	return false
@@ -3256,12 +3361,14 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 }
 
 type SessionShellParams struct {
-	Agent     param.Field[string]                   `json:"agent,required"`
-	Command   param.Field[string]                   `json:"command,required"`
-	Directory param.Field[string]                   `query:"directory"`
-	Model     param.Field[SessionPromptParamsModel] `json:"model"`
-	Workspace param.Field[string]                   `query:"workspace"`
-	Variant   param.Field[string]                   `json:"variant"`
+	Agent     param.Field[string]                    `json:"agent,required"`
+	Command   param.Field[string]                    `json:"command,required"`
+	Directory param.Field[string]                    `query:"directory"`
+	MessageID param.Field[string]                    `json:"messageID"`
+	Model     param.Field[SessionPromptParamsModel]  `json:"model"`
+	Workspace param.Field[string]                    `query:"workspace"`
+	Variant   param.Field[string]                    `json:"variant"`
+	Parts     param.Field[[]SessionPromptParamsPartUnion] `json:"parts"`
 }
 
 func (r SessionShellParams) MarshalJSON() (data []byte, err error) {
@@ -3281,6 +3388,7 @@ type SessionSummarizeParams struct {
 	ProviderID param.Field[string] `json:"providerID,required"`
 	Directory  param.Field[string] `query:"directory"`
 	Workspace  param.Field[string] `query:"workspace"`
+	Auto       param.Field[bool]   `json:"auto"`
 }
 
 func (r SessionSummarizeParams) MarshalJSON() (data []byte, err error) {

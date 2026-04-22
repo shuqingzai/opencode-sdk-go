@@ -62,10 +62,10 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 
 	r = &Client{Options: opts}
 
+	r.Agent = NewAgentService(opts...)
 	r.Event = NewEventService(opts...)
 	r.Path = NewPathService(opts...)
 	r.App = NewAppService(opts...)
-	r.Agent = NewAgentService(opts...)
 	r.Find = NewFindService(opts...)
 	r.File = NewFileService(opts...)
 	r.Config = NewConfigService(opts...)

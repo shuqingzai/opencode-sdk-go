@@ -62,9 +62,8 @@ type EventListResponse struct {
 	// [EventListResponseEventMessagePartUpdatedProperties],
 	// [EventListResponseEventMessagePartDeltaProperties],
 	// [EventListResponseEventMessagePartRemovedProperties],
-	// [EventListResponseEventSessionCompactedProperties],
-	// [Permission],
-	// [EventListResponseEventPermissionAskedProperties],
+// [EventListResponseEventSessionCompactedProperties],
+// [EventListResponseEventPermissionAskedProperties],
 	// [EventListResponseEventPermissionRepliedProperties],
 	// [EventListResponseEventFileEditedProperties],
 	// [EventListResponseEventFileWatcherUpdatedProperties],
@@ -93,6 +92,8 @@ type EventListResponse struct {
 	// [EventListResponseEventVcsBranchUpdatedProperties],
 	// [EventListResponseEventWorkspaceReadyProperties],
 	// [EventListResponseEventWorkspaceFailedProperties],
+	// [EventListResponseEventWorkspaceRestoreProperties],
+	// [EventListResponseEventWorkspaceStatusProperties],
 	// [EventListResponseEventPtyCreatedProperties],
 	// [EventListResponseEventPtyUpdatedProperties],
 	// [EventListResponseEventPtyExitedProperties],
@@ -171,6 +172,8 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
+// [EventListResponseEventWorkspaceRestore],
+// [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyUpdated],
 // [EventListResponseEventPtyExited],
@@ -191,7 +194,6 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventSessionCompacted],
-// [EventListResponseEventPermissionUpdated],
 // [EventListResponseEventPermissionAsked],
 // [EventListResponseEventPermissionReplied],
 // [EventListResponseEventFileEdited],
@@ -221,6 +223,8 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
+// [EventListResponseEventWorkspaceRestore],
+// [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyUpdated],
 // [EventListResponseEventPtyExited],
@@ -275,10 +279,6 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventSessionCompacted{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPermissionUpdated{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -395,6 +395,14 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventWorkspaceFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorkspaceRestore{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventWorkspaceStatus{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -856,45 +864,6 @@ const (
 func (r EventListResponseEventSessionCompactedType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventSessionCompactedTypeSessionCompacted:
-		return true
-	}
-	return false
-}
-
-type EventListResponseEventPermissionUpdated struct {
-	Properties Permission                                  `json:"properties,required"`
-	Type       EventListResponseEventPermissionUpdatedType `json:"type,required"`
-	JSON       eventListResponseEventPermissionUpdatedJSON `json:"-"`
-}
-
-// eventListResponseEventPermissionUpdatedJSON contains the JSON metadata for the
-// struct [EventListResponseEventPermissionUpdated]
-type eventListResponseEventPermissionUpdatedJSON struct {
-	Properties  apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventPermissionUpdated) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventPermissionUpdatedJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r EventListResponseEventPermissionUpdated) implementsEventListResponse() {}
-
-type EventListResponseEventPermissionUpdatedType string
-
-const (
-	EventListResponseEventPermissionUpdatedTypePermissionUpdated EventListResponseEventPermissionUpdatedType = "permission.updated"
-)
-
-func (r EventListResponseEventPermissionUpdatedType) IsKnown() bool {
-	switch r {
-	case EventListResponseEventPermissionUpdatedTypePermissionUpdated:
 		return true
 	}
 	return false

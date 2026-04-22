@@ -42,10 +42,18 @@ func (r *AppService) Log(ctx context.Context, params AppLogParams, opts ...optio
 	return
 }
 
-// List all providers
-func (r *AppService) Providers(ctx context.Context, query AppProvidersParams, opts ...option.RequestOption) (res *AppProvidersResponse, err error) {
+// List all agents
+func (r *AppService) Agents(ctx context.Context, query AgentListParams, opts ...option.RequestOption) (res *[]Agent, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "config/providers"
+	path := "agent"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// List all skills
+func (r *AppService) Skills(ctx context.Context, query AppSkillsParams, opts ...option.RequestOption) (res *[]Skill, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "skill"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
@@ -350,31 +358,6 @@ func (r providerJSON) RawJSON() string {
 	return r.raw
 }
 
-type AppProvidersResponse struct {
-	Default   map[string]string        `json:"default,required"`
-	Providers []Provider               `json:"providers,required"`
-	Connected []string                 `json:"connected"`
-	JSON      appProvidersResponseJSON `json:"-"`
-}
-
-// appProvidersResponseJSON contains the JSON metadata for the struct
-// [AppProvidersResponse]
-type appProvidersResponseJSON struct {
-	Default     apijson.Field
-	Providers   apijson.Field
-	Connected   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AppProvidersResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r appProvidersResponseJSON) RawJSON() string {
-	return r.raw
-}
-
 type AppLogParams struct {
 	// Log level
 	Level param.Field[AppLogParamsLevel] `json:"level,required"`
@@ -418,15 +401,4 @@ func (r AppLogParamsLevel) IsKnown() bool {
 	return false
 }
 
-type AppProvidersParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
 
-// URLQuery serializes [AppProvidersParams]'s query parameters as `url.Values`.
-func (r AppProvidersParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}

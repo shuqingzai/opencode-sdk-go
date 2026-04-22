@@ -2,6 +2,7 @@ package opencode
 
 import (
 	"github.com/sst/opencode-sdk-go/internal/apijson"
+	"github.com/sst/opencode-sdk-go/internal/param"
 )
 
 // =============================================================================
@@ -1919,6 +1920,151 @@ const (
 func (r PtyStatus) IsKnown() bool {
 	switch r {
 	case PtyStatusRunning, PtyStatusExited:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventWorkspaceRestore
+// =============================================================================
+
+type EventListResponseEventWorkspaceRestore struct {
+	Properties EventListResponseEventWorkspaceRestoreProperties `json:"properties,required"`
+	Type       EventListResponseEventWorkspaceRestoreType       `json:"type,required"`
+	JSON       eventListResponseEventWorkspaceRestoreJSON      `json:"-"`
+}
+
+type eventListResponseEventWorkspaceRestoreJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventWorkspaceRestore) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventWorkspaceRestoreJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventWorkspaceRestore) implementsEventListResponse() {}
+
+type EventListResponseEventWorkspaceRestoreProperties struct {
+	WorkspaceID param.Field[string] `json:"workspaceID,required"`
+	SessionID   param.Field[string] `json:"sessionID,required"`
+	Total       param.Field[int64]  `json:"total,required"`
+	Step        param.Field[int64]  `json:"step,required"`
+	JSON        eventListResponseEventWorkspaceRestorePropertiesJSON
+}
+
+type eventListResponseEventWorkspaceRestorePropertiesJSON struct {
+	WorkspaceID apijson.Field
+	SessionID   apijson.Field
+	Total       apijson.Field
+	Step        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventWorkspaceRestoreProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventWorkspaceRestorePropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventWorkspaceRestoreType string
+
+const (
+	EventListResponseEventWorkspaceRestoreTypeWorkspaceRestore EventListResponseEventWorkspaceRestoreType = "workspace.restore"
+)
+
+func (r EventListResponseEventWorkspaceRestoreType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventWorkspaceRestoreTypeWorkspaceRestore:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventWorkspaceStatus
+// =============================================================================
+
+type EventListResponseEventWorkspaceStatus struct {
+	Properties EventListResponseEventWorkspaceStatusProperties `json:"properties,required"`
+	Type       EventListResponseEventWorkspaceStatusType       `json:"type,required"`
+	JSON       eventListResponseEventWorkspaceStatusJSON      `json:"-"`
+}
+
+type eventListResponseEventWorkspaceStatusJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventWorkspaceStatus) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventWorkspaceStatusJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventWorkspaceStatus) implementsEventListResponse() {}
+
+type EventListResponseEventWorkspaceStatusProperties struct {
+	WorkspaceID param.Field[string]                    `json:"workspaceID,required"`
+	Status     EventListResponseEventWorkspaceStatusStatus `json:"status,required"`
+	JSON       eventListResponseEventWorkspaceStatusPropertiesJSON
+}
+
+type eventListResponseEventWorkspaceStatusPropertiesJSON struct {
+	WorkspaceID apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventWorkspaceStatusProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventWorkspaceStatusPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventWorkspaceStatusType string
+
+const (
+	EventListResponseEventWorkspaceStatusTypeWorkspaceStatus EventListResponseEventWorkspaceStatusType = "workspace.status"
+)
+
+func (r EventListResponseEventWorkspaceStatusType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventWorkspaceStatusTypeWorkspaceStatus:
+		return true
+	}
+	return false
+}
+
+type EventListResponseEventWorkspaceStatusStatus string
+
+const (
+	EventListResponseEventWorkspaceStatusStatusConnected    EventListResponseEventWorkspaceStatusStatus = "connected"
+	EventListResponseEventWorkspaceStatusStatusConnecting   EventListResponseEventWorkspaceStatusStatus = "connecting"
+	EventListResponseEventWorkspaceStatusStatusDisconnected EventListResponseEventWorkspaceStatusStatus = "disconnected"
+	EventListResponseEventWorkspaceStatusStatusError        EventListResponseEventWorkspaceStatusStatus = "error"
+)
+
+func (r EventListResponseEventWorkspaceStatusStatus) IsKnown() bool {
+	switch r {
+	case EventListResponseEventWorkspaceStatusStatusConnected, EventListResponseEventWorkspaceStatusStatusConnecting, EventListResponseEventWorkspaceStatusStatusDisconnected, EventListResponseEventWorkspaceStatusStatusError:
 		return true
 	}
 	return false

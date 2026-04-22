@@ -46,10 +46,18 @@ func (r *ConfigService) Get(ctx context.Context, query ConfigGetParams, opts ...
 }
 
 // Update config
-func (r *ConfigService) Update(ctx context.Context, body Config, query ConfigUpdateParams, opts ...option.RequestOption) (res *Config, err error) {
+func (r *ConfigService) Update(ctx context.Context, body Config, opts ...option.RequestOption) (res *Config, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "config"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	return
+}
+
+// List config providers
+func (r *ConfigService) Providers(ctx context.Context, query ConfigProvidersParams, opts ...option.RequestOption) (res *ConfigProvidersResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "config/providers"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
 
@@ -3231,4 +3239,41 @@ func (r ConfigUpdateParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type ConfigProvidersParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ConfigProvidersParams]'s query parameters as `url.Values`.
+func (r ConfigProvidersParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ConfigProvidersResponse struct {
+	Default   map[string]string `json:"default,required"`
+	Providers []Provider        `json:"providers,required"`
+	Connected []string         `json:"connected"`
+	JSON      configProvidersResponseJSON `json:"-"`
+}
+
+// configProvidersResponseJSON contains the JSON metadata for the struct [ConfigProvidersResponse]
+type configProvidersResponseJSON struct {
+	Default    apijson.Field
+	Providers  apijson.Field
+	Connected  apijson.Field
+	raw        string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigProvidersResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configProvidersResponseJSON) RawJSON() string {
+	return r.raw
 }

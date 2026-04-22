@@ -22,7 +22,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewTuiService] method instead.
 type TuiService struct {
-	Options []option.RequestOption
+	Options  []option.RequestOption
+	Control *TuiControlService
 }
 
 // NewTuiService generates a new service that applies the given options to each
@@ -31,6 +32,7 @@ type TuiService struct {
 func NewTuiService(opts ...option.RequestOption) (r *TuiService) {
 	r = &TuiService{}
 	r.Options = opts
+	r.Control = NewTuiControlService(opts...)
 	return
 }
 
@@ -102,6 +104,50 @@ func (r *TuiService) ShowToast(ctx context.Context, params TuiShowToastParams, o
 func (r *TuiService) SubmitPrompt(ctx context.Context, body TuiSubmitPromptParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "tui/submit-prompt"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Publish a TUI event
+func (r *TuiService) Publish(ctx context.Context, body TuiPublishParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "tui/publish"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Select session in TUI
+func (r *TuiService) SelectSession(ctx context.Context, body TuiSelectSessionParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "tui/select-session"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// TuiControlService contains methods for TUI control operations.
+type TuiControlService struct {
+	Options []option.RequestOption
+}
+
+// NewTuiControlService creates a new TuiControlService.
+func NewTuiControlService(opts ...option.RequestOption) (r *TuiControlService) {
+	r = &TuiControlService{}
+	r.Options = opts
+	return
+}
+
+// Get next TUI request
+func (r *TuiControlService) Next(ctx context.Context, query TuiControlNextParams, opts ...option.RequestOption) (res *TuiControlNextResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "tui/control/next"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Submit TUI response
+func (r *TuiControlService) Response(ctx context.Context, body TuiControlResponseParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "tui/control/response"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
@@ -257,4 +303,75 @@ func (r TuiSubmitPromptParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type TuiPublishParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Body      param.Field[TuiPublishBodyUnion] `json:"body"`
+}
+
+func (r TuiPublishParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type TuiPublishBodyUnion interface {
+	implementsTuiPublishBody()
+}
+
+func (r *TuiPublishParams) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type TuiSelectSessionParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	SessionID param.Field[string] `json:"sessionID,required"`
+}
+
+func (r TuiSelectSessionParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type TuiControlNextParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r TuiControlNextParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type TuiControlNextResponse struct {
+	Path string       `json:"path,required"`
+	Body interface{} `json:"body,required"`
+	JSON tuicontrolNextResponseJSON `json:"-"`
+}
+
+type tuicontrolNextResponseJSON struct {
+	Path        apijson.Field
+	Body        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *TuiControlNextResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r tuicontrolNextResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type TuiControlResponseParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Body      param.Field[interface{}] `json:"body"`
+}
+
+func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

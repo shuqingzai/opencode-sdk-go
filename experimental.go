@@ -80,6 +80,74 @@ func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, qu
 	return
 }
 
+// List workspace adaptors
+func (r *ExperimentalService) AdaptorList(ctx context.Context, query ExperimentalAdaptorListParams, opts ...option.RequestOption) (res *[]WorkspaceAdaptor, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/workspace/adaptor"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Get workspace status
+func (r *ExperimentalService) WorkspaceStatus(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceStatusItem, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/workspace/status"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Restore session into workspace
+func (r *ExperimentalService) WorkspaceSessionRestore(ctx context.Context, id string, body ExperimentalWorkspaceSessionRestoreInput, opts ...option.RequestOption) (res *ExperimentalWorkspaceSessionRestoreResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("experimental/workspace/%s/session-restore", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Get active Console provider metadata
+func (r *ExperimentalService) ConsoleGet(ctx context.Context, query ExperimentalConsoleGetParams, opts ...option.RequestOption) (res *ConsoleState, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/console"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// List switchable Console orgs
+func (r *ExperimentalService) ConsoleListOrgs(ctx context.Context, query ExperimentalConsoleListOrgsParams, opts ...option.RequestOption) (res *ConsoleListOrgsResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/console/orgs"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Switch active Console org
+func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ConsoleSwitchOrgInput, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/console/switch"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// List sessions across projects
+func (r *ExperimentalService) SessionList(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *[]GlobalSession, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/session"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// List MCP resources
+func (r *ExperimentalService) ResourceList(ctx context.Context, query ExperimentalResourceListParams, opts ...option.RequestOption) (res *map[string]McpResource, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/resource"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
 type ToolListItem struct {
 	Id          string           `json:"id,required"`
 	Description string           `json:"description,required"`
@@ -228,6 +296,364 @@ type ExperimentalWorkspaceRemoveParams struct {
 
 // URLQuery serializes [ExperimentalWorkspaceRemoveParams]'s query parameters as `url.Values`.
 func (r ExperimentalWorkspaceRemoveParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type WorkspaceAdaptor struct {
+	Type        string `json:"type,required"`
+	Name        string `json:"name,required"`
+	Description string `json:"description,required"`
+	JSON        workspaceAdaptorJSON `json:"-"`
+}
+
+type workspaceAdaptorJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	Description apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceAdaptor) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceAdaptorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalAdaptorListParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalAdaptorListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type WorkspaceStatusItem struct {
+	WorkspaceID string                         `json:"workspaceID,required"`
+	Status      WorkspaceStatusItemStatus       `json:"status,required"`
+	JSON        workspaceStatusItemJSON          `json:"-"`
+}
+
+type workspaceStatusItemJSON struct {
+	WorkspaceID  apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceStatusItem) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceStatusItemJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkspaceStatusItemStatus string
+
+const (
+	WorkspaceStatusItemStatusConnected    WorkspaceStatusItemStatus = "connected"
+	WorkspaceStatusItemStatusConnecting   WorkspaceStatusItemStatus = "connecting"
+	WorkspaceStatusItemStatusDisconnected WorkspaceStatusItemStatus = "disconnected"
+	WorkspaceStatusItemStatusError       WorkspaceStatusItemStatus = "error"
+)
+
+func (r WorkspaceStatusItemStatus) IsKnown() bool {
+	switch r {
+	case WorkspaceStatusItemStatusConnected, WorkspaceStatusItemStatusConnecting, WorkspaceStatusItemStatusDisconnected, WorkspaceStatusItemStatusError:
+		return true
+	}
+	return false
+}
+
+type ExperimentalWorkspaceStatusParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalWorkspaceStatusParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ExperimentalWorkspaceSessionRestoreInput struct {
+	SessionID param.Field[string] `json:"sessionID,required"`
+	JSON      experimentalWorkspaceSessionRestoreInputJSON `json:"-"`
+}
+
+type experimentalWorkspaceSessionRestoreInputJSON struct {
+	SessionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ExperimentalWorkspaceSessionRestoreInput) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ExperimentalWorkspaceSessionRestoreInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r experimentalWorkspaceSessionRestoreInputJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalWorkspaceSessionRestoreResponse struct {
+	Total int64 `json:"total,required"`
+	JSON  experimentalWorkspaceSessionRestoreResponseJSON `json:"-"`
+}
+
+type experimentalWorkspaceSessionRestoreResponseJSON struct {
+	Total       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ExperimentalWorkspaceSessionRestoreResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r experimentalWorkspaceSessionRestoreResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConsoleState struct {
+	ConsoleManagedProviders []string `json:"consoleManagedProviders,required"`
+	ActiveOrgName           string   `json:"activeOrgName,omitempty"`
+	SwitchableOrgCount     float64  `json:"switchableOrgCount,required"`
+	JSON                   consoleStateJSON `json:"-"`
+}
+
+type consoleStateJSON struct {
+	ConsoleManagedProviders apijson.Field
+	ActiveOrgName          apijson.Field
+	SwitchableOrgCount     apijson.Field
+	raw                    string
+	ExtraFields            map[string]apijson.Field
+}
+
+func (r *ConsoleState) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r consoleStateJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalConsoleGetParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalConsoleGetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ConsoleOrg struct {
+	AccountID    string `json:"accountID,required"`
+	AccountEmail string `json:"accountEmail,required"`
+	AccountUrl   string `json:"accountUrl,required"`
+	OrgID       string `json:"orgID,required"`
+	OrgName     string `json:"orgName,required"`
+	Active      bool   `json:"active,required"`
+	JSON        consoleOrgJSON `json:"-"`
+}
+
+type consoleOrgJSON struct {
+	AccountID    apijson.Field
+	AccountEmail apijson.Field
+	AccountUrl   apijson.Field
+	OrgID       apijson.Field
+	OrgName     apijson.Field
+	Active      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConsoleOrg) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r consoleOrgJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConsoleListOrgsResponse struct {
+	Orgs []ConsoleOrg `json:"orgs,required"`
+	JSON consoleListOrgsResponseJSON `json:"-"`
+}
+
+type consoleListOrgsResponseJSON struct {
+	Orgs        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConsoleListOrgsResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r consoleListOrgsResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalConsoleListOrgsParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ConsoleSwitchOrgInput struct {
+	AccountID param.Field[string] `json:"accountID,required"`
+	OrgID     param.Field[string] `json:"orgID,required"`
+	JSON      consoleSwitchOrgInputJSON `json:"-"`
+}
+
+type consoleSwitchOrgInputJSON struct {
+	AccountID   apijson.Field
+	OrgID      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConsoleSwitchOrgInput) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r consoleSwitchOrgInputJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalSessionListParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Roots    param.Field[bool]   `query:"roots"`
+	Start    param.Field[float64] `query:"start"`
+	Cursor   param.Field[float64] `query:"cursor"`
+	Search   param.Field[string] `query:"search"`
+	Limit    param.Field[float64] `query:"limit"`
+	Archived param.Field[bool]   `query:"archived"`
+}
+
+func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type GlobalSession struct {
+	Id          string           `json:"id,required"`
+	Slug        string           `json:"slug,omitempty"`
+	ProjectID   string           `json:"projectID,omitempty"`
+	WorkspaceID string           `json:"workspaceID,omitempty"`
+	Directory   string           `json:"directory,omitempty"`
+	ParentID    string           `json:"parentID,omitempty"`
+	Summary     *GlobalSessionSummary `json:"summary,omitempty"`
+	JSON        globalSessionJSON `json:"-"`
+}
+
+type globalSessionJSON struct {
+	Id          apijson.Field
+	Slug        apijson.Field
+	ProjectID   apijson.Field
+	WorkspaceID apijson.Field
+	Directory   apijson.Field
+	ParentID    apijson.Field
+	Summary     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSession) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionSummary struct {
+	Additions float64 `json:"additions,required"`
+	Deletions float64 `json:"deletions,required"`
+	Files     float64 `json:"files,required"`
+	JSON      globalSessionSummaryJSON `json:"-"`
+}
+
+type globalSessionSummaryJSON struct {
+	Additions  apijson.Field
+	Deletions  apijson.Field
+	Files      apijson.Field
+	raw        string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionSummary) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionSummaryJSON) RawJSON() string {
+	return r.raw
+}
+
+type McpResource struct {
+	Name        string `json:"name,required"`
+	Uri         string `json:"uri,required"`
+	Description string `json:"description,omitempty"`
+	MimeType    string `json:"mimeType,omitempty"`
+	Client      string `json:"client,required"`
+	JSON        mcpResourceJSON `json:"-"`
+}
+
+type mcpResourceJSON struct {
+	Name        apijson.Field
+	Uri         apijson.Field
+	Description apijson.Field
+	MimeType    apijson.Field
+	Client      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *McpResource) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r mcpResourceJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalResourceListParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalResourceListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
