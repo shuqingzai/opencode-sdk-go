@@ -20,7 +20,6 @@ type Client struct {
 	Event        *EventService
 	Path         *PathService
 	App          *AppService
-	Agent        *AgentService
 	Find         *FindService
 	File         *FileService
 	Config       *ConfigService
@@ -62,7 +61,6 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 
 	r = &Client{Options: opts}
 
-	r.Agent = NewAgentService(opts...)
 	r.Event = NewEventService(opts...)
 	r.Path = NewPathService(opts...)
 	r.App = NewAppService(opts...)

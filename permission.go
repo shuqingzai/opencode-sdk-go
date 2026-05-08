@@ -4,7 +4,6 @@ package opencode
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/url"
 	"slices"
@@ -48,17 +47,6 @@ func (r *PermissionService) Reply(ctx context.Context, requestID string, params 
 	opts = slices.Concat(r.Options, opts)
 	path := "permission/" + requestID + "/reply"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
-	return
-}
-
-func (r *PermissionService) Reject(ctx context.Context, requestID string, opts ...option.RequestOption) (res *bool, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if requestID == "" {
-		err = errors.New("missing required requestID parameter")
-		return
-	}
-	path := "permission/" + requestID + "/reject"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 

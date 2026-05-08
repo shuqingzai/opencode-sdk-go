@@ -3,50 +3,20 @@
 package opencode
 
 import (
-	"context"
-	"net/http"
 	"net/url"
-	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
-	"github.com/sst/opencode-sdk-go/internal/requestconfig"
-	"github.com/sst/opencode-sdk-go/option"
 )
 
-// AgentService contains methods and other services that help with interacting with
-// the opencode API.
-//
-// Note, unlike clients, this service does not read variables from the environment
-// automatically. You should not instantiate this service directly, and instead use
-// the [NewAgentService] method instead.
-type AgentService struct {
-	Options []option.RequestOption
-}
-
-// NewAgentService generates a new service that applies the given options to each
-// request. These options are applied after the parent client's options (if there
-// is one), and before any request-specific options.
-func NewAgentService(opts ...option.RequestOption) (r *AgentService) {
-	r = &AgentService{}
-	r.Options = opts
-	return
-}
-
-// List all agents
-func (r *AgentService) List(ctx context.Context, query AgentListParams, opts ...option.RequestOption) (res *[]Agent, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "agent"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
+// Agent represents an agent definition.
 
 type Agent struct {
 	Mode        AgentMode              `json:"mode,required"`
 	Name        string                 `json:"name,required"`
 	Options     map[string]interface{} `json:"options,required"`
-	Permission  PermissionRuleset       `json:"permission,required"`
+	Permission  PermissionRuleset      `json:"permission,required"`
 	Description string                 `json:"description"`
 	Model       AgentModel             `json:"model"`
 	Prompt      string                 `json:"prompt"`

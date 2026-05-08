@@ -44,6 +44,14 @@ func (r *PtyService) List(ctx context.Context, query PtyListParams, opts ...opti
 	return
 }
 
+// List available PTY shells
+func (r *PtyService) Shells(ctx context.Context, query PtyShellsParams, opts ...option.RequestOption) (res *[]PtyShell, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "pty/shells"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
 // Create a new PTY
 func (r *PtyService) Create(ctx context.Context, params PtyCreateParams, opts ...option.RequestOption) (res *Pty, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -72,7 +80,7 @@ func (r *PtyService) Update(ctx context.Context, ptyID string, params PtyUpdateP
 		return
 	}
 	path := fmt.Sprintf("pty/%s", ptyID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, params, &res, opts...)
 	return
 }
 
@@ -97,6 +105,18 @@ func (r *PtyService) Connect(ctx context.Context, ptyID string, query PtyConnect
 	}
 	path := fmt.Sprintf("pty/%s/connect", ptyID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Get a connect token for a PTY
+func (r *PtyService) ConnectToken(ctx context.Context, ptyID string, query PtyConnectTokenParams, opts ...option.RequestOption) (res *PtyConnectTokenResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if ptyID == "" {
+		err = errors.New("missing required ptyID parameter")
+		return
+	}
+	path := fmt.Sprintf("pty/%s/connect-token", ptyID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return
 }
 
@@ -213,4 +233,72 @@ func (r PtyConnectParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type PtyShellsParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r PtyShellsParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type PtyShell struct {
+	Path       string       `json:"path,required"`
+	Name       string       `json:"name,required"`
+	Acceptable bool         `json:"acceptable,required"`
+	JSON       ptyShellJSON `json:"-"`
+}
+
+type ptyShellJSON struct {
+	Path        apijson.Field
+	Name        apijson.Field
+	Acceptable  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyShell) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyShellJSON) RawJSON() string {
+	return r.raw
+}
+
+type PtyConnectTokenParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r PtyConnectTokenParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type PtyConnectTokenResponse struct {
+	Ticket    string                      `json:"ticket,required"`
+	ExpiresIn int64                       `json:"expires_in,required"`
+	JSON      ptyConnectTokenResponseJSON `json:"-"`
+}
+
+type ptyConnectTokenResponseJSON struct {
+	Ticket      apijson.Field
+	ExpiresIn   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyConnectTokenResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyConnectTokenResponseJSON) RawJSON() string {
+	return r.raw
 }

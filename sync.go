@@ -22,7 +22,7 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewSyncService] method instead.
 type SyncService struct {
-	Options  []option.RequestOption
+	Options []option.RequestOption
 	History *SyncHistoryService
 }
 
@@ -49,6 +49,14 @@ func (r *SyncService) Replay(ctx context.Context, body SyncReplayInput, opts ...
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/replay"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Steal a sync session
+func (r *SyncService) Steal(ctx context.Context, params SyncStealParams, opts ...option.RequestOption) (res *SyncStealResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "sync/steal"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
@@ -92,9 +100,9 @@ func (r SyncStartParams) URLQuery() (v url.Values) {
 }
 
 type SyncReplayInput struct {
-	Directory param.Field[string]             `json:"directory,required"`
-	Events   param.Field[[]SyncReplayEvent] `json:"events,required"`
-	JSON     syncReplayInputJSON            `json:"-"`
+	Directory param.Field[string]            `json:"directory,required"`
+	Events    param.Field[[]SyncReplayEvent] `json:"events,required"`
+	JSON      syncReplayInputJSON            `json:"-"`
 }
 
 type syncReplayInputJSON struct {
@@ -118,20 +126,20 @@ func (r syncReplayInputJSON) RawJSON() string {
 
 type SyncReplayEvent struct {
 	ID          string                 `json:"id,required"`
-	AggregateID string                `json:"aggregateID,required"`
-	Seq        float64               `json:"seq,required"`
-	Type       string                `json:"type,required"`
-	Data       map[string]interface{} `json:"data,required"`
-	JSON       syncReplayEventJSON   `json:"-"`
+	AggregateID string                 `json:"aggregateID,required"`
+	Seq         float64                `json:"seq,required"`
+	Type        string                 `json:"type,required"`
+	Data        map[string]interface{} `json:"data,required"`
+	JSON        syncReplayEventJSON    `json:"-"`
 }
 
 type syncReplayEventJSON struct {
 	ID          apijson.Field
 	AggregateID apijson.Field
-	Seq        apijson.Field
-	Type       apijson.Field
-	Data       apijson.Field
-	raw        string
+	Seq         apijson.Field
+	Type        apijson.Field
+	Data        apijson.Field
+	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
@@ -144,13 +152,13 @@ func (r syncReplayEventJSON) RawJSON() string {
 }
 
 type SyncReplayResponse struct {
-	SessionID string `json:"sessionID,omitempty"`
-	JSON     syncReplayResponseJSON `json:"-"`
+	SessionID string                 `json:"sessionID,omitempty"`
+	JSON      syncReplayResponseJSON `json:"-"`
 }
 
 type syncReplayResponseJSON struct {
-	SessionID  apijson.Field
-	raw        string
+	SessionID   apijson.Field
+	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
@@ -171,21 +179,21 @@ func (r SyncHistoryListInput) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncHistoryListResponse struct {
-	ID         string                 `json:"id,required"`
-	AggregateID string                `json:"aggregate_id,required"`
-	Seq        float64               `json:"seq,required"`
-	Type       string                `json:"type,required"`
-	Data       map[string]interface{} `json:"data,required"`
-	JSON       syncHistoryListResponseJSON `json:"-"`
+	ID          string                      `json:"id,required"`
+	AggregateID string                      `json:"aggregate_id,required"`
+	Seq         float64                     `json:"seq,required"`
+	Type        string                      `json:"type,required"`
+	Data        map[string]interface{}      `json:"data,required"`
+	JSON        syncHistoryListResponseJSON `json:"-"`
 }
 
 type syncHistoryListResponseJSON struct {
 	ID          apijson.Field
 	AggregateID apijson.Field
-	Seq        apijson.Field
-	Type       apijson.Field
-	Data       apijson.Field
-	raw        string
+	Seq         apijson.Field
+	Type        apijson.Field
+	Data        apijson.Field
+	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
@@ -194,5 +202,41 @@ func (r *SyncHistoryListResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r syncHistoryListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type SyncStealParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	SessionID param.Field[string] `json:"sessionID,required"`
+}
+
+func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r SyncStealParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SyncStealResponse struct {
+	SessionID string                `json:"sessionID,required"`
+	JSON      syncStealResponseJSON `json:"-"`
+}
+
+type syncStealResponseJSON struct {
+	SessionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SyncStealResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r syncStealResponseJSON) RawJSON() string {
 	return r.raw
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/ssestream"
 )
 
 // GlobalService contains methods and other services that help with interacting with
@@ -55,6 +56,35 @@ func (r *GlobalService) Upgrade(ctx context.Context, body GlobalUpgradeBody, opt
 	opts = slices.Concat(r.Options, opts)
 	path := "global/upgrade"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Subscribe to global events via SSE
+func (r *GlobalService) Event(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[GlobalEvent]) {
+	var (
+		raw *http.Response
+		err error
+	)
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
+	path := "global/event"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &raw, opts...)
+	return ssestream.NewStream[GlobalEvent](ssestream.NewDecoder(raw), err)
+}
+
+// Get global config
+func (r *GlobalService) ConfigGet(ctx context.Context, opts ...option.RequestOption) (res *Config, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "global/config"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// Update global config
+func (r *GlobalService) ConfigUpdate(ctx context.Context, body Config, opts ...option.RequestOption) (res *Config, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "global/config"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
 	return
 }
 
@@ -122,5 +152,30 @@ func (r *GlobalUpgradeResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r globalUpgradeResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalEvent struct {
+	Directory string          `json:"directory,required"`
+	Payload   interface{}     `json:"payload,required"`
+	Project   string          `json:"project"`
+	Workspace string          `json:"workspace"`
+	JSON      globalEventJSON `json:"-"`
+}
+
+type globalEventJSON struct {
+	Directory   apijson.Field
+	Payload     apijson.Field
+	Project     apijson.Field
+	Workspace   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalEventJSON) RawJSON() string {
 	return r.raw
 }

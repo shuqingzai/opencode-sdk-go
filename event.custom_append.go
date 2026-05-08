@@ -2,7 +2,6 @@ package opencode
 
 import (
 	"github.com/sst/opencode-sdk-go/internal/apijson"
-	"github.com/sst/opencode-sdk-go/internal/param"
 )
 
 // =============================================================================
@@ -1932,7 +1931,7 @@ func (r PtyStatus) IsKnown() bool {
 type EventListResponseEventWorkspaceRestore struct {
 	Properties EventListResponseEventWorkspaceRestoreProperties `json:"properties,required"`
 	Type       EventListResponseEventWorkspaceRestoreType       `json:"type,required"`
-	JSON       eventListResponseEventWorkspaceRestoreJSON      `json:"-"`
+	JSON       eventListResponseEventWorkspaceRestoreJSON       `json:"-"`
 }
 
 type eventListResponseEventWorkspaceRestoreJSON struct {
@@ -1953,10 +1952,10 @@ func (r eventListResponseEventWorkspaceRestoreJSON) RawJSON() string {
 func (r EventListResponseEventWorkspaceRestore) implementsEventListResponse() {}
 
 type EventListResponseEventWorkspaceRestoreProperties struct {
-	WorkspaceID param.Field[string] `json:"workspaceID,required"`
-	SessionID   param.Field[string] `json:"sessionID,required"`
-	Total       param.Field[int64]  `json:"total,required"`
-	Step        param.Field[int64]  `json:"step,required"`
+	WorkspaceID string `json:"workspaceID,required"`
+	SessionID   string `json:"sessionID,required"`
+	Total       int64  `json:"total,required"`
+	Step        int64  `json:"step,required"`
 	JSON        eventListResponseEventWorkspaceRestorePropertiesJSON
 }
 
@@ -1998,7 +1997,7 @@ func (r EventListResponseEventWorkspaceRestoreType) IsKnown() bool {
 type EventListResponseEventWorkspaceStatus struct {
 	Properties EventListResponseEventWorkspaceStatusProperties `json:"properties,required"`
 	Type       EventListResponseEventWorkspaceStatusType       `json:"type,required"`
-	JSON       eventListResponseEventWorkspaceStatusJSON      `json:"-"`
+	JSON       eventListResponseEventWorkspaceStatusJSON       `json:"-"`
 }
 
 type eventListResponseEventWorkspaceStatusJSON struct {
@@ -2019,9 +2018,9 @@ func (r eventListResponseEventWorkspaceStatusJSON) RawJSON() string {
 func (r EventListResponseEventWorkspaceStatus) implementsEventListResponse() {}
 
 type EventListResponseEventWorkspaceStatusProperties struct {
-	WorkspaceID param.Field[string]                    `json:"workspaceID,required"`
-	Status     EventListResponseEventWorkspaceStatusStatus `json:"status,required"`
-	JSON       eventListResponseEventWorkspaceStatusPropertiesJSON
+	WorkspaceID string                                      `json:"workspaceID,required"`
+	Status      EventListResponseEventWorkspaceStatusStatus `json:"status,required"`
+	JSON        eventListResponseEventWorkspaceStatusPropertiesJSON
 }
 
 type eventListResponseEventWorkspaceStatusPropertiesJSON struct {
