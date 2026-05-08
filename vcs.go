@@ -138,3 +138,109 @@ func (r VcsFileDiffStatus) IsKnown() bool {
 	}
 	return false
 }
+
+func (r *VcsService) Status(ctx context.Context, query VcsStatusParams, opts ...option.RequestOption) (res *[]VcsFileStatus, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "vcs/status"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+type VcsFileStatus struct {
+	File      string              `json:"file,required"`
+	Additions int64               `json:"additions,required"`
+	Deletions int64               `json:"deletions,required"`
+	Status    VcsFileDiffStatus   `json:"status,required"`
+	JSON      vcsFileStatusJSON   `json:"-"`
+}
+
+type vcsFileStatusJSON struct {
+	File        apijson.Field
+	Additions   apijson.Field
+	Deletions   apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VcsFileStatus) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vcsFileStatusJSON) RawJSON() string {
+	return r.raw
+}
+
+type VcsStatusParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r VcsStatusParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+func (r *VcsService) DiffRaw(ctx context.Context, query VcsDiffRawParams, opts ...option.RequestOption) (res *string, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "vcs/diff/raw"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+type VcsDiffRawParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r VcsDiffRawParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+func (r *VcsService) Apply(ctx context.Context, body VcsApplyParams, opts ...option.RequestOption) (res *VcsApplyResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "vcs/apply"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+type VcsApplyParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Patch     param.Field[string] `json:"patch,required"`
+}
+
+func (r VcsApplyParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+func (r VcsApplyParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type VcsApplyResponse struct {
+	Applied bool                `json:"applied,required"`
+	JSON    vcsApplyResponseJSON `json:"-"`
+}
+
+type vcsApplyResponseJSON struct {
+	Applied     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VcsApplyResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vcsApplyResponseJSON) RawJSON() string {
+	return r.raw
+}

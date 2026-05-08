@@ -80,10 +80,10 @@ func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, qu
 	return
 }
 
-// List workspace adaptors
-func (r *ExperimentalService) AdaptorList(ctx context.Context, query ExperimentalAdaptorListParams, opts ...option.RequestOption) (res *[]WorkspaceAdaptor, err error) {
+// List workspace adapters
+func (r *ExperimentalService) AdapterList(ctx context.Context, query ExperimentalAdapterListParams, opts ...option.RequestOption) (res *[]WorkspaceAdapter, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace/adaptor"
+	path := "experimental/workspace/adapter"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
@@ -298,14 +298,14 @@ func (r ExperimentalWorkspaceRemoveParams) URLQuery() (v url.Values) {
 	})
 }
 
-type WorkspaceAdaptor struct {
+type WorkspaceAdapter struct {
 	Type        string               `json:"type,required"`
 	Name        string               `json:"name,required"`
 	Description string               `json:"description,required"`
-	JSON        workspaceAdaptorJSON `json:"-"`
+	JSON        workspaceAdapterJSON `json:"-"`
 }
 
-type workspaceAdaptorJSON struct {
+type workspaceAdapterJSON struct {
 	Type        apijson.Field
 	Name        apijson.Field
 	Description apijson.Field
@@ -313,20 +313,20 @@ type workspaceAdaptorJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *WorkspaceAdaptor) UnmarshalJSON(data []byte) (err error) {
+func (r *WorkspaceAdapter) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r workspaceAdaptorJSON) RawJSON() string {
+func (r workspaceAdapterJSON) RawJSON() string {
 	return r.raw
 }
 
-type ExperimentalAdaptorListParams struct {
+type ExperimentalAdapterListParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 
-func (r ExperimentalAdaptorListParams) URLQuery() (v url.Values) {
+func (r ExperimentalAdapterListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
