@@ -104,6 +104,14 @@ func (r *ExperimentalService) Warp(ctx context.Context, params ExperimentalWarpP
 	return
 }
 
+// Register missing workspaces returned by workspace adapters.
+func (r *ExperimentalService) WorkspaceSyncList(ctx context.Context, query ExperimentalWorkspaceSyncListParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/workspace/sync-list"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, nil, opts...)
+	return
+}
+
 // Get active Console provider metadata
 func (r *ExperimentalService) ConsoleGet(ctx context.Context, query ExperimentalConsoleGetParams, opts ...option.RequestOption) (res *ConsoleState, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -626,6 +634,19 @@ type ExperimentalResourceListParams struct {
 }
 
 func (r ExperimentalResourceListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ExperimentalWorkspaceSyncListParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ExperimentalWorkspaceSyncListParams]'s query parameters as `url.Values`.
+func (r ExperimentalWorkspaceSyncListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

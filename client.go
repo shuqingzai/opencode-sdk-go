@@ -40,6 +40,7 @@ type Client struct {
 	Vcs          *VcsService
 	Lsp          *LspService
 	Formatter    *FormatterService
+	Sync         *SyncService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should
@@ -84,6 +85,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Vcs = NewVcsService(opts...)
 	r.Lsp = NewLspService(opts...)
 	r.Formatter = NewFormatterService(opts...)
+	r.Sync = NewSyncService(opts...)
 
 	return
 }

@@ -23,7 +23,6 @@ import (
 // the [NewSyncService] method instead.
 type SyncService struct {
 	Options []option.RequestOption
-	History *SyncHistoryService
 }
 
 // NewSyncService generates a new service that applies the given options to each
@@ -32,11 +31,11 @@ type SyncService struct {
 func NewSyncService(opts ...option.RequestOption) (r *SyncService) {
 	r = &SyncService{}
 	r.Options = opts
-	r.History = NewSyncHistoryService(opts...)
 	return
 }
 
-// Start a sync
+// Start sync loops for workspaces in the current project that have active
+// sessions.
 func (r *SyncService) Start(ctx context.Context, query SyncStartParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/start"
@@ -44,15 +43,16 @@ func (r *SyncService) Start(ctx context.Context, query SyncStartParams, opts ...
 	return
 }
 
-// Replay sync events
-func (r *SyncService) Replay(ctx context.Context, body SyncReplayInput, opts ...option.RequestOption) (res *SyncReplayResponse, err error) {
+// Validate and replay a complete sync event history.
+func (r *SyncService) Replay(ctx context.Context, params SyncReplayParams, opts ...option.RequestOption) (res *SyncReplayResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/replay"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
-// Steal a sync session
+// Update a session to belong to the current workspace through the sync event
+// system.
 func (r *SyncService) Steal(ctx context.Context, params SyncStealParams, opts ...option.RequestOption) (res *SyncStealResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/steal"
@@ -60,99 +60,19 @@ func (r *SyncService) Steal(ctx context.Context, params SyncStealParams, opts ..
 	return
 }
 
-// SyncHistoryService contains methods and other services that help with interacting with
-// the opencode API.
-//
-// Note, unlike clients, this service does not read variables from the environment
-// automatically. You should not instantiate this service directly, and instead use
-// the [NewSyncHistoryService] method instead.
-type SyncHistoryService struct {
-	Options []option.RequestOption
-}
-
-// NewSyncHistoryService generates a new service that applies the given options to each
-// request. These options are applied after the parent client's options (if there
-// is one), and before any request-specific options.
-func NewSyncHistoryService(opts ...option.RequestOption) (r *SyncHistoryService) {
-	r = &SyncHistoryService{}
-	r.Options = opts
-	return
-}
-
-// List sync history
-func (r *SyncHistoryService) List(ctx context.Context, body SyncHistoryListInput, opts ...option.RequestOption) (res *[]SyncHistoryListResponse, err error) {
+// List sync events for all aggregates. Keys are aggregate IDs the client already
+// knows about, values are the last known sequence ID. Events with seq > value are
+// returned for those aggregates. Aggregates not listed in the input get their full
+// history.
+func (r *SyncService) HistoryList(ctx context.Context, params SyncHistoryListParams, opts ...option.RequestOption) (res *[]SyncHistoryEvent, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/history"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
-}
-
-type SyncStartParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r SyncStartParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type SyncReplayInput struct {
-	Directory param.Field[string]            `json:"directory,required"`
-	Events    param.Field[[]SyncReplayEvent] `json:"events,required"`
-	JSON      syncReplayInputJSON            `json:"-"`
-}
-
-type syncReplayInputJSON struct {
-	Directory   apijson.Field
-	Events      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SyncReplayInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r SyncReplayInput) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r syncReplayInputJSON) RawJSON() string {
-	return r.raw
-}
-
-type SyncReplayEvent struct {
-	ID          string                 `json:"id,required"`
-	AggregateID string                 `json:"aggregateID,required"`
-	Seq         float64                `json:"seq,required"`
-	Type        string                 `json:"type,required"`
-	Data        map[string]interface{} `json:"data,required"`
-	JSON        syncReplayEventJSON    `json:"-"`
-}
-
-type syncReplayEventJSON struct {
-	ID          apijson.Field
-	AggregateID apijson.Field
-	Seq         apijson.Field
-	Type        apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SyncReplayEvent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r syncReplayEventJSON) RawJSON() string {
-	return r.raw
 }
 
 type SyncReplayResponse struct {
-	SessionID string                 `json:"sessionID,omitempty"`
+	SessionID string               `json:"sessionID,required"`
 	JSON      syncReplayResponseJSON `json:"-"`
 }
 
@@ -170,60 +90,8 @@ func (r syncReplayResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-type SyncHistoryListInput struct {
-	Body param.Field[map[string]float64] `json:"body"`
-}
-
-func (r SyncHistoryListInput) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type SyncHistoryListResponse struct {
-	ID          string                      `json:"id,required"`
-	AggregateID string                      `json:"aggregate_id,required"`
-	Seq         float64                     `json:"seq,required"`
-	Type        string                      `json:"type,required"`
-	Data        map[string]interface{}      `json:"data,required"`
-	JSON        syncHistoryListResponseJSON `json:"-"`
-}
-
-type syncHistoryListResponseJSON struct {
-	ID          apijson.Field
-	AggregateID apijson.Field
-	Seq         apijson.Field
-	Type        apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SyncHistoryListResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r syncHistoryListResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type SyncStealParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	SessionID param.Field[string] `json:"sessionID,required"`
-}
-
-func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r SyncStealParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
 type SyncStealResponse struct {
-	SessionID string                `json:"sessionID,required"`
+	SessionID string              `json:"sessionID,required"`
 	JSON      syncStealResponseJSON `json:"-"`
 }
 
@@ -239,4 +107,133 @@ func (r *SyncStealResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r syncStealResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+type SyncHistoryEvent struct {
+	ID          string               `json:"id,required"`
+	AggregateID string               `json:"aggregate_id,required"`
+	Seq         int64                `json:"seq,required"`
+	Type        string               `json:"type,required"`
+	Data        map[string]any       `json:"data,required"`
+	JSON        syncHistoryEventJSON `json:"-"`
+}
+
+type syncHistoryEventJSON struct {
+	ID          apijson.Field
+	AggregateID apijson.Field
+	Seq         apijson.Field
+	Type        apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SyncHistoryEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r syncHistoryEventJSON) RawJSON() string {
+	return r.raw
+}
+
+type SyncStartParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [SyncStartParams]'s query parameters as `url.Values`.
+func (r SyncStartParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SyncReplayParams struct {
+	Directory param.Field[string]             `query:"directory"`
+	Workspace param.Field[string]             `query:"workspace"`
+	Body      SyncReplayParamsBody            `json:"body,required"`
+}
+
+func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+// URLQuery serializes [SyncReplayParams]'s query parameters as `url.Values`.
+func (r SyncReplayParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SyncReplayParamsBody struct {
+	Directory param.Field[string]                    `json:"directory,required"`
+	Events    param.Field[[]SyncReplayParamsBodyEvent] `json:"events,required"`
+}
+
+func (r SyncReplayParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SyncReplayParamsBodyEvent struct {
+	ID          param.Field[string]             `json:"id,required"`
+	AggregateID param.Field[string]             `json:"aggregateID,required"`
+	Seq         param.Field[int64]              `json:"seq,required"`
+	Type        param.Field[string]             `json:"type,required"`
+	Data        param.Field[map[string]any]     `json:"data,required"`
+}
+
+func (r SyncReplayParamsBodyEvent) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SyncStealParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Body      SyncStealParamsBody `json:"body,required"`
+}
+
+func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+// URLQuery serializes [SyncStealParams]'s query parameters as `url.Values`.
+func (r SyncStealParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SyncStealParamsBody struct {
+	SessionID param.Field[string] `json:"sessionID,required"`
+}
+
+func (r SyncStealParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SyncHistoryListParams struct {
+	Directory param.Field[string]           `query:"directory"`
+	Workspace param.Field[string]           `query:"workspace"`
+	Body      SyncHistoryListParamsBody     `json:"body,required"`
+}
+
+func (r SyncHistoryListParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+// URLQuery serializes [SyncHistoryListParams]'s query parameters as `url.Values`.
+func (r SyncHistoryListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SyncHistoryListParamsBody map[string]int64
+
+func (r SyncHistoryListParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
