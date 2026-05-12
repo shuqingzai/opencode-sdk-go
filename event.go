@@ -432,6 +432,110 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventIdeInstalled{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextAgentSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextModelSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextPrompted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextSynthetic{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolCalled{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolProgress{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolSuccess{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRetried{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionEnded{}),
+		},
 	)
 }
 
@@ -1839,15 +1943,41 @@ const (
 	EventListResponseTypeServerConnected             EventListResponseType = "server.connected"
 	EventListResponseTypeServerInstanceDisposed      EventListResponseType = "server.instance.disposed"
 	EventListResponseTypeGlobalDisposed              EventListResponseType = "global.disposed"
-	EventListResponseTypeQuestionAsked               EventListResponseType = "question.asked"
-	EventListResponseTypeQuestionRejected            EventListResponseType = "question.rejected"
-	EventListResponseTypeQuestionReplied             EventListResponseType = "question.replied"
-	EventListResponseTypeIdeInstalled                EventListResponseType = "ide.installed"
+	EventListResponseTypeQuestionAsked                      EventListResponseType = "question.asked"
+	EventListResponseTypeQuestionRejected                   EventListResponseType = "question.rejected"
+	EventListResponseTypeQuestionReplied                    EventListResponseType = "question.replied"
+	EventListResponseTypeIdeInstalled                       EventListResponseType = "ide.installed"
+	EventListResponseTypeSessionNextAgentSwitched           EventListResponseType = "session.next.agent.switched"
+	EventListResponseTypeSessionNextModelSwitched           EventListResponseType = "session.next.model.switched"
+	EventListResponseTypeSessionNextPrompted                EventListResponseType = "session.next.prompted"
+	EventListResponseTypeSessionNextSynthetic               EventListResponseType = "session.next.synthetic"
+	EventListResponseTypeSessionNextShellStarted            EventListResponseType = "session.next.shell.started"
+	EventListResponseTypeSessionNextShellEnded              EventListResponseType = "session.next.shell.ended"
+	EventListResponseTypeSessionNextStepStarted             EventListResponseType = "session.next.step.started"
+	EventListResponseTypeSessionNextStepEnded               EventListResponseType = "session.next.step.ended"
+	EventListResponseTypeSessionNextStepFailed              EventListResponseType = "session.next.step.failed"
+	EventListResponseTypeSessionNextTextStarted             EventListResponseType = "session.next.text.started"
+	EventListResponseTypeSessionNextTextDelta               EventListResponseType = "session.next.text.delta"
+	EventListResponseTypeSessionNextTextEnded               EventListResponseType = "session.next.text.ended"
+	EventListResponseTypeSessionNextReasoningStarted        EventListResponseType = "session.next.reasoning.started"
+	EventListResponseTypeSessionNextReasoningDelta          EventListResponseType = "session.next.reasoning.delta"
+	EventListResponseTypeSessionNextReasoningEnded          EventListResponseType = "session.next.reasoning.ended"
+	EventListResponseTypeSessionNextToolInputStarted        EventListResponseType = "session.next.tool.input.started"
+	EventListResponseTypeSessionNextToolInputDelta          EventListResponseType = "session.next.tool.input.delta"
+	EventListResponseTypeSessionNextToolInputEnded          EventListResponseType = "session.next.tool.input.ended"
+	EventListResponseTypeSessionNextToolCalled              EventListResponseType = "session.next.tool.called"
+	EventListResponseTypeSessionNextToolProgress            EventListResponseType = "session.next.tool.progress"
+	EventListResponseTypeSessionNextToolSuccess             EventListResponseType = "session.next.tool.success"
+	EventListResponseTypeSessionNextToolFailed              EventListResponseType = "session.next.tool.failed"
+	EventListResponseTypeSessionNextRetried                 EventListResponseType = "session.next.retried"
+	EventListResponseTypeSessionNextCompactionStarted       EventListResponseType = "session.next.compaction.started"
+	EventListResponseTypeSessionNextCompactionDelta         EventListResponseType = "session.next.compaction.delta"
+	EventListResponseTypeSessionNextCompactionEnded         EventListResponseType = "session.next.compaction.ended"
 )
 
 func (r EventListResponseType) IsKnown() bool {
 	switch r {
-	case EventListResponseTypeInstallationUpdated, EventListResponseTypeInstallationUpdateAvailable, EventListResponseTypeLspClientDiagnostics, EventListResponseTypeLspUpdated, EventListResponseTypeMessageUpdated, EventListResponseTypeMessageRemoved, EventListResponseTypeMessagePartUpdated, EventListResponseTypeMessagePartDelta, EventListResponseTypeMessagePartRemoved, EventListResponseTypeSessionCompacted, EventListResponseTypeSessionCreated, EventListResponseTypeSessionUpdated, EventListResponseTypeSessionDeleted, EventListResponseTypeSessionDiff, EventListResponseTypeSessionError, EventListResponseTypeSessionIdle, EventListResponseTypeSessionStatus, EventListResponseTypePermissionUpdated, EventListResponseTypePermissionAsked, EventListResponseTypePermissionReplied, EventListResponseTypeFileEdited, EventListResponseTypeFileWatcherUpdated, EventListResponseTypeTodoUpdated, EventListResponseTypeTuiPromptAppend, EventListResponseTypeTuiCommandExecute, EventListResponseTypeTuiToastShow, EventListResponseTypeTuiSessionSelect, EventListResponseTypeMcpToolsChanged, EventListResponseTypeMcpBrowserOpenFailed, EventListResponseTypeCommandExecuted, EventListResponseTypeProjectUpdated, EventListResponseTypeVcsBranchUpdated, EventListResponseTypeWorkspaceReady, EventListResponseTypeWorkspaceFailed, EventListResponseTypePtyCreated, EventListResponseTypePtyUpdated, EventListResponseTypePtyExited, EventListResponseTypePtyDeleted, EventListResponseTypeWorktreeReady, EventListResponseTypeWorktreeFailed, EventListResponseTypeServerConnected, EventListResponseTypeServerInstanceDisposed, EventListResponseTypeGlobalDisposed, EventListResponseTypeQuestionAsked, EventListResponseTypeQuestionRejected, EventListResponseTypeQuestionReplied, EventListResponseTypeIdeInstalled:
+	case EventListResponseTypeInstallationUpdated, EventListResponseTypeInstallationUpdateAvailable, EventListResponseTypeLspClientDiagnostics, EventListResponseTypeLspUpdated, EventListResponseTypeMessageUpdated, EventListResponseTypeMessageRemoved, EventListResponseTypeMessagePartUpdated, EventListResponseTypeMessagePartDelta, EventListResponseTypeMessagePartRemoved, EventListResponseTypeSessionCompacted, EventListResponseTypeSessionCreated, EventListResponseTypeSessionUpdated, EventListResponseTypeSessionDeleted, EventListResponseTypeSessionDiff, EventListResponseTypeSessionError, EventListResponseTypeSessionIdle, EventListResponseTypeSessionStatus, EventListResponseTypePermissionUpdated, EventListResponseTypePermissionAsked, EventListResponseTypePermissionReplied, EventListResponseTypeFileEdited, EventListResponseTypeFileWatcherUpdated, EventListResponseTypeTodoUpdated, EventListResponseTypeTuiPromptAppend, EventListResponseTypeTuiCommandExecute, EventListResponseTypeTuiToastShow, EventListResponseTypeTuiSessionSelect, EventListResponseTypeMcpToolsChanged, EventListResponseTypeMcpBrowserOpenFailed, EventListResponseTypeCommandExecuted, EventListResponseTypeProjectUpdated, EventListResponseTypeVcsBranchUpdated, EventListResponseTypeWorkspaceReady, EventListResponseTypeWorkspaceFailed, EventListResponseTypePtyCreated, EventListResponseTypePtyUpdated, EventListResponseTypePtyExited, EventListResponseTypePtyDeleted, EventListResponseTypeWorktreeReady, EventListResponseTypeWorktreeFailed, EventListResponseTypeServerConnected, EventListResponseTypeServerInstanceDisposed, EventListResponseTypeGlobalDisposed, EventListResponseTypeQuestionAsked, EventListResponseTypeQuestionRejected, EventListResponseTypeQuestionReplied, EventListResponseTypeIdeInstalled, EventListResponseTypeSessionNextAgentSwitched, EventListResponseTypeSessionNextModelSwitched, EventListResponseTypeSessionNextPrompted, EventListResponseTypeSessionNextSynthetic, EventListResponseTypeSessionNextShellStarted, EventListResponseTypeSessionNextShellEnded, EventListResponseTypeSessionNextStepStarted, EventListResponseTypeSessionNextStepEnded, EventListResponseTypeSessionNextStepFailed, EventListResponseTypeSessionNextTextStarted, EventListResponseTypeSessionNextTextDelta, EventListResponseTypeSessionNextTextEnded, EventListResponseTypeSessionNextReasoningStarted, EventListResponseTypeSessionNextReasoningDelta, EventListResponseTypeSessionNextReasoningEnded, EventListResponseTypeSessionNextToolInputStarted, EventListResponseTypeSessionNextToolInputDelta, EventListResponseTypeSessionNextToolInputEnded, EventListResponseTypeSessionNextToolCalled, EventListResponseTypeSessionNextToolProgress, EventListResponseTypeSessionNextToolSuccess, EventListResponseTypeSessionNextToolFailed, EventListResponseTypeSessionNextRetried, EventListResponseTypeSessionNextCompactionStarted, EventListResponseTypeSessionNextCompactionDelta, EventListResponseTypeSessionNextCompactionEnded:
 		return true
 	}
 	return false
@@ -1855,6 +1985,7 @@ func (r EventListResponseType) IsKnown() bool {
 
 type EventListParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [EventListParams]'s query parameters as `url.Values`.
