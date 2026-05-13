@@ -44,3 +44,27 @@ type UnknownErrorName = shared.UnknownErrorName
 
 // This is an alias to an internal value.
 const UnknownErrorNameUnknownError = shared.UnknownErrorNameUnknownError
+
+// This is an alias to an internal type.
+type StructuredOutputError = shared.StructuredOutputError
+
+// This is an alias to an internal type.
+type StructuredOutputErrorData = shared.StructuredOutputErrorData
+
+// This is an alias to an internal type.
+type StructuredOutputErrorName = shared.StructuredOutputErrorName
+
+// This is an alias to an internal value.
+const StructuredOutputErrorNameStructuredOutputError = shared.StructuredOutputErrorNameStructuredOutputError
+
+// This is an alias to an internal type.
+type ContextOverflowError = shared.ContextOverflowError
+
+// This is an alias to an internal type.
+type ContextOverflowErrorData = shared.ContextOverflowErrorData
+
+// This is an alias to an internal type.
+type ContextOverflowErrorName = shared.ContextOverflowErrorName
+
+// This is an alias to an internal value.
+const ContextOverflowErrorNameContextOverflowError = shared.ContextOverflowErrorNameContextOverflowError

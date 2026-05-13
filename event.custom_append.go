@@ -1331,20 +1331,18 @@ func (r eventListResponseEventSessionDiffPropertiesJSON) RawJSON() string {
 
 type EventListResponseEventSessionDiffPropertiesDiff struct {
 	Additions int    `json:"additions,required"`
-	After     string `json:"after,required"`
-	Before    string `json:"before,required"`
 	Deletions int    `json:"deletions,required"`
-	File      string `json:"file,required"`
+	File      string `json:"file"`
+	Patch     string `json:"patch"`
 	Status    string `json:"status,omitempty"`
 	JSON      eventListResponseEventSessionDiffPropertiesDiffJSON
 }
 
 type eventListResponseEventSessionDiffPropertiesDiffJSON struct {
 	Additions   apijson.Field
-	After       apijson.Field
-	Before      apijson.Field
 	Deletions   apijson.Field
 	File        apijson.Field
+	Patch       apijson.Field
 	Status      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

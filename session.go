@@ -730,13 +730,15 @@ func (r *AssistantMessageError) UnmarshalJSON(data []byte) (err error) {
 //
 // Possible runtime types of the union are [shared.ProviderAuthError],
 // [shared.UnknownError], [AssistantMessageErrorMessageOutputLengthError],
-// [shared.MessageAbortedError], [AssistantMessageErrorAPIError].
+// [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContextOverflowError], [AssistantMessageErrorAPIError].
 func (r AssistantMessageError) AsUnion() AssistantMessageErrorUnion {
 	return r.union
 }
 
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
-// [AssistantMessageErrorMessageOutputLengthError], [shared.MessageAbortedError] or
+// [AssistantMessageErrorMessageOutputLengthError], [shared.MessageAbortedError],
+// [shared.StructuredOutputError], [shared.ContextOverflowError] or
 // [AssistantMessageErrorAPIError].
 type AssistantMessageErrorUnion interface {
 	ImplementsAssistantMessageError()
@@ -761,6 +763,14 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(shared.MessageAbortedError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.StructuredOutputError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.ContextOverflowError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -883,12 +893,14 @@ const (
 	AssistantMessageErrorNameUnknownError             AssistantMessageErrorName = "UnknownError"
 	AssistantMessageErrorNameMessageOutputLengthError AssistantMessageErrorName = "MessageOutputLengthError"
 	AssistantMessageErrorNameMessageAbortedError      AssistantMessageErrorName = "MessageAbortedError"
+	AssistantMessageErrorNameStructuredOutputError    AssistantMessageErrorName = "StructuredOutputError"
+	AssistantMessageErrorNameContextOverflowError     AssistantMessageErrorName = "ContextOverflowError"
 	AssistantMessageErrorNameAPIError                 AssistantMessageErrorName = "APIError"
 )
 
 func (r AssistantMessageErrorName) IsKnown() bool {
 	switch r {
-	case AssistantMessageErrorNameProviderAuthError, AssistantMessageErrorNameUnknownError, AssistantMessageErrorNameMessageOutputLengthError, AssistantMessageErrorNameMessageAbortedError, AssistantMessageErrorNameAPIError:
+	case AssistantMessageErrorNameProviderAuthError, AssistantMessageErrorNameUnknownError, AssistantMessageErrorNameMessageOutputLengthError, AssistantMessageErrorNameMessageAbortedError, AssistantMessageErrorNameStructuredOutputError, AssistantMessageErrorNameContextOverflowError, AssistantMessageErrorNameAPIError:
 		return true
 	}
 	return false

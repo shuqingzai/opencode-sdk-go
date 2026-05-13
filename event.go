@@ -62,8 +62,8 @@ type EventListResponse struct {
 	// [EventListResponseEventMessagePartUpdatedProperties],
 	// [EventListResponseEventMessagePartDeltaProperties],
 	// [EventListResponseEventMessagePartRemovedProperties],
-// [EventListResponseEventSessionCompactedProperties],
-// [EventListResponseEventPermissionAskedProperties],
+	// [EventListResponseEventSessionCompactedProperties],
+	// [EventListResponseEventPermissionAskedProperties],
 	// [EventListResponseEventPermissionRepliedProperties],
 	// [EventListResponseEventFileEditedProperties],
 	// [EventListResponseEventFileWatcherUpdatedProperties],
@@ -92,15 +92,14 @@ type EventListResponse struct {
 	// [EventListResponseEventVcsBranchUpdatedProperties],
 	// [EventListResponseEventWorkspaceReadyProperties],
 	// [EventListResponseEventWorkspaceFailedProperties],
-	// [EventListResponseEventWorkspaceRestoreProperties],
 	// [EventListResponseEventWorkspaceStatusProperties],
 	// [EventListResponseEventPtyCreatedProperties],
 	// [EventListResponseEventPtyUpdatedProperties],
 	// [EventListResponseEventPtyExitedProperties],
 	// [EventListResponseEventPtyDeletedProperties],
 	// [EventListResponseEventWorktreeReadyProperties],
-	// [EventListResponseEventWorktreeFailedProperties],
-	// [EventListResponseEventIdeInstalledProperties].
+	// [EventListResponseEventWorktreeFailedProperties].
+	ID         string                `json:"id,required"`
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
 	JSON       eventListResponseJSON `json:"-"`
@@ -110,6 +109,7 @@ type EventListResponse struct {
 // eventListResponseJSON contains the JSON metadata for the struct
 // [EventListResponse]
 type eventListResponseJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -142,7 +142,6 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventSessionCompacted],
-// [EventListResponseEventPermissionUpdated],
 // [EventListResponseEventPermissionAsked],
 // [EventListResponseEventPermissionReplied],
 // [EventListResponseEventFileEdited],
@@ -172,15 +171,13 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
-// [EventListResponseEventWorkspaceRestore],
 // [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyUpdated],
 // [EventListResponseEventPtyExited],
 // [EventListResponseEventPtyDeleted],
 // [EventListResponseEventWorktreeReady],
-// [EventListResponseEventWorktreeFailed],
-// [EventListResponseEventIdeInstalled].
+// [EventListResponseEventWorktreeFailed].
 func (r EventListResponse) AsUnion() EventListResponseUnion {
 	return r.union
 }
@@ -223,15 +220,13 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventVcsBranchUpdated],
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceFailed],
-// [EventListResponseEventWorkspaceRestore],
 // [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyUpdated],
 // [EventListResponseEventPtyExited],
 // [EventListResponseEventPtyDeleted],
 // [EventListResponseEventWorktreeReady],
-// [EventListResponseEventWorktreeFailed],
-// [EventListResponseEventIdeInstalled].
+// [EventListResponseEventWorktreeFailed].
 type EventListResponseUnion interface {
 	implementsEventListResponse()
 }
@@ -812,9 +807,8 @@ func (r EventListResponseEventMessagePartUpdated) implementsGlobalEventPayload()
 
 type EventListResponseEventMessagePartUpdatedProperties struct {
 	Part      Part                                                   `json:"part,required"`
-	Delta     string                                                 `json:"delta"`
 	SessionID string                                                 `json:"sessionID,required"`
-	Time      string                                                 `json:"time,required"`
+	Time      int64                                                  `json:"time,required"`
 	JSON      eventListResponseEventMessagePartUpdatedPropertiesJSON `json:"-"`
 }
 
@@ -822,7 +816,6 @@ type EventListResponseEventMessagePartUpdatedProperties struct {
 // metadata for the struct [EventListResponseEventMessagePartUpdatedProperties]
 type eventListResponseEventMessagePartUpdatedPropertiesJSON struct {
 	Part        apijson.Field
-	Delta       apijson.Field
 	SessionID   apijson.Field
 	Time        apijson.Field
 	raw         string
@@ -1620,7 +1613,8 @@ func (r *EventListResponseEventSessionErrorPropertiesError) UnmarshalJSON(data [
 // Possible runtime types of the union are [shared.ProviderAuthError],
 // [shared.UnknownError],
 // [EventListResponseEventSessionErrorPropertiesErrorMessageOutputLengthError],
-// [shared.MessageAbortedError],
+// [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContextOverflowError],
 // [EventListResponseEventSessionErrorPropertiesErrorAPIError].
 func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListResponseEventSessionErrorPropertiesErrorUnion {
 	return r.union
@@ -1628,7 +1622,8 @@ func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListRe
 
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
 // [EventListResponseEventSessionErrorPropertiesErrorMessageOutputLengthError],
-// [shared.MessageAbortedError] or
+// [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContextOverflowError] or
 // [EventListResponseEventSessionErrorPropertiesErrorAPIError].
 type EventListResponseEventSessionErrorPropertiesErrorUnion interface {
 	ImplementsEventListResponseEventSessionErrorPropertiesError()
@@ -1653,6 +1648,14 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(shared.MessageAbortedError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.StructuredOutputError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.ContextOverflowError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1780,12 +1783,14 @@ const (
 	EventListResponseEventSessionErrorPropertiesErrorNameUnknownError             EventListResponseEventSessionErrorPropertiesErrorName = "UnknownError"
 	EventListResponseEventSessionErrorPropertiesErrorNameMessageOutputLengthError EventListResponseEventSessionErrorPropertiesErrorName = "MessageOutputLengthError"
 	EventListResponseEventSessionErrorPropertiesErrorNameMessageAbortedError      EventListResponseEventSessionErrorPropertiesErrorName = "MessageAbortedError"
+	EventListResponseEventSessionErrorPropertiesErrorNameStructuredOutputError    EventListResponseEventSessionErrorPropertiesErrorName = "StructuredOutputError"
+	EventListResponseEventSessionErrorPropertiesErrorNameContextOverflowError     EventListResponseEventSessionErrorPropertiesErrorName = "ContextOverflowError"
 	EventListResponseEventSessionErrorPropertiesErrorNameAPIError                 EventListResponseEventSessionErrorPropertiesErrorName = "APIError"
 )
 
 func (r EventListResponseEventSessionErrorPropertiesErrorName) IsKnown() bool {
 	switch r {
-	case EventListResponseEventSessionErrorPropertiesErrorNameProviderAuthError, EventListResponseEventSessionErrorPropertiesErrorNameUnknownError, EventListResponseEventSessionErrorPropertiesErrorNameMessageOutputLengthError, EventListResponseEventSessionErrorPropertiesErrorNameMessageAbortedError, EventListResponseEventSessionErrorPropertiesErrorNameAPIError:
+	case EventListResponseEventSessionErrorPropertiesErrorNameProviderAuthError, EventListResponseEventSessionErrorPropertiesErrorNameUnknownError, EventListResponseEventSessionErrorPropertiesErrorNameMessageOutputLengthError, EventListResponseEventSessionErrorPropertiesErrorNameMessageAbortedError, EventListResponseEventSessionErrorPropertiesErrorNameStructuredOutputError, EventListResponseEventSessionErrorPropertiesErrorNameContextOverflowError, EventListResponseEventSessionErrorPropertiesErrorNameAPIError:
 		return true
 	}
 	return false

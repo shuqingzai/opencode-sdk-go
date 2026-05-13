@@ -192,3 +192,131 @@ func (r UnknownErrorName) IsKnown() bool {
 	}
 	return false
 }
+
+type StructuredOutputError struct {
+	Data StructuredOutputErrorData `json:"data,required"`
+	Name StructuredOutputErrorName `json:"name,required"`
+	JSON structuredOutputErrorJSON `json:"-"`
+}
+
+// structuredOutputErrorJSON contains the JSON metadata for the struct
+// [StructuredOutputError]
+type structuredOutputErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *StructuredOutputError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r structuredOutputErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r StructuredOutputError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r StructuredOutputError) ImplementsAssistantMessageError() {}
+
+type StructuredOutputErrorData struct {
+	Message string                        `json:"message,required"`
+	Retries int64                         `json:"retries,required"`
+	JSON    structuredOutputErrorDataJSON `json:"-"`
+}
+
+// structuredOutputErrorDataJSON contains the JSON metadata for the struct
+// [StructuredOutputErrorData]
+type structuredOutputErrorDataJSON struct {
+	Message     apijson.Field
+	Retries     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *StructuredOutputErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r structuredOutputErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type StructuredOutputErrorName string
+
+const (
+	StructuredOutputErrorNameStructuredOutputError StructuredOutputErrorName = "StructuredOutputError"
+)
+
+func (r StructuredOutputErrorName) IsKnown() bool {
+	switch r {
+	case StructuredOutputErrorNameStructuredOutputError:
+		return true
+	}
+	return false
+}
+
+type ContextOverflowError struct {
+	Data ContextOverflowErrorData `json:"data,required"`
+	Name ContextOverflowErrorName `json:"name,required"`
+	JSON contextOverflowErrorJSON `json:"-"`
+}
+
+// contextOverflowErrorJSON contains the JSON metadata for the struct
+// [ContextOverflowError]
+type contextOverflowErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ContextOverflowError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r contextOverflowErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ContextOverflowError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r ContextOverflowError) ImplementsAssistantMessageError() {}
+
+type ContextOverflowErrorData struct {
+	Message      string                      `json:"message,required"`
+	ResponseBody string                      `json:"responseBody"`
+	JSON         contextOverflowErrorDataJSON `json:"-"`
+}
+
+// contextOverflowErrorDataJSON contains the JSON metadata for the struct
+// [ContextOverflowErrorData]
+type contextOverflowErrorDataJSON struct {
+	Message      apijson.Field
+	ResponseBody apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *ContextOverflowErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r contextOverflowErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type ContextOverflowErrorName string
+
+const (
+	ContextOverflowErrorNameContextOverflowError ContextOverflowErrorName = "ContextOverflowError"
+)
+
+func (r ContextOverflowErrorName) IsKnown() bool {
+	switch r {
+	case ContextOverflowErrorNameContextOverflowError:
+		return true
+	}
+	return false
+}
