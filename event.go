@@ -398,10 +398,6 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorkspaceRestore{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventWorkspaceStatus{}),
 		},
 		apijson.UnionVariant{
@@ -427,10 +423,6 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventWorktreeFailed{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventIdeInstalled{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -564,6 +556,8 @@ func (r eventListResponseEventInstallationUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventInstallationUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventInstallationUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventInstallationUpdatedProperties struct {
 	Version string                                                  `json:"version,required"`
 	JSON    eventListResponseEventInstallationUpdatedPropertiesJSON `json:"-"`
@@ -623,6 +617,8 @@ func (r eventListResponseEventLspClientDiagnosticsJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventLspClientDiagnostics) implementsEventListResponse() {}
+
+func (r EventListResponseEventLspClientDiagnostics) implementsGlobalEventPayload() {}
 
 type EventListResponseEventLspClientDiagnosticsProperties struct {
 	Path     string                                                   `json:"path,required"`
@@ -686,6 +682,8 @@ func (r eventListResponseEventMessageUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventMessageUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventMessageUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventMessageUpdatedProperties struct {
 	Info Message                                            `json:"info,required"`
 	JSON eventListResponseEventMessageUpdatedPropertiesJSON `json:"-"`
@@ -745,6 +743,8 @@ func (r eventListResponseEventMessageRemovedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventMessageRemoved) implementsEventListResponse() {}
+
+func (r EventListResponseEventMessageRemoved) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessageRemovedProperties struct {
 	MessageID string                                             `json:"messageID,required"`
@@ -807,6 +807,8 @@ func (r eventListResponseEventMessagePartUpdatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventMessagePartUpdated) implementsEventListResponse() {}
+
+func (r EventListResponseEventMessagePartUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessagePartUpdatedProperties struct {
 	Part      Part                                                   `json:"part,required"`
@@ -874,6 +876,8 @@ func (r eventListResponseEventMessagePartRemovedJSON) RawJSON() string {
 
 func (r EventListResponseEventMessagePartRemoved) implementsEventListResponse() {}
 
+func (r EventListResponseEventMessagePartRemoved) implementsGlobalEventPayload() {}
+
 type EventListResponseEventMessagePartRemovedProperties struct {
 	MessageID string                                                 `json:"messageID,required"`
 	PartID    string                                                 `json:"partID,required"`
@@ -938,6 +942,8 @@ func (r eventListResponseEventSessionCompactedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionCompacted) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionCompacted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionCompactedProperties struct {
 	SessionID string                                               `json:"sessionID,required"`
 	JSON      eventListResponseEventSessionCompactedPropertiesJSON `json:"-"`
@@ -997,6 +1003,8 @@ func (r eventListResponseEventPermissionRepliedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventPermissionReplied) implementsEventListResponse() {}
+
+func (r EventListResponseEventPermissionReplied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionRepliedProperties struct {
 	PermissionID string                                                `json:"permissionID,required"`
@@ -1064,6 +1072,8 @@ func (r eventListResponseEventFileEditedJSON) RawJSON() string {
 
 func (r EventListResponseEventFileEdited) implementsEventListResponse() {}
 
+func (r EventListResponseEventFileEdited) implementsGlobalEventPayload() {}
+
 type EventListResponseEventFileEditedProperties struct {
 	File string                                         `json:"file,required"`
 	JSON eventListResponseEventFileEditedPropertiesJSON `json:"-"`
@@ -1123,6 +1133,8 @@ func (r eventListResponseEventFileWatcherUpdatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventFileWatcherUpdated) implementsEventListResponse() {}
+
+func (r EventListResponseEventFileWatcherUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventFileWatcherUpdatedProperties struct {
 	Event EventListResponseEventFileWatcherUpdatedPropertiesEvent `json:"event,required"`
@@ -1201,6 +1213,8 @@ func (r eventListResponseEventTodoUpdatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventTodoUpdated) implementsEventListResponse() {}
+
+func (r EventListResponseEventTodoUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTodoUpdatedProperties struct {
 	SessionID string                                            `json:"sessionID,required"`
@@ -1295,6 +1309,8 @@ func (r eventListResponseEventSessionIdleJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionIdle) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionIdle) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionIdleProperties struct {
 	SessionID string                                          `json:"sessionID,required"`
 	JSON      eventListResponseEventSessionIdlePropertiesJSON `json:"-"`
@@ -1354,6 +1370,8 @@ func (r eventListResponseEventSessionCreatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionCreated) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionCreated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionCreatedProperties struct {
 	Info Session                                            `json:"info,required"`
@@ -1415,6 +1433,8 @@ func (r eventListResponseEventSessionUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionUpdatedProperties struct {
 	Info Session                                            `json:"info,required"`
 	JSON eventListResponseEventSessionUpdatedPropertiesJSON `json:"-"`
@@ -1475,6 +1495,8 @@ func (r eventListResponseEventSessionDeletedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionDeleted) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionDeleted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionDeletedProperties struct {
 	Info Session                                            `json:"info,required"`
 	JSON eventListResponseEventSessionDeletedPropertiesJSON `json:"-"`
@@ -1534,6 +1556,8 @@ func (r eventListResponseEventSessionErrorJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionError) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionError) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionErrorProperties struct {
 	Error     EventListResponseEventSessionErrorPropertiesError `json:"error,required"`
@@ -1806,6 +1830,8 @@ func (r eventListResponseEventServerConnectedJSON) RawJSON() string {
 
 func (r EventListResponseEventServerConnected) implementsEventListResponse() {}
 
+func (r EventListResponseEventServerConnected) implementsGlobalEventPayload() {}
+
 type EventListResponseEventServerConnectedProperties struct {
 	JSON eventListResponseEventServerConnectedPropertiesJSON `json:"-"`
 }
@@ -1837,66 +1863,6 @@ func (r EventListResponseEventServerConnectedType) IsKnown() bool {
 	return false
 }
 
-type EventListResponseEventIdeInstalled struct {
-	Properties EventListResponseEventIdeInstalledProperties `json:"properties,required"`
-	Type       EventListResponseEventIdeInstalledType       `json:"type,required"`
-	JSON       eventListResponseEventIdeInstalledJSON       `json:"-"`
-}
-
-// eventListResponseEventIdeInstalledJSON contains the JSON metadata for the struct
-// [EventListResponseEventIdeInstalled]
-type eventListResponseEventIdeInstalledJSON struct {
-	Properties  apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventIdeInstalled) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventIdeInstalledJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r EventListResponseEventIdeInstalled) implementsEventListResponse() {}
-
-type EventListResponseEventIdeInstalledProperties struct {
-	Ide  string                                           `json:"ide,required"`
-	JSON eventListResponseEventIdeInstalledPropertiesJSON `json:"-"`
-}
-
-// eventListResponseEventIdeInstalledPropertiesJSON contains the JSON metadata for
-// the struct [EventListResponseEventIdeInstalledProperties]
-type eventListResponseEventIdeInstalledPropertiesJSON struct {
-	Ide         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventIdeInstalledProperties) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventIdeInstalledPropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventIdeInstalledType string
-
-const (
-	EventListResponseEventIdeInstalledTypeIdeInstalled EventListResponseEventIdeInstalledType = "ide.installed"
-)
-
-func (r EventListResponseEventIdeInstalledType) IsKnown() bool {
-	switch r {
-	case EventListResponseEventIdeInstalledTypeIdeInstalled:
-		return true
-	}
-	return false
-}
-
 type EventListResponseType string
 
 const (
@@ -1917,7 +1883,6 @@ const (
 	EventListResponseTypeSessionError                EventListResponseType = "session.error"
 	EventListResponseTypeSessionIdle                 EventListResponseType = "session.idle"
 	EventListResponseTypeSessionStatus               EventListResponseType = "session.status"
-	EventListResponseTypePermissionUpdated           EventListResponseType = "permission.updated"
 	EventListResponseTypePermissionAsked             EventListResponseType = "permission.asked"
 	EventListResponseTypePermissionReplied           EventListResponseType = "permission.replied"
 	EventListResponseTypeFileEdited                  EventListResponseType = "file.edited"
@@ -1934,6 +1899,7 @@ const (
 	EventListResponseTypeVcsBranchUpdated            EventListResponseType = "vcs.branch.updated"
 	EventListResponseTypeWorkspaceReady              EventListResponseType = "workspace.ready"
 	EventListResponseTypeWorkspaceFailed             EventListResponseType = "workspace.failed"
+	EventListResponseTypeWorkspaceStatus             EventListResponseType = "workspace.status"
 	EventListResponseTypePtyCreated                  EventListResponseType = "pty.created"
 	EventListResponseTypePtyUpdated                  EventListResponseType = "pty.updated"
 	EventListResponseTypePtyExited                   EventListResponseType = "pty.exited"
@@ -1946,7 +1912,6 @@ const (
 	EventListResponseTypeQuestionAsked                      EventListResponseType = "question.asked"
 	EventListResponseTypeQuestionRejected                   EventListResponseType = "question.rejected"
 	EventListResponseTypeQuestionReplied                    EventListResponseType = "question.replied"
-	EventListResponseTypeIdeInstalled                       EventListResponseType = "ide.installed"
 	EventListResponseTypeSessionNextAgentSwitched           EventListResponseType = "session.next.agent.switched"
 	EventListResponseTypeSessionNextModelSwitched           EventListResponseType = "session.next.model.switched"
 	EventListResponseTypeSessionNextPrompted                EventListResponseType = "session.next.prompted"
@@ -1977,7 +1942,7 @@ const (
 
 func (r EventListResponseType) IsKnown() bool {
 	switch r {
-	case EventListResponseTypeInstallationUpdated, EventListResponseTypeInstallationUpdateAvailable, EventListResponseTypeLspClientDiagnostics, EventListResponseTypeLspUpdated, EventListResponseTypeMessageUpdated, EventListResponseTypeMessageRemoved, EventListResponseTypeMessagePartUpdated, EventListResponseTypeMessagePartDelta, EventListResponseTypeMessagePartRemoved, EventListResponseTypeSessionCompacted, EventListResponseTypeSessionCreated, EventListResponseTypeSessionUpdated, EventListResponseTypeSessionDeleted, EventListResponseTypeSessionDiff, EventListResponseTypeSessionError, EventListResponseTypeSessionIdle, EventListResponseTypeSessionStatus, EventListResponseTypePermissionUpdated, EventListResponseTypePermissionAsked, EventListResponseTypePermissionReplied, EventListResponseTypeFileEdited, EventListResponseTypeFileWatcherUpdated, EventListResponseTypeTodoUpdated, EventListResponseTypeTuiPromptAppend, EventListResponseTypeTuiCommandExecute, EventListResponseTypeTuiToastShow, EventListResponseTypeTuiSessionSelect, EventListResponseTypeMcpToolsChanged, EventListResponseTypeMcpBrowserOpenFailed, EventListResponseTypeCommandExecuted, EventListResponseTypeProjectUpdated, EventListResponseTypeVcsBranchUpdated, EventListResponseTypeWorkspaceReady, EventListResponseTypeWorkspaceFailed, EventListResponseTypePtyCreated, EventListResponseTypePtyUpdated, EventListResponseTypePtyExited, EventListResponseTypePtyDeleted, EventListResponseTypeWorktreeReady, EventListResponseTypeWorktreeFailed, EventListResponseTypeServerConnected, EventListResponseTypeServerInstanceDisposed, EventListResponseTypeGlobalDisposed, EventListResponseTypeQuestionAsked, EventListResponseTypeQuestionRejected, EventListResponseTypeQuestionReplied, EventListResponseTypeIdeInstalled, EventListResponseTypeSessionNextAgentSwitched, EventListResponseTypeSessionNextModelSwitched, EventListResponseTypeSessionNextPrompted, EventListResponseTypeSessionNextSynthetic, EventListResponseTypeSessionNextShellStarted, EventListResponseTypeSessionNextShellEnded, EventListResponseTypeSessionNextStepStarted, EventListResponseTypeSessionNextStepEnded, EventListResponseTypeSessionNextStepFailed, EventListResponseTypeSessionNextTextStarted, EventListResponseTypeSessionNextTextDelta, EventListResponseTypeSessionNextTextEnded, EventListResponseTypeSessionNextReasoningStarted, EventListResponseTypeSessionNextReasoningDelta, EventListResponseTypeSessionNextReasoningEnded, EventListResponseTypeSessionNextToolInputStarted, EventListResponseTypeSessionNextToolInputDelta, EventListResponseTypeSessionNextToolInputEnded, EventListResponseTypeSessionNextToolCalled, EventListResponseTypeSessionNextToolProgress, EventListResponseTypeSessionNextToolSuccess, EventListResponseTypeSessionNextToolFailed, EventListResponseTypeSessionNextRetried, EventListResponseTypeSessionNextCompactionStarted, EventListResponseTypeSessionNextCompactionDelta, EventListResponseTypeSessionNextCompactionEnded:
+	case EventListResponseTypeInstallationUpdated, EventListResponseTypeInstallationUpdateAvailable, EventListResponseTypeLspClientDiagnostics, EventListResponseTypeLspUpdated, EventListResponseTypeMessageUpdated, EventListResponseTypeMessageRemoved, EventListResponseTypeMessagePartUpdated, EventListResponseTypeMessagePartDelta, EventListResponseTypeMessagePartRemoved, EventListResponseTypeSessionCompacted, EventListResponseTypeSessionCreated, EventListResponseTypeSessionUpdated, EventListResponseTypeSessionDeleted, EventListResponseTypeSessionDiff, EventListResponseTypeSessionError, EventListResponseTypeSessionIdle, EventListResponseTypeSessionStatus, EventListResponseTypePermissionAsked, EventListResponseTypePermissionReplied, EventListResponseTypeFileEdited, EventListResponseTypeFileWatcherUpdated, EventListResponseTypeTodoUpdated, EventListResponseTypeTuiPromptAppend, EventListResponseTypeTuiCommandExecute, EventListResponseTypeTuiToastShow, EventListResponseTypeTuiSessionSelect, EventListResponseTypeMcpToolsChanged, EventListResponseTypeMcpBrowserOpenFailed, EventListResponseTypeCommandExecuted, EventListResponseTypeProjectUpdated, EventListResponseTypeVcsBranchUpdated, EventListResponseTypeWorkspaceReady, EventListResponseTypeWorkspaceFailed, EventListResponseTypeWorkspaceStatus, EventListResponseTypePtyCreated, EventListResponseTypePtyUpdated, EventListResponseTypePtyExited, EventListResponseTypePtyDeleted, EventListResponseTypeWorktreeReady, EventListResponseTypeWorktreeFailed, EventListResponseTypeServerConnected, EventListResponseTypeServerInstanceDisposed, EventListResponseTypeGlobalDisposed, EventListResponseTypeQuestionAsked, EventListResponseTypeQuestionRejected, EventListResponseTypeQuestionReplied, EventListResponseTypeSessionNextAgentSwitched, EventListResponseTypeSessionNextModelSwitched, EventListResponseTypeSessionNextPrompted, EventListResponseTypeSessionNextSynthetic, EventListResponseTypeSessionNextShellStarted, EventListResponseTypeSessionNextShellEnded, EventListResponseTypeSessionNextStepStarted, EventListResponseTypeSessionNextStepEnded, EventListResponseTypeSessionNextStepFailed, EventListResponseTypeSessionNextTextStarted, EventListResponseTypeSessionNextTextDelta, EventListResponseTypeSessionNextTextEnded, EventListResponseTypeSessionNextReasoningStarted, EventListResponseTypeSessionNextReasoningDelta, EventListResponseTypeSessionNextReasoningEnded, EventListResponseTypeSessionNextToolInputStarted, EventListResponseTypeSessionNextToolInputDelta, EventListResponseTypeSessionNextToolInputEnded, EventListResponseTypeSessionNextToolCalled, EventListResponseTypeSessionNextToolProgress, EventListResponseTypeSessionNextToolSuccess, EventListResponseTypeSessionNextToolFailed, EventListResponseTypeSessionNextRetried, EventListResponseTypeSessionNextCompactionStarted, EventListResponseTypeSessionNextCompactionDelta, EventListResponseTypeSessionNextCompactionEnded:
 		return true
 	}
 	return false

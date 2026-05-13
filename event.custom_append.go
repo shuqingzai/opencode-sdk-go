@@ -31,6 +31,8 @@ func (r eventListResponseEventInstallationUpdateAvailableJSON) RawJSON() string 
 
 func (r EventListResponseEventInstallationUpdateAvailable) implementsEventListResponse() {}
 
+func (r EventListResponseEventInstallationUpdateAvailable) implementsGlobalEventPayload() {}
+
 type EventListResponseEventInstallationUpdateAvailableProperties struct {
 	Version string                                                          `json:"version,required"`
 	JSON    eventListResponseEventInstallationUpdateAvailablePropertiesJSON `json:"-"`
@@ -90,6 +92,8 @@ func (r eventListResponseEventProjectUpdatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventProjectUpdated) implementsEventListResponse() {}
+
+func (r EventListResponseEventProjectUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventProjectUpdatedProperties struct {
 	Project Project `json:"project,required"`
@@ -151,6 +155,8 @@ func (r eventListResponseEventServerInstanceDisposedJSON) RawJSON() string {
 
 func (r EventListResponseEventServerInstanceDisposed) implementsEventListResponse() {}
 
+func (r EventListResponseEventServerInstanceDisposed) implementsGlobalEventPayload() {}
+
 type EventListResponseEventServerInstanceDisposedProperties struct {
 	Directory string                                                     `json:"directory,required"`
 	JSON      eventListResponseEventServerInstanceDisposedPropertiesJSON `json:"-"`
@@ -211,6 +217,8 @@ func (r eventListResponseEventGlobalDisposedJSON) RawJSON() string {
 
 func (r EventListResponseEventGlobalDisposed) implementsEventListResponse() {}
 
+func (r EventListResponseEventGlobalDisposed) implementsGlobalEventPayload() {}
+
 type EventListResponseEventGlobalDisposedProperties struct {
 	JSON eventListResponseEventGlobalDisposedPropertiesJSON `json:"-"`
 }
@@ -269,6 +277,8 @@ func (r eventListResponseEventLspUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventLspUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventLspUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventLspUpdatedProperties struct {
 	JSON eventListResponseEventLspUpdatedPropertiesJSON `json:"-"`
 }
@@ -326,6 +336,8 @@ func (r eventListResponseEventMessagePartDeltaJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventMessagePartDelta) implementsEventListResponse() {}
+
+func (r EventListResponseEventMessagePartDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessagePartDeltaProperties struct {
 	Delta     string `json:"delta,required"`
@@ -394,6 +406,8 @@ func (r eventListResponseEventPermissionAskedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventPermissionAsked) implementsEventListResponse() {}
+
+func (r EventListResponseEventPermissionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionAskedProperties struct {
 	Always     []string                                             `json:"always,required"`
@@ -488,6 +502,8 @@ func (r eventListResponseEventSessionStatusJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionStatus) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionStatus) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionStatusProperties struct {
 	SessionID string                                    `json:"sessionID,required"`
 	Status    EventListResponseEventSessionStatusStatus `json:"status,required"`
@@ -574,6 +590,8 @@ func (r eventListResponseEventQuestionAskedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventQuestionAsked) implementsEventListResponse() {}
+
+func (r EventListResponseEventQuestionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventQuestionAskedProperties struct {
 	ID        string                                                   `json:"id,required"`
@@ -710,6 +728,8 @@ func (r eventListResponseEventQuestionRejectedJSON) RawJSON() string {
 
 func (r EventListResponseEventQuestionRejected) implementsEventListResponse() {}
 
+func (r EventListResponseEventQuestionRejected) implementsGlobalEventPayload() {}
+
 type EventListResponseEventQuestionRejectedProperties struct {
 	RequestID string `json:"requestID,required"`
 	SessionID string `json:"sessionID,required"`
@@ -771,6 +791,8 @@ func (r eventListResponseEventQuestionRepliedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventQuestionReplied) implementsEventListResponse() {}
+
+func (r EventListResponseEventQuestionReplied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventQuestionRepliedProperties struct {
 	Answers   [][]string `json:"answers,required"`
@@ -836,6 +858,8 @@ func (r eventListResponseEventTuiPromptAppendJSON) RawJSON() string {
 
 func (r EventListResponseEventTuiPromptAppend) implementsEventListResponse() {}
 
+func (r EventListResponseEventTuiPromptAppend) implementsGlobalEventPayload() {}
+
 type EventListResponseEventTuiPromptAppendProperties struct {
 	Text string `json:"text,required"`
 	JSON eventListResponseEventTuiPromptAppendPropertiesJSON
@@ -896,6 +920,8 @@ func (r eventListResponseEventTuiCommandExecuteJSON) RawJSON() string {
 
 func (r EventListResponseEventTuiCommandExecute) implementsEventListResponse() {}
 
+func (r EventListResponseEventTuiCommandExecute) implementsGlobalEventPayload() {}
+
 type EventListResponseEventTuiCommandExecuteProperties struct {
 	Command string `json:"command,required"`
 	JSON    eventListResponseEventTuiCommandExecutePropertiesJSON
@@ -955,6 +981,8 @@ func (r eventListResponseEventTuiToastShowJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventTuiToastShow) implementsEventListResponse() {}
+
+func (r EventListResponseEventTuiToastShow) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTuiToastShowProperties struct {
 	Duration *int    `json:"duration,omitempty"`
@@ -1022,6 +1050,8 @@ func (r eventListResponseEventTuiSessionSelectJSON) RawJSON() string {
 
 func (r EventListResponseEventTuiSessionSelect) implementsEventListResponse() {}
 
+func (r EventListResponseEventTuiSessionSelect) implementsGlobalEventPayload() {}
+
 type EventListResponseEventTuiSessionSelectProperties struct {
 	SessionID string `json:"sessionID,required"`
 	JSON      eventListResponseEventTuiSessionSelectPropertiesJSON
@@ -1082,6 +1112,8 @@ func (r eventListResponseEventMcpToolsChangedJSON) RawJSON() string {
 
 func (r EventListResponseEventMcpToolsChanged) implementsEventListResponse() {}
 
+func (r EventListResponseEventMcpToolsChanged) implementsGlobalEventPayload() {}
+
 type EventListResponseEventMcpToolsChangedProperties struct {
 	Server string `json:"server,required"`
 	JSON   eventListResponseEventMcpToolsChangedPropertiesJSON
@@ -1141,6 +1173,8 @@ func (r eventListResponseEventMcpBrowserOpenFailedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventMcpBrowserOpenFailed) implementsEventListResponse() {}
+
+func (r EventListResponseEventMcpBrowserOpenFailed) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMcpBrowserOpenFailedProperties struct {
 	McpName string `json:"mcpName,required"`
@@ -1203,6 +1237,8 @@ func (r eventListResponseEventCommandExecutedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventCommandExecuted) implementsEventListResponse() {}
+
+func (r EventListResponseEventCommandExecuted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventCommandExecutedProperties struct {
 	Arguments string `json:"arguments,required"`
@@ -1269,6 +1305,8 @@ func (r eventListResponseEventSessionDiffJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionDiff) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionDiff) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionDiffProperties struct {
 	Diff      []EventListResponseEventSessionDiffPropertiesDiff `json:"diff,required"`
@@ -1361,6 +1399,8 @@ func (r eventListResponseEventVcsBranchUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventVcsBranchUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventVcsBranchUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventVcsBranchUpdatedProperties struct {
 	Branch string `json:"branch,required"`
 	JSON   eventListResponseEventVcsBranchUpdatedPropertiesJSON
@@ -1420,6 +1460,8 @@ func (r eventListResponseEventWorkspaceReadyJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventWorkspaceReady) implementsEventListResponse() {}
+
+func (r EventListResponseEventWorkspaceReady) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorkspaceReadyProperties struct {
 	Name string `json:"name,required"`
@@ -1481,6 +1523,8 @@ func (r eventListResponseEventWorkspaceFailedJSON) RawJSON() string {
 
 func (r EventListResponseEventWorkspaceFailed) implementsEventListResponse() {}
 
+func (r EventListResponseEventWorkspaceFailed) implementsGlobalEventPayload() {}
+
 type EventListResponseEventWorkspaceFailedProperties struct {
 	Message string `json:"message,required"`
 	JSON    eventListResponseEventWorkspaceFailedPropertiesJSON
@@ -1540,6 +1584,8 @@ func (r eventListResponseEventPtyCreatedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventPtyCreated) implementsEventListResponse() {}
+
+func (r EventListResponseEventPtyCreated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPtyCreatedProperties struct {
 	Info Pty `json:"info,required"`
@@ -1601,6 +1647,8 @@ func (r eventListResponseEventPtyUpdatedJSON) RawJSON() string {
 
 func (r EventListResponseEventPtyUpdated) implementsEventListResponse() {}
 
+func (r EventListResponseEventPtyUpdated) implementsGlobalEventPayload() {}
+
 type EventListResponseEventPtyUpdatedProperties struct {
 	Info Pty `json:"info,required"`
 	JSON eventListResponseEventPtyUpdatedPropertiesJSON
@@ -1660,6 +1708,8 @@ func (r eventListResponseEventPtyExitedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventPtyExited) implementsEventListResponse() {}
+
+func (r EventListResponseEventPtyExited) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPtyExitedProperties struct {
 	ExitCode int    `json:"exitCode,required"`
@@ -1723,6 +1773,8 @@ func (r eventListResponseEventPtyDeletedJSON) RawJSON() string {
 
 func (r EventListResponseEventPtyDeleted) implementsEventListResponse() {}
 
+func (r EventListResponseEventPtyDeleted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventPtyDeletedProperties struct {
 	ID   string `json:"id,required"`
 	JSON eventListResponseEventPtyDeletedPropertiesJSON
@@ -1782,6 +1834,8 @@ func (r eventListResponseEventWorktreeReadyJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventWorktreeReady) implementsEventListResponse() {}
+
+func (r EventListResponseEventWorktreeReady) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorktreeReadyProperties struct {
 	Branch string `json:"branch,required"`
@@ -1844,6 +1898,8 @@ func (r eventListResponseEventWorktreeFailedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventWorktreeFailed) implementsEventListResponse() {}
+
+func (r EventListResponseEventWorktreeFailed) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorktreeFailedProperties struct {
 	Message string `json:"message,required"`
@@ -1927,70 +1983,6 @@ func (r PtyStatus) IsKnown() bool {
 // =============================================================================
 // EventListResponseEventWorkspaceRestore
 // =============================================================================
-
-type EventListResponseEventWorkspaceRestore struct {
-	Properties EventListResponseEventWorkspaceRestoreProperties `json:"properties,required"`
-	Type       EventListResponseEventWorkspaceRestoreType       `json:"type,required"`
-	JSON       eventListResponseEventWorkspaceRestoreJSON       `json:"-"`
-}
-
-type eventListResponseEventWorkspaceRestoreJSON struct {
-	Properties  apijson.Field
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventWorkspaceRestore) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventWorkspaceRestoreJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r EventListResponseEventWorkspaceRestore) implementsEventListResponse() {}
-
-type EventListResponseEventWorkspaceRestoreProperties struct {
-	WorkspaceID string `json:"workspaceID,required"`
-	SessionID   string `json:"sessionID,required"`
-	Total       int64  `json:"total,required"`
-	Step        int64  `json:"step,required"`
-	JSON        eventListResponseEventWorkspaceRestorePropertiesJSON
-}
-
-type eventListResponseEventWorkspaceRestorePropertiesJSON struct {
-	WorkspaceID apijson.Field
-	SessionID   apijson.Field
-	Total       apijson.Field
-	Step        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventWorkspaceRestoreProperties) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventWorkspaceRestorePropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventWorkspaceRestoreType string
-
-const (
-	EventListResponseEventWorkspaceRestoreTypeWorkspaceRestore EventListResponseEventWorkspaceRestoreType = "workspace.restore"
-)
-
-func (r EventListResponseEventWorkspaceRestoreType) IsKnown() bool {
-	switch r {
-	case EventListResponseEventWorkspaceRestoreTypeWorkspaceRestore:
-		return true
-	}
-	return false
-}
-
-// =============================================================================
 // EventListResponseEventWorkspaceStatus
 // =============================================================================
 
@@ -2016,6 +2008,8 @@ func (r eventListResponseEventWorkspaceStatusJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventWorkspaceStatus) implementsEventListResponse() {}
+
+func (r EventListResponseEventWorkspaceStatus) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorkspaceStatusProperties struct {
 	WorkspaceID string                                      `json:"workspaceID,required"`
@@ -2096,6 +2090,8 @@ func (r eventListResponseEventSessionNextAgentSwitchedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextAgentSwitched) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextAgentSwitched) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextAgentSwitchedProperties struct {
 	Timestamp float64                                                      `json:"timestamp,required"`
 	SessionID string                                                       `json:"sessionID,required"`
@@ -2159,6 +2155,8 @@ func (r eventListResponseEventSessionNextModelSwitchedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextModelSwitched) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextModelSwitched) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextModelSwitchedProperties struct {
 	Timestamp float64                                                      `json:"timestamp,required"`
@@ -2246,6 +2244,8 @@ func (r eventListResponseEventSessionNextPromptedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextPrompted) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextPrompted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextPromptedProperties struct {
 	Timestamp float64                                                 `json:"timestamp,required"`
@@ -2336,6 +2336,8 @@ func (r eventListResponseEventSessionNextSyntheticJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextSynthetic) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextSynthetic) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextSyntheticProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
 	SessionID string                                                   `json:"sessionID,required"`
@@ -2399,6 +2401,8 @@ func (r eventListResponseEventSessionNextShellStartedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextShellStarted) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextShellStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextShellStartedProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
@@ -2466,6 +2470,8 @@ func (r eventListResponseEventSessionNextShellEndedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextShellEnded) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextShellEnded) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextShellEndedProperties struct {
 	Timestamp float64                                                `json:"timestamp,required"`
 	SessionID string                                                 `json:"sessionID,required"`
@@ -2531,6 +2537,8 @@ func (r eventListResponseEventSessionNextStepStartedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextStepStarted) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextStepStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextStepStartedProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
@@ -2599,6 +2607,8 @@ func (r eventListResponseEventSessionNextStepEndedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextStepEnded) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextStepEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextStepEndedProperties struct {
 	Timestamp float64                                                `json:"timestamp,required"`
@@ -2716,6 +2726,8 @@ func (r eventListResponseEventSessionNextStepFailedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextStepFailed) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextStepFailed) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextStepFailedProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
 	SessionID string                                                   `json:"sessionID,required"`
@@ -2801,6 +2813,8 @@ func (r eventListResponseEventSessionNextTextStartedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextTextStarted) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextTextStarted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextTextStartedProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
 	SessionID string                                                   `json:"sessionID,required"`
@@ -2862,6 +2876,8 @@ func (r eventListResponseEventSessionNextTextDeltaJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextTextDelta) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextTextDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextTextDeltaProperties struct {
 	Timestamp float64                                                `json:"timestamp,required"`
@@ -2927,6 +2943,8 @@ func (r eventListResponseEventSessionNextTextEndedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextTextEnded) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextTextEnded) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextTextEndedProperties struct {
 	Timestamp float64                                                `json:"timestamp,required"`
 	SessionID string                                                 `json:"sessionID,required"`
@@ -2991,6 +3009,8 @@ func (r eventListResponseEventSessionNextReasoningStartedJSON) RawJSON() string 
 
 func (r EventListResponseEventSessionNextReasoningStarted) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextReasoningStarted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextReasoningStartedProperties struct {
 	Timestamp   float64                                                        `json:"timestamp,required"`
 	SessionID   string                                                         `json:"sessionID,required"`
@@ -3054,6 +3074,8 @@ func (r eventListResponseEventSessionNextReasoningDeltaJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextReasoningDelta) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextReasoningDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningDeltaProperties struct {
 	Timestamp   float64                                                       `json:"timestamp,required"`
@@ -3121,6 +3143,8 @@ func (r eventListResponseEventSessionNextReasoningEndedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextReasoningEnded) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextReasoningEnded) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextReasoningEndedProperties struct {
 	Timestamp   float64                                                       `json:"timestamp,required"`
 	SessionID   string                                                        `json:"sessionID,required"`
@@ -3186,6 +3210,8 @@ func (r eventListResponseEventSessionNextToolInputStartedJSON) RawJSON() string 
 }
 
 func (r EventListResponseEventSessionNextToolInputStarted) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextToolInputStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolInputStartedProperties struct {
 	Timestamp float64                                                          `json:"timestamp,required"`
@@ -3253,6 +3279,8 @@ func (r eventListResponseEventSessionNextToolInputDeltaJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextToolInputDelta) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextToolInputDelta) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextToolInputDeltaProperties struct {
 	Timestamp float64                                                         `json:"timestamp,required"`
 	SessionID string                                                          `json:"sessionID,required"`
@@ -3319,6 +3347,8 @@ func (r eventListResponseEventSessionNextToolInputEndedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextToolInputEnded) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextToolInputEnded) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextToolInputEndedProperties struct {
 	Timestamp float64                                                         `json:"timestamp,required"`
 	SessionID string                                                          `json:"sessionID,required"`
@@ -3384,6 +3414,8 @@ func (r eventListResponseEventSessionNextToolCalledJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextToolCalled) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextToolCalled) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolCalledProperties struct {
 	Timestamp float64                                                   `json:"timestamp,required"`
@@ -3476,6 +3508,8 @@ func (r eventListResponseEventSessionNextToolProgressJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextToolProgress) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextToolProgress) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextToolProgressProperties struct {
 	Timestamp  float64                                                    `json:"timestamp,required"`
 	SessionID  string                                                     `json:"sessionID,required"`
@@ -3543,6 +3577,8 @@ func (r eventListResponseEventSessionNextToolSuccessJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextToolSuccess) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextToolSuccess) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolSuccessProperties struct {
 	Timestamp  float64                                                    `json:"timestamp,required"`
@@ -3614,6 +3650,8 @@ func (r eventListResponseEventSessionNextToolFailedJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextToolFailed) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextToolFailed) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextToolFailedProperties struct {
 	Timestamp float64                                                  `json:"timestamp,required"`
 	SessionID string                                                   `json:"sessionID,required"`
@@ -3681,6 +3719,8 @@ func (r eventListResponseEventSessionNextRetriedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextRetried) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextRetried) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextRetriedProperties struct {
 	Timestamp float64                                               `json:"timestamp,required"`
@@ -3777,6 +3817,8 @@ func (r eventListResponseEventSessionNextCompactionStartedJSON) RawJSON() string
 
 func (r EventListResponseEventSessionNextCompactionStarted) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextCompactionStarted) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextCompactionStartedProperties struct {
 	Timestamp float64                                                          `json:"timestamp,required"`
 	SessionID string                                                           `json:"sessionID,required"`
@@ -3856,6 +3898,8 @@ func (r eventListResponseEventSessionNextCompactionDeltaJSON) RawJSON() string {
 
 func (r EventListResponseEventSessionNextCompactionDelta) implementsEventListResponse() {}
 
+func (r EventListResponseEventSessionNextCompactionDelta) implementsGlobalEventPayload() {}
+
 type EventListResponseEventSessionNextCompactionDeltaProperties struct {
 	Timestamp float64                                                         `json:"timestamp,required"`
 	SessionID string                                                          `json:"sessionID,required"`
@@ -3919,6 +3963,8 @@ func (r eventListResponseEventSessionNextCompactionEndedJSON) RawJSON() string {
 }
 
 func (r EventListResponseEventSessionNextCompactionEnded) implementsEventListResponse() {}
+
+func (r EventListResponseEventSessionNextCompactionEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextCompactionEndedProperties struct {
 	Timestamp float64                                                         `json:"timestamp,required"`
