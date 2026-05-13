@@ -5,11 +5,9 @@ package opencode
 import (
 	"context"
 	"net/http"
-	"net/url"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
-	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
@@ -44,10 +42,10 @@ func (r *GlobalService) Health(ctx context.Context, opts ...option.RequestOption
 }
 
 // Dispose global instance
-func (r *GlobalService) Dispose(ctx context.Context, query GlobalDisposeParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *GlobalService) Dispose(ctx context.Context, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "global/dispose"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
 }
 
@@ -108,19 +106,6 @@ func (r *GlobalHealthResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r globalHealthResponseJSON) RawJSON() string {
 	return r.raw
-}
-
-type GlobalDisposeParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [GlobalDisposeParams]'s query parameters as `url.Values`.
-func (r GlobalDisposeParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }
 
 type GlobalUpgradeBody struct {

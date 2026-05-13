@@ -3260,7 +3260,7 @@ type SessionPromptParams struct {
 	NoReply   param.Field[bool]                           `json:"noReply"`
 	System    param.Field[string]                         `json:"system"`
 	Tools     param.Field[map[string]bool]                `json:"tools"`
-	Format    param.Field[string]                         `json:"format"`
+	Format    param.Field[SessionPromptParamsFormatUnion]  `json:"format"`
 	Variant   param.Field[string]                         `json:"variant"`
 }
 
@@ -3314,6 +3314,62 @@ const (
 func (r SessionPromptParamsPartsType) IsKnown() bool {
 	switch r {
 	case SessionPromptParamsPartsTypeText, SessionPromptParamsPartsTypeFile, SessionPromptParamsPartsTypeAgent, SessionPromptParamsPartsTypeSubtask:
+		return true
+	}
+	return false
+}
+
+// Satisfied by [SessionPromptParamsFormatText],
+// [SessionPromptParamsFormatJsonSchema].
+type SessionPromptParamsFormatUnion interface {
+	implementsSessionPromptParamsFormatUnion()
+}
+
+type SessionPromptParamsFormatText struct {
+	Type param.Field[SessionPromptParamsFormatTextType] `json:"type,required"`
+}
+
+func (r SessionPromptParamsFormatText) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r SessionPromptParamsFormatText) implementsSessionPromptParamsFormatUnion() {}
+
+type SessionPromptParamsFormatTextType string
+
+const (
+	SessionPromptParamsFormatTextTypeText SessionPromptParamsFormatTextType = "text"
+)
+
+func (r SessionPromptParamsFormatTextType) IsKnown() bool {
+	switch r {
+	case SessionPromptParamsFormatTextTypeText:
+		return true
+	}
+	return false
+}
+
+type SessionPromptParamsFormatJsonSchema struct {
+	Type       param.Field[SessionPromptParamsFormatJsonSchemaType] `json:"type,required"`
+	Schema     param.Field[interface{}]                             `json:"schema,required"`
+	RetryCount param.Field[int64]                                   `json:"retryCount"`
+}
+
+func (r SessionPromptParamsFormatJsonSchema) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r SessionPromptParamsFormatJsonSchema) implementsSessionPromptParamsFormatUnion() {}
+
+type SessionPromptParamsFormatJsonSchemaType string
+
+const (
+	SessionPromptParamsFormatJsonSchemaTypeJsonSchema SessionPromptParamsFormatJsonSchemaType = "json_schema"
+)
+
+func (r SessionPromptParamsFormatJsonSchemaType) IsKnown() bool {
+	switch r {
+	case SessionPromptParamsFormatJsonSchemaTypeJsonSchema:
 		return true
 	}
 	return false

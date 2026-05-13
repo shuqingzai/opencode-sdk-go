@@ -47,9 +47,7 @@ func TestGlobalDispose(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Global.Dispose(context.TODO(), opencode.GlobalDisposeParams{
-		Directory: opencode.F("directory"),
-	})
+	_, err := client.Global.Dispose(context.TODO())
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
