@@ -68,3 +68,24 @@ type ContextOverflowErrorName = shared.ContextOverflowErrorName
 
 // This is an alias to an internal value.
 const ContextOverflowErrorNameContextOverflowError = shared.ContextOverflowErrorNameContextOverflowError
+
+// This is an alias to an internal type.
+type MessageOutputLengthError = shared.MessageOutputLengthError
+
+// This is an alias to an internal type.
+type MessageOutputLengthErrorName = shared.MessageOutputLengthErrorName
+
+// This is an alias to an internal value.
+const MessageOutputLengthErrorNameMessageOutputLengthError = shared.MessageOutputLengthErrorNameMessageOutputLengthError
+
+// This is an alias to an internal type.
+type APIError = shared.APIError
+
+// This is an alias to an internal type.
+type APIErrorData = shared.APIErrorData
+
+// This is an alias to an internal type.
+type APIErrorName = shared.APIErrorName
+
+// This is an alias to an internal value.
+const APIErrorNameAPIError = shared.APIErrorNameAPIError

@@ -82,6 +82,32 @@ type EventListResponse struct {
 	// [EventListResponseEventSessionCreatedProperties],
 	// [EventListResponseEventSessionUpdatedProperties],
 	// [EventListResponseEventSessionDeletedProperties],
+	// [EventListResponseEventSessionNextAgentSwitchedProperties],
+	// [EventListResponseEventSessionNextCompactionDeltaProperties],
+	// [EventListResponseEventSessionNextCompactionEndedProperties],
+	// [EventListResponseEventSessionNextCompactionStartedProperties],
+	// [EventListResponseEventSessionNextModelSwitchedProperties],
+	// [EventListResponseEventSessionNextPromptedProperties],
+	// [EventListResponseEventSessionNextReasoningDeltaProperties],
+	// [EventListResponseEventSessionNextReasoningEndedProperties],
+	// [EventListResponseEventSessionNextReasoningStartedProperties],
+	// [EventListResponseEventSessionNextRetriedProperties],
+	// [EventListResponseEventSessionNextShellEndedProperties],
+	// [EventListResponseEventSessionNextShellStartedProperties],
+	// [EventListResponseEventSessionNextStepEndedProperties],
+	// [EventListResponseEventSessionNextStepFailedProperties],
+	// [EventListResponseEventSessionNextStepStartedProperties],
+	// [EventListResponseEventSessionNextSyntheticProperties],
+	// [EventListResponseEventSessionNextTextDeltaProperties],
+	// [EventListResponseEventSessionNextTextEndedProperties],
+	// [EventListResponseEventSessionNextTextStartedProperties],
+	// [EventListResponseEventSessionNextToolCalledProperties],
+	// [EventListResponseEventSessionNextToolFailedProperties],
+	// [EventListResponseEventSessionNextToolInputDeltaProperties],
+	// [EventListResponseEventSessionNextToolInputEndedProperties],
+	// [EventListResponseEventSessionNextToolInputStartedProperties],
+	// [EventListResponseEventSessionNextToolProgressProperties],
+	// [EventListResponseEventSessionNextToolSuccessProperties],
 	// [EventListResponseEventServerConnectedProperties],
 	// [EventListResponseEventServerInstanceDisposedProperties],
 	// [EventListResponseEventGlobalDisposedProperties],
@@ -161,6 +187,32 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventSessionCreated],
 // [EventListResponseEventSessionUpdated],
 // [EventListResponseEventSessionDeleted],
+// [EventListResponseEventSessionNextAgentSwitched],
+// [EventListResponseEventSessionNextCompactionDelta],
+// [EventListResponseEventSessionNextCompactionEnded],
+// [EventListResponseEventSessionNextCompactionStarted],
+// [EventListResponseEventSessionNextModelSwitched],
+// [EventListResponseEventSessionNextPrompted],
+// [EventListResponseEventSessionNextReasoningDelta],
+// [EventListResponseEventSessionNextReasoningEnded],
+// [EventListResponseEventSessionNextReasoningStarted],
+// [EventListResponseEventSessionNextRetried],
+// [EventListResponseEventSessionNextShellEnded],
+// [EventListResponseEventSessionNextShellStarted],
+// [EventListResponseEventSessionNextStepEnded],
+// [EventListResponseEventSessionNextStepFailed],
+// [EventListResponseEventSessionNextStepStarted],
+// [EventListResponseEventSessionNextSynthetic],
+// [EventListResponseEventSessionNextTextDelta],
+// [EventListResponseEventSessionNextTextEnded],
+// [EventListResponseEventSessionNextTextStarted],
+// [EventListResponseEventSessionNextToolCalled],
+// [EventListResponseEventSessionNextToolFailed],
+// [EventListResponseEventSessionNextToolInputDelta],
+// [EventListResponseEventSessionNextToolInputEnded],
+// [EventListResponseEventSessionNextToolInputStarted],
+// [EventListResponseEventSessionNextToolProgress],
+// [EventListResponseEventSessionNextToolSuccess],
 // [EventListResponseEventServerConnected],
 // [EventListResponseEventServerInstanceDisposed],
 // [EventListResponseEventGlobalDisposed],
@@ -210,6 +262,32 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventSessionCreated],
 // [EventListResponseEventSessionUpdated],
 // [EventListResponseEventSessionDeleted],
+// [EventListResponseEventSessionNextAgentSwitched],
+// [EventListResponseEventSessionNextCompactionDelta],
+// [EventListResponseEventSessionNextCompactionEnded],
+// [EventListResponseEventSessionNextCompactionStarted],
+// [EventListResponseEventSessionNextModelSwitched],
+// [EventListResponseEventSessionNextPrompted],
+// [EventListResponseEventSessionNextReasoningDelta],
+// [EventListResponseEventSessionNextReasoningEnded],
+// [EventListResponseEventSessionNextReasoningStarted],
+// [EventListResponseEventSessionNextRetried],
+// [EventListResponseEventSessionNextShellEnded],
+// [EventListResponseEventSessionNextShellStarted],
+// [EventListResponseEventSessionNextStepEnded],
+// [EventListResponseEventSessionNextStepFailed],
+// [EventListResponseEventSessionNextStepStarted],
+// [EventListResponseEventSessionNextSynthetic],
+// [EventListResponseEventSessionNextTextDelta],
+// [EventListResponseEventSessionNextTextEnded],
+// [EventListResponseEventSessionNextTextStarted],
+// [EventListResponseEventSessionNextToolCalled],
+// [EventListResponseEventSessionNextToolFailed],
+// [EventListResponseEventSessionNextToolInputDelta],
+// [EventListResponseEventSessionNextToolInputEnded],
+// [EventListResponseEventSessionNextToolInputStarted],
+// [EventListResponseEventSessionNextToolProgress],
+// [EventListResponseEventSessionNextToolSuccess],
 // [EventListResponseEventServerConnected],
 // [EventListResponseEventServerInstanceDisposed],
 // [EventListResponseEventGlobalDisposed],
@@ -1578,7 +1656,8 @@ func (r eventListResponseEventSessionErrorPropertiesJSON) RawJSON() string {
 type EventListResponseEventSessionErrorPropertiesError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
 	// [shared.UnknownErrorData], [interface{}], [shared.MessageAbortedErrorData],
-	// [EventListResponseEventSessionErrorPropertiesErrorAPIErrorData].
+	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
+	// [shared.APIErrorData].
 	Data  interface{}                                           `json:"data,required"`
 	Name  EventListResponseEventSessionErrorPropertiesErrorName `json:"name,required"`
 	JSON  eventListResponseEventSessionErrorPropertiesErrorJSON `json:"-"`
@@ -1612,19 +1691,19 @@ func (r *EventListResponseEventSessionErrorPropertiesError) UnmarshalJSON(data [
 //
 // Possible runtime types of the union are [shared.ProviderAuthError],
 // [shared.UnknownError],
-// [EventListResponseEventSessionErrorPropertiesErrorMessageOutputLengthError],
+// [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
 // [shared.ContextOverflowError],
-// [EventListResponseEventSessionErrorPropertiesErrorAPIError].
+// [shared.APIError].
 func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListResponseEventSessionErrorPropertiesErrorUnion {
 	return r.union
 }
 
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
-// [EventListResponseEventSessionErrorPropertiesErrorMessageOutputLengthError],
+// [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
 // [shared.ContextOverflowError] or
-// [EventListResponseEventSessionErrorPropertiesErrorAPIError].
+// [shared.APIError].
 type EventListResponseEventSessionErrorPropertiesErrorUnion interface {
 	ImplementsEventListResponseEventSessionErrorPropertiesError()
 }
@@ -1643,7 +1722,7 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionErrorPropertiesErrorMessageOutputLengthError{}),
+			Type:       reflect.TypeOf(shared.MessageOutputLengthError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1659,7 +1738,7 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionErrorPropertiesErrorAPIError{}),
+			Type:       reflect.TypeOf(shared.APIError{}),
 		},
 	)
 }

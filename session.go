@@ -696,7 +696,8 @@ func (r assistantMessageTokensCacheJSON) RawJSON() string {
 type AssistantMessageError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
 	// [shared.UnknownErrorData], [interface{}], [shared.MessageAbortedErrorData],
-	// [AssistantMessageErrorAPIErrorData].
+	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
+	// [shared.APIErrorData].
 	Data  interface{}               `json:"data,required"`
 	Name  AssistantMessageErrorName `json:"name,required"`
 	JSON  assistantMessageErrorJSON `json:"-"`
@@ -729,17 +730,17 @@ func (r *AssistantMessageError) UnmarshalJSON(data []byte) (err error) {
 // the specific types for more type safety.
 //
 // Possible runtime types of the union are [shared.ProviderAuthError],
-// [shared.UnknownError], [AssistantMessageErrorMessageOutputLengthError],
+// [shared.UnknownError], [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
-// [shared.ContextOverflowError], [AssistantMessageErrorAPIError].
+// [shared.ContextOverflowError], [shared.APIError].
 func (r AssistantMessageError) AsUnion() AssistantMessageErrorUnion {
 	return r.union
 }
 
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
-// [AssistantMessageErrorMessageOutputLengthError], [shared.MessageAbortedError],
+// [shared.MessageOutputLengthError], [shared.MessageAbortedError],
 // [shared.StructuredOutputError], [shared.ContextOverflowError] or
-// [AssistantMessageErrorAPIError].
+// [shared.APIError].
 type AssistantMessageErrorUnion interface {
 	ImplementsAssistantMessageError()
 }
@@ -758,7 +759,7 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AssistantMessageErrorMessageOutputLengthError{}),
+			Type:       reflect.TypeOf(shared.MessageOutputLengthError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -774,7 +775,7 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AssistantMessageErrorAPIError{}),
+			Type:       reflect.TypeOf(shared.APIError{}),
 		},
 	)
 }
