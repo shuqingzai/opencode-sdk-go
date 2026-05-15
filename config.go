@@ -2840,13 +2840,15 @@ func (r configProviderModelsProviderJSON) RawJSON() string {
 type ConfigProviderModelsStatus string
 
 const (
-	ConfigProviderModelsStatusAlpha ConfigProviderModelsStatus = "alpha"
-	ConfigProviderModelsStatusBeta  ConfigProviderModelsStatus = "beta"
+	ConfigProviderModelsStatusAlpha     ConfigProviderModelsStatus = "alpha"
+	ConfigProviderModelsStatusBeta      ConfigProviderModelsStatus = "beta"
+	ConfigProviderModelsStatusDeprecated ConfigProviderModelsStatus = "deprecated"
+	ConfigProviderModelsStatusActive    ConfigProviderModelsStatus = "active"
 )
 
 func (r ConfigProviderModelsStatus) IsKnown() bool {
 	switch r {
-	case ConfigProviderModelsStatusAlpha, ConfigProviderModelsStatusBeta:
+	case ConfigProviderModelsStatusAlpha, ConfigProviderModelsStatusBeta, ConfigProviderModelsStatusDeprecated, ConfigProviderModelsStatusActive:
 		return true
 	}
 	return false

@@ -467,24 +467,49 @@ func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
 }
 
 type GlobalSession struct {
-	Id          string                `json:"id,required"`
-	Slug        string                `json:"slug,omitempty"`
-	ProjectID   string                `json:"projectID,omitempty"`
-	WorkspaceID string                `json:"workspaceID,omitempty"`
-	Directory   string                `json:"directory,omitempty"`
-	ParentID    string                `json:"parentID,omitempty"`
-	Summary     *GlobalSessionSummary `json:"summary,omitempty"`
-	JSON        globalSessionJSON     `json:"-"`
+	Id          string                    `json:"id,required"`
+	Slug        string                    `json:"slug,required"`
+	ProjectID   string                    `json:"projectID,required"`
+	Directory   string                    `json:"directory,required"`
+	Title       string                    `json:"title,required"`
+	Version     string                    `json:"version,required"`
+	Time        GlobalSessionTime         `json:"time,required"`
+	Project     *ProjectSummary           `json:"project,required"`
+	WorkspaceID string                    `json:"workspaceID,omitempty"`
+	Path        string                    `json:"path,omitempty"`
+	ParentID    string                    `json:"parentID,omitempty"`
+	Summary     *GlobalSessionSummary     `json:"summary,omitempty"`
+	Cost        float64                   `json:"cost,omitempty"`
+	Tokens      *GlobalSessionTokens      `json:"tokens,omitempty"`
+	Share       *GlobalSessionShare       `json:"share,omitempty"`
+	Agent       string                    `json:"agent,omitempty"`
+	Model       *GlobalSessionModel       `json:"model,omitempty"`
+	Permission  PermissionRuleset         `json:"permission,omitempty"`
+	Revert      *GlobalSessionRevert      `json:"revert,omitempty"`
+	JSON        globalSessionJSON         `json:"-"`
 }
 
+// globalSessionJSON contains the JSON metadata for the struct [GlobalSession]
 type globalSessionJSON struct {
 	Id          apijson.Field
 	Slug        apijson.Field
 	ProjectID   apijson.Field
-	WorkspaceID apijson.Field
 	Directory   apijson.Field
+	Title       apijson.Field
+	Version     apijson.Field
+	Time        apijson.Field
+	Project     apijson.Field
+	WorkspaceID apijson.Field
+	Path        apijson.Field
 	ParentID    apijson.Field
 	Summary     apijson.Field
+	Cost        apijson.Field
+	Tokens      apijson.Field
+	Share       apijson.Field
+	Agent       apijson.Field
+	Model       apijson.Field
+	Permission  apijson.Field
+	Revert      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -497,10 +522,155 @@ func (r globalSessionJSON) RawJSON() string {
 	return r.raw
 }
 
+type GlobalSessionTime struct {
+	Created    float64                `json:"created,required"`
+	Updated    float64                `json:"updated,required"`
+	Compacting float64                `json:"compacting,omitempty"`
+	Archived   float64                `json:"archived,omitempty"`
+	JSON       globalSessionTimeJSON  `json:"-"`
+}
+
+// globalSessionTimeJSON contains the JSON metadata for the struct [GlobalSessionTime]
+type globalSessionTimeJSON struct {
+	Created     apijson.Field
+	Updated     apijson.Field
+	Compacting  apijson.Field
+	Archived    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionTime) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionTimeJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionTokens struct {
+	Input      float64                     `json:"input,required"`
+	Output     float64                     `json:"output,required"`
+	Reasoning  float64                     `json:"reasoning,required"`
+	Cache      GlobalSessionTokensCache    `json:"cache,required"`
+	JSON       globalSessionTokensJSON     `json:"-"`
+}
+
+// globalSessionTokensJSON contains the JSON metadata for the struct [GlobalSessionTokens]
+type globalSessionTokensJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	Reasoning   apijson.Field
+	Cache       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionTokens) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionTokensJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionTokensCache struct {
+	Read  float64                       `json:"read,required"`
+	Write float64                       `json:"write,required"`
+	JSON  globalSessionTokensCacheJSON  `json:"-"`
+}
+
+// globalSessionTokensCacheJSON contains the JSON metadata for the struct [GlobalSessionTokensCache]
+type globalSessionTokensCacheJSON struct {
+	Read        apijson.Field
+	Write       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionTokensCache) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionTokensCacheJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionShare struct {
+	URL  string                    `json:"url,required"`
+	JSON globalSessionShareJSON    `json:"-"`
+}
+
+// globalSessionShareJSON contains the JSON metadata for the struct [GlobalSessionShare]
+type globalSessionShareJSON struct {
+	URL         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionShare) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionShareJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionModel struct {
+	ID         string                     `json:"id,required"`
+	ProviderID string                     `json:"providerID,required"`
+	Variant    string                     `json:"variant,omitempty"`
+	JSON       globalSessionModelJSON     `json:"-"`
+}
+
+// globalSessionModelJSON contains the JSON metadata for the struct [GlobalSessionModel]
+type globalSessionModelJSON struct {
+	ID          apijson.Field
+	ProviderID  apijson.Field
+	Variant     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionModel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionModelJSON) RawJSON() string {
+	return r.raw
+}
+
+type GlobalSessionRevert struct {
+	MessageID string                      `json:"messageID,required"`
+	PartID    string                      `json:"partID,omitempty"`
+	Snapshot  string                      `json:"snapshot,omitempty"`
+	Diff      string                      `json:"diff,omitempty"`
+	JSON      globalSessionRevertJSON     `json:"-"`
+}
+
+// globalSessionRevertJSON contains the JSON metadata for the struct [GlobalSessionRevert]
+type globalSessionRevertJSON struct {
+	MessageID   apijson.Field
+	PartID      apijson.Field
+	Snapshot    apijson.Field
+	Diff        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalSessionRevert) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalSessionRevertJSON) RawJSON() string {
+	return r.raw
+}
+
 type GlobalSessionSummary struct {
 	Additions float64                  `json:"additions,required"`
 	Deletions float64                  `json:"deletions,required"`
 	Files     float64                  `json:"files,required"`
+	Diffs     []SnapshotFileDiff       `json:"diffs,omitempty"`
 	JSON      globalSessionSummaryJSON `json:"-"`
 }
 
@@ -508,6 +678,7 @@ type globalSessionSummaryJSON struct {
 	Additions   apijson.Field
 	Deletions   apijson.Field
 	Files       apijson.Field
+	Diffs       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -517,6 +688,30 @@ func (r *GlobalSessionSummary) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r globalSessionSummaryJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProjectSummary struct {
+	ID       string              `json:"id,required"`
+	Worktree string              `json:"worktree,required"`
+	Name     string              `json:"name,omitempty"`
+	JSON     projectSummaryJSON  `json:"-"`
+}
+
+// projectSummaryJSON contains the JSON metadata for the struct [ProjectSummary]
+type projectSummaryJSON struct {
+	ID          apijson.Field
+	Worktree    apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectSummary) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectSummaryJSON) RawJSON() string {
 	return r.raw
 }
 
