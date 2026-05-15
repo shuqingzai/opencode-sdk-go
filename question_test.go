@@ -73,7 +73,7 @@ func TestQuestionReject(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Question.Reject(context.TODO(), "requestID")
+	_, err := client.Question.Reject(context.TODO(), "requestID", opencode.QuestionRejectParams{})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

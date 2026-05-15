@@ -160,7 +160,7 @@ func (r v2ProviderInfoEnabledCustomJSON) RawJSON() string {
 func (r V2ProviderInfoEnabledCustom) implementsV2ProviderInfoEnabledUnion() {}
 
 type V2ProviderListParams struct {
-	Instance param.Field[V2InstanceParam] `query:"instance"`
+	Location param.Field[V2LocationParam] `query:"location"`
 }
 
 func (r V2ProviderListParams) URLQuery() (v url.Values) {
@@ -171,7 +171,7 @@ func (r V2ProviderListParams) URLQuery() (v url.Values) {
 }
 
 type V2ProviderGetParams struct {
-	Instance param.Field[V2InstanceParam] `query:"instance"`
+	Location param.Field[V2LocationParam] `query:"location"`
 }
 
 func (r V2ProviderGetParams) URLQuery() (v url.Values) {

@@ -43,6 +43,7 @@ func (r *PathService) Get(ctx context.Context, query PathGetParams, opts ...opti
 }
 
 type Path struct {
+	Home      string   `json:"home,required"`
 	Config    string   `json:"config,required"`
 	Directory string   `json:"directory,required"`
 	State     string   `json:"state,required"`
@@ -52,6 +53,7 @@ type Path struct {
 
 // pathJSON contains the JSON metadata for the struct [Path]
 type pathJSON struct {
+	Home        apijson.Field
 	Config      apijson.Field
 	Directory   apijson.Field
 	State       apijson.Field
@@ -70,6 +72,7 @@ func (r pathJSON) RawJSON() string {
 
 type PathGetParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [PathGetParams]'s query parameters as `url.Values`.

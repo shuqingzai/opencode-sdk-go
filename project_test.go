@@ -77,9 +77,7 @@ func TestProjectUpdate(t *testing.T) {
 		context.TODO(),
 		"projectID",
 		opencode.ProjectUpdateParams{
-			Name: opencode.F("name"),
-		},
-		opencode.ProjectUpdateParamsQuery{
+			Name:      opencode.F("name"),
 			Directory: opencode.F("directory"),
 		},
 	)

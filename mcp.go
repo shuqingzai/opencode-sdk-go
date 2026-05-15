@@ -47,10 +47,10 @@ func (r *McpService) Status(ctx context.Context, query McpStatusParams, opts ...
 }
 
 // Add an MCP server
-func (r *McpService) Add(ctx context.Context, query McpAddParams, body McpAddBody, opts ...option.RequestOption) (res *map[string]McpStatus, err error) {
+func (r *McpService) Add(ctx context.Context, params McpAddParams, opts ...option.RequestOption) (res *map[string]McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "mcp"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
@@ -91,14 +91,14 @@ func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthSt
 }
 
 // OAuth callback
-func (r *McpService) AuthCallback(ctx context.Context, name string, query McpAuthCallbackParams, body McpAuthCallbackBody, opts ...option.RequestOption) (res *McpStatus, err error) {
+func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
 		return
 	}
 	path := fmt.Sprintf("mcp/%s/auth/callback", name)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
@@ -337,8 +337,10 @@ type McpOAuthConfig struct {
 	// OAuth client secret (if required by the authorization server)
 	ClientSecret string `json:"clientSecret"`
 	// OAuth scopes to request during authorization
-	Scope string             `json:"scope"`
-	JSON  mcpOAuthConfigJSON `json:"-"`
+	Scope string `json:"scope"`
+	// OAuth redirect URI
+	RedirectUri string            `json:"redirectUri"`
+	JSON        mcpOAuthConfigJSON `json:"-"`
 }
 
 // mcpOAuthConfigJSON contains the JSON metadata for the struct [McpOAuthConfig]
@@ -346,6 +348,7 @@ type mcpOAuthConfigJSON struct {
 	ClientId     apijson.Field
 	ClientSecret apijson.Field
 	Scope        apijson.Field
+	RedirectUri  apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -557,10 +560,17 @@ func (r McpStatusParams) URLQuery() (v url.Values) {
 	})
 }
 
-// McpAddParams contains the query parameters for adding an MCP server.
+// McpAddParams contains the parameters for adding an MCP server.
 type McpAddParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Directory param.Field[string]       `query:"directory"`
+	Workspace param.Field[string]       `query:"workspace"`
+	Name      param.Field[string]      `json:"name,required"`
+	Config    McpAddBodyConfigUnion    `json:"config,required"`
+}
+
+// MarshalJSON serializes [McpAddParams] omitting query parameters.
+func (r McpAddParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // URLQuery serializes [McpAddParams]'s query parameters as `url.Values`.
@@ -613,10 +623,16 @@ func (r McpAuthStartParams) URLQuery() (v url.Values) {
 	})
 }
 
-// McpAuthCallbackParams contains the query parameters for OAuth callback.
+// McpAuthCallbackParams contains the parameters for OAuth callback.
 type McpAuthCallbackParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	Code      param.Field[string] `json:"code,required"`
+}
+
+// MarshalJSON serializes [McpAuthCallbackParams] omitting query parameters.
+func (r McpAuthCallbackParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // URLQuery serializes [McpAuthCallbackParams]'s query parameters as `url.Values`.

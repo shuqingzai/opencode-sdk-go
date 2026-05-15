@@ -51,8 +51,7 @@ func TestMcpAdd(t *testing.T) {
 	)
 	_, err := client.Mcp.Add(context.TODO(), opencode.McpAddParams{
 		Directory: opencode.F("directory"),
-	}, opencode.McpAddBody{
-		Name: "name",
+		Name:     opencode.F("name"),
 		Config: opencode.McpAddBodyConfigLocal{
 			Type:    opencode.McpLocalConfigTypeLocal,
 			Command: []string{"command"},
@@ -151,8 +150,8 @@ func TestMcpAuthCallback(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Mcp.AuthCallback(context.TODO(), "name", opencode.McpAuthCallbackParams{}, opencode.McpAuthCallbackBody{
-		Code: "code",
+	_, err := client.Mcp.AuthCallback(context.TODO(), "name", opencode.McpAuthCallbackParams{
+		Code: opencode.F("code"),
 	})
 	if err != nil {
 		var apierr *opencode.Error

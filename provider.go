@@ -54,26 +54,26 @@ func (r *ProviderService) Auth(ctx context.Context, query ProviderAuthParams, op
 }
 
 // Start OAuth authorization flow
-func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, query ProviderOauthAuthorizeParams, body ProviderOauthAuthorizeBody, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
+func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
 		return
 	}
 	path := fmt.Sprintf("provider/%s/oauth/authorize", providerID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
 // OAuth callback
-func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, query ProviderOauthCallbackParams, body ProviderOauthCallbackBody, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
 		return
 	}
 	path := fmt.Sprintf("provider/%s/oauth/callback", providerID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
 
@@ -105,22 +105,24 @@ func (r providerListResponseJSON) RawJSON() string {
 
 // ProviderInfo represents information about a provider.
 type ProviderInfo struct {
-	Api    string                       `json:"api"`
-	Name   string                       `json:"name,required"`
-	Env    []string                     `json:"env,required"`
-	Id     string                       `json:"id,required"`
-	Npm    string                       `json:"npm"`
-	Models map[string]ProviderModelInfo `json:"models,required"`
-	JSON   providerInfoJSON             `json:"-"`
+	Id      string                       `json:"id,required"`
+	Name    string                       `json:"name,required"`
+	Source  string                       `json:"source,required"`
+	Env     []string                     `json:"env,required"`
+	Key     string                       `json:"key"`
+	Options map[string]interface{}       `json:"options,required"`
+	Models  map[string]ProviderModelInfo `json:"models,required"`
+	JSON    providerInfoJSON             `json:"-"`
 }
 
 // providerInfoJSON contains the JSON metadata for the struct [ProviderInfo]
 type providerInfoJSON struct {
-	Api         apijson.Field
-	Name        apijson.Field
-	Env         apijson.Field
 	Id          apijson.Field
-	Npm         apijson.Field
+	Name        apijson.Field
+	Source      apijson.Field
+	Env         apijson.Field
+	Key         apijson.Field
+	Options     apijson.Field
 	Models      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -503,9 +505,9 @@ func (r providerAuthMethodPromptSelectOptionJSON) RawJSON() string {
 
 // ProviderOauthAuthorizeBody represents the body for OAuth authorization request.
 type ProviderOauthAuthorizeBody struct {
-	Method string                         `json:"method,required"`
-	Inputs map[string]string              `json:"inputs"`
-	JSON   providerOauthAuthorizeBodyJSON `json:"-"`
+	Method int64                            `json:"method,required"`
+	Inputs map[string]string                `json:"inputs"`
+	JSON   providerOauthAuthorizeBodyJSON   `json:"-"`
 }
 
 // providerOauthAuthorizeBodyJSON contains the JSON metadata for the struct
@@ -553,9 +555,9 @@ func (r providerOauthAuthorizeResponseJSON) RawJSON() string {
 
 // ProviderOauthCallbackBody represents the body for OAuth callback.
 type ProviderOauthCallbackBody struct {
-	Method string                        `json:"method,required"`
-	Code   string                        `json:"code"`
-	JSON   providerOauthCallbackBodyJSON `json:"-"`
+	Method int64                           `json:"method,required"`
+	Code   string                          `json:"code"`
+	JSON   providerOauthCallbackBodyJSON   `json:"-"`
 }
 
 // providerOauthCallbackBodyJSON contains the JSON metadata for the struct
@@ -603,10 +605,17 @@ func (r ProviderAuthParams) URLQuery() (v url.Values) {
 	})
 }
 
-// ProviderOauthAuthorizeParams contains the query parameters for OAuth authorization.
+// ProviderOauthAuthorizeParams contains the parameters for OAuth authorization.
 type ProviderOauthAuthorizeParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	Method    param.Field[int64]  `json:"method,required"`
+	Inputs    param.Field[map[string]string] `json:"inputs"`
+}
+
+// MarshalJSON serializes [ProviderOauthAuthorizeParams] omitting query parameters.
+func (r ProviderOauthAuthorizeParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // URLQuery serializes [ProviderOauthAuthorizeParams]'s query parameters as `url.Values`.
@@ -617,10 +626,17 @@ func (r ProviderOauthAuthorizeParams) URLQuery() (v url.Values) {
 	})
 }
 
-// ProviderOauthCallbackParams contains the query parameters for OAuth callback.
+// ProviderOauthCallbackParams contains the parameters for OAuth callback.
 type ProviderOauthCallbackParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	Method    param.Field[int64]  `json:"method,required"`
+	Code      param.Field[string] `json:"code"`
+}
+
+// MarshalJSON serializes [ProviderOauthCallbackParams] omitting query parameters.
+func (r ProviderOauthCallbackParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // URLQuery serializes [ProviderOauthCallbackParams]'s query parameters as `url.Values`.

@@ -114,15 +114,17 @@ func (r oauthJSON) RawJSON() string {
 func (r OAuth) implementsAuth() {}
 
 type ApiAuth struct {
-	Type string      `json:"type,required"`
-	Key  string      `json:"key,required"`
-	JSON apiAuthJSON `json:"-"`
+	Type     string            `json:"type,required"`
+	Key      string            `json:"key,required"`
+	Metadata map[string]string `json:"metadata,required"`
+	JSON     apiAuthJSON       `json:"-"`
 }
 
 // apiAuthJSON contains the JSON metadata for the struct [ApiAuth]
 type apiAuthJSON struct {
 	Type        apijson.Field
 	Key         apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

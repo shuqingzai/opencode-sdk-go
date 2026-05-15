@@ -51,10 +51,10 @@ func (r *QuestionService) Reply(ctx context.Context, requestID string, params Qu
 }
 
 // Reject a question request
-func (r *QuestionService) Reject(ctx context.Context, requestID string, opts ...option.RequestOption) (res *bool, err error) {
+func (r *QuestionService) Reject(ctx context.Context, requestID string, query QuestionRejectParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "question/" + requestID + "/reject"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return
 }
 
@@ -177,9 +177,32 @@ func (r QuestionListParams) URLQuery() (v url.Values) {
 
 type QuestionReplyParams struct {
 	// Answers to the questions (array of string arrays, one for each question)
-	Answers param.Field[QuestionAnswer] `json:"answers,required"`
+	Answers   param.Field[QuestionAnswer] `json:"answers,required"`
+	Directory param.Field[string]          `query:"directory"`
+	Workspace param.Field[string]          `query:"workspace"`
 }
 
 func (r QuestionReplyParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// URLQuery serializes [QuestionReplyParams]'s query parameters as `url.Values`.
+func (r QuestionReplyParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type QuestionRejectParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [QuestionRejectParams]'s query parameters as `url.Values`.
+func (r QuestionRejectParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }

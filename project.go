@@ -52,10 +52,10 @@ func (r *ProjectService) Current(ctx context.Context, query ProjectCurrentParams
 }
 
 // Update a project
-func (r *ProjectService) Update(ctx context.Context, projectID string, body ProjectUpdateParams, query ProjectUpdateParamsQuery, opts ...option.RequestOption) (res *Project, err error) {
+func (r *ProjectService) Update(ctx context.Context, projectID string, params ProjectUpdateParams, opts ...option.RequestOption) (res *Project, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := fmt.Sprintf("project/%s", projectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
 	return
 }
 
@@ -102,14 +102,16 @@ func (r projectJSON) RawJSON() string {
 }
 
 type ProjectTime struct {
-	Created     float64         `json:"created,required"`
-	Initialized float64         `json:"initialized"`
+	Created     int64           `json:"created,required"`
+	Updated     int64           `json:"updated,required"`
+	Initialized int64           `json:"initialized"`
 	JSON        projectTimeJSON `json:"-"`
 }
 
 // projectTimeJSON contains the JSON metadata for the struct [ProjectTime]
 type projectTimeJSON struct {
 	Created     apijson.Field
+	Updated     apijson.Field
 	Initialized apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -164,9 +166,24 @@ func (r ProjectCurrentParams) URLQuery() (v url.Values) {
 }
 
 type ProjectUpdateParams struct {
-	Name     param.Field[string]          `json:"name"`
-	Icon     param.Field[ProjectIcon]     `json:"icon"`
-	Commands param.Field[ProjectCommands] `json:"commands"`
+	Directory param.Field[string]        `query:"directory"`
+	Workspace param.Field[string]        `query:"workspace"`
+	Name      param.Field[string]        `json:"name"`
+	Icon      param.Field[ProjectIcon]   `json:"icon"`
+	Commands  param.Field[ProjectCommands] `json:"commands"`
+}
+
+// MarshalJSON serializes [ProjectUpdateParams] omitting query parameters.
+func (r ProjectUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// URLQuery serializes [ProjectUpdateParams]'s query parameters as `url.Values`.
+func (r ProjectUpdateParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type ProjectIcon struct {
@@ -177,19 +194,6 @@ type ProjectIcon struct {
 
 type ProjectCommands struct {
 	Start string `json:"start"`
-}
-
-type ProjectUpdateParamsQuery struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ProjectUpdateParamsQuery]'s query parameters as `url.Values`.
-func (r ProjectUpdateParamsQuery) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }
 
 type ProjectInitGitParams struct {

@@ -59,7 +59,7 @@ func (r *FindService) Text(ctx context.Context, query FindTextParams, opts ...op
 }
 
 type Symbol struct {
-	Kind     float64        `json:"kind,required"`
+	Kind     int64          `json:"kind,required"`
 	Location SymbolLocation `json:"location,required"`
 	Name     string         `json:"name,required"`
 	JSON     symbolJSON     `json:"-"`
@@ -105,9 +105,9 @@ func (r symbolLocationJSON) RawJSON() string {
 }
 
 type SymbolLocationRange struct {
-	End   SymbolLocationRangeEnd   `json:"end,required"`
-	Start SymbolLocationRangeStart `json:"start,required"`
-	JSON  symbolLocationRangeJSON  `json:"-"`
+	End   SymbolPosition          `json:"end,required"`
+	Start SymbolPosition          `json:"start,required"`
+	JSON  symbolLocationRangeJSON `json:"-"`
 }
 
 // symbolLocationRangeJSON contains the JSON metadata for the struct
@@ -127,55 +127,32 @@ func (r symbolLocationRangeJSON) RawJSON() string {
 	return r.raw
 }
 
-type SymbolLocationRangeEnd struct {
-	Character float64                    `json:"character,required"`
-	Line      float64                    `json:"line,required"`
-	JSON      symbolLocationRangeEndJSON `json:"-"`
+// SymbolPosition represents a line/character position in a source file.
+type SymbolPosition struct {
+	Character int64              `json:"character,required"`
+	Line      int64              `json:"line,required"`
+	JSON      symbolPositionJSON `json:"-"`
 }
 
-// symbolLocationRangeEndJSON contains the JSON metadata for the struct
-// [SymbolLocationRangeEnd]
-type symbolLocationRangeEndJSON struct {
+// symbolPositionJSON contains the JSON metadata for the struct [SymbolPosition]
+type symbolPositionJSON struct {
 	Character   apijson.Field
 	Line        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *SymbolLocationRangeEnd) UnmarshalJSON(data []byte) (err error) {
+func (r *SymbolPosition) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r symbolLocationRangeEndJSON) RawJSON() string {
-	return r.raw
-}
-
-type SymbolLocationRangeStart struct {
-	Character float64                      `json:"character,required"`
-	Line      float64                      `json:"line,required"`
-	JSON      symbolLocationRangeStartJSON `json:"-"`
-}
-
-// symbolLocationRangeStartJSON contains the JSON metadata for the struct
-// [SymbolLocationRangeStart]
-type symbolLocationRangeStartJSON struct {
-	Character   apijson.Field
-	Line        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SymbolLocationRangeStart) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r symbolLocationRangeStartJSON) RawJSON() string {
+func (r symbolPositionJSON) RawJSON() string {
 	return r.raw
 }
 
 type FindTextResponse struct {
-	AbsoluteOffset float64                    `json:"absolute_offset,required"`
-	LineNumber     float64                    `json:"line_number,required"`
+	AbsoluteOffset int64                    `json:"absolute_offset,required"`
+	LineNumber     int64                    `json:"line_number,required"`
 	Lines          FindTextResponseLines      `json:"lines,required"`
 	Path           FindTextResponsePath       `json:"path,required"`
 	Submatches     []FindTextResponseSubmatch `json:"submatches,required"`
@@ -245,9 +222,9 @@ func (r findTextResponsePathJSON) RawJSON() string {
 }
 
 type FindTextResponseSubmatch struct {
-	End   float64                         `json:"end,required"`
+	End   int64                         `json:"end,required"`
 	Match FindTextResponseSubmatchesMatch `json:"match,required"`
-	Start float64                         `json:"start,required"`
+	Start int64                         `json:"start,required"`
 	JSON  findTextResponseSubmatchJSON    `json:"-"`
 }
 
@@ -291,12 +268,44 @@ func (r findTextResponseSubmatchesMatchJSON) RawJSON() string {
 }
 
 type FindFilesParams struct {
-	Query     param.Field[string] `query:"query,required"`
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Dirs      param.Field[string] `query:"dirs"`
-	Type      param.Field[string] `query:"type"`
-	Limit     param.Field[int64]  `query:"limit"`
+	Query     param.Field[string]            `query:"query,required"`
+	Directory param.Field[string]            `query:"directory"`
+	Workspace param.Field[string]            `query:"workspace"`
+	Dirs      param.Field[FindFilesParamsDirs] `query:"dirs"`
+	Type      param.Field[FindFilesParamsType] `query:"type"`
+	Limit     param.Field[int64]             `query:"limit"`
+}
+
+// FindFilesParamsDirs controls whether to include directories in file search results.
+type FindFilesParamsDirs string
+
+const (
+	FindFilesParamsDirsTrue  FindFilesParamsDirs = "true"
+	FindFilesParamsDirsFalse FindFilesParamsDirs = "false"
+)
+
+func (r FindFilesParamsDirs) IsKnown() bool {
+	switch r {
+	case FindFilesParamsDirsTrue, FindFilesParamsDirsFalse:
+		return true
+	}
+	return false
+}
+
+// FindFilesParamsType filters file search results by node type.
+type FindFilesParamsType string
+
+const (
+	FindFilesParamsTypeFile      FindFilesParamsType = "file"
+	FindFilesParamsTypeDirectory FindFilesParamsType = "directory"
+)
+
+func (r FindFilesParamsType) IsKnown() bool {
+	switch r {
+	case FindFilesParamsTypeFile, FindFilesParamsTypeDirectory:
+		return true
+	}
+	return false
 }
 
 // URLQuery serializes [FindFilesParams]'s query parameters as `url.Values`.

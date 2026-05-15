@@ -405,6 +405,8 @@ func (r v2ModelInfoVariantJSON) RawJSON() string {
 }
 
 type V2ModelInfoTime struct {
+	// The release date as a Unix timestamp. This field can have the runtime type of
+	// float64, "NaN", "Infinity", or "-Infinity".
 	Released float64            `json:"released,required"`
 	JSON     v2ModelInfoTimeJSON `json:"-"`
 }
@@ -491,12 +493,18 @@ func (r v2ModelInfoCostCacheJSON) RawJSON() string {
 }
 
 type V2ModelInfoLimit struct {
-	JSON v2ModelInfoLimitJSON `json:"-"`
+	Context int64                  `json:"context,required"`
+	Input   int64                  `json:"input"`
+	Output  int64                  `json:"output,required"`
+	JSON    v2ModelInfoLimitJSON   `json:"-"`
 	// ExtraFields contains additional fields that may be present.
 	ExtraFields map[string]interface{} `json:"-"`
 }
 
 type v2ModelInfoLimitJSON struct {
+	Context     apijson.Field
+	Input       apijson.Field
+	Output      apijson.Field
 	ExtraFields map[string]apijson.Field
 	raw         string
 }
@@ -510,7 +518,7 @@ func (r v2ModelInfoLimitJSON) RawJSON() string {
 }
 
 type V2ModelListParams struct {
-	Instance param.Field[V2InstanceParam] `query:"instance"`
+	Location param.Field[V2LocationParam] `query:"location"`
 }
 
 func (r V2ModelListParams) URLQuery() (v url.Values) {
@@ -520,7 +528,7 @@ func (r V2ModelListParams) URLQuery() (v url.Values) {
 	})
 }
 
-type V2InstanceParam struct {
+type V2LocationParam struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }

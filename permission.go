@@ -128,13 +128,23 @@ func (r permissionRequestToolJSON) RawJSON() string {
 // Reply to a permission request
 type PermissionReplyParams struct {
 	// Reply type: "once", "always", or "reject"
-	Reply param.Field[PermissionReplyParamsReply] `json:"reply,required"`
+	Reply     param.Field[PermissionReplyParamsReply] `json:"reply,required"`
 	// Optional message to include with the reply
-	Message param.Field[string] `json:"message"`
+	Message   param.Field[string] `json:"message"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 func (r PermissionReplyParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// URLQuery serializes [PermissionReplyParams]'s query parameters as `url.Values`.
+func (r PermissionReplyParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 // Deprecated: Use [PermissionReplyParams] instead.

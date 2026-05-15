@@ -100,7 +100,7 @@ func (r VcsDiffParamsMode) IsKnown() bool {
 
 type VcsFileDiff struct {
 	File      string            `json:"file,required"`
-	Patch     string            `json:"patch,required"`
+	Patch     string            `json:"patch"`
 	Additions int64             `json:"additions,required"`
 	Deletions int64             `json:"deletions,required"`
 	Status    VcsFileDiffStatus `json:"status"`

@@ -236,10 +236,10 @@ func (r fileReadResponsePatchJSON) RawJSON() string {
 
 type FileReadResponsePatchHunk struct {
 	Lines    []string                      `json:"lines,required"`
-	NewLines float64                       `json:"newLines,required"`
-	NewStart float64                       `json:"newStart,required"`
-	OldLines float64                       `json:"oldLines,required"`
-	OldStart float64                       `json:"oldStart,required"`
+	NewLines int64                         `json:"newLines,required"`
+	NewStart int64                         `json:"newStart,required"`
+	OldLines int64                         `json:"oldLines,required"`
+	OldStart int64                         `json:"oldStart,required"`
 	JSON     fileReadResponsePatchHunkJSON `json:"-"`
 }
 

@@ -92,7 +92,7 @@ func (r permissionJSON) RawJSON() string {
 }
 
 type PermissionTime struct {
-	Created float64            `json:"created,required"`
+	Created int64              `json:"created,required"`
 	JSON    permissionTimeJSON `json:"-"`
 }
 

@@ -601,8 +601,8 @@ func (r AssistantMessageRole) IsKnown() bool {
 }
 
 type AssistantMessageTime struct {
-	Created   float64                  `json:"created,required"`
-	Completed float64                  `json:"completed"`
+	Created   int64                     `json:"created,required"`
+	Completed int64                     `json:"completed"`
 	JSON      assistantMessageTimeJSON `json:"-"`
 }
 
@@ -832,7 +832,7 @@ type AssistantMessageErrorAPIErrorData struct {
 	Message         string                                `json:"message,required"`
 	ResponseBody    string                                `json:"responseBody"`
 	ResponseHeaders map[string]string                     `json:"responseHeaders"`
-	StatusCode      float64                               `json:"statusCode"`
+	StatusCode      int64                                 `json:"statusCode"`
 	JSON            assistantMessageErrorAPIErrorDataJSON `json:"-"`
 }
 
@@ -1268,7 +1268,7 @@ type Part struct {
 	MessageID string   `json:"messageID,required"`
 	SessionID string   `json:"sessionID,required"`
 	Type      PartType `json:"type,required"`
-	Attempt   float64  `json:"attempt"`
+	Attempt   int64   `json:"attempt"`
 	CallID    string   `json:"callID"`
 	Cost      float64  `json:"cost"`
 	// This field can have the runtime type of [PartRetryPartError].
@@ -1463,7 +1463,7 @@ func (r PartPatchPartType) IsKnown() bool {
 
 type PartRetryPart struct {
 	ID        string             `json:"id,required"`
-	Attempt   float64            `json:"attempt,required"`
+	Attempt   int64               `json:"attempt,required"`
 	Error     PartRetryPartError `json:"error,required"`
 	MessageID string             `json:"messageID,required"`
 	SessionID string             `json:"sessionID,required"`
@@ -1523,7 +1523,7 @@ type PartRetryPartErrorData struct {
 	Message         string                     `json:"message,required"`
 	ResponseBody    string                     `json:"responseBody"`
 	ResponseHeaders map[string]string          `json:"responseHeaders"`
-	StatusCode      float64                    `json:"statusCode"`
+	StatusCode      int64                       `json:"statusCode"`
 	JSON            partRetryPartErrorDataJSON `json:"-"`
 }
 
@@ -1562,7 +1562,7 @@ func (r PartRetryPartErrorName) IsKnown() bool {
 }
 
 type PartRetryPartTime struct {
-	Created float64               `json:"created,required"`
+	Created int64                  `json:"created,required"`
 	JSON    partRetryPartTimeJSON `json:"-"`
 }
 
@@ -1748,10 +1748,10 @@ func (r sessionJSON) RawJSON() string {
 }
 
 type SessionTime struct {
-	Created    float64         `json:"created,required"`
-	Updated    float64         `json:"updated,required"`
-	Compacting float64         `json:"compacting"`
-	Archived   float64         `json:"archived"`
+	Created    int64            `json:"created,required"`
+	Updated    int64            `json:"updated,required"`
+	Compacting int64            `json:"compacting"`
+	Archived   float64          `json:"archived"`
 	JSON       sessionTimeJSON `json:"-"`
 }
 
@@ -3021,7 +3021,7 @@ func (r UserMessageRole) IsKnown() bool {
 }
 
 type UserMessageTime struct {
-	Created float64             `json:"created,required"`
+	Created int64               `json:"created,required"`
 	JSON    userMessageTimeJSON `json:"-"`
 }
 

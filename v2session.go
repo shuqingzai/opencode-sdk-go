@@ -185,9 +185,9 @@ func (r v2SessionInfoJSON) RawJSON() string {
 }
 
 type V2SessionInfoTime struct {
-	Created  float64            `json:"created,required"`
-	Updated  float64            `json:"updated,required"`
-	Archived float64            `json:"archived"`
+	Created  int64               `json:"created,required"`
+	Updated  int64               `json:"updated,required"`
+	Archived float64             `json:"archived"`
 	JSON     v2SessionInfoTimeJSON `json:"-"`
 }
 
@@ -597,7 +597,7 @@ func (r sessionErrorUnknownJSON) RawJSON() string {
 // Shared sub-types
 
 type V2SessionMessageTime struct {
-	Created float64                  `json:"created,required"`
+	Created int64                     `json:"created,required"`
 	JSON    v2SessionMessageTimeJSON `json:"-"`
 }
 
@@ -616,8 +616,8 @@ func (r v2SessionMessageTimeJSON) RawJSON() string {
 }
 
 type V2SessionMessageShellTime struct {
-	Created   float64                       `json:"created,required"`
-	Completed float64                       `json:"completed"`
+	Created   int64                          `json:"created,required"`
+	Completed int64                          `json:"completed"`
 	JSON      v2SessionMessageShellTimeJSON `json:"-"`
 }
 
@@ -637,8 +637,8 @@ func (r v2SessionMessageShellTimeJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantTime struct {
-	Created   float64                            `json:"created,required"`
-	Completed float64                            `json:"completed"`
+	Created   int64                               `json:"created,required"`
+	Completed int64                               `json:"completed"`
 	JSON      v2SessionMessageAssistantTimeJSON  `json:"-"`
 }
 
@@ -801,9 +801,9 @@ func (r v2SessionMessageToolProviderJSON) RawJSON() string {
 }
 
 type V2SessionMessageToolTime struct {
-	Created   float64                        `json:"created,required"`
-	Ran       float64                        `json:"ran"`
-	Completed float64                        `json:"completed"`
+	Created   int64                           `json:"created,required"`
+	Ran       int64                           `json:"ran"`
+	Completed int64                           `json:"completed"`
 	Pruned    float64                        `json:"pruned"`
 	JSON      v2SessionMessageToolTimeJSON   `json:"-"`
 }

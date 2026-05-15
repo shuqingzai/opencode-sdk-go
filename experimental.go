@@ -139,11 +139,14 @@ func (r *ExperimentalService) ResourceList(ctx context.Context, query Experiment
 type Workspace struct {
 	Id        string        `json:"id,required"`
 	Type      string        `json:"type,required"`
+	Name      string        `json:"name,required"`
 	Branch    string        `json:"branch"`
-	Name      string        `json:"name"`
 	Directory string        `json:"directory"`
 	Extra     any           `json:"extra"`
 	ProjectID string        `json:"projectID,required"`
+	// The amount of time in milliseconds that this workspace has been used.
+	// This field can have the runtime type of float64, "NaN", "Infinity", or "-Infinity".
+	TimeUsed  float64       `json:"timeUsed,required"`
 	JSON      workspaceJSON `json:"-"`
 }
 
@@ -151,11 +154,12 @@ type Workspace struct {
 type workspaceJSON struct {
 	Id          apijson.Field
 	Type        apijson.Field
-	Branch      apijson.Field
 	Name        apijson.Field
+	Branch      apijson.Field
 	Directory   apijson.Field
 	Extra       apijson.Field
 	ProjectID   apijson.Field
+	TimeUsed    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -523,9 +527,9 @@ func (r globalSessionJSON) RawJSON() string {
 }
 
 type GlobalSessionTime struct {
-	Created    float64                `json:"created,required"`
-	Updated    float64                `json:"updated,required"`
-	Compacting float64                `json:"compacting,omitempty"`
+	Created    int64                   `json:"created,required"`
+	Updated    int64                   `json:"updated,required"`
+	Compacting int64                   `json:"compacting,omitempty"`
 	Archived   float64                `json:"archived,omitempty"`
 	JSON       globalSessionTimeJSON  `json:"-"`
 }

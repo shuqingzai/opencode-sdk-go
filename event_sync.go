@@ -408,9 +408,9 @@ func (r syncEventSessionUpdatedDataInfoSummaryJSON) RawJSON() string {
 }
 
 type SyncEventSessionUpdatedDataInfoTokens struct {
-	Input     float64                                       `json:"input,required"`
-	Output    float64                                       `json:"output,required"`
-	Reasoning float64                                       `json:"reasoning,required"`
+	Input     int64                                         `json:"input,required"`
+	Output    int64                                         `json:"output,required"`
+	Reasoning int64                                         `json:"reasoning,required"`
 	Cache     SyncEventSessionUpdatedDataInfoTokensCache    `json:"cache,required"`
 	JSON      syncEventSessionUpdatedDataInfoTokensJSON     `json:"-"`
 }
@@ -433,8 +433,8 @@ func (r syncEventSessionUpdatedDataInfoTokensJSON) RawJSON() string {
 }
 
 type SyncEventSessionUpdatedDataInfoTokensCache struct {
-	Read  float64                                             `json:"read,required"`
-	Write float64                                             `json:"write,required"`
+	Read  int64                                               `json:"read,required"`
+	Write int64                                               `json:"write,required"`
 	JSON  syncEventSessionUpdatedDataInfoTokensCacheJSON      `json:"-"`
 }
 
@@ -496,9 +496,9 @@ func (r syncEventSessionUpdatedDataInfoModelJSON) RawJSON() string {
 }
 
 type SyncEventSessionUpdatedDataInfoTime struct {
-	Created    float64                                       `json:"created"`
-	Updated    float64                                       `json:"updated"`
-	Compacting float64                                       `json:"compacting"`
+	Created    int64                                       `json:"created"`
+	Updated    int64                                       `json:"updated"`
+	Compacting int64                                         `json:"compacting"`
 	Archived   float64                                       `json:"archived"`
 	JSON       syncEventSessionUpdatedDataInfoTimeJSON       `json:"-"`
 }
@@ -631,7 +631,7 @@ func (r syncEventSessionNextAgentSwitchedJSON) RawJSON() string {
 func (r SyncEventSessionNextAgentSwitched) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextAgentSwitchedData struct {
-	Timestamp float64                                        `json:"timestamp,required"`
+	Timestamp int64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
 	Agent     string                                         `json:"agent,required"`
 	JSON      syncEventSessionNextAgentSwitchedDataJSON      `json:"-"`
@@ -686,7 +686,7 @@ func (r syncEventSessionNextModelSwitchedJSON) RawJSON() string {
 func (r SyncEventSessionNextModelSwitched) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextModelSwitchedData struct {
-	Timestamp float64                                           `json:"timestamp,required"`
+	Timestamp int64                                           `json:"timestamp,required"`
 	SessionID string                                            `json:"sessionID,required"`
 	Model     SyncEventSessionNextModelSwitchedDataModel        `json:"model,required"`
 	JSON      syncEventSessionNextModelSwitchedDataJSON         `json:"-"`
@@ -764,7 +764,7 @@ func (r syncEventSessionNextPromptedJSON) RawJSON() string {
 func (r SyncEventSessionNextPrompted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextPromptedData struct {
-	Timestamp float64                                     `json:"timestamp,required"`
+	Timestamp int64                                     `json:"timestamp,required"`
 	SessionID string                                      `json:"sessionID,required"`
 	// This field can have the runtime type of map[string]interface{}.
 	Prompt    interface{}                                 `json:"prompt,required"`
@@ -820,7 +820,7 @@ func (r syncEventSessionNextSyntheticJSON) RawJSON() string {
 func (r SyncEventSessionNextSynthetic) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextSyntheticData struct {
-	Timestamp float64                                     `json:"timestamp,required"`
+	Timestamp int64                                     `json:"timestamp,required"`
 	SessionID string                                      `json:"sessionID,required"`
 	Text      string                                      `json:"text,required"`
 	JSON      syncEventSessionNextSyntheticDataJSON       `json:"-"`
@@ -875,7 +875,7 @@ func (r syncEventSessionNextShellStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextShellStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextShellStartedData struct {
-	Timestamp float64                                        `json:"timestamp,required"`
+	Timestamp int64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
 	CallID    string                                         `json:"callID,required"`
 	Command   string                                         `json:"command,required"`
@@ -932,7 +932,7 @@ func (r syncEventSessionNextShellEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextShellEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextShellEndedData struct {
-	Timestamp float64                                        `json:"timestamp,required"`
+	Timestamp int64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
 	CallID    string                                         `json:"callID,required"`
 	Output    string                                         `json:"output,required"`
@@ -989,7 +989,7 @@ func (r syncEventSessionNextStepStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextStepStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextStepStartedData struct {
-	Timestamp float64                                           `json:"timestamp,required"`
+	Timestamp int64                                           `json:"timestamp,required"`
 	SessionID string                                            `json:"sessionID,required"`
 	Agent     string                                            `json:"agent,required"`
 	Model     SyncEventSessionNextStepStartedDataModel          `json:"model,required"`
@@ -1071,7 +1071,7 @@ func (r syncEventSessionNextStepEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextStepEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextStepEndedData struct {
-	Timestamp float64                                         `json:"timestamp,required"`
+	Timestamp int64                                         `json:"timestamp,required"`
 	SessionID string                                          `json:"sessionID,required"`
 	Finish    string                                          `json:"finish,required"`
 	Cost      float64                                         `json:"cost,required"`
@@ -1100,9 +1100,9 @@ func (r syncEventSessionNextStepEndedDataJSON) RawJSON() string {
 }
 
 type SyncEventSessionNextStepEndedDataTokens struct {
-	Input     float64                                              `json:"input,required"`
-	Output    float64                                              `json:"output,required"`
-	Reasoning float64                                              `json:"reasoning,required"`
+	Input     int64                                                `json:"input,required"`
+	Output    int64                                                `json:"output,required"`
+	Reasoning int64                                                `json:"reasoning,required"`
 	Cache     SyncEventSessionNextStepEndedDataTokensCache         `json:"cache,required"`
 	JSON      syncEventSessionNextStepEndedDataTokensJSON          `json:"-"`
 }
@@ -1125,8 +1125,8 @@ func (r syncEventSessionNextStepEndedDataTokensJSON) RawJSON() string {
 }
 
 type SyncEventSessionNextStepEndedDataTokensCache struct {
-	Read  float64                                                    `json:"read,required"`
-	Write float64                                                    `json:"write,required"`
+	Read  int64                                                      `json:"read,required"`
+	Write int64                                                      `json:"write,required"`
 	JSON  syncEventSessionNextStepEndedDataTokensCacheJSON           `json:"-"`
 }
 
@@ -1178,7 +1178,7 @@ func (r syncEventSessionNextStepFailedJSON) RawJSON() string {
 func (r SyncEventSessionNextStepFailed) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextStepFailedData struct {
-	Timestamp float64                                        `json:"timestamp,required"`
+	Timestamp int64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
 	// This field can have the runtime type of [SessionErrorUnknown].
 	Error     interface{}                                    `json:"error,required"`
@@ -1234,7 +1234,7 @@ func (r syncEventSessionNextTextStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextTextStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextTextStartedData struct {
-	Timestamp float64                                        `json:"timestamp,required"`
+	Timestamp int64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
 	JSON      syncEventSessionNextTextStartedDataJSON       `json:"-"`
 }
@@ -1287,7 +1287,7 @@ func (r syncEventSessionNextTextDeltaJSON) RawJSON() string {
 func (r SyncEventSessionNextTextDelta) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextTextDeltaData struct {
-	Timestamp float64                                      `json:"timestamp,required"`
+	Timestamp int64                                      `json:"timestamp,required"`
 	SessionID string                                       `json:"sessionID,required"`
 	Delta     string                                       `json:"delta,required"`
 	JSON      syncEventSessionNextTextDeltaDataJSON        `json:"-"`
@@ -1342,7 +1342,7 @@ func (r syncEventSessionNextTextEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextTextEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextTextEndedData struct {
-	Timestamp float64                                      `json:"timestamp,required"`
+	Timestamp int64                                      `json:"timestamp,required"`
 	SessionID string                                       `json:"sessionID,required"`
 	Text      string                                       `json:"text,required"`
 	JSON      syncEventSessionNextTextEndedDataJSON        `json:"-"`
@@ -1397,7 +1397,7 @@ func (r syncEventSessionNextReasoningStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextReasoningStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextReasoningStartedData struct {
-	Timestamp    float64                                             `json:"timestamp,required"`
+	Timestamp    int64                                               `json:"timestamp,required"`
 	SessionID    string                                              `json:"sessionID,required"`
 	ReasoningID  string                                              `json:"reasoningID,required"`
 	JSON         syncEventSessionNextReasoningStartedDataJSON        `json:"-"`
@@ -1452,7 +1452,7 @@ func (r syncEventSessionNextReasoningDeltaJSON) RawJSON() string {
 func (r SyncEventSessionNextReasoningDelta) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextReasoningDeltaData struct {
-	Timestamp    float64                                            `json:"timestamp,required"`
+	Timestamp    int64                                              `json:"timestamp,required"`
 	SessionID    string                                             `json:"sessionID,required"`
 	ReasoningID  string                                             `json:"reasoningID,required"`
 	Delta        string                                             `json:"delta,required"`
@@ -1509,7 +1509,7 @@ func (r syncEventSessionNextReasoningEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextReasoningEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextReasoningEndedData struct {
-	Timestamp    float64                                            `json:"timestamp,required"`
+	Timestamp    int64                                              `json:"timestamp,required"`
 	SessionID    string                                             `json:"sessionID,required"`
 	ReasoningID  string                                             `json:"reasoningID,required"`
 	Text         string                                             `json:"text,required"`
@@ -1566,7 +1566,7 @@ func (r syncEventSessionNextToolInputStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextToolInputStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolInputStartedData struct {
-	Timestamp float64                                               `json:"timestamp,required"`
+	Timestamp int64                                               `json:"timestamp,required"`
 	SessionID string                                                `json:"sessionID,required"`
 	CallID    string                                                `json:"callID,required"`
 	Name      string                                                `json:"name,required"`
@@ -1623,7 +1623,7 @@ func (r syncEventSessionNextToolInputDeltaJSON) RawJSON() string {
 func (r SyncEventSessionNextToolInputDelta) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolInputDeltaData struct {
-	Timestamp float64                                              `json:"timestamp,required"`
+	Timestamp int64                                              `json:"timestamp,required"`
 	SessionID string                                               `json:"sessionID,required"`
 	CallID    string                                               `json:"callID,required"`
 	Delta     string                                               `json:"delta,required"`
@@ -1680,7 +1680,7 @@ func (r syncEventSessionNextToolInputEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextToolInputEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolInputEndedData struct {
-	Timestamp float64                                              `json:"timestamp,required"`
+	Timestamp int64                                              `json:"timestamp,required"`
 	SessionID string                                               `json:"sessionID,required"`
 	CallID    string                                               `json:"callID,required"`
 	Text      string                                               `json:"text,required"`
@@ -1737,7 +1737,7 @@ func (r syncEventSessionNextToolCalledJSON) RawJSON() string {
 func (r SyncEventSessionNextToolCalled) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolCalledData struct {
-	Timestamp float64                                           `json:"timestamp,required"`
+	Timestamp int64                                           `json:"timestamp,required"`
 	SessionID string                                            `json:"sessionID,required"`
 	CallID    string                                            `json:"callID,required"`
 	Tool      string                                            `json:"tool,required"`
@@ -1820,7 +1820,7 @@ func (r syncEventSessionNextToolProgressJSON) RawJSON() string {
 func (r SyncEventSessionNextToolProgress) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolProgressData struct {
-	Timestamp  float64                                           `json:"timestamp,required"`
+	Timestamp  int64                                             `json:"timestamp,required"`
 	SessionID  string                                            `json:"sessionID,required"`
 	CallID     string                                            `json:"callID,required"`
 	// This field can have the runtime type of map[string]interface{}.
@@ -1881,7 +1881,7 @@ func (r syncEventSessionNextToolSuccessJSON) RawJSON() string {
 func (r SyncEventSessionNextToolSuccess) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolSuccessData struct {
-	Timestamp  float64                                           `json:"timestamp,required"`
+	Timestamp  int64                                             `json:"timestamp,required"`
 	SessionID  string                                            `json:"sessionID,required"`
 	CallID     string                                            `json:"callID,required"`
 	// This field can have the runtime type of map[string]interface{}.
@@ -1965,7 +1965,7 @@ func (r syncEventSessionNextToolFailedJSON) RawJSON() string {
 func (r SyncEventSessionNextToolFailed) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextToolFailedData struct {
-	Timestamp float64                                          `json:"timestamp,required"`
+	Timestamp int64                                          `json:"timestamp,required"`
 	SessionID string                                           `json:"sessionID,required"`
 	CallID    string                                           `json:"callID,required"`
 	// This field can have the runtime type of [SessionErrorUnknown].
@@ -2046,9 +2046,9 @@ func (r syncEventSessionNextRetriedJSON) RawJSON() string {
 func (r SyncEventSessionNextRetried) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextRetriedData struct {
-	Timestamp float64                                      `json:"timestamp,required"`
+	Timestamp int64                                      `json:"timestamp,required"`
 	SessionID string                                       `json:"sessionID,required"`
-	Attempt   float64                                      `json:"attempt,required"`
+	Attempt   int64                                        `json:"attempt,required"`
 	// This field can have the runtime type of map[string]interface{}.
 	Error     interface{}                                  `json:"error,required"`
 	JSON      syncEventSessionNextRetriedDataJSON          `json:"-"`
@@ -2104,7 +2104,7 @@ func (r syncEventSessionNextCompactionStartedJSON) RawJSON() string {
 func (r SyncEventSessionNextCompactionStarted) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextCompactionStartedData struct {
-	Timestamp float64                                               `json:"timestamp,required"`
+	Timestamp int64                                               `json:"timestamp,required"`
 	SessionID string                                                `json:"sessionID,required"`
 	Reason    string                                                `json:"reason,required"`
 	JSON      syncEventSessionNextCompactionStartedDataJSON         `json:"-"`
@@ -2159,7 +2159,7 @@ func (r syncEventSessionNextCompactionDeltaJSON) RawJSON() string {
 func (r SyncEventSessionNextCompactionDelta) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextCompactionDeltaData struct {
-	Timestamp float64                                              `json:"timestamp,required"`
+	Timestamp int64                                              `json:"timestamp,required"`
 	SessionID string                                               `json:"sessionID,required"`
 	Text      string                                               `json:"text,required"`
 	JSON      syncEventSessionNextCompactionDeltaDataJSON          `json:"-"`
@@ -2214,7 +2214,7 @@ func (r syncEventSessionNextCompactionEndedJSON) RawJSON() string {
 func (r SyncEventSessionNextCompactionEnded) implementsGlobalEventPayload() {}
 
 type SyncEventSessionNextCompactionEndedData struct {
-	Timestamp float64                                              `json:"timestamp,required"`
+	Timestamp int64                                              `json:"timestamp,required"`
 	SessionID string                                               `json:"sessionID,required"`
 	Text      string                                               `json:"text,required"`
 	Include   string                                               `json:"include"`

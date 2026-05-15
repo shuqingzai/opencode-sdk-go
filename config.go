@@ -1638,7 +1638,6 @@ type ConfigExperimental struct {
 	McpTimeout          float64                `json:"mcp_timeout"`
 	OpenTelemetry       bool                   `json:"openTelemetry"`
 	PrimaryTools        []string               `json:"primary_tools"`
-	Hook                ConfigExperimentalHook `json:"hook"`
 	JSON                configExperimentalJSON `json:"-"`
 }
 
@@ -1651,7 +1650,6 @@ type configExperimentalJSON struct {
 	McpTimeout          apijson.Field
 	OpenTelemetry       apijson.Field
 	PrimaryTools        apijson.Field
-	Hook                apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
 }
@@ -1661,75 +1659,6 @@ func (r *ConfigExperimental) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r configExperimentalJSON) RawJSON() string {
-	return r.raw
-}
-
-type ConfigExperimentalHook struct {
-	FileEdited       map[string][]ConfigExperimentalHookFileEdited `json:"file_edited"`
-	SessionCompleted []ConfigExperimentalHookSessionCompleted      `json:"session_completed"`
-	JSON             configExperimentalHookJSON                    `json:"-"`
-}
-
-// configExperimentalHookJSON contains the JSON metadata for the struct
-// [ConfigExperimentalHook]
-type configExperimentalHookJSON struct {
-	FileEdited       apijson.Field
-	SessionCompleted apijson.Field
-	raw              string
-	ExtraFields      map[string]apijson.Field
-}
-
-func (r *ConfigExperimentalHook) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configExperimentalHookJSON) RawJSON() string {
-	return r.raw
-}
-
-type ConfigExperimentalHookFileEdited struct {
-	Command     []string                             `json:"command,required"`
-	Environment map[string]string                    `json:"environment"`
-	JSON        configExperimentalHookFileEditedJSON `json:"-"`
-}
-
-// configExperimentalHookFileEditedJSON contains the JSON metadata for the struct
-// [ConfigExperimentalHookFileEdited]
-type configExperimentalHookFileEditedJSON struct {
-	Command     apijson.Field
-	Environment apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigExperimentalHookFileEdited) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configExperimentalHookFileEditedJSON) RawJSON() string {
-	return r.raw
-}
-
-type ConfigExperimentalHookSessionCompleted struct {
-	Command     []string                                   `json:"command,required"`
-	Environment map[string]string                          `json:"environment"`
-	JSON        configExperimentalHookSessionCompletedJSON `json:"-"`
-}
-
-// configExperimentalHookSessionCompletedJSON contains the JSON metadata for the
-// struct [ConfigExperimentalHookSessionCompleted]
-type configExperimentalHookSessionCompletedJSON struct {
-	Command     apijson.Field
-	Environment apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigExperimentalHookSessionCompleted) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configExperimentalHookSessionCompletedJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1998,7 +1927,7 @@ func (r ConfigMcpType) IsKnown() bool {
 type ConfigMode struct {
 	Build       ConfigModeBuild       `json:"build"`
 	Plan        ConfigModePlan        `json:"plan"`
-	ExtraFields map[string]ConfigMode `json:"-,extras"`
+	ExtraFields map[string]ConfigAgent `json:"-,extras"`
 	JSON        configModeJSON        `json:"-"`
 }
 
@@ -2374,13 +2303,16 @@ type ConfigPermission struct {
 	Task interface{} `json:"task"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	ExternalDirectory interface{} `json:"external_directory"`
-	Todowrite         string      `json:"todowrite"`
-	Question          string      `json:"question"`
-	Websearch         string      `json:"websearch"`
-	Codesearch        string      `json:"codesearch"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	Websearch interface{} `json:"websearch"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	Lsp      interface{} `json:"lsp"`
-	DoomLoop string      `json:"doom_loop"`
+	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	DoomLoop interface{} `json:"doom_loop"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	Skill interface{}          `json:"skill"`
 	JSON  configPermissionJSON `json:"-"`
@@ -2401,7 +2333,6 @@ type configPermissionJSON struct {
 	Todowrite         apijson.Field
 	Question          apijson.Field
 	Websearch         apijson.Field
-	Codesearch        apijson.Field
 	Lsp               apijson.Field
 	DoomLoop          apijson.Field
 	Skill             apijson.Field
@@ -3142,6 +3073,8 @@ type McpLocalConfig struct {
 	Type McpLocalConfigType `json:"type,required"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
+	// Timeout in milliseconds
+	Timeout int64 `json:"timeout"`
 	// Environment variables to set when running the MCP server
 	Environment map[string]string  `json:"environment"`
 	JSON        mcpLocalConfigJSON `json:"-"`
@@ -3152,6 +3085,7 @@ type mcpLocalConfigJSON struct {
 	Command     apijson.Field
 	Type        apijson.Field
 	Enabled     apijson.Field
+	Timeout     apijson.Field
 	Environment apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -3189,9 +3123,14 @@ type McpRemoteConfig struct {
 	URL string `json:"url,required"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
+	// Timeout in milliseconds
+	Timeout int64 `json:"timeout"`
 	// Headers to send with the request
-	Headers map[string]string   `json:"headers"`
-	JSON    mcpRemoteConfigJSON `json:"-"`
+	Headers map[string]string `json:"headers"`
+	// OAuth authentication configuration for this MCP server.
+	// This field can have the runtime type of [McpOAuthConfig] or bool (false).
+	Oauth interface{}         `json:"oauth"`
+	JSON  mcpRemoteConfigJSON `json:"-"`
 }
 
 // mcpRemoteConfigJSON contains the JSON metadata for the struct [McpRemoteConfig]
@@ -3199,7 +3138,9 @@ type mcpRemoteConfigJSON struct {
 	Type        apijson.Field
 	URL         apijson.Field
 	Enabled     apijson.Field
+	Timeout     apijson.Field
 	Headers     apijson.Field
+	Oauth       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3314,7 +3255,6 @@ func (r ConfigProvidersParams) URLQuery() (v url.Values) {
 type ConfigProvidersResponse struct {
 	Default   map[string]string `json:"default,required"`
 	Providers []Provider        `json:"providers,required"`
-	Connected []string         `json:"connected"`
 	JSON      configProvidersResponseJSON `json:"-"`
 }
 
@@ -3322,7 +3262,6 @@ type ConfigProvidersResponse struct {
 type configProvidersResponseJSON struct {
 	Default    apijson.Field
 	Providers  apijson.Field
-	Connected  apijson.Field
 	raw        string
 	ExtraFields map[string]apijson.Field
 }
