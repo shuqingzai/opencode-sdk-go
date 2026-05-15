@@ -2276,3 +2276,61 @@ func (r EventListResponseEventSessionNextCompactionStartedReason) IsKnown() bool
 	}
 	return false
 }
+
+type EventListResponseEventCatalogModelUpdated struct {
+	Properties EventListResponseEventCatalogModelUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventCatalogModelUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventCatalogModelUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventCatalogModelUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventCatalogModelUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventCatalogModelUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventCatalogModelUpdated) implementsEventListResponse() {}
+
+func (r EventListResponseEventCatalogModelUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventCatalogModelUpdatedProperties struct {
+	Model V2ModelInfo                                            `json:"model,required"`
+	JSON  eventListResponseEventCatalogModelUpdatedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventCatalogModelUpdatedPropertiesJSON struct {
+	Model       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventCatalogModelUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventCatalogModelUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventCatalogModelUpdatedType string
+
+const (
+	EventListResponseEventCatalogModelUpdatedTypeCatalogModelUpdated EventListResponseEventCatalogModelUpdatedType = "catalog.model.updated"
+)
+
+func (r EventListResponseEventCatalogModelUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventCatalogModelUpdatedTypeCatalogModelUpdated:
+		return true
+	}
+	return false
+}

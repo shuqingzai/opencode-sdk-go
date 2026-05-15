@@ -145,7 +145,7 @@ func (r globalUpgradeResponseJSON) RawJSON() string {
 type GlobalEvent struct {
 	Directory string                 `json:"directory,required"`
 	// This field can have the runtime type of
-	// [EventListResponseEventXxx] (39 V2 Event types):
+	// [EventListResponseEventXxx] (40 V2 Event types):
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
 	// [EventListResponseEventFileWatcherUpdated],
@@ -185,6 +185,7 @@ type GlobalEvent struct {
 	// [EventListResponseEventWorkspaceStatus],
 	// [EventListResponseEventWorktreeFailed],
 	// [EventListResponseEventWorktreeReady],
+	// [EventListResponseEventCatalogModelUpdated],
 	//
 	// [SyncEventXxx] (33 V1 SyncEvent types):
 	// [SyncEventMessagePartRemoved],
@@ -689,6 +690,11 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextCompactionEnded{}),
+		},
+		// V2 Event: catalog.model.updated
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
 		},
 	)
 }

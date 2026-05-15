@@ -92,6 +92,40 @@ type EventListResponse struct {
 	// [EventListResponseEventWorkspaceStatusProperties],
 	// [EventListResponseEventWorktreeFailedProperties],
 	// [EventListResponseEventWorktreeReadyProperties],
+	// [EventListResponseEventMessageUpdatedProperties],
+	// [EventListResponseEventMessageRemovedProperties],
+	// [EventListResponseEventMessagePartUpdatedProperties],
+	// [EventListResponseEventMessagePartRemovedProperties],
+	// [EventListResponseEventSessionCreatedProperties],
+	// [EventListResponseEventSessionUpdatedProperties],
+	// [EventListResponseEventSessionDeletedProperties],
+	// [EventListResponseEventSessionNextAgentSwitchedProperties],
+	// [EventListResponseEventSessionNextModelSwitchedProperties],
+	// [EventListResponseEventSessionNextPromptedProperties],
+	// [EventListResponseEventSessionNextSyntheticProperties],
+	// [EventListResponseEventSessionNextShellStartedProperties],
+	// [EventListResponseEventSessionNextShellEndedProperties],
+	// [EventListResponseEventSessionNextStepStartedProperties],
+	// [EventListResponseEventSessionNextStepEndedProperties],
+	// [EventListResponseEventSessionNextStepFailedProperties],
+	// [EventListResponseEventSessionNextTextStartedProperties],
+	// [EventListResponseEventSessionNextTextDeltaProperties],
+	// [EventListResponseEventSessionNextTextEndedProperties],
+	// [EventListResponseEventSessionNextReasoningStartedProperties],
+	// [EventListResponseEventSessionNextReasoningDeltaProperties],
+	// [EventListResponseEventSessionNextReasoningEndedProperties],
+	// [EventListResponseEventSessionNextToolInputStartedProperties],
+	// [EventListResponseEventSessionNextToolInputDeltaProperties],
+	// [EventListResponseEventSessionNextToolInputEndedProperties],
+	// [EventListResponseEventSessionNextToolCalledProperties],
+	// [EventListResponseEventSessionNextToolProgressProperties],
+	// [EventListResponseEventSessionNextToolSuccessProperties],
+	// [EventListResponseEventSessionNextToolFailedProperties],
+	// [EventListResponseEventSessionNextRetriedProperties],
+	// [EventListResponseEventSessionNextCompactionStartedProperties],
+	// [EventListResponseEventSessionNextCompactionDeltaProperties],
+	// [EventListResponseEventSessionNextCompactionEndedProperties],
+	// [EventListResponseEventCatalogModelUpdatedProperties].
 	ID         string                `json:"id,required"`
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
@@ -192,7 +226,8 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventPtyExited],
 // [EventListResponseEventPtyDeleted],
 // [EventListResponseEventWorktreeReady],
-// [EventListResponseEventWorktreeFailed].
+// [EventListResponseEventWorktreeFailed],
+// [EventListResponseEventCatalogModelUpdated].
 func (r EventListResponse) AsUnion() EventListResponseUnion {
 	return r.union
 }
@@ -267,7 +302,8 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventPtyExited],
 // [EventListResponseEventPtyDeleted],
 // [EventListResponseEventWorktreeReady],
-// [EventListResponseEventWorktreeFailed].
+// [EventListResponseEventWorktreeFailed],
+// [EventListResponseEventCatalogModelUpdated].
 type EventListResponseUnion interface {
 	implementsEventListResponse()
 }
@@ -431,6 +467,143 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventWorktreeReady{}),
+		},
+		// V2 Event types from event_global_types.go
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMessageUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMessageRemoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMessagePartUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventMessagePartRemoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionCreated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionDeleted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextAgentSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextModelSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextPrompted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextSynthetic{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolCalled{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolProgress{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolSuccess{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRetried{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionDelta{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
 		},
 	)
 }
