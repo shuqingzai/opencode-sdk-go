@@ -31,11 +31,27 @@ func (r *LspService) Status(ctx context.Context, query LspStatusParams, opts ...
 }
 
 type LspStatus struct {
-	Id     string        `json:"id,required"`
-	Name   string        `json:"name,required"`
-	Root   string        `json:"root,required"`
-	Status string        `json:"status,required"`
-	JSON   lspStatusJSON `json:"-"`
+	Id     string           `json:"id,required"`
+	Name   string           `json:"name,required"`
+	Root   string           `json:"root,required"`
+	Status LspStatusStatus  `json:"status,required"`
+	JSON   lspStatusJSON    `json:"-"`
+}
+
+// LspStatusStatus represents the status of an LSP server connection.
+type LspStatusStatus string
+
+const (
+	LspStatusStatusConnected LspStatusStatus = "connected"
+	LspStatusStatusError    LspStatusStatus = "error"
+)
+
+func (r LspStatusStatus) IsKnown() bool {
+	switch r {
+	case LspStatusStatusConnected, LspStatusStatusError:
+		return true
+	}
+	return false
 }
 
 type lspStatusJSON struct {

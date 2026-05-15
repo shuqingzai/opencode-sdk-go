@@ -502,12 +502,14 @@ func (r mcpAuthCallbackBodyJSON) RawJSON() string {
 // McpAuthStartResponse represents the response from starting OAuth authentication.
 type McpAuthStartResponse struct {
 	AuthorizationUrl string                   `json:"authorizationUrl,required"`
+	OauthState       string                   `json:"oauthState,required"`
 	JSON             mcpAuthStartResponseJSON `json:"-"`
 }
 
 // mcpAuthStartResponseJSON contains the JSON metadata for the struct [McpAuthStartResponse]
 type mcpAuthStartResponseJSON struct {
 	AuthorizationUrl apijson.Field
+	OauthState       apijson.Field
 	raw              string
 	ExtraFields      map[string]apijson.Field
 }
