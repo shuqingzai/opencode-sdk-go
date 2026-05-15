@@ -884,9 +884,9 @@ func (r v2PromptAgentAttachmentJSON) RawJSON() string {
 }
 
 type V2PromptReferenceAttachment struct {
-	Name       string                           `json:"name,required"`
-	Kind       string                           `json:"kind,required"`
-	URI        string                           `json:"uri"`
+	Name       string                              `json:"name,required"`
+	Kind       V2PromptReferenceAttachmentKind      `json:"kind,required"`
+	URI        string                              `json:"uri"`
 	Repository string                           `json:"repository"`
 	Branch     string                           `json:"branch"`
 	Target     string                           `json:"target"`
@@ -916,6 +916,22 @@ func (r *V2PromptReferenceAttachment) UnmarshalJSON(data []byte) (err error) {
 
 func (r v2PromptReferenceAttachmentJSON) RawJSON() string {
 	return r.raw
+}
+
+type V2PromptReferenceAttachmentKind string
+
+const (
+	V2PromptReferenceAttachmentKindLocal   V2PromptReferenceAttachmentKind = "local"
+	V2PromptReferenceAttachmentKindGit     V2PromptReferenceAttachmentKind = "git"
+	V2PromptReferenceAttachmentKindInvalid V2PromptReferenceAttachmentKind = "invalid"
+)
+
+func (r V2PromptReferenceAttachmentKind) IsKnown() bool {
+	switch r {
+	case V2PromptReferenceAttachmentKindLocal, V2PromptReferenceAttachmentKindGit, V2PromptReferenceAttachmentKindInvalid:
+		return true
+	}
+	return false
 }
 
 type V2PromptSource struct {
@@ -992,7 +1008,10 @@ type V2SessionMessageAssistantToolContent struct {
 	ID       string                                     `json:"id,required"`
 	Name     string                                     `json:"name,required"`
 	Provider V2SessionMessageToolProvider               `json:"provider"`
-	State    interface{}                                `json:"state,required"`
+	// This field can have the runtime type of
+	// [V2SessionMessageToolStatePending], [V2SessionMessageToolStateRunning],
+	// [V2SessionMessageToolStateCompleted], [V2SessionMessageToolStateError].
+	State    V2SessionMessageToolState                  `json:"state,required"`
 	Time     V2SessionMessageToolTime                   `json:"time,required"`
 	JSON     v2SessionMessageAssistantToolContentJSON   `json:"-"`
 }

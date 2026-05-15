@@ -1646,11 +1646,13 @@ const (
 	PartTypePatch      PartType = "patch"
 	PartTypeAgent      PartType = "agent"
 	PartTypeRetry      PartType = "retry"
+	PartTypeSubtask    PartType = "subtask"
+	PartTypeCompaction PartType = "compaction"
 )
 
 func (r PartType) IsKnown() bool {
 	switch r {
-	case PartTypeText, PartTypeReasoning, PartTypeFile, PartTypeTool, PartTypeStepStart, PartTypeStepFinish, PartTypeSnapshot, PartTypePatch, PartTypeAgent, PartTypeRetry:
+	case PartTypeText, PartTypeReasoning, PartTypeFile, PartTypeTool, PartTypeStepStart, PartTypeStepFinish, PartTypeSnapshot, PartTypePatch, PartTypeAgent, PartTypeRetry, PartTypeSubtask, PartTypeCompaction:
 		return true
 	}
 	return false

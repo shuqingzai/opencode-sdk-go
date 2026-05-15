@@ -34,6 +34,30 @@ type ProviderAuthErrorName = shared.ProviderAuthErrorName
 const ProviderAuthErrorNameProviderAuthError = shared.ProviderAuthErrorNameProviderAuthError
 
 // This is an alias to an internal type.
+type ProviderAuthError1 = shared.ProviderAuthError1
+
+// This is an alias to an internal type.
+type ProviderAuthError1Data = shared.ProviderAuthError1Data
+
+// This is an alias to an internal type.
+type ProviderAuthError1Name = shared.ProviderAuthError1Name
+
+// This is an alias to an internal value.
+const ProviderAuthError1NameBadRequest = shared.ProviderAuthError1NameBadRequest
+
+// This is an alias to an internal value.
+const ProviderAuthError1NameProviderAuthOauthMissing = shared.ProviderAuthError1NameProviderAuthOauthMissing
+
+// This is an alias to an internal value.
+const ProviderAuthError1NameProviderAuthOauthCodeMissing = shared.ProviderAuthError1NameProviderAuthOauthCodeMissing
+
+// This is an alias to an internal value.
+const ProviderAuthError1NameProviderAuthOauthCallbackFailed = shared.ProviderAuthError1NameProviderAuthOauthCallbackFailed
+
+// This is an alias to an internal value.
+const ProviderAuthError1NameProviderAuthValidationFailed = shared.ProviderAuthError1NameProviderAuthValidationFailed
+
+// This is an alias to an internal type.
 type UnknownError = shared.UnknownError
 
 // This is an alias to an internal type.

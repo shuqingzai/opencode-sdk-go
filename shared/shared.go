@@ -132,6 +132,74 @@ func (r ProviderAuthErrorName) IsKnown() bool {
 	return false
 }
 
+type ProviderAuthError1 struct {
+	Data ProviderAuthError1Data `json:"data,required"`
+	Name ProviderAuthError1Name `json:"name,required"`
+	JSON providerAuthError1JSON `json:"-"`
+}
+
+// providerAuthError1JSON contains the JSON metadata for the struct
+// [ProviderAuthError1]
+type providerAuthError1JSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderAuthError1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerAuthError1JSON) RawJSON() string {
+	return r.raw
+}
+
+type ProviderAuthError1Data struct {
+	ProviderID string                     `json:"providerID"`
+	Field      string                     `json:"field"`
+	Message    string                     `json:"message"`
+	Kind       string                     `json:"kind"`
+	JSON       providerAuthError1DataJSON `json:"-"`
+}
+
+// providerAuthError1DataJSON contains the JSON metadata for the struct
+// [ProviderAuthError1Data]
+type providerAuthError1DataJSON struct {
+	ProviderID  apijson.Field
+	Field       apijson.Field
+	Message     apijson.Field
+	Kind        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderAuthError1Data) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerAuthError1DataJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProviderAuthError1Name string
+
+const (
+	ProviderAuthError1NameBadRequest                      ProviderAuthError1Name = "BadRequest"
+	ProviderAuthError1NameProviderAuthOauthMissing        ProviderAuthError1Name = "ProviderAuthOauthMissing"
+	ProviderAuthError1NameProviderAuthOauthCodeMissing    ProviderAuthError1Name = "ProviderAuthOauthCodeMissing"
+	ProviderAuthError1NameProviderAuthOauthCallbackFailed ProviderAuthError1Name = "ProviderAuthOauthCallbackFailed"
+	ProviderAuthError1NameProviderAuthValidationFailed    ProviderAuthError1Name = "ProviderAuthValidationFailed"
+)
+
+func (r ProviderAuthError1Name) IsKnown() bool {
+	switch r {
+	case ProviderAuthError1NameBadRequest, ProviderAuthError1NameProviderAuthOauthMissing, ProviderAuthError1NameProviderAuthOauthCodeMissing, ProviderAuthError1NameProviderAuthOauthCallbackFailed, ProviderAuthError1NameProviderAuthValidationFailed:
+		return true
+	}
+	return false
+}
+
 type UnknownError struct {
 	Data UnknownErrorData `json:"data,required"`
 	Name UnknownErrorName `json:"name,required"`
