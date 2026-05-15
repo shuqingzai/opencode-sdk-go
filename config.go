@@ -204,7 +204,7 @@ func (r ConfigLogLevel) IsKnown() bool {
 }
 
 type ServerConfig struct {
-	Port       float64          `json:"port"`
+	Port       int64            `json:"port"`
 	Hostname   string           `json:"hostname"`
 	Mdns       bool             `json:"mdns"`
 	MdnsDomain string           `json:"mdnsDomain"`
@@ -254,7 +254,7 @@ func (r configSkillsJSON) RawJSON() string {
 type ConfigCompaction struct {
 	Auto     bool                 `json:"auto"`
 	Prune    bool                 `json:"prune"`
-	Reserved float64              `json:"reserved"`
+	Reserved int64                `json:"reserved"`
 	JSON     configCompactionJSON `json:"-"`
 }
 
@@ -342,8 +342,8 @@ type ConfigAgentBuild struct {
 	Hidden      bool                       `json:"hidden"`
 	Options     map[string]string          `json:"options"`
 	Color       string                     `json:"color"`
-	Steps       float64                    `json:"steps"`
-	MaxSteps    float64                    `json:"max_steps"`
+	Steps       int64                      `json:"steps"`
+	MaxSteps    int64                      `json:"max_steps"`
 	ExtraFields map[string]interface{}     `json:"-,extras"`
 	JSON        configAgentBuildJSON       `json:"-"`
 }
@@ -525,8 +525,8 @@ type ConfigAgentGeneral struct {
 	Hidden      bool                         `json:"hidden"`
 	Options     map[string]string            `json:"options"`
 	Color       string                       `json:"color"`
-	Steps       float64                      `json:"steps"`
-	MaxSteps    float64                      `json:"max_steps"`
+	Steps       int64                        `json:"steps"`
+	MaxSteps    int64                        `json:"max_steps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentGeneralJSON       `json:"-"`
 }
@@ -708,8 +708,8 @@ type ConfigAgentPlan struct {
 	Hidden      bool                      `json:"hidden"`
 	Options     map[string]string         `json:"options"`
 	Color       string                    `json:"color"`
-	Steps       float64                   `json:"steps"`
-	MaxSteps    float64                   `json:"max_steps"`
+	Steps       int64                     `json:"steps"`
+	MaxSteps    int64                     `json:"max_steps"`
 	ExtraFields map[string]interface{}    `json:"-,extras"`
 	JSON        configAgentPlanJSON       `json:"-"`
 }
@@ -889,8 +889,8 @@ type ConfigAgentExplore struct {
 	Hidden      bool                         `json:"hidden"`
 	Options     map[string]string            `json:"options"`
 	Color       string                       `json:"color"`
-	Steps       float64                      `json:"steps"`
-	MaxSteps    float64                      `json:"max_steps"`
+	Steps       int64                        `json:"steps"`
+	MaxSteps    int64                        `json:"max_steps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentExploreJSON       `json:"-"`
 }
@@ -1071,8 +1071,8 @@ type ConfigAgentTitle struct {
 	Hidden      bool                       `json:"hidden"`
 	Options     map[string]string          `json:"options"`
 	Color       string                     `json:"color"`
-	Steps       float64                    `json:"steps"`
-	MaxSteps    float64                    `json:"max_steps"`
+	Steps       int64                      `json:"steps"`
+	MaxSteps    int64                      `json:"max_steps"`
 	ExtraFields map[string]interface{}     `json:"-,extras"`
 	JSON        configAgentTitleJSON       `json:"-"`
 }
@@ -1252,8 +1252,8 @@ type ConfigAgentSummary struct {
 	Hidden      bool                         `json:"hidden"`
 	Options     map[string]string            `json:"options"`
 	Color       string                       `json:"color"`
-	Steps       float64                      `json:"steps"`
-	MaxSteps    float64                      `json:"max_steps"`
+	Steps       int64                        `json:"steps"`
+	MaxSteps    int64                        `json:"max_steps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentSummaryJSON       `json:"-"`
 }
@@ -1433,8 +1433,8 @@ type ConfigAgentCompaction struct {
 	Hidden      bool                            `json:"hidden"`
 	Options     map[string]string               `json:"options"`
 	Color       string                          `json:"color"`
-	Steps       float64                         `json:"steps"`
-	MaxSteps    float64                         `json:"max_steps"`
+	Steps       int64                           `json:"steps"`
+	MaxSteps    int64                           `json:"max_steps"`
 	ExtraFields map[string]interface{}          `json:"-,extras"`
 	JSON        configAgentCompactionJSON       `json:"-"`
 }
@@ -1635,7 +1635,7 @@ type ConfigExperimental struct {
 	BatchTool           bool                   `json:"batch_tool"`
 	ContinueLoopOnDeny  bool                   `json:"continue_loop_on_deny"`
 	DisablePasteSummary bool                   `json:"disable_paste_summary"`
-	McpTimeout          float64                `json:"mcp_timeout"`
+	McpTimeout          int64                  `json:"mcp_timeout"`
 	OpenTelemetry       bool                   `json:"openTelemetry"`
 	PrimaryTools        []string               `json:"primary_tools"`
 	JSON                configExperimentalJSON `json:"-"`
@@ -2542,7 +2542,7 @@ type ConfigProvider struct {
 	Env     []string                       `json:"env"`
 	Models  map[string]ConfigProviderModel `json:"models"`
 	Name    string                         `json:"name"`
-	Npm     string                         `json:"npm"`
+	NPM     string                         `json:"npm"`
 	Options ConfigProviderOptions          `json:"options"`
 	Source  ConfigProviderSource           `json:"source"`
 	Key     string                         `json:"key"`
@@ -2556,7 +2556,7 @@ type configProviderJSON struct {
 	Env         apijson.Field
 	Models      apijson.Field
 	Name        apijson.Field
-	Npm         apijson.Field
+	NPM         apijson.Field
 	Options     apijson.Field
 	Source      apijson.Field
 	Key         apijson.Field
@@ -2631,7 +2631,7 @@ func (r configProviderModelJSON) RawJSON() string {
 
 type ConfigProviderModelsCost struct {
 	Input           float64                                 `json:"input,required"`
-	Output          float64                                 `json:"output,required"`
+	Output          int64                                 `json:"output,required"`
 	CacheRead       float64                                 `json:"cache_read"`
 	CacheWrite      float64                                 `json:"cache_write"`
 	ContextOver200k ConfigProviderModelsCostContextOver200k `json:"contextOver200k"`
@@ -2639,10 +2639,10 @@ type ConfigProviderModelsCost struct {
 }
 
 type ConfigProviderModelsCostContextOver200k struct {
-	Read   float64 `json:"read"`
-	Write  float64 `json:"write"`
-	Input  float64 `json:"input"`
-	Output float64 `json:"output"`
+	Read   int64 `json:"read"`
+	Write  int64 `json:"write"`
+	Input  int64 `json:"input"`
+	Output int64 `json:"output"`
 }
 
 // configProviderModelsCostJSON contains the JSON metadata for the struct
@@ -2666,8 +2666,8 @@ func (r configProviderModelsCostJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsLimit struct {
-	Context float64                       `json:"context,required"`
-	Output  float64                       `json:"output,required"`
+	Context int64                       `json:"context,required"`
+	Output  int64                       `json:"output,required"`
 	JSON    configProviderModelsLimitJSON `json:"-"`
 }
 
@@ -2748,14 +2748,14 @@ func (r ConfigProviderModelsModalitiesOutput) IsKnown() bool {
 }
 
 type ConfigProviderModelsProvider struct {
-	Npm  string                           `json:"npm,required"`
+	NPM  string                           `json:"npm,required"`
 	JSON configProviderModelsProviderJSON `json:"-"`
 }
 
 // configProviderModelsProviderJSON contains the JSON metadata for the struct
 // [ConfigProviderModelsProvider]
 type configProviderModelsProviderJSON struct {
-	Npm         apijson.Field
+	NPM         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3129,7 +3129,7 @@ type McpRemoteConfig struct {
 	Headers map[string]string `json:"headers"`
 	// OAuth authentication configuration for this MCP server.
 	// This field can have the runtime type of [McpOAuthConfig] or bool (false).
-	Oauth interface{}         `json:"oauth"`
+	OAuth interface{}         `json:"oauth"`
 	JSON  mcpRemoteConfigJSON `json:"-"`
 }
 
@@ -3140,7 +3140,7 @@ type mcpRemoteConfigJSON struct {
 	Enabled     apijson.Field
 	Timeout     apijson.Field
 	Headers     apijson.Field
-	Oauth       apijson.Field
+	OAuth       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

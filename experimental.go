@@ -137,7 +137,7 @@ func (r *ExperimentalService) ResourceList(ctx context.Context, query Experiment
 }
 
 type Workspace struct {
-	Id        string        `json:"id,required"`
+	ID        string        `json:"id,required"`
 	Type      string        `json:"type,required"`
 	Name      string        `json:"name,required"`
 	Branch    string        `json:"branch"`
@@ -152,7 +152,7 @@ type Workspace struct {
 
 // workspaceJSON contains the JSON metadata for the struct [Workspace]
 type workspaceJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Type        apijson.Field
 	Name        apijson.Field
 	Branch      apijson.Field
@@ -186,7 +186,7 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 }
 
 type ExperimentalWorkspaceCreateInput struct {
-	Id     param.Field[string]                  `json:"id"`
+	ID     param.Field[string]                  `json:"id"`
 	Type   param.Field[string]                  `json:"type"`
 	Branch param.Field[string]                  `json:"branch"`
 	Extra  param.Field[any]                     `json:"extra"`
@@ -196,7 +196,7 @@ type ExperimentalWorkspaceCreateInput struct {
 // experimentalWorkspaceCreateInputJSON contains the JSON metadata for the struct
 // [ExperimentalWorkspaceCreateInput]
 type experimentalWorkspaceCreateInputJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Type        apijson.Field
 	Branch      apijson.Field
 	Extra       apijson.Field
@@ -335,7 +335,7 @@ func (r ExperimentalWarpParams) URLQuery() (v url.Values) {
 type ConsoleState struct {
 	ConsoleManagedProviders []string         `json:"consoleManagedProviders,required"`
 	ActiveOrgName           string           `json:"activeOrgName,omitempty"`
-	SwitchableOrgCount      float64          `json:"switchableOrgCount,required"`
+	SwitchableOrgCount      int64            `json:"switchableOrgCount,required"`
 	JSON                    consoleStateJSON `json:"-"`
 }
 
@@ -370,7 +370,7 @@ func (r ExperimentalConsoleGetParams) URLQuery() (v url.Values) {
 type ConsoleOrg struct {
 	AccountID    string         `json:"accountID,required"`
 	AccountEmail string         `json:"accountEmail,required"`
-	AccountUrl   string         `json:"accountUrl,required"`
+	AccountURL   string         `json:"accountUrl,required"`
 	OrgID        string         `json:"orgID,required"`
 	OrgName      string         `json:"orgName,required"`
 	Active       bool           `json:"active,required"`
@@ -380,7 +380,7 @@ type ConsoleOrg struct {
 type consoleOrgJSON struct {
 	AccountID    apijson.Field
 	AccountEmail apijson.Field
-	AccountUrl   apijson.Field
+	AccountURL   apijson.Field
 	OrgID        apijson.Field
 	OrgName      apijson.Field
 	Active       apijson.Field
@@ -456,10 +456,10 @@ type ExperimentalSessionListParams struct {
 	Directory param.Field[string]  `query:"directory"`
 	Workspace param.Field[string]  `query:"workspace"`
 	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[float64] `query:"start"`
-	Cursor    param.Field[float64] `query:"cursor"`
+	Start     param.Field[int64]   `query:"start"`
+	Cursor    param.Field[int64]   `query:"cursor"`
 	Search    param.Field[string]  `query:"search"`
-	Limit     param.Field[float64] `query:"limit"`
+	Limit     param.Field[int64]   `query:"limit"`
 	Archived  param.Field[bool]    `query:"archived"`
 }
 
@@ -471,7 +471,7 @@ func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
 }
 
 type GlobalSession struct {
-	Id          string                    `json:"id,required"`
+	ID          string                    `json:"id,required"`
 	Slug        string                    `json:"slug,required"`
 	ProjectID   string                    `json:"projectID,required"`
 	Directory   string                    `json:"directory,required"`
@@ -495,7 +495,7 @@ type GlobalSession struct {
 
 // globalSessionJSON contains the JSON metadata for the struct [GlobalSession]
 type globalSessionJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Slug        apijson.Field
 	ProjectID   apijson.Field
 	Directory   apijson.Field
@@ -530,7 +530,7 @@ type GlobalSessionTime struct {
 	Created    int64                   `json:"created,required"`
 	Updated    int64                   `json:"updated,required"`
 	Compacting int64                   `json:"compacting,omitempty"`
-	Archived   float64                `json:"archived,omitempty"`
+	Archived   int64                  `json:"archived,omitempty"`
 	JSON       globalSessionTimeJSON  `json:"-"`
 }
 
@@ -553,9 +553,9 @@ func (r globalSessionTimeJSON) RawJSON() string {
 }
 
 type GlobalSessionTokens struct {
-	Input      float64                     `json:"input,required"`
-	Output     float64                     `json:"output,required"`
-	Reasoning  float64                     `json:"reasoning,required"`
+	Input      int64                       `json:"input,required"`
+	Output     int64                       `json:"output,required"`
+	Reasoning  int64                       `json:"reasoning,required"`
 	Cache      GlobalSessionTokensCache    `json:"cache,required"`
 	JSON       globalSessionTokensJSON     `json:"-"`
 }
@@ -579,8 +579,8 @@ func (r globalSessionTokensJSON) RawJSON() string {
 }
 
 type GlobalSessionTokensCache struct {
-	Read  float64                       `json:"read,required"`
-	Write float64                       `json:"write,required"`
+	Read  int64                         `json:"read,required"`
+	Write int64                         `json:"write,required"`
 	JSON  globalSessionTokensCacheJSON  `json:"-"`
 }
 
@@ -671,9 +671,9 @@ func (r globalSessionRevertJSON) RawJSON() string {
 }
 
 type GlobalSessionSummary struct {
-	Additions float64                  `json:"additions,required"`
-	Deletions float64                  `json:"deletions,required"`
-	Files     float64                  `json:"files,required"`
+	Additions int64                    `json:"additions,required"`
+	Deletions int64                    `json:"deletions,required"`
+	Files     int64                    `json:"files,required"`
 	Diffs     []SnapshotFileDiff       `json:"diffs,omitempty"`
 	JSON      globalSessionSummaryJSON `json:"-"`
 }
@@ -721,18 +721,18 @@ func (r projectSummaryJSON) RawJSON() string {
 
 type McpResource struct {
 	Name        string          `json:"name,required"`
-	Uri         string          `json:"uri,required"`
+	URI         string          `json:"uri,required"`
 	Description string          `json:"description,omitempty"`
-	MimeType    string          `json:"mimeType,omitempty"`
+	MIMEType    string          `json:"mimeType,omitempty"`
 	Client      string          `json:"client,required"`
 	JSON        mcpResourceJSON `json:"-"`
 }
 
 type mcpResourceJSON struct {
 	Name        apijson.Field
-	Uri         apijson.Field
+	URI         apijson.Field
 	Description apijson.Field
-	MimeType    apijson.Field
+	MIMEType    apijson.Field
 	Client      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

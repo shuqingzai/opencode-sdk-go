@@ -105,7 +105,7 @@ func (r providerListResponseJSON) RawJSON() string {
 
 // ProviderInfo represents information about a provider.
 type ProviderInfo struct {
-	Id      string                       `json:"id,required"`
+	ID      string                       `json:"id,required"`
 	Name    string                       `json:"name,required"`
 	Source  string                       `json:"source,required"`
 	Env     []string                     `json:"env,required"`
@@ -117,7 +117,7 @@ type ProviderInfo struct {
 
 // providerInfoJSON contains the JSON metadata for the struct [ProviderInfo]
 type providerInfoJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Name        apijson.Field
 	Source      apijson.Field
 	Env         apijson.Field
@@ -138,7 +138,7 @@ func (r providerInfoJSON) RawJSON() string {
 
 // ProviderModelInfo represents information about a model provided by a provider.
 type ProviderModelInfo struct {
-	Id           string                          `json:"id,required"`
+	ID           string                          `json:"id,required"`
 	Name         string                          `json:"name,required"`
 	Family       string                          `json:"family"`
 	ReleaseDate  string                          `json:"release_date,required"`
@@ -161,7 +161,7 @@ type ProviderModelInfo struct {
 
 // providerModelInfoJSON contains the JSON metadata for the struct [ProviderModelInfo]
 type providerModelInfoJSON struct {
-	Id           apijson.Field
+	ID           apijson.Field
 	Name         apijson.Field
 	Family       apijson.Field
 	ReleaseDate  apijson.Field
@@ -194,7 +194,7 @@ func (r providerModelInfoJSON) RawJSON() string {
 // ProviderModelCost represents the cost structure for a model.
 type ProviderModelCost struct {
 	Input           float64                          `json:"input,required"`
-	Output          float64                          `json:"output,required"`
+	Output          int64                          `json:"output,required"`
 	CacheRead       float64                          `json:"cache_read"`
 	CacheWrite      float64                          `json:"cache_write"`
 	ContextOver200k ProviderModelCostContextOver200k `json:"context_over_200k"`
@@ -223,7 +223,7 @@ func (r providerModelCostJSON) RawJSON() string {
 // ProviderModelCostContextOver200k represents cost structure for context over 200k tokens.
 type ProviderModelCostContextOver200k struct {
 	Input      float64                              `json:"input,required"`
-	Output     float64                              `json:"output,required"`
+	Output     int64                              `json:"output,required"`
 	CacheRead  float64                              `json:"cache_read"`
 	CacheWrite float64                              `json:"cache_write"`
 	JSON       providerModelCostContextOver200kJSON `json:"-"`
@@ -250,9 +250,9 @@ func (r providerModelCostContextOver200kJSON) RawJSON() string {
 
 // ProviderModelLimit represents limits for a model.
 type ProviderModelLimit struct {
-	Context float64                `json:"context,required"`
-	Input   float64                `json:"input"`
-	Output  float64                `json:"output,required"`
+	Context int64                `json:"context,required"`
+	Input   int64                `json:"input"`
+	Output  int64                `json:"output,required"`
 	JSON    providerModelLimitJSON `json:"-"`
 }
 
@@ -299,16 +299,16 @@ func (r providerModelModalitiesJSON) RawJSON() string {
 
 // ProviderModelProvider represents provider information for a model.
 type ProviderModelProvider struct {
-	Npm  string                    `json:"npm"`
-	Api  string                    `json:"api"`
+	NPM  string                    `json:"npm"`
+	API  string                    `json:"api"`
 	JSON providerModelProviderJSON `json:"-"`
 }
 
 // providerModelProviderJSON contains the JSON metadata for the struct
 // [ProviderModelProvider]
 type providerModelProviderJSON struct {
-	Npm         apijson.Field
-	Api         apijson.Field
+	NPM         apijson.Field
+	API         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -529,7 +529,7 @@ func (r providerOauthAuthorizeBodyJSON) RawJSON() string {
 
 // ProviderOauthAuthorizeResponse represents the response from OAuth authorization.
 type ProviderOauthAuthorizeResponse struct {
-	Url          string                             `json:"url,required"`
+	URL          string                             `json:"url,required"`
 	Method       string                             `json:"method,required"`
 	Instructions string                             `json:"instructions,required"`
 	JSON         providerOauthAuthorizeResponseJSON `json:"-"`
@@ -538,7 +538,7 @@ type ProviderOauthAuthorizeResponse struct {
 // providerOauthAuthorizeResponseJSON contains the JSON metadata for the struct
 // [ProviderOauthAuthorizeResponse]
 type providerOauthAuthorizeResponseJSON struct {
-	Url          apijson.Field
+	URL          apijson.Field
 	Method       apijson.Field
 	Instructions apijson.Field
 	raw          string

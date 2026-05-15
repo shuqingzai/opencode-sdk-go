@@ -385,9 +385,9 @@ func (r syncEventSessionUpdatedDataInfoJSON) RawJSON() string {
 }
 
 type SyncEventSessionUpdatedDataInfoSummary struct {
-	Additions float64                                      `json:"additions,required"`
-	Deletions float64                                      `json:"deletions,required"`
-	Files     float64                                      `json:"files,required"`
+	Additions int64                                      `json:"additions,required"`
+	Deletions int64                                      `json:"deletions,required"`
+	Files     int64                                      `json:"files,required"`
 	JSON      syncEventSessionUpdatedDataInfoSummaryJSON   `json:"-"`
 }
 
@@ -499,7 +499,7 @@ type SyncEventSessionUpdatedDataInfoTime struct {
 	Created    int64                                       `json:"created"`
 	Updated    int64                                       `json:"updated"`
 	Compacting int64                                         `json:"compacting"`
-	Archived   float64                                       `json:"archived"`
+	Archived   int64                                       `json:"archived"`
 	JSON       syncEventSessionUpdatedDataInfoTimeJSON       `json:"-"`
 }
 

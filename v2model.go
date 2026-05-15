@@ -427,8 +427,8 @@ func (r v2ModelInfoTimeJSON) RawJSON() string {
 
 type V2ModelInfoCostItem struct {
 	Tier   V2ModelInfoCostTier      `json:"tier"`
-	Input  float64                  `json:"input,required"`
-	Output float64                  `json:"output,required"`
+	Input  int64                  `json:"input,required"`
+	Output int64                  `json:"output,required"`
 	Cache  V2ModelInfoCostCache     `json:"cache,required"`
 	JSON   v2ModelInfoCostItemJSON  `json:"-"`
 }
@@ -452,7 +452,7 @@ func (r v2ModelInfoCostItemJSON) RawJSON() string {
 
 type V2ModelInfoCostTier struct {
 	Type string                 `json:"type,required"`
-	Size float64                `json:"size,required"`
+	Size int64                `json:"size,required"`
 	JSON v2ModelInfoCostTierJSON `json:"-"`
 }
 
@@ -472,8 +472,8 @@ func (r v2ModelInfoCostTierJSON) RawJSON() string {
 }
 
 type V2ModelInfoCostCache struct {
-	Read  float64                  `json:"read,required"`
-	Write float64                  `json:"write,required"`
+	Read  int64                  `json:"read,required"`
+	Write int64                  `json:"write,required"`
 	JSON  v2ModelInfoCostCacheJSON `json:"-"`
 }
 

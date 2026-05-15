@@ -350,8 +350,8 @@ func TestSessionPromptWithOptionalParams(t *testing.T) {
 				}),
 				Synthetic: opencode.F(true),
 				Time: opencode.F(opencode.TextPartInputTimeParam{
-					Start: opencode.F(0.000000),
-					End:   opencode.F(0.000000),
+					Start: opencode.F(int64(0)),
+					End:   opencode.F(int64(0)),
 				}),
 			}}),
 			Directory: opencode.F("directory"),

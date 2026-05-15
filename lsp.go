@@ -31,7 +31,7 @@ func (r *LspService) Status(ctx context.Context, query LspStatusParams, opts ...
 }
 
 type LspStatus struct {
-	Id     string           `json:"id,required"`
+	ID     string           `json:"id,required"`
 	Name   string           `json:"name,required"`
 	Root   string           `json:"root,required"`
 	Status LspStatusStatus  `json:"status,required"`
@@ -55,7 +55,7 @@ func (r LspStatusStatus) IsKnown() bool {
 }
 
 type lspStatusJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Name        apijson.Field
 	Root        apijson.Field
 	Status      apijson.Field

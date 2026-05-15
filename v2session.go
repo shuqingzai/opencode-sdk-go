@@ -187,7 +187,7 @@ func (r v2SessionInfoJSON) RawJSON() string {
 type V2SessionInfoTime struct {
 	Created  int64               `json:"created,required"`
 	Updated  int64               `json:"updated,required"`
-	Archived float64             `json:"archived"`
+	Archived int64             `json:"archived"`
 	JSON     v2SessionInfoTimeJSON `json:"-"`
 }
 
@@ -231,9 +231,9 @@ func (r v2SessionInfoModelJSON) RawJSON() string {
 }
 
 type V2SessionInfoTokens struct {
-	Input     float64                    `json:"input,required"`
-	Output    float64                    `json:"output,required"`
-	Reasoning float64                    `json:"reasoning,required"`
+	Input     int64                    `json:"input,required"`
+	Output    int64                    `json:"output,required"`
+	Reasoning int64                    `json:"reasoning,required"`
 	Cache     V2SessionInfoTokensCache   `json:"cache,required"`
 	JSON      v2SessionInfoTokensJSON    `json:"-"`
 }
@@ -256,8 +256,8 @@ func (r v2SessionInfoTokensJSON) RawJSON() string {
 }
 
 type V2SessionInfoTokensCache struct {
-	Read  float64                        `json:"read,required"`
-	Write float64                        `json:"write,required"`
+	Read  int64                        `json:"read,required"`
+	Write int64                        `json:"write,required"`
 	JSON  v2SessionInfoTokensCacheJSON   `json:"-"`
 }
 
@@ -681,9 +681,9 @@ func (r v2SessionMessageModelJSON) RawJSON() string {
 }
 
 type V2SessionMessageTokens struct {
-	Input     float64                      `json:"input,required"`
-	Output    float64                      `json:"output,required"`
-	Reasoning float64                      `json:"reasoning,required"`
+	Input     int64                      `json:"input,required"`
+	Output    int64                      `json:"output,required"`
+	Reasoning int64                      `json:"reasoning,required"`
 	Cache     V2SessionMessageTokensCache  `json:"cache,required"`
 	JSON      v2SessionMessageTokensJSON   `json:"-"`
 }
@@ -706,8 +706,8 @@ func (r v2SessionMessageTokensJSON) RawJSON() string {
 }
 
 type V2SessionMessageTokensCache struct {
-	Read  float64                          `json:"read,required"`
-	Write float64                          `json:"write,required"`
+	Read  int64                          `json:"read,required"`
+	Write int64                          `json:"write,required"`
 	JSON  v2SessionMessageTokensCacheJSON  `json:"-"`
 }
 
@@ -804,7 +804,7 @@ type V2SessionMessageToolTime struct {
 	Created   int64                           `json:"created,required"`
 	Ran       int64                           `json:"ran"`
 	Completed int64                           `json:"completed"`
-	Pruned    float64                        `json:"pruned"`
+	Pruned    int64                        `json:"pruned"`
 	JSON      v2SessionMessageToolTimeJSON   `json:"-"`
 }
 
@@ -940,8 +940,8 @@ func (r V2PromptReferenceAttachmentKind) IsKnown() bool {
 }
 
 type V2PromptSource struct {
-	Start float64           `json:"start,required"`
-	End   float64           `json:"end,required"`
+	Start int64           `json:"start,required"`
+	End   int64           `json:"end,required"`
 	Text  string            `json:"text,required"`
 	JSON  v2PromptSourceJSON `json:"-"`
 }
@@ -1353,11 +1353,11 @@ func init() {
 type V2SessionListParams struct {
 	Directory param.Field[string]  `query:"directory"`
 	Workspace param.Field[string]  `query:"workspace"`
-	Limit     param.Field[float64] `query:"limit"`
+	Limit     param.Field[int64] `query:"limit"`
 	Order     param.Field[string]  `query:"order"`
 	Path      param.Field[string]  `query:"path"`
 	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[float64] `query:"start"`
+	Start     param.Field[int64] `query:"start"`
 	Search    param.Field[string]  `query:"search"`
 	Cursor    param.Field[string]  `query:"cursor"`
 }
@@ -1459,8 +1459,8 @@ func (r V2PromptReferenceAttachmentParam) MarshalJSON() (data []byte, err error)
 }
 
 type V2PromptSourceParam struct {
-	Start param.Field[float64] `json:"start,required"`
-	End   param.Field[float64] `json:"end,required"`
+	Start param.Field[int64] `json:"start,required"`
+	End   param.Field[int64] `json:"end,required"`
 	Text  param.Field[string]  `json:"text,required"`
 }
 
@@ -1507,7 +1507,7 @@ func (r V2SessionContextParams) URLQuery() (v url.Values) {
 type V2SessionMessagesParams struct {
 	Directory param.Field[string]  `query:"directory"`
 	Workspace param.Field[string]  `query:"workspace"`
-	Limit     param.Field[float64] `query:"limit"`
+	Limit     param.Field[int64] `query:"limit"`
 	Order     param.Field[string]  `query:"order"`
 	Cursor    param.Field[string]  `query:"cursor"`
 }

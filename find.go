@@ -84,14 +84,14 @@ func (r symbolJSON) RawJSON() string {
 
 type SymbolLocation struct {
 	Range SymbolLocationRange `json:"range,required"`
-	Uri   string              `json:"uri,required"`
+	URI   string              `json:"uri,required"`
 	JSON  symbolLocationJSON  `json:"-"`
 }
 
 // symbolLocationJSON contains the JSON metadata for the struct [SymbolLocation]
 type symbolLocationJSON struct {
 	Range       apijson.Field
-	Uri         apijson.Field
+	URI         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

@@ -516,6 +516,7 @@ func (r AgentPartInputSourceParam) MarshalJSON() (data []byte, err error) {
 
 type AssistantMessage struct {
 	ID         string                 `json:"id,required"`
+	Agent      string                 `json:"agent,required"`
 	Cost       float64                `json:"cost,required"`
 	Mode       string                 `json:"mode,required"`
 	ModelID    string                 `json:"modelID,required"`
@@ -527,6 +528,10 @@ type AssistantMessage struct {
 	System     []string               `json:"system,required"`
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
+	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
+	Structured interface{}            `json:"structured,omitzero"`
+	Variant    string                 `json:"variant,omitzero"`
+	Finish     string                 `json:"finish,omitzero"`
 	Error      AssistantMessageError  `json:"error"`
 	Summary    bool                   `json:"summary"`
 	JSON       assistantMessageJSON   `json:"-"`
@@ -536,6 +541,7 @@ type AssistantMessage struct {
 // [AssistantMessage]
 type assistantMessageJSON struct {
 	ID          apijson.Field
+	Agent       apijson.Field
 	Cost        apijson.Field
 	Mode        apijson.Field
 	ModelID     apijson.Field
@@ -547,6 +553,9 @@ type assistantMessageJSON struct {
 	System      apijson.Field
 	Time        apijson.Field
 	Tokens      apijson.Field
+	Structured  apijson.Field
+	Variant     apijson.Field
+	Finish      apijson.Field
 	Error       apijson.Field
 	Summary     apijson.Field
 	raw         string
@@ -625,10 +634,10 @@ func (r assistantMessageTimeJSON) RawJSON() string {
 
 type AssistantMessageTokens struct {
 	Cache     AssistantMessageTokensCache `json:"cache,required"`
-	Input     float64                     `json:"input,required"`
-	Output    float64                     `json:"output,required"`
-	Reasoning float64                     `json:"reasoning,required"`
-	Total     float64                     `json:"total"`
+	Input     int64                     `json:"input,required"`
+	Output    int64                     `json:"output,required"`
+	Reasoning int64                     `json:"reasoning,required"`
+	Total     int64                     `json:"total"`
 	JSON      assistantMessageTokensJSON  `json:"-"`
 }
 
@@ -653,8 +662,8 @@ func (r assistantMessageTokensJSON) RawJSON() string {
 }
 
 type AssistantMessageTokensCache struct {
-	Read  float64                         `json:"read,required"`
-	Write float64                         `json:"write,required"`
+	Read  int64                         `json:"read,required"`
+	Write int64                         `json:"write,required"`
 	JSON  assistantMessageTokensCacheJSON `json:"-"`
 }
 
@@ -1656,8 +1665,8 @@ func (r reasoningPartJSON) RawJSON() string {
 func (r ReasoningPart) implementsPart() {}
 
 type ReasoningPartTime struct {
-	Start float64               `json:"start,required"`
-	End   float64               `json:"end"`
+	Start int64               `json:"start,required"`
+	End   int64               `json:"end"`
 	JSON  reasoningPartTimeJSON `json:"-"`
 }
 
@@ -1706,7 +1715,7 @@ type Session struct {
 	Path        string         `json:"path"`
 	Revert      SessionRevert  `json:"revert"`
 	Share       SessionShare   `json:"share"`
-	Slug        string         `json:"slug"`
+	Slug        string         `json:"slug,required"`
 	Summary     SessionSummary `json:"summary"`
 	Tokens      SessionTokens  `json:"tokens"`
 	WorkspaceID string         `json:"workspaceID"`
@@ -1751,7 +1760,7 @@ type SessionTime struct {
 	Created    int64            `json:"created,required"`
 	Updated    int64            `json:"updated,required"`
 	Compacting int64            `json:"compacting"`
-	Archived   float64          `json:"archived"`
+	Archived   int64          `json:"archived"`
 	JSON       sessionTimeJSON `json:"-"`
 }
 
@@ -1820,10 +1829,10 @@ func (r sessionShareJSON) RawJSON() string {
 }
 
 type SessionSummary struct {
-	Additions float64              `json:"additions,required"`
-	Deletions float64              `json:"deletions,required"`
-	Files     float64              `json:"files,required"`
-	Diffs     []SessionSummaryDiff `json:"diffs,required"`
+	Additions int64              `json:"additions,required"`
+	Deletions int64              `json:"deletions,required"`
+	Files     int64              `json:"files,required"`
+	Diffs     []SnapshotFileDiff `json:"diffs"`
 	JSON      sessionSummaryJSON   `json:"-"`
 }
 
@@ -1842,35 +1851,6 @@ func (r *SessionSummary) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r sessionSummaryJSON) RawJSON() string {
-	return r.raw
-}
-
-type SessionSummaryDiff struct {
-	Additions float64                `json:"additions,required"`
-	After     string                 `json:"after,required"`
-	Before    string                 `json:"before,required"`
-	Deletions float64                `json:"deletions,required"`
-	File      string                 `json:"file,required"`
-	JSON      sessionSummaryDiffJSON `json:"-"`
-}
-
-// sessionSummaryDiffJSON contains the JSON metadata for the struct
-// [SessionSummaryDiff]
-type sessionSummaryDiffJSON struct {
-	Additions   apijson.Field
-	After       apijson.Field
-	Before      apijson.Field
-	Deletions   apijson.Field
-	File        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SessionSummaryDiff) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r sessionSummaryDiffJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1899,9 +1879,9 @@ func (r sessionModelJSON) RawJSON() string {
 }
 
 type SessionTokens struct {
-	Input     float64            `json:"input,required"`
-	Output    float64            `json:"output,required"`
-	Reasoning float64            `json:"reasoning,required"`
+	Input     int64            `json:"input,required"`
+	Output    int64            `json:"output,required"`
+	Reasoning int64            `json:"reasoning,required"`
 	Cache     SessionTokensCache `json:"cache,required"`
 	JSON      sessionTokensJSON  `json:"-"`
 }
@@ -1925,8 +1905,8 @@ func (r sessionTokensJSON) RawJSON() string {
 }
 
 type SessionTokensCache struct {
-	Read  float64                `json:"read,required"`
-	Write float64                `json:"write,required"`
+	Read  int64                `json:"read,required"`
+	Write int64                `json:"write,required"`
 	JSON  sessionTokensCacheJSON `json:"-"`
 }
 
@@ -2028,10 +2008,10 @@ func (r StepFinishPart) implementsPart() {}
 
 type StepFinishPartTokens struct {
 	Cache     StepFinishPartTokensCache `json:"cache,required"`
-	Input     float64                   `json:"input,required"`
-	Output    float64                   `json:"output,required"`
-	Reasoning float64                   `json:"reasoning,required"`
-	Total     float64                   `json:"total"`
+	Input     int64                   `json:"input,required"`
+	Output    int64                   `json:"output,required"`
+	Reasoning int64                   `json:"reasoning,required"`
+	Total     int64                   `json:"total"`
 	JSON      stepFinishPartTokensJSON  `json:"-"`
 }
 
@@ -2054,8 +2034,8 @@ func (r stepFinishPartTokensJSON) RawJSON() string {
 }
 
 type StepFinishPartTokensCache struct {
-	Read  float64                       `json:"read,required"`
-	Write float64                       `json:"write,required"`
+	Read  int64                       `json:"read,required"`
+	Write int64                       `json:"write,required"`
 	JSON  stepFinishPartTokensCacheJSON `json:"-"`
 }
 
@@ -2190,8 +2170,8 @@ func (r symbolSourceRangeJSON) RawJSON() string {
 }
 
 type SymbolSourceRangeEnd struct {
-	Character float64                  `json:"character,required"`
-	Line      float64                  `json:"line,required"`
+	Character int64                  `json:"character,required"`
+	Line      int64                  `json:"line,required"`
 	JSON      symbolSourceRangeEndJSON `json:"-"`
 }
 
@@ -2213,8 +2193,8 @@ func (r symbolSourceRangeEndJSON) RawJSON() string {
 }
 
 type SymbolSourceRangeStart struct {
-	Character float64                    `json:"character,required"`
-	Line      float64                    `json:"line,required"`
+	Character int64                    `json:"character,required"`
+	Line      int64                    `json:"line,required"`
 	JSON      symbolSourceRangeStartJSON `json:"-"`
 }
 
@@ -2274,8 +2254,8 @@ func (r SymbolSourceRangeParam) MarshalJSON() (data []byte, err error) {
 }
 
 type SymbolSourceRangeEndParam struct {
-	Character param.Field[float64] `json:"character,required"`
-	Line      param.Field[float64] `json:"line,required"`
+	Character param.Field[int64] `json:"character,required"`
+	Line      param.Field[int64] `json:"line,required"`
 }
 
 func (r SymbolSourceRangeEndParam) MarshalJSON() (data []byte, err error) {
@@ -2283,8 +2263,8 @@ func (r SymbolSourceRangeEndParam) MarshalJSON() (data []byte, err error) {
 }
 
 type SymbolSourceRangeStartParam struct {
-	Character param.Field[float64] `json:"character,required"`
-	Line      param.Field[float64] `json:"line,required"`
+	Character param.Field[int64] `json:"character,required"`
+	Line      param.Field[int64] `json:"line,required"`
 }
 
 func (r SymbolSourceRangeStartParam) MarshalJSON() (data []byte, err error) {
@@ -2295,7 +2275,7 @@ type ResourceSource struct {
 	ClientName string             `json:"clientName,required"`
 	Text       FilePartSourceText `json:"text,required"`
 	Type       ResourceSourceType `json:"type,required"`
-	Uri        string             `json:"uri,required"`
+	URI        string             `json:"uri,required"`
 	JSON       resourceSourceJSON `json:"-"`
 }
 
@@ -2304,7 +2284,7 @@ type resourceSourceJSON struct {
 	ClientName  apijson.Field
 	Text        apijson.Field
 	Type        apijson.Field
-	Uri         apijson.Field
+	URI         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2337,7 +2317,7 @@ type ResourceSourceParam struct {
 	ClientName param.Field[string]                  `json:"clientName,required"`
 	Text       param.Field[FilePartSourceTextParam] `json:"text,required"`
 	Type       param.Field[ResourceSourceType]      `json:"type,required"`
-	Uri        param.Field[string]                  `json:"uri,required"`
+	URI        param.Field[string]                  `json:"uri,required"`
 }
 
 func (r ResourceSourceParam) MarshalJSON() (data []byte, err error) {
@@ -2516,8 +2496,8 @@ func (r TextPartType) IsKnown() bool {
 }
 
 type TextPartTime struct {
-	Start float64          `json:"start,required"`
-	End   float64          `json:"end"`
+	Start int64          `json:"start,required"`
+	End   int64          `json:"end"`
 	JSON  textPartTimeJSON `json:"-"`
 }
 
@@ -2568,8 +2548,8 @@ func (r TextPartInputType) IsKnown() bool {
 }
 
 type TextPartInputTimeParam struct {
-	Start param.Field[float64] `json:"start,required"`
-	End   param.Field[float64] `json:"end"`
+	Start param.Field[int64] `json:"start,required"`
+	End   param.Field[int64] `json:"end"`
 }
 
 func (r TextPartInputTimeParam) MarshalJSON() (data []byte, err error) {
@@ -2776,9 +2756,9 @@ func (r ToolStateCompletedStatus) IsKnown() bool {
 }
 
 type ToolStateCompletedTime struct {
-	End       float64                    `json:"end,required"`
-	Start     float64                    `json:"start,required"`
-	Compacted float64                    `json:"compacted"`
+	End       int64                    `json:"end,required"`
+	Start     int64                    `json:"start,required"`
+	Compacted int64                    `json:"compacted"`
 	JSON      toolStateCompletedTimeJSON `json:"-"`
 }
 
@@ -2845,8 +2825,8 @@ func (r ToolStateErrorStatus) IsKnown() bool {
 }
 
 type ToolStateErrorTime struct {
-	End   float64                `json:"end,required"`
-	Start float64                `json:"start,required"`
+	End   int64                `json:"end,required"`
+	Start int64                `json:"start,required"`
 	JSON  toolStateErrorTimeJSON `json:"-"`
 }
 
@@ -2956,7 +2936,7 @@ func (r ToolStateRunningStatus) IsKnown() bool {
 }
 
 type ToolStateRunningTime struct {
-	Start float64                  `json:"start,required"`
+	Start int64                  `json:"start,required"`
 	JSON  toolStateRunningTimeJSON `json:"-"`
 }
 
@@ -3066,10 +3046,10 @@ func (r userMessageSummaryJSON) RawJSON() string {
 }
 
 type UserMessageSummaryDiff struct {
-	Additions float64                    `json:"additions,required"`
+	Additions int64                    `json:"additions,required"`
 	After     string                     `json:"after,required"`
 	Before    string                     `json:"before,required"`
-	Deletions float64                    `json:"deletions,required"`
+	Deletions int64                    `json:"deletions,required"`
 	File      string                     `json:"file,required"`
 	JSON      userMessageSummaryDiffJSON `json:"-"`
 }
@@ -3224,7 +3204,7 @@ type SessionUpdateParams struct {
 }
 
 type SessionUpdateParamsTime struct {
-	Archived param.Field[float64] `json:"archived"`
+	Archived param.Field[int64] `json:"archived"`
 }
 
 func (r SessionUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3245,9 +3225,9 @@ type SessionListParams struct {
 	Scope     param.Field[string]  `query:"scope"`
 	Path      param.Field[string]  `query:"path"`
 	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[float64] `query:"start"`
+	Start     param.Field[int64] `query:"start"`
 	Search    param.Field[string]  `query:"search"`
-	Limit     param.Field[float64] `query:"limit"`
+	Limit     param.Field[int64] `query:"limit"`
 }
 
 // URLQuery serializes [SessionListParams]'s query parameters as `url.Values`.
@@ -3659,20 +3639,52 @@ func (r SessionStatusIdle) ImplementsSessionStatus() {}
 
 // SessionStatusRetry represents a retry session status
 type SessionStatusRetry struct {
-	Type    string                 `json:"type,required"`
-	Attempt int64                  `json:"attempt,required"`
-	Message string                 `json:"message,required"`
-	Next    int64                  `json:"next,required"`
-	JSON    sessionStatusRetryJSON `json:"-"`
+	Type    string                     `json:"type,required"`
+	Attempt int64                      `json:"attempt,required"`
+	Message string                     `json:"message,required"`
+	Action  SessionStatusRetryAction   `json:"action,omitzero"`
+	Next    int64                      `json:"next,required"`
+	JSON    sessionStatusRetryJSON     `json:"-"`
 }
 
 type sessionStatusRetryJSON struct {
 	Type        apijson.Field
 	Attempt     apijson.Field
 	Message     apijson.Field
+	Action      apijson.Field
 	Next        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
+}
+
+// SessionStatusRetryAction represents the action to retry a session
+type SessionStatusRetryAction struct {
+	Reason   string                           `json:"reason,required"`
+	Provider string                           `json:"provider,required"`
+	Title    string                           `json:"title,required"`
+	Message  string                           `json:"message,required"`
+	Label    string                           `json:"label,required"`
+	Link     string                           `json:"link,omitzero"`
+	JSON     sessionStatusRetryActionJSON     `json:"-"`
+}
+
+type sessionStatusRetryActionJSON struct {
+	Reason      apijson.Field
+	Provider    apijson.Field
+	Title       apijson.Field
+	Message     apijson.Field
+	Label       apijson.Field
+	Link        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r sessionStatusRetryActionJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SessionStatusRetryAction) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r sessionStatusRetryJSON) RawJSON() string {
@@ -3708,8 +3720,8 @@ type SessionStatus interface {
 type SnapshotFileDiff struct {
 	File      string                `json:"file"`
 	Patch     string                `json:"patch"`
-	Additions float64               `json:"additions,required"`
-	Deletions float64               `json:"deletions,required"`
+	Additions int64               `json:"additions,required"`
+	Deletions int64               `json:"deletions,required"`
 	Status    SnapshotFileDiffStatus `json:"status"`
 	JSON      snapshotFileDiffJSON  `json:"-"`
 }

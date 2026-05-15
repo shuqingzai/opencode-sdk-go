@@ -86,8 +86,8 @@ type OAuth struct {
 	Refresh       string    `json:"refresh,required"`
 	Access        string    `json:"access,required"`
 	Expires       int64     `json:"expires,required"`
-	AccountId     string    `json:"accountId"`
-	EnterpriseUrl string    `json:"enterpriseUrl"`
+	AccountID     string    `json:"accountId"`
+	EnterpriseURL string    `json:"enterpriseUrl"`
 	JSON          oauthJSON `json:"-"`
 }
 
@@ -97,8 +97,8 @@ type oauthJSON struct {
 	Refresh       apijson.Field
 	Access        apijson.Field
 	Expires       apijson.Field
-	AccountId     apijson.Field
-	EnterpriseUrl apijson.Field
+	AccountID     apijson.Field
+	EnterpriseURL apijson.Field
 	raw           string
 	ExtraFields   map[string]apijson.Field
 }

@@ -333,22 +333,22 @@ func (r McpStatusStatus) IsKnown() bool {
 // McpOAuthConfig contains OAuth authentication configuration for an MCP server.
 type McpOAuthConfig struct {
 	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
-	ClientId string `json:"clientId"`
+	ClientID string `json:"clientId"`
 	// OAuth client secret (if required by the authorization server)
 	ClientSecret string `json:"clientSecret"`
 	// OAuth scopes to request during authorization
 	Scope string `json:"scope"`
 	// OAuth redirect URI
-	RedirectUri string            `json:"redirectUri"`
+	RedirectURI string            `json:"redirectUri"`
 	JSON        mcpOAuthConfigJSON `json:"-"`
 }
 
 // mcpOAuthConfigJSON contains the JSON metadata for the struct [McpOAuthConfig]
 type mcpOAuthConfigJSON struct {
-	ClientId     apijson.Field
+	ClientID     apijson.Field
 	ClientSecret apijson.Field
 	Scope        apijson.Field
-	RedirectUri  apijson.Field
+	RedirectURI  apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -453,7 +453,7 @@ type McpAddBodyConfigRemote struct {
 	// Headers to send with the request
 	Headers map[string]string `json:"headers"`
 	// OAuth authentication configuration for the MCP server. Set to false to disable OAuth auto-detection.
-	Oauth interface{} `json:"oauth"`
+	OAuth interface{} `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
 	Timeout int                        `json:"timeout"`
 	JSON    mcpAddBodyConfigRemoteJSON `json:"-"`
@@ -465,7 +465,7 @@ type mcpAddBodyConfigRemoteJSON struct {
 	URL         apijson.Field
 	Enabled     apijson.Field
 	Headers     apijson.Field
-	Oauth       apijson.Field
+	OAuth       apijson.Field
 	Timeout     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -504,15 +504,15 @@ func (r mcpAuthCallbackBodyJSON) RawJSON() string {
 
 // McpAuthStartResponse represents the response from starting OAuth authentication.
 type McpAuthStartResponse struct {
-	AuthorizationUrl string                   `json:"authorizationUrl,required"`
-	OauthState       string                   `json:"oauthState,required"`
+	AuthorizationURL string                   `json:"authorizationUrl,required"`
+	OAuthState       string                   `json:"oauthState,required"`
 	JSON             mcpAuthStartResponseJSON `json:"-"`
 }
 
 // mcpAuthStartResponseJSON contains the JSON metadata for the struct [McpAuthStartResponse]
 type mcpAuthStartResponseJSON struct {
-	AuthorizationUrl apijson.Field
-	OauthState       apijson.Field
+	AuthorizationURL apijson.Field
+	OAuthState       apijson.Field
 	raw              string
 	ExtraFields      map[string]apijson.Field
 }

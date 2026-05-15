@@ -51,7 +51,7 @@ func (r *ToolService) List(ctx context.Context, query ToolListParams, opts ...op
 }
 
 type ToolListItem struct {
-	Id          string           `json:"id,required"`
+	ID          string           `json:"id,required"`
 	Description string           `json:"description,required"`
 	Parameters  any              `json:"parameters,required"`
 	JSON        toolListItemJSON `json:"-"`
@@ -59,7 +59,7 @@ type ToolListItem struct {
 
 // toolListItemJSON contains the JSON metadata for the struct [ToolListItem]
 type toolListItemJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Description apijson.Field
 	Parameters  apijson.Field
 	raw         string

@@ -45,6 +45,7 @@ type Client struct {
 	V2Model      *V2ModelService
 	V2Provider   *V2ProviderService
 	Tool         *ToolService
+	Part         *PartService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should
@@ -94,6 +95,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.V2Model = NewV2ModelService(opts...)
 	r.V2Provider = NewV2ProviderService(opts...)
 	r.Tool = NewToolService(opts...)
+	r.Part = NewPartService(opts...)
 
 	return
 }

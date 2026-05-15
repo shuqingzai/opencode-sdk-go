@@ -118,7 +118,7 @@ func (r modelJSON) RawJSON() string {
 }
 
 type ModelCost struct {
-	Input      float64 `json:"input,required"`
+	Input      int64 `json:"input,required"`
 	Output     float64 `json:"output,required"`
 	CacheRead  float64 `json:"cache_read"`
 	CacheWrite float64 `json:"cache_write"`
@@ -147,8 +147,8 @@ func (r modelCostJSON) RawJSON() string {
 }
 
 type ModelLimit struct {
-	Context float64        `json:"context,required"`
-	Output  float64        `json:"output,required"`
+	Context int64          `json:"context,required"`
+	Output  int64          `json:"output,required"`
 	JSON    modelLimitJSON `json:"-"`
 }
 
@@ -227,13 +227,13 @@ func (r ModelModalitiesOutput) IsKnown() bool {
 }
 
 type ModelProvider struct {
-	Npm  string            `json:"npm,required"`
+	NPM  string            `json:"npm,required"`
 	JSON modelProviderJSON `json:"-"`
 }
 
 // modelProviderJSON contains the JSON metadata for the struct [ModelProvider]
 type modelProviderJSON struct {
-	Npm         apijson.Field
+	NPM         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -249,14 +249,14 @@ func (r modelProviderJSON) RawJSON() string {
 type ModelAPI struct {
 	ID   string       `json:"id"`
 	URL  string       `json:"url"`
-	Npm  string       `json:"npm"`
+	NPM  string       `json:"npm"`
 	JSON modelAPIJSON `json:"-"`
 }
 
 type modelAPIJSON struct {
 	ID          apijson.Field
 	URL         apijson.Field
-	Npm         apijson.Field
+	NPM         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -329,7 +329,7 @@ type Provider struct {
 	Models map[string]Model `json:"models,required"`
 	Name   string           `json:"name,required"`
 	API    string           `json:"api"`
-	Npm    string           `json:"npm"`
+	NPM    string           `json:"npm"`
 	Source ProviderSource   `json:"source"`
 	Key    string           `json:"key"`
 	// This field can have the runtime type of object.
@@ -344,7 +344,7 @@ type providerJSON struct {
 	Models      apijson.Field
 	Name        apijson.Field
 	API         apijson.Field
-	Npm         apijson.Field
+	NPM         apijson.Field
 	Source      apijson.Field
 	Key         apijson.Field
 	Options     apijson.Field

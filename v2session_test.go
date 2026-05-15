@@ -12,7 +12,7 @@ func TestV2SessionService(t *testing.T) {
 
 func TestV2SessionListParams(t *testing.T) {
 	params := V2SessionListParams{
-		Limit: Float(10),
+		Limit: Int(10),
 		Order: String("desc"),
 	}
 	v := params.URLQuery()

@@ -148,7 +148,7 @@ type FileReadResponse struct {
 	Type     FileReadResponseType     `json:"type,required"`
 	Diff     string                   `json:"diff"`
 	Encoding FileReadResponseEncoding `json:"encoding"`
-	MimeType string                   `json:"mimeType"`
+	MIMEType string                   `json:"mimeType"`
 	Patch    FileReadResponsePatch    `json:"patch"`
 	JSON     fileReadResponseJSON     `json:"-"`
 }
@@ -160,7 +160,7 @@ type fileReadResponseJSON struct {
 	Type        apijson.Field
 	Diff        apijson.Field
 	Encoding    apijson.Field
-	MimeType    apijson.Field
+	MIMEType    apijson.Field
 	Patch       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

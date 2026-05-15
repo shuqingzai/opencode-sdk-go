@@ -462,7 +462,7 @@ type APIErrorData struct {
 	Metadata        map[string]string `json:"metadata,omitempty"`
 	ResponseBody    string            `json:"responseBody,omitempty"`
 	ResponseHeaders map[string]string `json:"responseHeaders,omitempty"`
-	StatusCode      float64           `json:"statusCode,omitempty"`
+	StatusCode      int64           `json:"statusCode,omitempty"`
 	JSON            apiErrorDataJSON  `json:"-"`
 }
 

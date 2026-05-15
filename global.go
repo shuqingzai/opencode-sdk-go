@@ -220,7 +220,7 @@ type GlobalEvent struct {
 	// [EventListResponseEventWorktreeReady],
 	// [EventListResponseEventCatalogModelUpdated],
 	//
-	// [SyncEventXxx] (32 V1 SyncEvent types):
+	// [SyncEventXxx] (33 V1 SyncEvent types):
 	// [SyncEventMessagePartRemoved],
 	// [SyncEventMessagePartUpdated],
 	// [SyncEventMessageRemoved],
