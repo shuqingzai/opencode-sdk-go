@@ -138,6 +138,7 @@ func (r PermissionPatternArray) ImplementsPermissionPatternUnion() {}
 type SessionPermissionRespondParams struct {
 	Response  param.Field[SessionPermissionRespondParamsResponse] `json:"response,required"`
 	Directory param.Field[string]                                 `query:"directory"`
+	Workspace param.Field[string]                                 `query:"workspace"`
 }
 
 func (r SessionPermissionRespondParams) MarshalJSON() (data []byte, err error) {

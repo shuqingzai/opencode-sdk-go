@@ -766,6 +766,7 @@ func (r SyncEventSessionNextPrompted) implementsGlobalEventPayload() {}
 type SyncEventSessionNextPromptedData struct {
 	Timestamp float64                                     `json:"timestamp,required"`
 	SessionID string                                      `json:"sessionID,required"`
+	// This field can have the runtime type of map[string]interface{}.
 	Prompt    interface{}                                 `json:"prompt,required"`
 	JSON      syncEventSessionNextPromptedDataJSON        `json:"-"`
 }
@@ -1179,6 +1180,7 @@ func (r SyncEventSessionNextStepFailed) implementsGlobalEventPayload() {}
 type SyncEventSessionNextStepFailedData struct {
 	Timestamp float64                                        `json:"timestamp,required"`
 	SessionID string                                         `json:"sessionID,required"`
+	// This field can have the runtime type of [SessionErrorUnknown].
 	Error     interface{}                                    `json:"error,required"`
 	JSON      syncEventSessionNextStepFailedDataJSON         `json:"-"`
 }
@@ -1739,6 +1741,7 @@ type SyncEventSessionNextToolCalledData struct {
 	SessionID string                                            `json:"sessionID,required"`
 	CallID    string                                            `json:"callID,required"`
 	Tool      string                                            `json:"tool,required"`
+	// This field can have the runtime type of map[string]interface{}.
 	Input     interface{}                                       `json:"input,required"`
 	Provider  SyncEventSessionNextToolCalledDataProvider        `json:"provider,required"`
 	JSON      syncEventSessionNextToolCalledDataJSON            `json:"-"`
@@ -1820,7 +1823,9 @@ type SyncEventSessionNextToolProgressData struct {
 	Timestamp  float64                                           `json:"timestamp,required"`
 	SessionID  string                                            `json:"sessionID,required"`
 	CallID     string                                            `json:"callID,required"`
-	Structured interface{}                                       `json:"structured,required"`
+	// This field can have the runtime type of map[string]interface{}.
+	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
 	Content    []interface{}                                     `json:"content,required"`
 	JSON       syncEventSessionNextToolProgressDataJSON          `json:"-"`
 }
@@ -1879,7 +1884,9 @@ type SyncEventSessionNextToolSuccessData struct {
 	Timestamp  float64                                           `json:"timestamp,required"`
 	SessionID  string                                            `json:"sessionID,required"`
 	CallID     string                                            `json:"callID,required"`
-	Structured interface{}                                       `json:"structured,required"`
+	// This field can have the runtime type of map[string]interface{}.
+	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
 	Content    []interface{}                                     `json:"content,required"`
 	Provider   SyncEventSessionNextToolSuccessDataProvider       `json:"provider,required"`
 	JSON       syncEventSessionNextToolSuccessDataJSON           `json:"-"`
@@ -1961,6 +1968,7 @@ type SyncEventSessionNextToolFailedData struct {
 	Timestamp float64                                          `json:"timestamp,required"`
 	SessionID string                                           `json:"sessionID,required"`
 	CallID    string                                           `json:"callID,required"`
+	// This field can have the runtime type of [SessionErrorUnknown].
 	Error     interface{}                                      `json:"error,required"`
 	Provider  SyncEventSessionNextToolFailedDataProvider       `json:"provider,required"`
 	JSON      syncEventSessionNextToolFailedDataJSON           `json:"-"`
@@ -2041,6 +2049,7 @@ type SyncEventSessionNextRetriedData struct {
 	Timestamp float64                                      `json:"timestamp,required"`
 	SessionID string                                       `json:"sessionID,required"`
 	Attempt   float64                                      `json:"attempt,required"`
+	// This field can have the runtime type of map[string]interface{}.
 	Error     interface{}                                  `json:"error,required"`
 	JSON      syncEventSessionNextRetriedDataJSON          `json:"-"`
 }

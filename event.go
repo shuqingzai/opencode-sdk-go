@@ -758,13 +758,15 @@ func (r EventListResponseEventMessageUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventMessageUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessageUpdatedProperties struct {
-	Info Message                                            `json:"info,required"`
-	JSON eventListResponseEventMessageUpdatedPropertiesJSON `json:"-"`
+	SessionID string                                                 `json:"sessionID,required"`
+	Info      Message                                               `json:"info,required"`
+	JSON      eventListResponseEventMessageUpdatedPropertiesJSON    `json:"-"`
 }
 
 // eventListResponseEventMessageUpdatedPropertiesJSON contains the JSON metadata
 // for the struct [EventListResponseEventMessageUpdatedProperties]
 type eventListResponseEventMessageUpdatedPropertiesJSON struct {
+	SessionID   apijson.Field
 	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1078,22 +1080,20 @@ func (r EventListResponseEventPermissionReplied) implementsEventListResponse() {
 func (r EventListResponseEventPermissionReplied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionRepliedProperties struct {
-	PermissionID string                                                `json:"permissionID,required"`
-	RequestID    string                                                `json:"requestID,required"`
-	Response     string                                                `json:"response,required"`
-	SessionID    string                                                `json:"sessionID,required"`
-	JSON         eventListResponseEventPermissionRepliedPropertiesJSON `json:"-"`
+	RequestID string                                                `json:"requestID,required"`
+	Reply     PermissionReplyParamsReply                            `json:"reply,required"`
+	SessionID string                                                `json:"sessionID,required"`
+	JSON      eventListResponseEventPermissionRepliedPropertiesJSON `json:"-"`
 }
 
 // eventListResponseEventPermissionRepliedPropertiesJSON contains the JSON metadata
 // for the struct [EventListResponseEventPermissionRepliedProperties]
 type eventListResponseEventPermissionRepliedPropertiesJSON struct {
-	PermissionID apijson.Field
-	RequestID    apijson.Field
-	Response     apijson.Field
-	SessionID    apijson.Field
-	raw          string
-	ExtraFields  map[string]apijson.Field
+	RequestID   apijson.Field
+	Reply       apijson.Field
+	SessionID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
 }
 
 func (r *EventListResponseEventPermissionRepliedProperties) UnmarshalJSON(data []byte) (err error) {
@@ -1445,13 +1445,15 @@ func (r EventListResponseEventSessionCreated) implementsEventListResponse() {}
 func (r EventListResponseEventSessionCreated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionCreatedProperties struct {
-	Info Session                                            `json:"info,required"`
-	JSON eventListResponseEventSessionCreatedPropertiesJSON `json:"-"`
+	SessionID string                                                `json:"sessionID,required"`
+	Info      Session                                              `json:"info,required"`
+	JSON      eventListResponseEventSessionCreatedPropertiesJSON   `json:"-"`
 }
 
 // eventListResponseEventSessionCreatedPropertiesJSON contains the JSON metadata
 // for the struct [EventListResponseEventSessionCreatedProperties]
 type eventListResponseEventSessionCreatedPropertiesJSON struct {
+	SessionID   apijson.Field
 	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1507,13 +1509,15 @@ func (r EventListResponseEventSessionUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventSessionUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionUpdatedProperties struct {
-	Info Session                                            `json:"info,required"`
-	JSON eventListResponseEventSessionUpdatedPropertiesJSON `json:"-"`
+	SessionID string                                                `json:"sessionID,required"`
+	Info      Session                                              `json:"info,required"`
+	JSON      eventListResponseEventSessionUpdatedPropertiesJSON   `json:"-"`
 }
 
 // eventListResponseEventSessionUpdatedPropertiesJSON contains the JSON metadata
 // for the struct [EventListResponseEventSessionUpdatedProperties]
 type eventListResponseEventSessionUpdatedPropertiesJSON struct {
+	SessionID   apijson.Field
 	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1569,13 +1573,15 @@ func (r EventListResponseEventSessionDeleted) implementsEventListResponse() {}
 func (r EventListResponseEventSessionDeleted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionDeletedProperties struct {
-	Info Session                                            `json:"info,required"`
-	JSON eventListResponseEventSessionDeletedPropertiesJSON `json:"-"`
+	SessionID string                                                `json:"sessionID,required"`
+	Info      Session                                              `json:"info,required"`
+	JSON      eventListResponseEventSessionDeletedPropertiesJSON   `json:"-"`
 }
 
 // eventListResponseEventSessionDeletedPropertiesJSON contains the JSON metadata
 // for the struct [EventListResponseEventSessionDeletedProperties]
 type eventListResponseEventSessionDeletedPropertiesJSON struct {
+	SessionID   apijson.Field
 	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

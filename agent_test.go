@@ -25,7 +25,7 @@ func TestAgentListWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Agent.List(context.TODO(), opencode.AgentListParams{
+	_, err := client.App.Agents(context.TODO(), opencode.AgentListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {

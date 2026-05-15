@@ -42,6 +42,9 @@ type Client struct {
 	Formatter    *FormatterService
 	Sync         *SyncService
 	V2Session    *V2SessionService
+	V2Model      *V2ModelService
+	V2Provider   *V2ProviderService
+	Tool         *ToolService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should
@@ -88,6 +91,9 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Formatter = NewFormatterService(opts...)
 	r.Sync = NewSyncService(opts...)
 	r.V2Session = NewV2SessionService(opts...)
+	r.V2Model = NewV2ModelService(opts...)
+	r.V2Provider = NewV2ProviderService(opts...)
+	r.Tool = NewToolService(opts...)
 
 	return
 }

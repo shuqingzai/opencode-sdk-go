@@ -13,56 +13,6 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestToolIds(t *testing.T) {
-	t.Skip("Prism tests are disabled")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := opencode.NewClient(
-		option.WithBaseURL(baseURL),
-	)
-	_, err := client.Experimental.ToolIds(context.TODO(), opencode.ExperimentalToolIdsParams{
-		Directory: opencode.F("directory"),
-	})
-	if err != nil {
-		var apierr *opencode.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestToolList(t *testing.T) {
-	t.Skip("Prism tests are disabled")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := opencode.NewClient(
-		option.WithBaseURL(baseURL),
-	)
-	_, err := client.Experimental.ToolList(context.TODO(), opencode.ExperimentalToolListParams{
-		Provider:  opencode.F("openai"),
-		Model:     opencode.F("gpt-4"),
-		Directory: opencode.F("directory"),
-	})
-	if err != nil {
-		var apierr *opencode.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
 func TestExperimentalWorkspaceList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
@@ -75,7 +25,7 @@ func TestExperimentalWorkspaceList(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.ExperimentalWorkspaceList(context.TODO(), opencode.ExperimentalWorkspaceListParams{
+	_, err := client.Experimental.WorkspaceList(context.TODO(), opencode.ExperimentalWorkspaceListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -99,7 +49,7 @@ func TestExperimentalWorkspaceCreate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.ExperimentalWorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateInput{
+	_, err := client.Experimental.WorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateInput{
 		Type:   opencode.F("type"),
 		Branch: opencode.F("main"),
 	})
@@ -124,7 +74,7 @@ func TestExperimentalWorkspaceRemove(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.ExperimentalWorkspaceRemove(context.TODO(), "workspaceID", opencode.ExperimentalWorkspaceRemoveParams{
+	_, err := client.Experimental.WorkspaceRemove(context.TODO(), "workspaceID", opencode.ExperimentalWorkspaceRemoveParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {

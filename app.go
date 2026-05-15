@@ -292,13 +292,15 @@ func (r modelCapabilitiesJSON) RawJSON() string {
 type ModelStatus string
 
 const (
-	ModelStatusAlpha ModelStatus = "alpha"
-	ModelStatusBeta  ModelStatus = "beta"
+	ModelStatusAlpha      ModelStatus = "alpha"
+	ModelStatusBeta       ModelStatus = "beta"
+	ModelStatusDeprecated ModelStatus = "deprecated"
+	ModelStatusActive     ModelStatus = "active"
 )
 
 func (r ModelStatus) IsKnown() bool {
 	switch r {
-	case ModelStatusAlpha, ModelStatusBeta:
+	case ModelStatusAlpha, ModelStatusBeta, ModelStatusDeprecated, ModelStatusActive:
 		return true
 	}
 	return false

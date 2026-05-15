@@ -177,12 +177,13 @@ func (r fileReadResponseJSON) RawJSON() string {
 type FileReadResponseType string
 
 const (
-	FileReadResponseTypeText FileReadResponseType = "text"
+	FileReadResponseTypeText   FileReadResponseType = "text"
+	FileReadResponseTypeBinary FileReadResponseType = "binary"
 )
 
 func (r FileReadResponseType) IsKnown() bool {
 	switch r {
-	case FileReadResponseTypeText:
+	case FileReadResponseTypeText, FileReadResponseTypeBinary:
 		return true
 	}
 	return false
@@ -265,6 +266,7 @@ func (r fileReadResponsePatchHunkJSON) RawJSON() string {
 type FileListParams struct {
 	Path      param.Field[string] `query:"path,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [FileListParams]'s query parameters as `url.Values`.
@@ -278,6 +280,7 @@ func (r FileListParams) URLQuery() (v url.Values) {
 type FileReadParams struct {
 	Path      param.Field[string] `query:"path,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [FileReadParams]'s query parameters as `url.Values`.
@@ -290,6 +293,7 @@ func (r FileReadParams) URLQuery() (v url.Values) {
 
 type FileStatusParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [FileStatusParams]'s query parameters as `url.Values`.

@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/url"
 	"slices"
@@ -46,6 +47,24 @@ func (r *PermissionService) List(ctx context.Context, query PermissionListParams
 func (r *PermissionService) Reply(ctx context.Context, requestID string, params PermissionReplyParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "permission/" + requestID + "/reply"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Deprecated: Use [PermissionService.Reply] instead.
+//
+// Respond to a permission request (deprecated)
+func (r *PermissionService) Respond(ctx context.Context, sessionID string, permissionID string, params PermissionRespondParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	if permissionID == "" {
+		err = errors.New("missing required permissionID parameter")
+		return
+	}
+	path := "session/" + sessionID + "/permissions/" + permissionID
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
@@ -116,6 +135,47 @@ type PermissionReplyParams struct {
 
 func (r PermissionReplyParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Deprecated: Use [PermissionReplyParams] instead.
+//
+// Respond to a permission request (deprecated)
+type PermissionRespondParams struct {
+	// Response type: "once", "always", or "reject"
+	Response param.Field[PermissionRespondParamsResponse] `json:"response,required"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r PermissionRespondParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// URLQuery serializes [PermissionRespondParams]'s query parameters as `url.Values`.
+func (r PermissionRespondParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Deprecated: Use [PermissionReplyParamsReply] instead.
+//
+// Response type for permission respond
+type PermissionRespondParamsResponse string
+
+const (
+	PermissionRespondParamsResponseOnce   PermissionRespondParamsResponse = "once"
+	PermissionRespondParamsResponseAlways PermissionRespondParamsResponse = "always"
+	PermissionRespondParamsResponseReject PermissionRespondParamsResponse = "reject"
+)
+
+func (r PermissionRespondParamsResponse) IsKnown() bool {
+	switch r {
+	case PermissionRespondParamsResponseOnce, PermissionRespondParamsResponseAlways, PermissionRespondParamsResponseReject:
+		return true
+	}
+	return false
 }
 
 type PermissionListParams struct {

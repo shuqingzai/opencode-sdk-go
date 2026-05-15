@@ -293,6 +293,10 @@ func (r findTextResponseSubmatchesMatchJSON) RawJSON() string {
 type FindFilesParams struct {
 	Query     param.Field[string] `query:"query,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Dirs      param.Field[string] `query:"dirs"`
+	Type      param.Field[string] `query:"type"`
+	Limit     param.Field[int64]  `query:"limit"`
 }
 
 // URLQuery serializes [FindFilesParams]'s query parameters as `url.Values`.
@@ -306,6 +310,7 @@ func (r FindFilesParams) URLQuery() (v url.Values) {
 type FindSymbolsParams struct {
 	Query     param.Field[string] `query:"query,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [FindSymbolsParams]'s query parameters as `url.Values`.
@@ -319,6 +324,7 @@ func (r FindSymbolsParams) URLQuery() (v url.Values) {
 type FindTextParams struct {
 	Pattern   param.Field[string] `query:"pattern,required"`
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
 }
 
 // URLQuery serializes [FindTextParams]'s query parameters as `url.Values`.

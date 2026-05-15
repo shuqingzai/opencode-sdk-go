@@ -31,14 +31,16 @@ func (r *VcsService) Get(ctx context.Context, query VcsGetParams, opts ...option
 }
 
 type VcsInfo struct {
-	Branch string      `json:"branch,required"`
-	JSON   vcsInfoJSON `json:"-"`
+	Branch        string      `json:"branch"`
+	DefaultBranch string      `json:"default_branch"`
+	JSON          vcsInfoJSON `json:"-"`
 }
 
 type vcsInfoJSON struct {
-	Branch      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Branch        apijson.Field
+	DefaultBranch apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *VcsInfo) UnmarshalJSON(data []byte) (err error) {

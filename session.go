@@ -21,7 +21,9 @@ import (
 )
 
 // SessionService contains methods and other services that help with interacting
-// with the opencode API.
+// with the opencode API. This includes session CRUD operations, message management
+// (prompt, messages, commands, shell), and part-level operations
+// ([SessionService.PartDelete], [SessionService.PartUpdate]).
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
@@ -218,7 +220,7 @@ func (r *SessionService) Share(ctx context.Context, id string, body SessionShare
 }
 
 // Run a shell command
-func (r *SessionService) Shell(ctx context.Context, id string, params SessionShellParams, opts ...option.RequestOption) (res *AssistantMessage, err error) {
+func (r *SessionService) Shell(ctx context.Context, id string, params SessionShellParams, opts ...option.RequestOption) (res *SessionMessageResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -286,7 +288,7 @@ func (r *SessionService) Fork(ctx context.Context, id string, params SessionFork
 }
 
 // Get session diff
-func (r *SessionService) Diff(ctx context.Context, id string, query SessionDiffParams, opts ...option.RequestOption) (res *[]FileDiff, err error) {
+func (r *SessionService) Diff(ctx context.Context, id string, query SessionDiffParams, opts ...option.RequestOption) (res *[]SnapshotFileDiff, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -366,9 +368,27 @@ func (r *SessionService) PromptAsync(ctx context.Context, id string, params Sess
 }
 
 type Todo struct {
-	Content  string `json:"content,required"`
-	Status   string `json:"status,required"`
-	Priority string `json:"priority,required"`
+	Content  string  `json:"content,required"`
+	Status   string  `json:"status,required"`
+	Priority string  `json:"priority,required"`
+	JSON     todoJSON `json:"-"`
+}
+
+// todoJSON contains the JSON metadata for the struct [Todo]
+type todoJSON struct {
+	Content     apijson.Field
+	Status      apijson.Field
+	Priority    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *Todo) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r todoJSON) RawJSON() string {
+	return r.raw
 }
 
 type PermissionAction string
@@ -1048,19 +1068,24 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SymbolSource{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ResourceSource{}),
+		},
 	)
 }
 
 type FilePartSourceType string
 
 const (
-	FilePartSourceTypeFile   FilePartSourceType = "file"
-	FilePartSourceTypeSymbol FilePartSourceType = "symbol"
+	FilePartSourceTypeFile     FilePartSourceType = "file"
+	FilePartSourceTypeSymbol   FilePartSourceType = "symbol"
+	FilePartSourceTypeResource FilePartSourceType = "resource"
 )
 
 func (r FilePartSourceType) IsKnown() bool {
 	switch r {
-	case FilePartSourceTypeFile, FilePartSourceTypeSymbol:
+	case FilePartSourceTypeFile, FilePartSourceTypeSymbol, FilePartSourceTypeResource:
 		return true
 	}
 	return false
@@ -1709,11 +1734,16 @@ type Session struct {
 	Time        SessionTime    `json:"time,required"`
 	Title       string         `json:"title,required"`
 	Version     string         `json:"version,required"`
+	Agent       string         `json:"agent"`
+	Cost        float64        `json:"cost"`
+	Model       SessionModel   `json:"model"`
 	ParentID    string         `json:"parentID"`
+	Path        string         `json:"path"`
 	Revert      SessionRevert  `json:"revert"`
 	Share       SessionShare   `json:"share"`
-	Summary     SessionSummary `json:"summary"`
 	Slug        string         `json:"slug"`
+	Summary     SessionSummary `json:"summary"`
+	Tokens      SessionTokens  `json:"tokens"`
 	WorkspaceID string         `json:"workspaceID"`
 	// This field can have the runtime type of [[]PermissionRule].
 	Permission interface{} `json:"permission"`
@@ -1728,11 +1758,16 @@ type sessionJSON struct {
 	Time        apijson.Field
 	Title       apijson.Field
 	Version     apijson.Field
+	Agent       apijson.Field
+	Cost        apijson.Field
+	Model       apijson.Field
 	ParentID    apijson.Field
+	Path        apijson.Field
 	Revert      apijson.Field
 	Share       apijson.Field
-	Summary     apijson.Field
 	Slug        apijson.Field
+	Summary     apijson.Field
+	Tokens      apijson.Field
 	WorkspaceID apijson.Field
 	Permission  apijson.Field
 	raw         string
@@ -1871,6 +1906,78 @@ func (r *SessionSummaryDiff) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r sessionSummaryDiffJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionModel struct {
+	ID        string            `json:"id,required"`
+	ProviderID string           `json:"providerID,required"`
+	Variant   string            `json:"variant"`
+	JSON      sessionModelJSON  `json:"-"`
+}
+
+// sessionModelJSON contains the JSON metadata for the struct [SessionModel]
+type sessionModelJSON struct {
+	ID          apijson.Field
+	ProviderID  apijson.Field
+	Variant     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionModel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionModelJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionTokens struct {
+	Input     float64            `json:"input,required"`
+	Output    float64            `json:"output,required"`
+	Reasoning float64            `json:"reasoning,required"`
+	Cache     SessionTokensCache `json:"cache,required"`
+	JSON      sessionTokensJSON  `json:"-"`
+}
+
+// sessionTokensJSON contains the JSON metadata for the struct [SessionTokens]
+type sessionTokensJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	Reasoning   apijson.Field
+	Cache       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionTokens) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionTokensJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionTokensCache struct {
+	Read  float64                `json:"read,required"`
+	Write float64                `json:"write,required"`
+	JSON  sessionTokensCacheJSON `json:"-"`
+}
+
+// sessionTokensCacheJSON contains the JSON metadata for the struct [SessionTokensCache]
+type sessionTokensCacheJSON struct {
+	Read        apijson.Field
+	Write       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionTokensCache) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionTokensCacheJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -2218,6 +2325,61 @@ type SymbolSourceRangeStartParam struct {
 func (r SymbolSourceRangeStartParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+type ResourceSource struct {
+	ClientName string             `json:"clientName,required"`
+	Text       FilePartSourceText `json:"text,required"`
+	Type       ResourceSourceType `json:"type,required"`
+	Uri        string             `json:"uri,required"`
+	JSON       resourceSourceJSON `json:"-"`
+}
+
+// resourceSourceJSON contains the JSON metadata for the struct [ResourceSource]
+type resourceSourceJSON struct {
+	ClientName  apijson.Field
+	Text        apijson.Field
+	Type        apijson.Field
+	Uri         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ResourceSource) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r resourceSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ResourceSource) implementsFilePartSource() {}
+
+type ResourceSourceType string
+
+const (
+	ResourceSourceTypeResource ResourceSourceType = "resource"
+)
+
+func (r ResourceSourceType) IsKnown() bool {
+	switch r {
+	case ResourceSourceTypeResource:
+		return true
+	}
+	return false
+}
+
+type ResourceSourceParam struct {
+	ClientName param.Field[string]                  `json:"clientName,required"`
+	Text       param.Field[FilePartSourceTextParam] `json:"text,required"`
+	Type       param.Field[ResourceSourceType]      `json:"type,required"`
+	Uri        param.Field[string]                  `json:"uri,required"`
+}
+
+func (r ResourceSourceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ResourceSourceParam) implementsFilePartSourceUnionParam() {}
 
 type TextPart struct {
 	ID        string                 `json:"id,required"`
@@ -3060,11 +3222,20 @@ func (r sessionPromptResponseJSON) RawJSON() string {
 }
 
 type SessionNewParams struct {
-	Directory   param.Field[string]         `query:"directory"`
-	ParentID    param.Field[string]         `json:"parentID"`
-	Title       param.Field[string]         `json:"title"`
-	Permission  param.Field[PermissionRuleset] `json:"permission"`
-	WorkspaceID param.Field[string]         `json:"workspaceID"`
+	Directory   param.Field[string]                  `query:"directory"`
+	Workspace   param.Field[string]                  `query:"workspace"`
+	ParentID    param.Field[string]                  `json:"parentID"`
+	Title       param.Field[string]                  `json:"title"`
+	Agent       param.Field[string]                  `json:"agent"`
+	Model       param.Field[SessionNewParamsModel]   `json:"model"`
+	Permission  param.Field[PermissionRuleset]       `json:"permission"`
+	WorkspaceID param.Field[string]                  `json:"workspaceID"`
+}
+
+type SessionNewParamsModel struct {
+	ID         param.Field[string] `json:"id"`
+	ProviderID param.Field[string] `json:"providerID"`
+	Variant    param.Field[string] `json:"variant"`
 }
 
 func (r SessionNewParams) MarshalJSON() (data []byte, err error) {
@@ -3080,9 +3251,10 @@ func (r SessionNewParams) URLQuery() (v url.Values) {
 }
 
 type SessionUpdateParams struct {
-	Directory  param.Field[string]          `query:"directory"`
-	Title      param.Field[string]          `json:"title"`
-	Permission param.Field[PermissionRuleset] `json:"permission"`
+	Directory  param.Field[string]                  `query:"directory"`
+	Workspace  param.Field[string]                  `query:"workspace"`
+	Title      param.Field[string]                  `json:"title"`
+	Permission param.Field[PermissionRuleset]       `json:"permission"`
 	Time       param.Field[SessionUpdateParamsTime] `json:"time"`
 }
 
@@ -3105,6 +3277,8 @@ func (r SessionUpdateParams) URLQuery() (v url.Values) {
 type SessionListParams struct {
 	Directory param.Field[string]  `query:"directory"`
 	Workspace param.Field[string]  `query:"workspace"`
+	Scope     param.Field[string]  `query:"scope"`
+	Path      param.Field[string]  `query:"path"`
 	Roots     param.Field[bool]    `query:"roots"`
 	Start     param.Field[float64] `query:"start"`
 	Search    param.Field[string]  `query:"search"`
@@ -3172,14 +3346,15 @@ func (r SessionTodoParams) URLQuery() (v url.Values) {
 }
 
 type SessionCommandParams struct {
-	Arguments param.Field[string]                       `json:"arguments,required"`
-	Command   param.Field[string]                       `json:"command,required"`
-	Directory param.Field[string]                        `query:"directory"`
+	Directory param.Field[string]                       `query:"directory"`
+	Workspace param.Field[string]                       `query:"workspace"`
 	Agent     param.Field[string]                       `json:"agent"`
+	Arguments param.Field[string]                       `json:"arguments"`
+	Command   param.Field[string]                       `json:"command"`
 	MessageID param.Field[string]                       `json:"messageID"`
 	Model     param.Field[string]                       `json:"model"`
 	Variant   param.Field[string]                       `json:"variant"`
-	Parts     param.Field[[]SessionCommandParamsPart] `json:"parts"`
+	Parts     param.Field[[]SessionCommandParamsPart]   `json:"parts"`
 }
 
 type SessionCommandParamsPart struct {
@@ -3217,11 +3392,11 @@ func (r SessionGetParams) URLQuery() (v url.Values) {
 }
 
 type SessionInitParams struct {
-	MessageID  param.Field[string] `json:"messageID,required"`
-	ModelID    param.Field[string] `json:"modelID,required"`
-	ProviderID param.Field[string] `json:"providerID,required"`
 	Directory  param.Field[string] `query:"directory"`
 	Workspace  param.Field[string] `query:"workspace"`
+	MessageID  param.Field[string] `json:"messageID"`
+	ModelID    param.Field[string] `json:"modelID"`
+	ProviderID param.Field[string] `json:"providerID"`
 }
 
 func (r SessionInitParams) MarshalJSON() (data []byte, err error) {
@@ -3267,6 +3442,7 @@ func (r SessionMessagesParams) URLQuery() (v url.Values) {
 type SessionPromptParams struct {
 	Parts     param.Field[[]SessionPromptParamsPartUnion] `json:"parts,required"`
 	Directory param.Field[string]                         `query:"directory"`
+	Workspace param.Field[string]                         `query:"workspace"`
 	Agent     param.Field[string]                         `json:"agent"`
 	MessageID param.Field[string]                         `json:"messageID"`
 	Model     param.Field[SessionPromptParamsModel]       `json:"model"`
@@ -3430,13 +3606,13 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 }
 
 type SessionShellParams struct {
-	Agent     param.Field[string]                    `json:"agent,required"`
-	Command   param.Field[string]                    `json:"command,required"`
-	Directory param.Field[string]                    `query:"directory"`
-	MessageID param.Field[string]                    `json:"messageID"`
-	Model     param.Field[SessionPromptParamsModel]  `json:"model"`
-	Workspace param.Field[string]                    `query:"workspace"`
-	Variant   param.Field[string]                    `json:"variant"`
+	Directory param.Field[string]                        `query:"directory"`
+	Workspace param.Field[string]                        `query:"workspace"`
+	Agent     param.Field[string]                        `json:"agent"`
+	Command   param.Field[string]                        `json:"command"`
+	MessageID param.Field[string]                        `json:"messageID"`
+	Model     param.Field[SessionPromptParamsModel]      `json:"model"`
+	Variant   param.Field[string]                        `json:"variant"`
 	Parts     param.Field[[]SessionPromptParamsPartUnion] `json:"parts"`
 }
 
@@ -3453,11 +3629,11 @@ func (r SessionShellParams) URLQuery() (v url.Values) {
 }
 
 type SessionSummarizeParams struct {
-	ModelID    param.Field[string] `json:"modelID,required"`
-	ProviderID param.Field[string] `json:"providerID,required"`
 	Directory  param.Field[string] `query:"directory"`
 	Workspace  param.Field[string] `query:"workspace"`
 	Auto       param.Field[bool]   `json:"auto"`
+	ModelID    param.Field[string] `json:"modelID"`
+	ProviderID param.Field[string] `json:"providerID"`
 }
 
 func (r SessionSummarizeParams) MarshalJSON() (data []byte, err error) {
@@ -3563,34 +3739,49 @@ type SessionStatus interface {
 	ImplementsSessionStatus()
 }
 
-// FileDiff represents a diff for a file
-type FileDiff struct {
-	After     string       `json:"after,required"`
-	Before    string       `json:"before,required"`
-	Diff      string       `json:"diff,required"`
-	File      string       `json:"file,required"`
-	Additions float64      `json:"additions,required"`
-	Deletions float64      `json:"deletions,required"`
-	JSON      fileDiffJSON `json:"-"`
+// SnapshotFileDiff represents a diff for a file in a snapshot
+type SnapshotFileDiff struct {
+	File      string                `json:"file"`
+	Patch     string                `json:"patch"`
+	Additions float64               `json:"additions,required"`
+	Deletions float64               `json:"deletions,required"`
+	Status    SnapshotFileDiffStatus `json:"status"`
+	JSON      snapshotFileDiffJSON  `json:"-"`
 }
 
-type fileDiffJSON struct {
-	After       apijson.Field
-	Before      apijson.Field
-	Diff        apijson.Field
+type snapshotFileDiffJSON struct {
 	File        apijson.Field
+	Patch       apijson.Field
 	Additions   apijson.Field
 	Deletions   apijson.Field
+	Status      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *FileDiff) UnmarshalJSON(data []byte) (err error) {
+func (r *SnapshotFileDiff) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r fileDiffJSON) RawJSON() string {
+func (r snapshotFileDiffJSON) RawJSON() string {
 	return r.raw
+}
+
+// SnapshotFileDiffStatus represents the status of a file diff
+type SnapshotFileDiffStatus string
+
+const (
+	SnapshotFileDiffStatusAdded    SnapshotFileDiffStatus = "added"
+	SnapshotFileDiffStatusDeleted  SnapshotFileDiffStatus = "deleted"
+	SnapshotFileDiffStatusModified SnapshotFileDiffStatus = "modified"
+)
+
+func (r SnapshotFileDiffStatus) IsKnown() bool {
+	switch r {
+	case SnapshotFileDiffStatusAdded, SnapshotFileDiffStatusDeleted, SnapshotFileDiffStatusModified:
+		return true
+	}
+	return false
 }
 
 type SessionForkParams struct {
@@ -3650,6 +3841,7 @@ func (r PartDeleteParams) URLQuery() (v url.Values) {
 type PartUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	Part      param.Field[Part]   `json:"part"`
 }
 
 func (r PartUpdateParams) MarshalJSON() (data []byte, err error) {

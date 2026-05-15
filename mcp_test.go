@@ -151,7 +151,7 @@ func TestMcpAuthCallback(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Mcp.AuthCallback(context.TODO(), "name", opencode.McpAuthCallbackBody{
+	_, err := client.Mcp.AuthCallback(context.TODO(), "name", opencode.McpAuthCallbackParams{}, opencode.McpAuthCallbackBody{
 		Code: "code",
 	})
 	if err != nil {
@@ -175,7 +175,7 @@ func TestMcpAuthAuthenticate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Mcp.AuthAuthenticate(context.TODO(), "name")
+	_, err := client.Mcp.AuthAuthenticate(context.TODO(), "name", opencode.McpAuthAuthenticateParams{})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
@@ -197,7 +197,7 @@ func TestMcpAuthRemove(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Mcp.AuthRemove(context.TODO(), "name")
+	_, err := client.Mcp.AuthRemove(context.TODO(), "name", opencode.McpAuthRemoveParams{})
 	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {

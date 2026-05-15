@@ -43,19 +43,23 @@ func (r *CommandService) List(ctx context.Context, query CommandListParams, opts
 }
 
 type Command struct {
-	Name        string      `json:"name,required"`
-	Template    string      `json:"template,required"`
-	Agent       string      `json:"agent"`
-	Description string      `json:"description"`
-	Model       string      `json:"model"`
-	Subtask     bool        `json:"subtask"`
-	JSON        commandJSON `json:"-"`
+	Name        string        `json:"name,required"`
+	Template    string        `json:"template,required"`
+	Source      CommandSource `json:"source"`
+	Hints       []string      `json:"hints,required"`
+	Agent       string        `json:"agent"`
+	Description string        `json:"description"`
+	Model       string        `json:"model"`
+	Subtask     bool          `json:"subtask"`
+	JSON        commandJSON   `json:"-"`
 }
 
 // commandJSON contains the JSON metadata for the struct [Command]
 type commandJSON struct {
 	Name        apijson.Field
 	Template    apijson.Field
+	Source      apijson.Field
+	Hints       apijson.Field
 	Agent       apijson.Field
 	Description apijson.Field
 	Model       apijson.Field
@@ -74,6 +78,23 @@ func (r commandJSON) RawJSON() string {
 
 type CommandListParams struct {
 	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+type CommandSource string
+
+const (
+	CommandSourceCommand CommandSource = "command"
+	CommandSourceMcp     CommandSource = "mcp"
+	CommandSourceSkill   CommandSource = "skill"
+)
+
+func (r CommandSource) IsKnown() bool {
+	switch r {
+	case CommandSourceCommand, CommandSourceMcp, CommandSourceSkill:
+		return true
+	}
+	return false
 }
 
 // URLQuery serializes [CommandListParams]'s query parameters as `url.Values`.

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
@@ -15,6 +16,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // V2SessionService contains methods and other services that help with interacting
@@ -144,23 +146,27 @@ func (r v2SessionsResponseJSON) RawJSON() string {
 }
 
 type V2SessionInfo struct {
-	ID          string            `json:"id,required"`
-	ProjectID   string            `json:"projectID,required"`
-	Time        V2SessionInfoTime   `json:"time,required"`
-	Title       string            `json:"title,required"`
-	ParentID    string            `json:"parentID"`
-	WorkspaceID string            `json:"workspaceID"`
-	Path        string            `json:"path"`
-	Agent       string            `json:"agent"`
-	Model       V2SessionInfoModel  `json:"model"`
-	JSON        v2SessionInfoJSON   `json:"-"`
+	ID          string               `json:"id,required"`
+	ProjectID   string               `json:"projectID,required"`
+	Cost        float64              `json:"cost,required"`
+	Time        V2SessionInfoTime    `json:"time,required"`
+	Title       string               `json:"title,required"`
+	Tokens      V2SessionInfoTokens  `json:"tokens,required"`
+	ParentID    string               `json:"parentID"`
+	WorkspaceID string               `json:"workspaceID"`
+	Path        string               `json:"path"`
+	Agent       string               `json:"agent"`
+	Model       V2SessionInfoModel   `json:"model"`
+	JSON        v2SessionInfoJSON    `json:"-"`
 }
 
 type v2SessionInfoJSON struct {
 	ID          apijson.Field
 	ProjectID   apijson.Field
+	Cost        apijson.Field
 	Time        apijson.Field
 	Title       apijson.Field
+	Tokens      apijson.Field
 	ParentID    apijson.Field
 	WorkspaceID apijson.Field
 	Path        apijson.Field
@@ -221,6 +227,52 @@ func (r *V2SessionInfoModel) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionInfoModelJSON) RawJSON() string {
+	return r.raw
+}
+
+type V2SessionInfoTokens struct {
+	Input     float64                    `json:"input,required"`
+	Output    float64                    `json:"output,required"`
+	Reasoning float64                    `json:"reasoning,required"`
+	Cache     V2SessionInfoTokensCache   `json:"cache,required"`
+	JSON      v2SessionInfoTokensJSON    `json:"-"`
+}
+
+type v2SessionInfoTokensJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	Reasoning   apijson.Field
+	Cache       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionInfoTokens) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionInfoTokensJSON) RawJSON() string {
+	return r.raw
+}
+
+type V2SessionInfoTokensCache struct {
+	Read  float64                        `json:"read,required"`
+	Write float64                        `json:"write,required"`
+	JSON  v2SessionInfoTokensCacheJSON   `json:"-"`
+}
+
+type v2SessionInfoTokensCacheJSON struct {
+	Read        apijson.Field
+	Write       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionInfoTokensCache) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionInfoTokensCacheJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -440,7 +492,7 @@ type V2SessionMessageAssistant struct {
 	Finish    string                              `json:"finish"`
 	Cost      float64                             `json:"cost"`
 	Tokens    V2SessionMessageTokens              `json:"tokens"`
-	Error     interface{}                         `json:"error"`
+	Error     SessionErrorUnknown                 `json:"error"`
 	Metadata  interface{}                         `json:"metadata"`
 	JSON      v2SessionMessageAssistantJSON       `json:"-"`
 }
@@ -471,14 +523,14 @@ func (r v2SessionMessageAssistantJSON) RawJSON() string {
 }
 
 type V2SessionMessageCompaction struct {
-	ID       string                          `json:"id,required"`
-	Time     V2SessionMessageTime            `json:"time,required"`
-	Type     string                          `json:"type,required"`
-	Reason   string                          `json:"reason,required"`
-	Summary  string                          `json:"summary,required"`
-	Include  string                          `json:"include"`
-	Metadata interface{}                     `json:"metadata"`
-	JSON     v2SessionMessageCompactionJSON  `json:"-"`
+	ID       string                                    `json:"id,required"`
+	Time     V2SessionMessageTime                      `json:"time,required"`
+	Type     string                                    `json:"type,required"`
+	Reason   V2SessionMessageCompactionReason           `json:"reason,required"`
+	Summary  string                                    `json:"summary,required"`
+	Include  string                                    `json:"include"`
+	Metadata interface{}                               `json:"metadata"`
+	JSON     v2SessionMessageCompactionJSON            `json:"-"`
 }
 
 type v2SessionMessageCompactionJSON struct {
@@ -498,6 +550,43 @@ func (r *V2SessionMessageCompaction) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionMessageCompactionJSON) RawJSON() string {
+	return r.raw
+}
+
+type V2SessionMessageCompactionReason string
+
+const (
+	V2SessionMessageCompactionReasonAuto   V2SessionMessageCompactionReason = "auto"
+	V2SessionMessageCompactionReasonManual V2SessionMessageCompactionReason = "manual"
+)
+
+func (r V2SessionMessageCompactionReason) IsKnown() bool {
+	switch r {
+	case V2SessionMessageCompactionReasonAuto, V2SessionMessageCompactionReasonManual:
+		return true
+	}
+	return false
+}
+
+type SessionErrorUnknown struct {
+	Type    string                    `json:"type,required"`
+	Message string                    `json:"message,required"`
+	JSON    sessionErrorUnknownJSON   `json:"-"`
+}
+
+// sessionErrorUnknownJSON contains the JSON metadata for the struct [SessionErrorUnknown]
+type sessionErrorUnknownJSON struct {
+	Type        apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionErrorUnknown) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionErrorUnknownJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -634,16 +723,14 @@ func (r v2SessionMessageTokensCacheJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantContent struct {
-	Type string                                     `json:"type,required"`
-	Text string                                     `json:"text"`
-	ID   string                                     `json:"id"`
-	Name string                                     `json:"name"`
-	// This field can have the runtime type of [V2SessionMessageToolState].
-	State     interface{}                                     `json:"state"`
-	Provider  V2SessionMessageToolProvider                    `json:"provider"`
-	Time      V2SessionMessageToolTime                        `json:"time"`
-	JSON      v2SessionMessageAssistantContentJSON            `json:"-"`
-	union     V2SessionMessageAssistantContentUnion
+	Type     string                                     `json:"type,required"`
+	Text     string                                     `json:"text"`
+	ID       string                                     `json:"id"`
+	Name     string                                     `json:"name"`
+	State    V2SessionMessageToolState                  `json:"state"`
+	Provider V2SessionMessageToolProvider               `json:"provider"`
+	Time     V2SessionMessageToolTime                   `json:"time"`
+	JSON     v2SessionMessageAssistantContentJSON       `json:"-"`
 }
 
 type v2SessionMessageAssistantContentJSON struct {
@@ -733,15 +820,14 @@ func (r v2SessionMessageToolTimeJSON) RawJSON() string {
 	return r.raw
 }
 
-// V2SessionMessageAssistantContentUnion is a union for assistant message content
-// items (text, reasoning, tool).
-type V2SessionMessageAssistantContentUnion interface {
-	implementsV2SessionMessageAssistantContentUnion()
-}
-
-func (V2SessionMessageAssistantTextContent) implementsV2SessionMessageAssistantContentUnion()      {}
-func (V2SessionMessageAssistantReasoningContent) implementsV2SessionMessageAssistantContentUnion() {}
-func (V2SessionMessageAssistantToolContent) implementsV2SessionMessageAssistantContentUnion()      {}
+// V2SessionMessage assistant content sub-types are discriminated by the "type"
+// field: "text" (V2SessionMessageAssistantTextContent), "reasoning"
+// (V2SessionMessageAssistantReasoningContent), and "tool"
+// (V2SessionMessageAssistantToolContent).
+//
+// The [V2SessionMessageAssistantContent] struct is a fat struct containing all
+// possible fields across content types; the concrete sub-types provide
+// type-safe alternatives.
 
 // V2SessionPromptResponse is returned by the Prompt method. It represents a
 // V2SessionMessage union type.
@@ -855,7 +941,7 @@ func (r v2PromptSourceJSON) RawJSON() string {
 	return r.raw
 }
 
-// ===== V2 Content Unions =====
+// ===== V2 Content Sub-Types =====
 
 type V2SessionMessageAssistantTextContent struct {
 	Type string                                     `json:"type,required"`
@@ -930,6 +1016,314 @@ func (r v2SessionMessageAssistantToolContentJSON) RawJSON() string {
 	return r.raw
 }
 
+// ===== Tool Content Types (shared) =====
+
+type ToolTextContent struct {
+	Type string              `json:"type,required"`
+	Text string              `json:"text,required"`
+	JSON toolTextContentJSON `json:"-"`
+}
+
+type toolTextContentJSON struct {
+	Type        apijson.Field
+	Text        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ToolTextContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r toolTextContentJSON) RawJSON() string {
+	return r.raw
+}
+
+type ToolFileContent struct {
+	Type string              `json:"type,required"`
+	URI  string              `json:"uri,required"`
+	Mime string              `json:"mime,required"`
+	Name string              `json:"name"`
+	JSON toolFileContentJSON `json:"-"`
+}
+
+type toolFileContentJSON struct {
+	Type        apijson.Field
+	URI         apijson.Field
+	Mime        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ToolFileContent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r toolFileContentJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2 Session Message Tool State Types =====
+
+// V2SessionMessageToolState represents the state of a tool execution within a V2
+// session assistant message content item.
+//
+// It is a discriminated union of the following types:
+// [V2SessionMessageToolStatePending], [V2SessionMessageToolStateRunning],
+// [V2SessionMessageToolStateCompleted], [V2SessionMessageToolStateError].
+type V2SessionMessageToolState struct {
+	Status V2SessionMessageToolStateStatus `json:"status,required"`
+	JSON   v2SessionMessageToolStateJSON   `json:"-"`
+	union  V2SessionMessageToolStateUnion
+}
+
+type v2SessionMessageToolStateJSON struct {
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2SessionMessageToolStateJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *V2SessionMessageToolState) UnmarshalJSON(data []byte) (err error) {
+	*r = V2SessionMessageToolState{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2SessionMessageToolStateUnion] interface which you can
+// cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [V2SessionMessageToolStatePending],
+// [V2SessionMessageToolStateRunning], [V2SessionMessageToolStateCompleted],
+// [V2SessionMessageToolStateError].
+func (r V2SessionMessageToolState) AsUnion() V2SessionMessageToolStateUnion {
+	return r.union
+}
+
+// Union satisfied by [V2SessionMessageToolStatePending],
+// [V2SessionMessageToolStateRunning], [V2SessionMessageToolStateCompleted] or
+// [V2SessionMessageToolStateError].
+type V2SessionMessageToolStateUnion interface {
+	implementsV2SessionMessageToolStateUnion()
+}
+
+type V2SessionMessageToolStateStatus string
+
+const (
+	V2SessionMessageToolStateStatusPending   V2SessionMessageToolStateStatus = "pending"
+	V2SessionMessageToolStateStatusRunning   V2SessionMessageToolStateStatus = "running"
+	V2SessionMessageToolStateStatusCompleted V2SessionMessageToolStateStatus = "completed"
+	V2SessionMessageToolStateStatusError     V2SessionMessageToolStateStatus = "error"
+)
+
+func (r V2SessionMessageToolStateStatus) IsKnown() bool {
+	switch r {
+	case V2SessionMessageToolStateStatusPending,
+		V2SessionMessageToolStateStatusRunning,
+		V2SessionMessageToolStateStatusCompleted,
+		V2SessionMessageToolStateStatusError:
+		return true
+	}
+	return false
+}
+
+type V2SessionMessageToolStatePending struct {
+	Status V2SessionMessageToolStatePendingStatus `json:"status,required"`
+	Input  string                                 `json:"input,required"`
+	JSON   v2SessionMessageToolStatePendingJSON   `json:"-"`
+}
+
+type V2SessionMessageToolStatePendingStatus string
+
+const (
+	V2SessionMessageToolStatePendingStatusPending V2SessionMessageToolStatePendingStatus = "pending"
+)
+
+func (r V2SessionMessageToolStatePendingStatus) IsKnown() bool {
+	switch r {
+	case V2SessionMessageToolStatePendingStatusPending:
+		return true
+	}
+	return false
+}
+
+type v2SessionMessageToolStatePendingJSON struct {
+	Status      apijson.Field
+	Input       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageToolStatePending) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageToolStatePendingJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2SessionMessageToolStatePending) implementsV2SessionMessageToolStateUnion() {}
+
+type V2SessionMessageToolStateRunning struct {
+	Status     V2SessionMessageToolStateRunningStatus `json:"status,required"`
+	Input      map[string]interface{}                 `json:"input,required"`
+	Structured map[string]interface{}                 `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content interface{}                               `json:"content,required"`
+	JSON    v2SessionMessageToolStateRunningJSON      `json:"-"`
+}
+
+type V2SessionMessageToolStateRunningStatus string
+
+const (
+	V2SessionMessageToolStateRunningStatusRunning V2SessionMessageToolStateRunningStatus = "running"
+)
+
+func (r V2SessionMessageToolStateRunningStatus) IsKnown() bool {
+	switch r {
+	case V2SessionMessageToolStateRunningStatusRunning:
+		return true
+	}
+	return false
+}
+
+type v2SessionMessageToolStateRunningJSON struct {
+	Status      apijson.Field
+	Input       apijson.Field
+	Structured  apijson.Field
+	Content     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageToolStateRunning) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageToolStateRunningJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2SessionMessageToolStateRunning) implementsV2SessionMessageToolStateUnion() {}
+
+type V2SessionMessageToolStateCompleted struct {
+	Status      V2SessionMessageToolStateCompletedStatus `json:"status,required"`
+	Input       map[string]interface{}                   `json:"input,required"`
+	Structured  map[string]interface{}                   `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content     interface{}                              `json:"content,required"`
+	Attachments []V2PromptFileAttachment                 `json:"attachments"`
+	JSON        v2SessionMessageToolStateCompletedJSON   `json:"-"`
+}
+
+type V2SessionMessageToolStateCompletedStatus string
+
+const (
+	V2SessionMessageToolStateCompletedStatusCompleted V2SessionMessageToolStateCompletedStatus = "completed"
+)
+
+func (r V2SessionMessageToolStateCompletedStatus) IsKnown() bool {
+	switch r {
+	case V2SessionMessageToolStateCompletedStatusCompleted:
+		return true
+	}
+	return false
+}
+
+type v2SessionMessageToolStateCompletedJSON struct {
+	Status      apijson.Field
+	Input       apijson.Field
+	Structured  apijson.Field
+	Content     apijson.Field
+	Attachments apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageToolStateCompleted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageToolStateCompletedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2SessionMessageToolStateCompleted) implementsV2SessionMessageToolStateUnion() {}
+
+type V2SessionMessageToolStateError struct {
+	Status     V2SessionMessageToolStateErrorStatus `json:"status,required"`
+	Input      map[string]interface{}               `json:"input,required"`
+	Structured map[string]interface{}               `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content interface{}                              `json:"content,required"`
+	Error   SessionErrorUnknown                      `json:"error,required"`
+	JSON    v2SessionMessageToolStateErrorJSON        `json:"-"`
+}
+
+type V2SessionMessageToolStateErrorStatus string
+
+const (
+	V2SessionMessageToolStateErrorStatusError V2SessionMessageToolStateErrorStatus = "error"
+)
+
+func (r V2SessionMessageToolStateErrorStatus) IsKnown() bool {
+	switch r {
+	case V2SessionMessageToolStateErrorStatusError:
+		return true
+	}
+	return false
+}
+
+type v2SessionMessageToolStateErrorJSON struct {
+	Status      apijson.Field
+	Input       apijson.Field
+	Structured  apijson.Field
+	Content     apijson.Field
+	Error       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageToolStateError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageToolStateErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2SessionMessageToolStateError) implementsV2SessionMessageToolStateUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2SessionMessageToolStateUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageToolStatePending{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageToolStateRunning{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageToolStateCompleted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageToolStateError{}),
+		},
+	)
+}
+
 // ===== Param Types =====
 
 type V2SessionListParams struct {
@@ -969,8 +1363,23 @@ func (r V2SessionPromptParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionPromptParamsBody struct {
-	Prompt   param.Field[V2Prompt]          `json:"prompt,required"`
-	Delivery param.Field[string]            `json:"delivery"`
+	Prompt   param.Field[V2Prompt]   `json:"prompt,required"`
+	Delivery param.Field[SessionDelivery] `json:"delivery"`
+}
+
+type SessionDelivery string
+
+const (
+	SessionDeliveryImmediate SessionDelivery = "immediate"
+	SessionDeliveryDeferred  SessionDelivery = "deferred"
+)
+
+func (r SessionDelivery) IsKnown() bool {
+	switch r {
+	case SessionDeliveryImmediate, SessionDeliveryDeferred:
+		return true
+	}
+	return false
 }
 
 func (r V2SessionPromptParamsBody) MarshalJSON() (data []byte, err error) {

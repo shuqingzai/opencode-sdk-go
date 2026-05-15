@@ -1400,7 +1400,7 @@ func (r EventListResponseEventVcsBranchUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventVcsBranchUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventVcsBranchUpdatedProperties struct {
-	Branch string `json:"branch,required"`
+	Branch string                                            `json:"branch"`
 	JSON   eventListResponseEventVcsBranchUpdatedPropertiesJSON
 }
 
@@ -1836,8 +1836,8 @@ func (r EventListResponseEventWorktreeReady) implementsEventListResponse() {}
 func (r EventListResponseEventWorktreeReady) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorktreeReadyProperties struct {
-	Branch string `json:"branch,required"`
-	Name   string `json:"name,required"`
+	Branch string                                          `json:"branch"`
+	Name   string                                          `json:"name,required"`
 	JSON   eventListResponseEventWorktreeReadyPropertiesJSON
 }
 
@@ -3420,7 +3420,8 @@ type EventListResponseEventSessionNextToolCalledProperties struct {
 	SessionID string                                                    `json:"sessionID,required"`
 	CallID    string                                                    `json:"callID,required"`
 	Tool      string                                                    `json:"tool,required"`
-	Input     interface{}                                               `json:"input,required"`
+	// This field can have the runtime type of map[string]interface{}.
+	Input    interface{}                                               `json:"input,required"`
 	Provider  EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
 	JSON      eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
 }
@@ -3512,8 +3513,10 @@ type EventListResponseEventSessionNextToolProgressProperties struct {
 	Timestamp  float64                                                    `json:"timestamp,required"`
 	SessionID  string                                                     `json:"sessionID,required"`
 	CallID     string                                                     `json:"callID,required"`
-	Structured interface{}                                                `json:"structured,required"`
-	Content    []interface{}                                              `json:"content,required"`
+	// This field can have the runtime type of map[string]interface{}.
+	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content []interface{} `json:"content,required"`
 	JSON       eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
 }
 
@@ -3582,8 +3585,10 @@ type EventListResponseEventSessionNextToolSuccessProperties struct {
 	Timestamp  float64                                                    `json:"timestamp,required"`
 	SessionID  string                                                     `json:"sessionID,required"`
 	CallID     string                                                     `json:"callID,required"`
-	Structured interface{}                                                `json:"structured,required"`
-	Content    []interface{}                                              `json:"content,required"`
+	// This field can have the runtime type of map[string]interface{}.
+	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content   []interface{}                                              `json:"content,required"`
 	Provider   EventListResponseEventSessionNextToolCalledProvider        `json:"provider,required"`
 	JSON       eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
 }

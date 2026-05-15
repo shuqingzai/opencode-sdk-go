@@ -110,7 +110,7 @@ func (r WorktreeCreateParams) URLQuery() (v url.Values) {
 }
 
 type WorktreeRemoveParams struct {
-	Directory param.Field[string] `json:"directory,required"`
+	Directory param.Field[string] `json:"directory,required" query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 
@@ -127,7 +127,7 @@ func (r WorktreeRemoveParams) URLQuery() (v url.Values) {
 }
 
 type WorktreeResetParams struct {
-	Directory param.Field[string] `json:"directory,required"`
+	Directory param.Field[string] `json:"directory,required" query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 

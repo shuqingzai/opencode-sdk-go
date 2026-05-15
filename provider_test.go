@@ -73,7 +73,7 @@ func TestProviderOauthAuthorize(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Provider.OauthAuthorize(context.TODO(), "providerID", opencode.ProviderOauthAuthorizeBody{
+	_, err := client.Provider.OauthAuthorize(context.TODO(), "providerID", opencode.ProviderOauthAuthorizeParams{}, opencode.ProviderOauthAuthorizeBody{
 		Method: "auto",
 	})
 	if err != nil {
@@ -97,7 +97,7 @@ func TestProviderOauthCallback(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Provider.OauthCallback(context.TODO(), "providerID", opencode.ProviderOauthCallbackBody{
+	_, err := client.Provider.OauthCallback(context.TODO(), "providerID", opencode.ProviderOauthCallbackParams{}, opencode.ProviderOauthCallbackBody{
 		Method: "auto",
 		Code:   "code",
 	})

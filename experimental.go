@@ -36,22 +36,6 @@ func NewExperimentalService(opts ...option.RequestOption) (r *ExperimentalServic
 	return
 }
 
-// Get tool IDs
-func (r *ExperimentalService) ToolIds(ctx context.Context, query ExperimentalToolIdsParams, opts ...option.RequestOption) (res *[]string, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/tool/ids"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
-// List tools
-func (r *ExperimentalService) ToolList(ctx context.Context, query ExperimentalToolListParams, opts ...option.RequestOption) (res *[]ToolListItem, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/tool"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
 // List workspaces
 func (r *ExperimentalService) WorkspaceList(ctx context.Context, query ExperimentalWorkspaceListParams, opts ...option.RequestOption) (res *[]Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -152,30 +136,6 @@ func (r *ExperimentalService) ResourceList(ctx context.Context, query Experiment
 	return
 }
 
-type ToolListItem struct {
-	Id          string           `json:"id,required"`
-	Description string           `json:"description,required"`
-	Parameters  any              `json:"parameters,required"`
-	JSON        toolListItemJSON `json:"-"`
-}
-
-// toolListItemJSON contains the JSON metadata for the struct [ToolListItem]
-type toolListItemJSON struct {
-	Id          apijson.Field
-	Description apijson.Field
-	Parameters  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ToolListItem) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r toolListItemJSON) RawJSON() string {
-	return r.raw
-}
-
 type Workspace struct {
 	Id        string        `json:"id,required"`
 	Type      string        `json:"type,required"`
@@ -206,34 +166,6 @@ func (r *Workspace) UnmarshalJSON(data []byte) (err error) {
 
 func (r workspaceJSON) RawJSON() string {
 	return r.raw
-}
-
-type ExperimentalToolIdsParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ExperimentalToolIdsParams]'s query parameters as `url.Values`.
-func (r ExperimentalToolIdsParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ExperimentalToolListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Provider  param.Field[string] `query:"provider,required"`
-	Model     param.Field[string] `query:"model,required"`
-}
-
-// URLQuery serializes [ExperimentalToolListParams]'s query parameters as `url.Values`.
-func (r ExperimentalToolListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }
 
 type ExperimentalWorkspaceListParams struct {

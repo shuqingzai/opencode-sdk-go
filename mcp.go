@@ -91,7 +91,7 @@ func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthSt
 }
 
 // OAuth callback
-func (r *McpService) AuthCallback(ctx context.Context, name string, body McpAuthCallbackBody, opts ...option.RequestOption) (res *McpStatus, err error) {
+func (r *McpService) AuthCallback(ctx context.Context, name string, query McpAuthCallbackParams, body McpAuthCallbackBody, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -103,7 +103,7 @@ func (r *McpService) AuthCallback(ctx context.Context, name string, body McpAuth
 }
 
 // Authenticate with MCP server
-func (r *McpService) AuthAuthenticate(ctx context.Context, name string, opts ...option.RequestOption) (res *McpStatus, err error) {
+func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -115,7 +115,7 @@ func (r *McpService) AuthAuthenticate(ctx context.Context, name string, opts ...
 }
 
 // Remove MCP server authentication
-func (r *McpService) AuthRemove(ctx context.Context, name string, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
+func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -605,6 +605,48 @@ type McpAuthStartParams struct {
 
 // URLQuery serializes [McpAuthStartParams]'s query parameters as `url.Values`.
 func (r McpAuthStartParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// McpAuthCallbackParams contains the query parameters for OAuth callback.
+type McpAuthCallbackParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [McpAuthCallbackParams]'s query parameters as `url.Values`.
+func (r McpAuthCallbackParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// McpAuthAuthenticateParams contains the query parameters for authenticating with MCP server.
+type McpAuthAuthenticateParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [McpAuthAuthenticateParams]'s query parameters as `url.Values`.
+func (r McpAuthAuthenticateParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// McpAuthRemoveParams contains the query parameters for removing MCP server authentication.
+type McpAuthRemoveParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [McpAuthRemoveParams]'s query parameters as `url.Values`.
+func (r McpAuthRemoveParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

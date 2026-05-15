@@ -51,7 +51,6 @@ func TestConfigUpdate(t *testing.T) {
 	)
 	_, err := client.Config.Update(
 		context.TODO(),
-		opencode.Config{},
 		opencode.ConfigUpdateParams{
 			Directory: opencode.F("directory"),
 		},

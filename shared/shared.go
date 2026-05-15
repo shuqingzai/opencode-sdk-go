@@ -391,10 +391,10 @@ func (r APIError) ImplementsAssistantMessageError() {}
 type APIErrorData struct {
 	IsRetryable     bool              `json:"isRetryable,required"`
 	Message         string            `json:"message,required"`
-	Metadata        map[string]string `json:"metadata"`
-	ResponseBody    string            `json:"responseBody"`
-	ResponseHeaders map[string]string `json:"responseHeaders"`
-	StatusCode      float64           `json:"statusCode"`
+	Metadata        map[string]string `json:"metadata,omitempty"`
+	ResponseBody    string            `json:"responseBody,omitempty"`
+	ResponseHeaders map[string]string `json:"responseHeaders,omitempty"`
+	StatusCode      float64           `json:"statusCode,omitempty"`
 	JSON            apiErrorDataJSON  `json:"-"`
 }
 
@@ -427,6 +427,329 @@ const (
 func (r APIErrorName) IsKnown() bool {
 	switch r {
 	case APIErrorNameAPIError:
+		return true
+	}
+	return false
+}
+
+type VcsApplyError struct {
+	Data VcsApplyErrorData `json:"data,required"`
+	Name VcsApplyErrorName `json:"name,required"`
+	JSON vcsApplyErrorJSON `json:"-"`
+}
+
+// vcsApplyErrorJSON contains the JSON metadata for the struct [VcsApplyError]
+type vcsApplyErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VcsApplyError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vcsApplyErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type VcsApplyErrorData struct {
+	Message string                `json:"message,required"`
+	Reason  VcsApplyErrorReason   `json:"reason,required"`
+	JSON    vcsApplyErrorDataJSON `json:"-"`
+}
+
+// vcsApplyErrorDataJSON contains the JSON metadata for the struct [VcsApplyErrorData]
+type vcsApplyErrorDataJSON struct {
+	Message     apijson.Field
+	Reason      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VcsApplyErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vcsApplyErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type VcsApplyErrorName string
+
+const (
+	VcsApplyErrorNameVcsApplyError VcsApplyErrorName = "VcsApplyError"
+)
+
+func (r VcsApplyErrorName) IsKnown() bool {
+	switch r {
+	case VcsApplyErrorNameVcsApplyError:
+		return true
+	}
+	return false
+}
+
+type VcsApplyErrorReason string
+
+const (
+	VcsApplyErrorReasonNonGit  VcsApplyErrorReason = "non-git"
+	VcsApplyErrorReasonNotClean VcsApplyErrorReason = "not-clean"
+)
+
+func (r VcsApplyErrorReason) IsKnown() bool {
+	switch r {
+	case VcsApplyErrorReasonNonGit, VcsApplyErrorReasonNotClean:
+		return true
+	}
+	return false
+}
+
+type WorkspaceWarpError struct {
+	Data WorkspaceWarpErrorData `json:"data,required"`
+	Name WorkspaceWarpErrorName `json:"name,required"`
+	JSON workspaceWarpErrorJSON `json:"-"`
+}
+
+// workspaceWarpErrorJSON contains the JSON metadata for the struct [WorkspaceWarpError]
+type workspaceWarpErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceWarpError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceWarpErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkspaceWarpErrorData struct {
+	Message string                     `json:"message,required"`
+	JSON    workspaceWarpErrorDataJSON `json:"-"`
+}
+
+// workspaceWarpErrorDataJSON contains the JSON metadata for the struct [WorkspaceWarpErrorData]
+type workspaceWarpErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceWarpErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceWarpErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkspaceWarpErrorName string
+
+const (
+	WorkspaceWarpErrorNameWorkspaceWarpError WorkspaceWarpErrorName = "WorkspaceWarpError"
+)
+
+func (r WorkspaceWarpErrorName) IsKnown() bool {
+	switch r {
+	case WorkspaceWarpErrorNameWorkspaceWarpError:
+		return true
+	}
+	return false
+}
+
+type NotFoundError struct {
+	Data NotFoundErrorData `json:"data,required"`
+	Name NotFoundErrorName `json:"name,required"`
+	JSON notFoundErrorJSON `json:"-"`
+}
+
+// notFoundErrorJSON contains the JSON metadata for the struct [NotFoundError]
+type notFoundErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *NotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r notFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type NotFoundErrorData struct {
+	Message string                `json:"message,required"`
+	JSON    notFoundErrorDataJSON `json:"-"`
+}
+
+// notFoundErrorDataJSON contains the JSON metadata for the struct [NotFoundErrorData]
+type notFoundErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *NotFoundErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r notFoundErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type NotFoundErrorName string
+
+const (
+	NotFoundErrorNameNotFoundError NotFoundErrorName = "NotFoundError"
+)
+
+func (r NotFoundErrorName) IsKnown() bool {
+	switch r {
+	case NotFoundErrorNameNotFoundError:
+		return true
+	}
+	return false
+}
+
+type BadRequestError struct {
+	Data BadRequestErrorData `json:"data,required"`
+	Name BadRequestErrorName `json:"name,required"`
+	JSON badRequestErrorJSON `json:"-"`
+}
+
+// badRequestErrorJSON contains the JSON metadata for the struct [BadRequestError]
+type badRequestErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *BadRequestError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r badRequestErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type BadRequestErrorData struct {
+	Message string                `json:"message,required"`
+	Kind    BadRequestErrorKind   `json:"kind"`
+	JSON    badRequestErrorDataJSON `json:"-"`
+}
+
+// badRequestErrorDataJSON contains the JSON metadata for the struct [BadRequestErrorData]
+type badRequestErrorDataJSON struct {
+	Message     apijson.Field
+	Kind        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *BadRequestErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r badRequestErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type BadRequestErrorName string
+
+const (
+	BadRequestErrorNameBadRequest BadRequestErrorName = "BadRequest"
+)
+
+func (r BadRequestErrorName) IsKnown() bool {
+	switch r {
+	case BadRequestErrorNameBadRequest:
+		return true
+	}
+	return false
+}
+
+type BadRequestErrorKind string
+
+const (
+	BadRequestErrorKindParams  BadRequestErrorKind = "Params"
+	BadRequestErrorKindHeaders BadRequestErrorKind = "Headers"
+	BadRequestErrorKindQuery   BadRequestErrorKind = "Query"
+	BadRequestErrorKindBody    BadRequestErrorKind = "Body"
+	BadRequestErrorKindPayload BadRequestErrorKind = "Payload"
+)
+
+func (r BadRequestErrorKind) IsKnown() bool {
+	switch r {
+	case BadRequestErrorKindParams, BadRequestErrorKindHeaders, BadRequestErrorKindQuery, BadRequestErrorKindBody, BadRequestErrorKindPayload:
+		return true
+	}
+	return false
+}
+
+type WorktreeError struct {
+	Data WorktreeErrorData `json:"data,required"`
+	Name WorktreeErrorName `json:"name,required"`
+	JSON worktreeErrorJSON `json:"-"`
+}
+
+// worktreeErrorJSON contains the JSON metadata for the struct [WorktreeError]
+type worktreeErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorktreeError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r worktreeErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorktreeErrorData struct {
+	Message string               `json:"message,required"`
+	JSON    worktreeErrorDataJSON `json:"-"`
+}
+
+// worktreeErrorDataJSON contains the JSON metadata for the struct [WorktreeErrorData]
+type worktreeErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorktreeErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r worktreeErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorktreeErrorName string
+
+const (
+	WorktreeErrorNameWorktreeNotGitError               WorktreeErrorName = "WorktreeNotGitError"
+	WorktreeErrorNameWorktreeNameGenerationFailedError  WorktreeErrorName = "WorktreeNameGenerationFailedError"
+	WorktreeErrorNameWorktreeCreateFailedError          WorktreeErrorName = "WorktreeCreateFailedError"
+	WorktreeErrorNameWorktreeStartCommandFailedError    WorktreeErrorName = "WorktreeStartCommandFailedError"
+	WorktreeErrorNameWorktreeRemoveFailedError          WorktreeErrorName = "WorktreeRemoveFailedError"
+	WorktreeErrorNameWorktreeResetFailedError           WorktreeErrorName = "WorktreeResetFailedError"
+	WorktreeErrorNameWorktreeListFailedError            WorktreeErrorName = "WorktreeListFailedError"
+)
+
+func (r WorktreeErrorName) IsKnown() bool {
+	switch r {
+	case WorktreeErrorNameWorktreeNotGitError, WorktreeErrorNameWorktreeNameGenerationFailedError, WorktreeErrorNameWorktreeCreateFailedError, WorktreeErrorNameWorktreeStartCommandFailedError, WorktreeErrorNameWorktreeRemoveFailedError, WorktreeErrorNameWorktreeResetFailedError, WorktreeErrorNameWorktreeListFailedError:
 		return true
 	}
 	return false

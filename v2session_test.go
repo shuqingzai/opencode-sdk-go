@@ -41,7 +41,7 @@ func TestV2SessionPromptParams(t *testing.T) {
 			Prompt: F(V2Prompt{
 				Text: String("hello"),
 			}),
-			Delivery: String("immediate"),
+			Delivery: F(SessionDeliveryImmediate),
 		},
 	}
 	data, err := params.MarshalJSON()

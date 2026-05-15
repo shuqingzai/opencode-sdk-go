@@ -46,10 +46,10 @@ func (r *ConfigService) Get(ctx context.Context, query ConfigGetParams, opts ...
 }
 
 // Update config
-func (r *ConfigService) Update(ctx context.Context, body Config, opts ...option.RequestOption) (res *Config, err error) {
+func (r *ConfigService) Update(ctx context.Context, params ConfigUpdateParams, opts ...option.RequestOption) (res *Config, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "config"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
 	return
 }
 
@@ -66,6 +66,8 @@ type Config struct {
 	Schema string `json:"$schema"`
 	// Agent configuration, see https://opencode.ai/docs/agent
 	Agent ConfigAgent `json:"agent"`
+	// Attachment configuration for image handling
+	Attachment AttachmentConfig `json:"attachment"`
 	// @deprecated Use 'share' field instead. Share newly created sessions
 	// automatically
 	Autoshare bool `json:"autoshare"`
@@ -103,9 +105,13 @@ type Config struct {
 	Plugin     []string         `json:"plugin"`
 	// Custom provider configurations and model overrides
 	Provider map[string]ConfigProvider `json:"provider"`
+	// Reference configuration for external documentation
+	Reference ReferenceConfig `json:"reference"`
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
 	Share ConfigShare `json:"share"`
+	// Shell command to use for terminal operations
+	Shell string `json:"shell"`
 	// Server configuration
 	Server ServerConfig `json:"server"`
 	// Skills configuration for paths and URLs
@@ -116,7 +122,9 @@ type Config struct {
 	Snapshot   bool   `json:"snapshot"`
 	// Theme name to use for the interface
 	Theme string          `json:"theme"`
-	Tools map[string]bool `json:"tools"`
+	// Tool output configuration
+	ToolOutput ConfigToolOutput `json:"tool_output"`
+	Tools      map[string]bool  `json:"tools"`
 	// TUI specific settings
 	Tui ConfigTui `json:"tui"`
 	// Custom username to display in conversations instead of system username
@@ -131,6 +139,7 @@ type Config struct {
 type configJSON struct {
 	Schema            apijson.Field
 	Agent             apijson.Field
+	Attachment        apijson.Field
 	Autoshare         apijson.Field
 	Autoupdate        apijson.Field
 	Command           apijson.Field
@@ -151,12 +160,15 @@ type configJSON struct {
 	Permission        apijson.Field
 	Plugin            apijson.Field
 	Provider          apijson.Field
+	Reference         apijson.Field
 	Share             apijson.Field
+	Shell             apijson.Field
 	Server            apijson.Field
 	Skills            apijson.Field
 	SmallModel        apijson.Field
 	Snapshot          apijson.Field
 	Theme             apijson.Field
+	ToolOutput        apijson.Field
 	Tools             apijson.Field
 	Tui               apijson.Field
 	Username          apijson.Field
@@ -3229,8 +3241,51 @@ func (r ConfigGetParams) URLQuery() (v url.Values) {
 }
 
 type ConfigUpdateParams struct {
+	// Query parameters
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	// Body parameters — all Config fields as optional
+	Schema            param.Field[string]                        `json:"$schema"`
+	Agent             param.Field[ConfigAgent]                   `json:"agent"`
+	Attachment        param.Field[AttachmentConfig]              `json:"attachment"`
+	Autoshare         param.Field[bool]                          `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand]      `json:"command"`
+	Compaction        param.Field[ConfigCompaction]              `json:"compaction"`
+	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]              `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]            `json:"experimental"`
+	Formatter         param.Field[map[string]ConfigFormatter]    `json:"formatter"`
+	Instructions      param.Field[[]string]                      `json:"instructions"`
+	Keybinds          param.Field[KeybindsConfig]                `json:"keybinds"`
+	Layout            param.Field[ConfigLayout]                  `json:"layout"`
+	LogLevel          param.Field[ConfigLogLevel]                `json:"logLevel"`
+	Lsp               param.Field[map[string]ConfigLsp]          `json:"lsp"`
+	Mcp               param.Field[map[string]ConfigMcp]          `json:"mcp"`
+	Mode              param.Field[ConfigMode]                    `json:"mode"`
+	Model             param.Field[string]                        `json:"model"`
+	Permission        param.Field[ConfigPermission]              `json:"permission"`
+	Plugin            param.Field[[]string]                      `json:"plugin"`
+	Provider          param.Field[map[string]ConfigProvider]     `json:"provider"`
+	Reference         param.Field[ReferenceConfig]               `json:"reference"`
+	Share             param.Field[ConfigShare]                   `json:"share"`
+	Shell             param.Field[string]                        `json:"shell"`
+	Server            param.Field[ServerConfig]                  `json:"server"`
+	Skills            param.Field[ConfigSkills]                  `json:"skills"`
+	SmallModel        param.Field[string]                        `json:"small_model"`
+	Snapshot          param.Field[bool]                          `json:"snapshot"`
+	Theme             param.Field[string]                        `json:"theme"`
+	ToolOutput        param.Field[ConfigToolOutput]              `json:"tool_output"`
+	Tools             param.Field[map[string]bool]               `json:"tools"`
+	Tui               param.Field[ConfigTui]                     `json:"tui"`
+	Username          param.Field[string]                        `json:"username"`
+	Watcher           param.Field[ConfigWatcher]                 `json:"watcher"`
+	DefaultAgent      param.Field[string]                        `json:"default_agent"`
+}
+
+func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // URLQuery serializes [ConfigUpdateParams]'s query parameters as `url.Values`.
@@ -3275,5 +3330,137 @@ func (r *ConfigProvidersResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r configProvidersResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Attachment configuration for image handling
+type AttachmentConfig struct {
+	// Image attachment configuration
+	Image ImageAttachmentConfig `json:"image"`
+	JSON  attachmentConfigJSON  `json:"-"`
+}
+
+// attachmentConfigJSON contains the JSON metadata for the struct [AttachmentConfig]
+type attachmentConfigJSON struct {
+	Image       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AttachmentConfig) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r attachmentConfigJSON) RawJSON() string {
+	return r.raw
+}
+
+// Image attachment configuration
+type ImageAttachmentConfig struct {
+	// Automatically resize images before sending
+	AutoResize bool `json:"auto_resize"`
+	// Maximum image width in pixels
+	MaxWidth int64 `json:"max_width"`
+	// Maximum image height in pixels
+	MaxHeight int64 `json:"max_height"`
+	// Maximum base64 encoded image size in bytes
+	MaxBase64Bytes int64                    `json:"max_base64_bytes"`
+	JSON           imageAttachmentConfigJSON `json:"-"`
+}
+
+// imageAttachmentConfigJSON contains the JSON metadata for the struct [ImageAttachmentConfig]
+type imageAttachmentConfigJSON struct {
+	AutoResize     apijson.Field
+	MaxWidth       apijson.Field
+	MaxHeight      apijson.Field
+	MaxBase64Bytes apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *ImageAttachmentConfig) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r imageAttachmentConfigJSON) RawJSON() string {
+	return r.raw
+}
+
+// Reference configuration for external documentation
+type ReferenceConfig map[string]ReferenceConfigEntry
+
+// Reference configuration entry
+// This field can have the runtime type of [string], [ReferenceConfigEntryRepository], [ReferenceConfigEntryPath].
+type ReferenceConfigEntry interface{}
+
+// Reference configuration entry for a repository
+type ReferenceConfigEntryRepository struct {
+	// Git repository URL, host/path reference, or GitHub owner/repo shorthand
+	Repository string `json:"repository"`
+	// Branch to reference
+	Branch string                           `json:"branch"`
+	JSON   referenceConfigEntryRepositoryJSON `json:"-"`
+}
+
+// referenceConfigEntryRepositoryJSON contains the JSON metadata for the struct [ReferenceConfigEntryRepository]
+type referenceConfigEntryRepositoryJSON struct {
+	Repository  apijson.Field
+	Branch      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ReferenceConfigEntryRepository) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r referenceConfigEntryRepositoryJSON) RawJSON() string {
+	return r.raw
+}
+
+// Reference configuration entry for a local path
+type ReferenceConfigEntryPath struct {
+	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
+	Path string                         `json:"path"`
+	JSON referenceConfigEntryPathJSON `json:"-"`
+}
+
+// referenceConfigEntryPathJSON contains the JSON metadata for the struct [ReferenceConfigEntryPath]
+type referenceConfigEntryPathJSON struct {
+	Path        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ReferenceConfigEntryPath) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r referenceConfigEntryPathJSON) RawJSON() string {
+	return r.raw
+}
+
+// Tool output configuration
+type ConfigToolOutput struct {
+	// Maximum number of lines to display in tool output
+	MaxLines int64 `json:"max_lines"`
+	// Maximum number of bytes to display in tool output
+	MaxBytes int64                 `json:"max_bytes"`
+	JSON     configToolOutputJSON `json:"-"`
+}
+
+// configToolOutputJSON contains the JSON metadata for the struct [ConfigToolOutput]
+type configToolOutputJSON struct {
+	MaxLines    apijson.Field
+	MaxBytes    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigToolOutput) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configToolOutputJSON) RawJSON() string {
 	return r.raw
 }

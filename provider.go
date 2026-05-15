@@ -54,7 +54,7 @@ func (r *ProviderService) Auth(ctx context.Context, query ProviderAuthParams, op
 }
 
 // Start OAuth authorization flow
-func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, body ProviderOauthAuthorizeBody, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
+func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, query ProviderOauthAuthorizeParams, body ProviderOauthAuthorizeBody, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
@@ -66,7 +66,7 @@ func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string,
 }
 
 // OAuth callback
-func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, body ProviderOauthCallbackBody, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, query ProviderOauthCallbackParams, body ProviderOauthCallbackBody, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
@@ -597,6 +597,34 @@ type ProviderAuthParams struct {
 
 // URLQuery serializes [ProviderAuthParams]'s query parameters as `url.Values`.
 func (r ProviderAuthParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// ProviderOauthAuthorizeParams contains the query parameters for OAuth authorization.
+type ProviderOauthAuthorizeParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ProviderOauthAuthorizeParams]'s query parameters as `url.Values`.
+func (r ProviderOauthAuthorizeParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// ProviderOauthCallbackParams contains the query parameters for OAuth callback.
+type ProviderOauthCallbackParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ProviderOauthCallbackParams]'s query parameters as `url.Values`.
+func (r ProviderOauthCallbackParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

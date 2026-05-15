@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestAppLogWithOptionalParams(t *testing.T) {
+func TestToolIds(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,14 +25,8 @@ func TestAppLogWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.App.Log(context.TODO(), opencode.AppLogParams{
-		Level:     opencode.F(opencode.AppLogParamsLevelDebug),
-		Message:   opencode.F("message"),
-		Service:   opencode.F("service"),
+	_, err := client.Tool.Ids(context.TODO(), opencode.ToolIdsParams{
 		Directory: opencode.F("directory"),
-		Extra: opencode.F(map[string]interface{}{
-			"foo": "bar",
-		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -43,7 +37,7 @@ func TestAppLogWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAppProvidersWithOptionalParams(t *testing.T) {
+func TestToolList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -55,7 +49,9 @@ func TestAppProvidersWithOptionalParams(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Config.Providers(context.TODO(), opencode.ConfigProvidersParams{
+	_, err := client.Tool.List(context.TODO(), opencode.ToolListParams{
+		Provider:  opencode.F("openai"),
+		Model:     opencode.F("gpt-4"),
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
