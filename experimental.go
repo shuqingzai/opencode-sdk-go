@@ -212,19 +212,6 @@ func (r experimentalWorkspaceCreateInputJSON) RawJSON() string {
 	return r.raw
 }
 
-type ExperimentalWorkspaceCreateParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ExperimentalWorkspaceCreateParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceCreateParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
 type ExperimentalWorkspaceRemoveParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
