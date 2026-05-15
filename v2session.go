@@ -339,6 +339,7 @@ type V2SessionMessageAgentSwitched struct {
 	Time     V2SessionMessageTime              `json:"time,required"`
 	Type     string                            `json:"type,required"`
 	Agent    string                            `json:"agent,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                       `json:"metadata"`
 	JSON     v2SessionMessageAgentSwitchedJSON `json:"-"`
 }
@@ -366,6 +367,7 @@ type V2SessionMessageModelSwitched struct {
 	Time     V2SessionMessageTime              `json:"time,required"`
 	Type     string                            `json:"type,required"`
 	Model    V2SessionMessageModel             `json:"model,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                       `json:"metadata"`
 	JSON     v2SessionMessageModelSwitchedJSON `json:"-"`
 }
@@ -457,6 +459,7 @@ type V2SessionMessageShell struct {
 	CallID   string                       `json:"callID,required"`
 	Command  string                       `json:"command,required"`
 	Output   string                       `json:"output,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                  `json:"metadata"`
 	JSON     v2SessionMessageShellJSON    `json:"-"`
 }
@@ -529,6 +532,7 @@ type V2SessionMessageCompaction struct {
 	Reason   V2SessionMessageCompactionReason           `json:"reason,required"`
 	Summary  string                                    `json:"summary,required"`
 	Include  string                                    `json:"include"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                               `json:"metadata"`
 	JSON     v2SessionMessageCompactionJSON            `json:"-"`
 }
@@ -775,7 +779,8 @@ func (r v2SessionMessageAssistantSnapshotJSON) RawJSON() string {
 }
 
 type V2SessionMessageToolProvider struct {
-	Executed bool                                `json:"executed,required"`
+	Executed bool `json:"executed,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                         `json:"metadata"`
 	JSON     v2SessionMessageToolProviderJSON    `json:"-"`
 }

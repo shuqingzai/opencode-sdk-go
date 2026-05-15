@@ -763,6 +763,7 @@ func init() {
 }
 
 type AssistantMessageErrorMessageOutputLengthError struct {
+	// This field can have the runtime type of [map[string]interface{}].
 	Data interface{}                                       `json:"data,required"`
 	Name AssistantMessageErrorMessageOutputLengthErrorName `json:"name,required"`
 	JSON assistantMessageErrorMessageOutputLengthErrorJSON `json:"-"`

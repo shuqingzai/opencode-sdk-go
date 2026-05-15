@@ -1598,6 +1598,7 @@ type EventListResponseEventSessionNextToolCalledProperties struct {
 	SessionID string `json:"sessionID,required"`
 	CallID string `json:"callID,required"`
 	Tool string `json:"tool,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Input interface{} `json:"input,required"`
 	Provider EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
 	JSON      eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
@@ -1665,7 +1666,9 @@ type EventListResponseEventSessionNextToolProgressProperties struct {
 	Timestamp float64 `json:"timestamp,required"`
 	SessionID string `json:"sessionID,required"`
 	CallID string `json:"callID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
 	Content []interface{} `json:"content,required"`
 	JSON      eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
 }
@@ -1731,7 +1734,9 @@ type EventListResponseEventSessionNextToolSuccessProperties struct {
 	Timestamp float64 `json:"timestamp,required"`
 	SessionID string `json:"sessionID,required"`
 	CallID string `json:"callID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
 	Content []interface{} `json:"content,required"`
 	Provider EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
 	JSON      eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
@@ -2115,7 +2120,8 @@ func (r eventListResponseEventSessionNextModelSwitchedModelJSON) RawJSON() strin
 
 // EventListResponseEventSessionNextToolCalledProvider
 type EventListResponseEventSessionNextToolCalledProvider struct {
-	Executed bool        `json:"executed,required"`
+	Executed bool `json:"executed,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{} `json:"metadata"`
 	JSON     eventListResponseEventSessionNextToolCalledProviderJSON `json:"-"`
 }
