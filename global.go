@@ -81,10 +81,10 @@ func (r *GlobalService) ConfigGet(ctx context.Context, opts ...option.RequestOpt
 }
 
 // Update global config
-func (r *GlobalService) ConfigUpdate(ctx context.Context, body Config, opts ...option.RequestOption) (res *Config, err error) {
+func (r *GlobalService) ConfigUpdate(ctx context.Context, params GlobalConfigUpdateParams, opts ...option.RequestOption) (res *Config, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "global/config"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
 	return
 }
 
@@ -140,6 +140,53 @@ func (r *GlobalUpgradeResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r globalUpgradeResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// GlobalConfigUpdateParams contains the parameters for updating global configuration.
+// All fields are optional for PATCH semantics.
+type GlobalConfigUpdateParams struct {
+	// Body parameters — all Config fields as optional
+	Schema            param.Field[string]                        `json:"$schema"`
+	Agent             param.Field[ConfigAgent]                   `json:"agent"`
+	Attachment        param.Field[AttachmentConfig]              `json:"attachment"`
+	Autoshare         param.Field[bool]                          `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand]      `json:"command"`
+	Compaction        param.Field[ConfigCompaction]              `json:"compaction"`
+	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]              `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]            `json:"experimental"`
+	Formatter         param.Field[map[string]ConfigFormatter]    `json:"formatter"`
+	Instructions      param.Field[[]string]                      `json:"instructions"`
+	Keybinds          param.Field[KeybindsConfig]                `json:"keybinds"`
+	Layout            param.Field[ConfigLayout]                  `json:"layout"`
+	LogLevel          param.Field[ConfigLogLevel]                `json:"logLevel"`
+	Lsp               param.Field[map[string]ConfigLsp]          `json:"lsp"`
+	Mcp               param.Field[map[string]ConfigMcp]          `json:"mcp"`
+	Mode              param.Field[ConfigMode]                    `json:"mode"`
+	Model             param.Field[string]                        `json:"model"`
+	Permission        param.Field[ConfigPermission]              `json:"permission"`
+	Plugin            param.Field[[]string]                      `json:"plugin"`
+	Provider          param.Field[map[string]ConfigProvider]     `json:"provider"`
+	Reference         param.Field[ReferenceConfig]               `json:"reference"`
+	Share             param.Field[ConfigShare]                   `json:"share"`
+	Shell             param.Field[string]                        `json:"shell"`
+	Server            param.Field[ServerConfig]                  `json:"server"`
+	Skills            param.Field[ConfigSkills]                  `json:"skills"`
+	SmallModel        param.Field[string]                        `json:"small_model"`
+	Snapshot          param.Field[bool]                          `json:"snapshot"`
+	Theme             param.Field[string]                        `json:"theme"`
+	ToolOutput        param.Field[ConfigToolOutput]              `json:"tool_output"`
+	Tools             param.Field[map[string]bool]               `json:"tools"`
+	Tui               param.Field[ConfigTui]                     `json:"tui"`
+	Username          param.Field[string]                        `json:"username"`
+	Watcher           param.Field[ConfigWatcher]                 `json:"watcher"`
+	DefaultAgent      param.Field[string]                        `json:"default_agent"`
+}
+
+func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type GlobalEvent struct {
