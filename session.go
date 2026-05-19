@@ -1170,6 +1170,7 @@ func (r FileSourceParam) implementsFilePartSourceUnionParam() {}
 
 type Message struct {
 	ID        string      `json:"id,required"`
+	Agent     string      `json:"agent,required"`
 	Role      MessageRole `json:"role,required"`
 	SessionID string      `json:"sessionID,required"`
 	// This field can have the runtime type of [UserMessageTime],
@@ -1197,6 +1198,7 @@ type Message struct {
 // messageJSON contains the JSON metadata for the struct [Message]
 type messageJSON struct {
 	ID          apijson.Field
+	Agent       apijson.Field
 	Role        apijson.Field
 	SessionID   apijson.Field
 	Time        apijson.Field
