@@ -193,6 +193,7 @@ type GlobalEvent struct {
 	Directory string                 `json:"directory,required"`
 	// This field can have the runtime type of
 	// [EventListResponseEventXxx] (73 V2 Event types):
+	// [EventListResponseEventCatalogModelUpdated],
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
 	// [EventListResponseEventFileWatcherUpdated],
@@ -265,7 +266,6 @@ type GlobalEvent struct {
 	// [EventListResponseEventWorkspaceStatus],
 	// [EventListResponseEventWorktreeFailed],
 	// [EventListResponseEventWorktreeReady],
-	// [EventListResponseEventCatalogModelUpdated],
 	//
 	// [SyncEventXxx] (33 V1 SyncEvent types):
 	// [SyncEventMessagePartRemoved],
