@@ -187,7 +187,7 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 
 type ExperimentalWorkspaceCreateInput struct {
 	ID     param.Field[string]                  `json:"id"`
-	Type   param.Field[string]                  `json:"type"`
+	Type   param.Field[string]                  `json:"type,required"`
 	Branch param.Field[string]                  `json:"branch"`
 	Extra  param.Field[any]                     `json:"extra"`
 	JSON   experimentalWorkspaceCreateInputJSON `json:"-"`
@@ -315,10 +315,11 @@ func (r ExperimentalWorkspaceStatusParams) URLQuery() (v url.Values) {
 }
 
 type ExperimentalWarpParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	ID        param.Field[string] `json:"id"`
-	SessionID param.Field[string] `json:"sessionID,required"`
+	Directory   param.Field[string] `query:"directory"`
+	Workspace   param.Field[string] `query:"workspace"`
+	ID          param.Field[string] `json:"id,required"`
+	SessionID   param.Field[string] `json:"sessionID,required"`
+	CopyChanges param.Field[bool]   `json:"copyChanges"`
 }
 
 func (r ExperimentalWarpParams) MarshalJSON() (data []byte, err error) {

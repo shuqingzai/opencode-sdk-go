@@ -525,7 +525,6 @@ type AssistantMessage struct {
 	ProviderID string                 `json:"providerID,required"`
 	Role       AssistantMessageRole   `json:"role,required"`
 	SessionID  string                 `json:"sessionID,required"`
-	System     []string               `json:"system,required"`
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
 	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
@@ -550,7 +549,6 @@ type assistantMessageJSON struct {
 	ProviderID  apijson.Field
 	Role        apijson.Field
 	SessionID   apijson.Field
-	System      apijson.Field
 	Time        apijson.Field
 	Tokens      apijson.Field
 	Structured  apijson.Field
@@ -1188,7 +1186,7 @@ type Message struct {
 	ProviderID string      `json:"providerID"`
 	// This field can have the runtime type of [UserMessageSummary], [bool].
 	Summary interface{} `json:"summary"`
-	// This field can have the runtime type of [[]string].
+	// This field can have the runtime type of [string].
 	System interface{} `json:"system"`
 	// This field can have the runtime type of [AssistantMessageTokens].
 	Tokens interface{} `json:"tokens"`
@@ -2437,13 +2435,14 @@ func (r subtaskPartModelJSON) RawJSON() string {
 }
 
 type CompactionPart struct {
-	ID        string             `json:"id,required"`
-	MessageID string             `json:"messageID,required"`
-	SessionID string             `json:"sessionID,required"`
-	Type      CompactionPartType `json:"type,required"`
-	Auto      bool               `json:"auto,required"`
-	Overflow  bool               `json:"overflow"`
-	JSON      compactionPartJSON `json:"-"`
+	ID          string            `json:"id,required"`
+	MessageID   string            `json:"messageID,required"`
+	SessionID   string            `json:"sessionID,required"`
+	Type        CompactionPartType `json:"type,required"`
+	Auto        bool              `json:"auto,required"`
+	Overflow    bool              `json:"overflow"`
+	TailStartID string            `json:"tail_start_id"`
+	JSON        compactionPartJSON `json:"-"`
 }
 
 type compactionPartJSON struct {
@@ -2453,6 +2452,7 @@ type compactionPartJSON struct {
 	Type        apijson.Field
 	Auto        apijson.Field
 	Overflow    apijson.Field
+	TailStartID apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2957,20 +2957,31 @@ func (r toolStateRunningTimeJSON) RawJSON() string {
 }
 
 type UserMessage struct {
-	ID        string             `json:"id,required"`
-	Role      UserMessageRole    `json:"role,required"`
-	SessionID string             `json:"sessionID,required"`
-	Time      UserMessageTime    `json:"time,required"`
-	Summary   UserMessageSummary `json:"summary"`
-	JSON      userMessageJSON    `json:"-"`
+	ID        string            `json:"id,required"`
+	Agent     string            `json:"agent,required"`
+	Model     UserMessageModel  `json:"model,required"`
+	Role      UserMessageRole   `json:"role,required"`
+	SessionID string            `json:"sessionID,required"`
+	Time      UserMessageTime   `json:"time,required"`
+	// This field can have the runtime type of [OutputFormatUnion].
+	Format  interface{}       `json:"format,omitzero"`
+	System  string            `json:"system,omitzero"`
+	Tools   map[string]bool   `json:"tools,omitzero"`
+	Summary UserMessageSummary `json:"summary"`
+	JSON    userMessageJSON    `json:"-"`
 }
 
 // userMessageJSON contains the JSON metadata for the struct [UserMessage]
 type userMessageJSON struct {
 	ID          apijson.Field
+	Agent       apijson.Field
+	Model       apijson.Field
 	Role        apijson.Field
 	SessionID   apijson.Field
 	Time        apijson.Field
+	Format      apijson.Field
+	System      apijson.Field
+	Tools       apijson.Field
 	Summary     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -2998,6 +3009,30 @@ func (r UserMessageRole) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type UserMessageModel struct {
+	ProviderID string               `json:"providerID,required"`
+	ModelID    string               `json:"modelID,required"`
+	Variant    string               `json:"variant"`
+	JSON       userMessageModelJSON `json:"-"`
+}
+
+// userMessageModelJSON contains the JSON metadata for the struct [UserMessageModel]
+type userMessageModelJSON struct {
+	ProviderID  apijson.Field
+	ModelID     apijson.Field
+	Variant     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UserMessageModel) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r userMessageModelJSON) RawJSON() string {
+	return r.raw
 }
 
 type UserMessageTime struct {
@@ -3294,8 +3329,8 @@ type SessionCommandParams struct {
 	Directory param.Field[string]                       `query:"directory"`
 	Workspace param.Field[string]                       `query:"workspace"`
 	Agent     param.Field[string]                       `json:"agent"`
-	Arguments param.Field[string]                       `json:"arguments"`
-	Command   param.Field[string]                       `json:"command"`
+	Arguments param.Field[string]                       `json:"arguments,required"`
+	Command   param.Field[string]                       `json:"command,required"`
 	MessageID param.Field[string]                       `json:"messageID"`
 	Model     param.Field[string]                       `json:"model"`
 	Variant   param.Field[string]                       `json:"variant"`
@@ -3339,9 +3374,9 @@ func (r SessionGetParams) URLQuery() (v url.Values) {
 type SessionInitParams struct {
 	Directory  param.Field[string] `query:"directory"`
 	Workspace  param.Field[string] `query:"workspace"`
-	MessageID  param.Field[string] `json:"messageID"`
-	ModelID    param.Field[string] `json:"modelID"`
-	ProviderID param.Field[string] `json:"providerID"`
+	MessageID  param.Field[string] `json:"messageID,required"`
+	ModelID    param.Field[string] `json:"modelID,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
 }
 
 func (r SessionInitParams) MarshalJSON() (data []byte, err error) {
@@ -3553,8 +3588,8 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 type SessionShellParams struct {
 	Directory param.Field[string]                        `query:"directory"`
 	Workspace param.Field[string]                        `query:"workspace"`
-	Agent     param.Field[string]                        `json:"agent"`
-	Command   param.Field[string]                        `json:"command"`
+	Agent     param.Field[string]                        `json:"agent,required"`
+	Command   param.Field[string]                        `json:"command,required"`
 	MessageID param.Field[string]                        `json:"messageID"`
 	Model     param.Field[SessionPromptParamsModel]      `json:"model"`
 	Variant   param.Field[string]                        `json:"variant"`
@@ -3577,8 +3612,8 @@ type SessionSummarizeParams struct {
 	Directory  param.Field[string] `query:"directory"`
 	Workspace  param.Field[string] `query:"workspace"`
 	Auto       param.Field[bool]   `json:"auto"`
-	ModelID    param.Field[string] `json:"modelID"`
-	ProviderID param.Field[string] `json:"providerID"`
+	ModelID    param.Field[string] `json:"modelID,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
 }
 
 func (r SessionSummarizeParams) MarshalJSON() (data []byte, err error) {

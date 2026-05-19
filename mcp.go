@@ -110,7 +110,7 @@ func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query Mc
 		return
 	}
 	path := fmt.Sprintf("mcp/%s/auth/authenticate", name)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return
 }
 
@@ -122,7 +122,7 @@ func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthR
 		return
 	}
 	path := fmt.Sprintf("mcp/%s/auth", name)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
 	return
 }
 

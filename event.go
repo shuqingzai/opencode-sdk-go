@@ -3323,7 +3323,7 @@ type Pty struct {
 	Command string    `json:"command,required"`
 	Cwd     string    `json:"cwd,required"`
 	ID      string    `json:"id,required"`
-	Pid     int       `json:"pid,required"`
+	Pid     int64     `json:"pid,required"`
 	Status  PtyStatus `json:"status,required"`
 	Title   string    `json:"title,required"`
 	JSON    ptyJSON   `json:"-"`
