@@ -143,6 +143,10 @@ type eventListResponseJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
+func (r eventListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
 func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 	*r = EventListResponse{}
 	err = apijson.UnmarshalRoot(data, &r.union)
