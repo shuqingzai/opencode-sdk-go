@@ -1187,6 +1187,7 @@ type Message struct {
 	ProviderID string      `json:"providerID"`
 	// This field can have the runtime type of [UserMessageSummary], [bool].
 	Summary interface{} `json:"summary"`
+	Finish  string      `json:"finish"`
 	// This field can have the runtime type of [string].
 	System interface{} `json:"system"`
 	// This field can have the runtime type of [AssistantMessageTokens].
@@ -1210,6 +1211,7 @@ type messageJSON struct {
 	Path        apijson.Field
 	ProviderID  apijson.Field
 	Summary     apijson.Field
+	Finish      apijson.Field
 	System      apijson.Field
 	Tokens      apijson.Field
 	raw         string
