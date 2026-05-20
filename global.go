@@ -323,11 +323,57 @@ func (r globalEventJSON) RawJSON() string {
 
 func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
 	*r = GlobalEvent{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
+
+	// Phase 1: parse only the wrapper fields (directory, project, workspace)
+	// into an alias struct that intentionally omits Payload, avoiding an
+	// unnecessary pass through the interface{} decoder. The full JSON metadata
+	// is still captured correctly via globalEventJSON.
+	type globalEventAlias struct {
+		Directory string          `json:"directory,required"`
+		Project   string          `json:"project"`
+		Workspace string          `json:"workspace"`
+		JSON      globalEventJSON `json:"-"`
+	}
+	var alias globalEventAlias
+	if err := apijson.UnmarshalRoot(data, &alias); err != nil {
 		return err
 	}
-	return apijson.Port(r.union, &r)
+	r.Directory = alias.Directory
+	r.Project = alias.Project
+	r.Workspace = alias.Workspace
+	r.JSON = alias.JSON
+
+	// Phase 2: extract the payload sub-object and determine the union match target.
+	//
+	// V2 events → payload has the shape {id, type, properties}. Match directly.
+	//
+	// V1 SyncEvents → the server wraps them as {type: "sync", syncEvent: {...}, id: "..."}.
+	//                  The actual SyncEvent variant fields ({type, name, id, seq,
+	//                  aggregateID, data}) are nested under "syncEvent". We extract
+	//                  that inner object so the existing SyncEvent* structs
+	//                  (registered as union variants) can match correctly.
+	result := gjson.ParseBytes(data)
+	payloadResult := result.Get("payload")
+	if !payloadResult.Exists() {
+		return nil
+	}
+
+	matchTarget := payloadResult
+	if payloadResult.Get("type").String() == "sync" {
+		if inner := payloadResult.Get("syncEvent"); inner.Exists() {
+			matchTarget = inner
+		}
+	}
+
+	if err := apijson.UnmarshalRoot([]byte(matchTarget.Raw), &r.union); err != nil {
+		return err
+	}
+
+	// Set Payload to the matched union variant (a properly typed struct like
+	// EventListResponseEventMessageUpdated or SyncEventMessageUpdated) instead
+	// of a raw map[string]interface{}.
+	r.Payload = r.union
+	return nil
 }
 
 // AsUnion returns a [GlobalEventPayloadUnion] interface which you can cast to the
