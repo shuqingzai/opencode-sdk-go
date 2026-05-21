@@ -454,9 +454,25 @@ func (r ProviderAuthMethodPromptSelect) implementsProviderAuthMethodPrompt() {}
 // ProviderAuthMethodPromptWhen represents condition for showing a prompt.
 type ProviderAuthMethodPromptWhen struct {
 	Key   string                           `json:"key,required"`
-	Op    string                           `json:"op,required"`
+	Op    ProviderAuthMethodPromptWhenOp   `json:"op,required"`
 	Value string                           `json:"value,required"`
 	JSON  providerAuthMethodPromptWhenJSON `json:"-"`
+}
+
+// ProviderAuthMethodPromptWhenOp represents the comparison operator for the when condition.
+type ProviderAuthMethodPromptWhenOp string
+
+const (
+	ProviderAuthMethodPromptWhenOpEq  ProviderAuthMethodPromptWhenOp = "eq"
+	ProviderAuthMethodPromptWhenOpNeq ProviderAuthMethodPromptWhenOp = "neq"
+)
+
+func (r ProviderAuthMethodPromptWhenOp) IsKnown() bool {
+	switch r {
+	case ProviderAuthMethodPromptWhenOpEq, ProviderAuthMethodPromptWhenOpNeq:
+		return true
+	}
+	return false
 }
 
 // providerAuthMethodPromptWhenJSON contains the JSON metadata for the struct
@@ -529,10 +545,25 @@ func (r providerOauthAuthorizeBodyJSON) RawJSON() string {
 
 // ProviderOauthAuthorizeResponse represents the response from OAuth authorization.
 type ProviderOauthAuthorizeResponse struct {
-	URL          string                             `json:"url,required"`
-	Method       string                             `json:"method,required"`
-	Instructions string                             `json:"instructions,required"`
-	JSON         providerOauthAuthorizeResponseJSON `json:"-"`
+	URL          string                                 `json:"url,required"`
+	Method       ProviderOauthAuthorizeResponseMethod   `json:"method,required"`
+	Instructions string                                 `json:"instructions,required"`
+	JSON         providerOauthAuthorizeResponseJSON     `json:"-"`
+}
+
+type ProviderOauthAuthorizeResponseMethod string
+
+const (
+	ProviderOauthAuthorizeResponseMethodAuto ProviderOauthAuthorizeResponseMethod = "auto"
+	ProviderOauthAuthorizeResponseMethodCode ProviderOauthAuthorizeResponseMethod = "code"
+)
+
+func (r ProviderOauthAuthorizeResponseMethod) IsKnown() bool {
+	switch r {
+	case ProviderOauthAuthorizeResponseMethodAuto, ProviderOauthAuthorizeResponseMethodCode:
+		return true
+	}
+	return false
 }
 
 // providerOauthAuthorizeResponseJSON contains the JSON metadata for the struct

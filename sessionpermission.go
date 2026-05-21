@@ -64,8 +64,10 @@ type Permission struct {
 	Title     string                 `json:"title,required"`
 	Type      string                 `json:"type,required"`
 	CallID    string                 `json:"callID"`
-	Pattern   PermissionPatternUnion `json:"pattern"`
-	JSON      permissionJSON         `json:"-"`
+	// This field can have the runtime type of [shared.UnionString], [PermissionPatternArray].
+	Pattern   interface{}    `json:"pattern"`
+	JSON      permissionJSON `json:"-"`
+	patternUnion PermissionPatternUnion
 }
 
 // permissionJSON contains the JSON metadata for the struct [Permission]
@@ -84,11 +86,21 @@ type permissionJSON struct {
 }
 
 func (r *Permission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = Permission{}
+	err = apijson.UnmarshalRoot(data, &r.patternUnion)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.patternUnion, r)
 }
 
 func (r permissionJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsPatternUnion returns the pattern field as a typed union.
+func (r *Permission) AsPatternUnion() PermissionPatternUnion {
+	return r.patternUnion
 }
 
 type PermissionTime struct {

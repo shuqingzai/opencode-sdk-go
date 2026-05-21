@@ -453,6 +453,8 @@ type McpAddBodyConfigRemote struct {
 	// Headers to send with the request
 	Headers map[string]string `json:"headers"`
 	// OAuth authentication configuration for the MCP server. Set to false to disable OAuth auto-detection.
+	// This field can have the runtime type of [McpOAuthConfig].
+	// When OAuth is disabled, this field is `false` (a JSON boolean).
 	OAuth interface{} `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
 	Timeout int                        `json:"timeout"`

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
@@ -15,6 +16,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // V2ProviderService contains methods and other services that help with interacting
@@ -57,13 +59,21 @@ func (r *V2ProviderService) Get(ctx context.Context, providerID string, query V2
 }
 
 type V2ProviderInfo struct {
-	ID       string                       `json:"id,required"`
-	Name     string                       `json:"name,required"`
-	Enabled  V2ProviderInfoEnabledUnion   `json:"enabled,required"`
-	Env      []string                     `json:"env,required"`
-	Endpoint V2ModelInfoEndpointUnion     `json:"endpoint,required"`
-	Options  V2ModelInfoOptions           `json:"options,required"`
-	JSON     v2ProviderInfoJSON           `json:"-"`
+	ID   string `json:"id,required"`
+	Name string `json:"name,required"`
+	// This field can have the runtime type of [V2ProviderInfoEnabledEnv],
+	// [V2ProviderInfoEnabledAuth], [V2ProviderInfoEnabledCustom].
+	// When the provider is disabled, this field is `false` (a JSON boolean).
+	Enabled  interface{}            `json:"enabled,required"`
+	Env      []string               `json:"env,required"`
+	// This field can have the runtime type of [V2ModelInfoEndpointUnknown],
+	// [V2ModelInfoEndpointOpenAIResponses], [V2ModelInfoEndpointOpenAICompletions],
+	// [V2ModelInfoEndpointAnthropicMessages], [V2ModelInfoEndpointAisdk].
+	Endpoint interface{}            `json:"endpoint,required"`
+	Options  V2ModelInfoOptions     `json:"options,required"`
+	JSON     v2ProviderInfoJSON     `json:"-"`
+	enabledUnion  V2ProviderInfoEnabledUnion
+	endpointUnion V2ModelInfoEndpointUnion
 }
 
 // v2ProviderInfoJSON contains the JSON metadata for the struct [V2ProviderInfo]
@@ -79,13 +89,39 @@ type v2ProviderInfoJSON struct {
 }
 
 func (r *V2ProviderInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = V2ProviderInfo{}
+	err = apijson.UnmarshalRoot(data, &r.enabledUnion)
+	if err != nil {
+		return err
+	}
+	err = apijson.UnmarshalRoot(data, &r.endpointUnion)
+	if err != nil {
+		return err
+	}
+	err = apijson.Port(r.enabledUnion, r)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.endpointUnion, r)
 }
 
 func (r v2ProviderInfoJSON) RawJSON() string {
 	return r.raw
 }
 
+// AsEnabledUnion returns the enabled field as a typed union.
+func (r *V2ProviderInfo) AsEnabledUnion() V2ProviderInfoEnabledUnion {
+	return r.enabledUnion
+}
+
+// AsEndpointUnion returns the endpoint field as a typed union.
+func (r *V2ProviderInfo) AsEndpointUnion() V2ModelInfoEndpointUnion {
+	return r.endpointUnion
+}
+
+// V2ProviderInfoEnabledUnion represents the enabled state of a provider.
+// Possible runtime types are [V2ProviderInfoEnabledEnv], [V2ProviderInfoEnabledAuth],
+// [V2ProviderInfoEnabledCustom]. When disabled, the value is `false` (a JSON boolean).
 type V2ProviderInfoEnabledUnion interface {
 	implementsV2ProviderInfoEnabledUnion()
 }
@@ -158,6 +194,25 @@ func (r v2ProviderInfoEnabledCustomJSON) RawJSON() string {
 }
 
 func (r V2ProviderInfoEnabledCustom) implementsV2ProviderInfoEnabledUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2ProviderInfoEnabledUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2ProviderInfoEnabledEnv{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2ProviderInfoEnabledAuth{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2ProviderInfoEnabledCustom{}),
+		},
+	)
+}
 
 type V2ProviderListParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`

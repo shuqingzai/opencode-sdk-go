@@ -116,7 +116,7 @@ func (r OAuth) implementsAuth() {}
 type ApiAuth struct {
 	Type     string            `json:"type,required"`
 	Key      string            `json:"key,required"`
-	Metadata map[string]string `json:"metadata,required"`
+	Metadata map[string]string `json:"metadata"`
 	JSON     apiAuthJSON       `json:"-"`
 }
 

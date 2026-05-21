@@ -1350,16 +1350,31 @@ func init() {
 
 // ===== Param Types =====
 
+type V2SessionOrder string
+
+const (
+	V2SessionOrderAsc  V2SessionOrder = "asc"
+	V2SessionOrderDesc V2SessionOrder = "desc"
+)
+
+func (r V2SessionOrder) IsKnown() bool {
+	switch r {
+	case V2SessionOrderAsc, V2SessionOrderDesc:
+		return true
+	}
+	return false
+}
+
 type V2SessionListParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Limit     param.Field[int64] `query:"limit"`
-	Order     param.Field[string]  `query:"order"`
-	Path      param.Field[string]  `query:"path"`
-	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[int64] `query:"start"`
-	Search    param.Field[string]  `query:"search"`
-	Cursor    param.Field[string]  `query:"cursor"`
+	Directory param.Field[string]        `query:"directory"`
+	Workspace param.Field[string]        `query:"workspace"`
+	Limit     param.Field[int64]         `query:"limit"`
+	Order     param.Field[V2SessionOrder] `query:"order"`
+	Path      param.Field[string]        `query:"path"`
+	Roots     param.Field[bool]          `query:"roots"`
+	Start     param.Field[int64]         `query:"start"`
+	Search    param.Field[string]        `query:"search"`
+	Cursor    param.Field[string]        `query:"cursor"`
 }
 
 func (r V2SessionListParams) URLQuery() (v url.Values) {
@@ -1505,11 +1520,11 @@ func (r V2SessionContextParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionMessagesParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Limit     param.Field[int64] `query:"limit"`
-	Order     param.Field[string]  `query:"order"`
-	Cursor    param.Field[string]  `query:"cursor"`
+	Directory param.Field[string]        `query:"directory"`
+	Workspace param.Field[string]        `query:"workspace"`
+	Limit     param.Field[int64]         `query:"limit"`
+	Order     param.Field[V2SessionOrder] `query:"order"`
+	Cursor    param.Field[string]        `query:"cursor"`
 }
 
 func (r V2SessionMessagesParams) URLQuery() (v url.Values) {

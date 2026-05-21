@@ -110,10 +110,29 @@ func (r AgentListParams) URLQuery() (v url.Values) {
 }
 
 type Skill struct {
-	Name        string `json:"name,required"`
-	Description string `json:"description,required"`
-	Location    string `json:"location,required"`
-	Content     string `json:"content,required"`
+	Name        string    `json:"name,required"`
+	Description string    `json:"description,required"`
+	Location    string    `json:"location,required"`
+	Content     string    `json:"content,required"`
+	JSON        skillJSON `json:"-"`
+}
+
+// skillJSON contains the JSON metadata for the struct [Skill]
+type skillJSON struct {
+	Name        apijson.Field
+	Description apijson.Field
+	Location    apijson.Field
+	Content     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *Skill) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillJSON) RawJSON() string {
+	return r.raw
 }
 
 type AppSkillsParams struct {

@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
@@ -16,7 +18,6 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/sst/opencode-sdk-go/packages/ssestream"
 	"github.com/sst/opencode-sdk-go/shared"
-	"github.com/tidwall/gjson"
 )
 
 // EventService contains methods and other services that help with interacting with
@@ -52,6 +53,7 @@ func (r *EventService) ListStreaming(ctx context.Context, query EventListParams,
 }
 
 type EventListResponse struct {
+	ID string `json:"id,required"`
 	// This field can have the runtime type of
 	// [EventListResponseEventCatalogModelUpdatedProperties],
 	// [EventListResponseEventCommandExecutedProperties],
@@ -126,7 +128,6 @@ type EventListResponse struct {
 	// [EventListResponseEventWorkspaceStatusProperties],
 	// [EventListResponseEventWorktreeFailedProperties],
 	// [EventListResponseEventWorktreeReadyProperties].
-	ID         string                `json:"id,required"`
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
 	JSON       eventListResponseJSON `json:"-"`
@@ -613,7 +614,6 @@ func init() {
 		},
 	)
 }
-
 
 type EventListResponseEventInstallationUpdated struct {
 	Properties EventListResponseEventInstallationUpdatedProperties `json:"properties,required"`
@@ -2792,7 +2792,7 @@ func (r EventListResponseEventVcsBranchUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventVcsBranchUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventVcsBranchUpdatedProperties struct {
-	Branch string                                            `json:"branch"`
+	Branch string `json:"branch"`
 	JSON   eventListResponseEventVcsBranchUpdatedPropertiesJSON
 }
 
@@ -3228,8 +3228,8 @@ func (r EventListResponseEventWorktreeReady) implementsEventListResponse() {}
 func (r EventListResponseEventWorktreeReady) implementsGlobalEventPayload() {}
 
 type EventListResponseEventWorktreeReadyProperties struct {
-	Branch string                                          `json:"branch"`
-	Name   string                                          `json:"name,required"`
+	Branch string `json:"branch"`
+	Name   string `json:"name,required"`
 	JSON   eventListResponseEventWorktreeReadyPropertiesJSON
 }
 
@@ -3457,79 +3457,79 @@ func (r EventListResponseEventWorkspaceStatusStatus) IsKnown() bool {
 type EventListResponseType string
 
 const (
-	EventListResponseTypeCatalogModelUpdated       EventListResponseType = "catalog.model.updated"
-	EventListResponseTypeCommandExecuted            EventListResponseType = "command.executed"
-	EventListResponseTypeFileEdited                 EventListResponseType = "file.edited"
-	EventListResponseTypeFileWatcherUpdated          EventListResponseType = "file.watcher.updated"
-	EventListResponseTypeGlobalDisposed             EventListResponseType = "global.disposed"
-	EventListResponseTypeInstallationUpdateAvailable EventListResponseType = "installation.update-available"
-	EventListResponseTypeInstallationUpdated        EventListResponseType = "installation.updated"
-	EventListResponseTypeLspClientDiagnostics        EventListResponseType = "lsp.client.diagnostics"
-	EventListResponseTypeLspUpdated                 EventListResponseType = "lsp.updated"
-	EventListResponseTypeMcpBrowserOpenFailed        EventListResponseType = "mcp.browser.open.failed"
-	EventListResponseTypeMcpToolsChanged            EventListResponseType = "mcp.tools.changed"
-	EventListResponseTypeMessagePartDelta           EventListResponseType = "message.part.delta"
-	EventListResponseTypeMessagePartRemoved          EventListResponseType = "message.part.removed"
-	EventListResponseTypeMessagePartUpdated          EventListResponseType = "message.part.updated"
-	EventListResponseTypeMessageRemoved             EventListResponseType = "message.removed"
-	EventListResponseTypeMessageUpdated             EventListResponseType = "message.updated"
-	EventListResponseTypePermissionAsked            EventListResponseType = "permission.asked"
-	EventListResponseTypePermissionReplied           EventListResponseType = "permission.replied"
-	EventListResponseTypeProjectUpdated             EventListResponseType = "project.updated"
-	EventListResponseTypePtyCreated                 EventListResponseType = "pty.created"
-	EventListResponseTypePtyDeleted                 EventListResponseType = "pty.deleted"
-	EventListResponseTypePtyExited                  EventListResponseType = "pty.exited"
-	EventListResponseTypePtyUpdated                 EventListResponseType = "pty.updated"
-	EventListResponseTypeQuestionAsked              EventListResponseType = "question.asked"
-	EventListResponseTypeQuestionRejected           EventListResponseType = "question.rejected"
-	EventListResponseTypeQuestionReplied            EventListResponseType = "question.replied"
-	EventListResponseTypeServerConnected            EventListResponseType = "server.connected"
-	EventListResponseTypeServerInstanceDisposed      EventListResponseType = "server.instance.disposed"
-	EventListResponseTypeSessionCompacted           EventListResponseType = "session.compacted"
-	EventListResponseTypeSessionCreated             EventListResponseType = "session.created"
-	EventListResponseTypeSessionDeleted             EventListResponseType = "session.deleted"
-	EventListResponseTypeSessionDiff                EventListResponseType = "session.diff"
-	EventListResponseTypeSessionError               EventListResponseType = "session.error"
-	EventListResponseTypeSessionIdle                EventListResponseType = "session.idle"
-	EventListResponseTypeSessionNextAgentSwitched    EventListResponseType = "session.next.agent.switched"
-	EventListResponseTypeSessionNextCompactionDelta  EventListResponseType = "session.next.compaction.delta"
-	EventListResponseTypeSessionNextCompactionEnded  EventListResponseType = "session.next.compaction.ended"
+	EventListResponseTypeCatalogModelUpdated          EventListResponseType = "catalog.model.updated"
+	EventListResponseTypeCommandExecuted              EventListResponseType = "command.executed"
+	EventListResponseTypeFileEdited                   EventListResponseType = "file.edited"
+	EventListResponseTypeFileWatcherUpdated           EventListResponseType = "file.watcher.updated"
+	EventListResponseTypeGlobalDisposed               EventListResponseType = "global.disposed"
+	EventListResponseTypeInstallationUpdateAvailable  EventListResponseType = "installation.update-available"
+	EventListResponseTypeInstallationUpdated          EventListResponseType = "installation.updated"
+	EventListResponseTypeLspClientDiagnostics         EventListResponseType = "lsp.client.diagnostics"
+	EventListResponseTypeLspUpdated                   EventListResponseType = "lsp.updated"
+	EventListResponseTypeMcpBrowserOpenFailed         EventListResponseType = "mcp.browser.open.failed"
+	EventListResponseTypeMcpToolsChanged              EventListResponseType = "mcp.tools.changed"
+	EventListResponseTypeMessagePartDelta             EventListResponseType = "message.part.delta"
+	EventListResponseTypeMessagePartRemoved           EventListResponseType = "message.part.removed"
+	EventListResponseTypeMessagePartUpdated           EventListResponseType = "message.part.updated"
+	EventListResponseTypeMessageRemoved               EventListResponseType = "message.removed"
+	EventListResponseTypeMessageUpdated               EventListResponseType = "message.updated"
+	EventListResponseTypePermissionAsked              EventListResponseType = "permission.asked"
+	EventListResponseTypePermissionReplied            EventListResponseType = "permission.replied"
+	EventListResponseTypeProjectUpdated               EventListResponseType = "project.updated"
+	EventListResponseTypePtyCreated                   EventListResponseType = "pty.created"
+	EventListResponseTypePtyDeleted                   EventListResponseType = "pty.deleted"
+	EventListResponseTypePtyExited                    EventListResponseType = "pty.exited"
+	EventListResponseTypePtyUpdated                   EventListResponseType = "pty.updated"
+	EventListResponseTypeQuestionAsked                EventListResponseType = "question.asked"
+	EventListResponseTypeQuestionRejected             EventListResponseType = "question.rejected"
+	EventListResponseTypeQuestionReplied              EventListResponseType = "question.replied"
+	EventListResponseTypeServerConnected              EventListResponseType = "server.connected"
+	EventListResponseTypeServerInstanceDisposed       EventListResponseType = "server.instance.disposed"
+	EventListResponseTypeSessionCompacted             EventListResponseType = "session.compacted"
+	EventListResponseTypeSessionCreated               EventListResponseType = "session.created"
+	EventListResponseTypeSessionDeleted               EventListResponseType = "session.deleted"
+	EventListResponseTypeSessionDiff                  EventListResponseType = "session.diff"
+	EventListResponseTypeSessionError                 EventListResponseType = "session.error"
+	EventListResponseTypeSessionIdle                  EventListResponseType = "session.idle"
+	EventListResponseTypeSessionNextAgentSwitched     EventListResponseType = "session.next.agent.switched"
+	EventListResponseTypeSessionNextCompactionDelta   EventListResponseType = "session.next.compaction.delta"
+	EventListResponseTypeSessionNextCompactionEnded   EventListResponseType = "session.next.compaction.ended"
 	EventListResponseTypeSessionNextCompactionStarted EventListResponseType = "session.next.compaction.started"
-	EventListResponseTypeSessionNextModelSwitched    EventListResponseType = "session.next.model.switched"
-	EventListResponseTypeSessionNextPrompted         EventListResponseType = "session.next.prompted"
-	EventListResponseTypeSessionNextReasoningDelta   EventListResponseType = "session.next.reasoning.delta"
-	EventListResponseTypeSessionNextReasoningEnded   EventListResponseType = "session.next.reasoning.ended"
-	EventListResponseTypeSessionNextReasoningStarted EventListResponseType = "session.next.reasoning.started"
-	EventListResponseTypeSessionNextRetried          EventListResponseType = "session.next.retried"
-	EventListResponseTypeSessionNextShellEnded       EventListResponseType = "session.next.shell.ended"
-	EventListResponseTypeSessionNextShellStarted     EventListResponseType = "session.next.shell.started"
-	EventListResponseTypeSessionNextStepEnded        EventListResponseType = "session.next.step.ended"
-	EventListResponseTypeSessionNextStepFailed       EventListResponseType = "session.next.step.failed"
-	EventListResponseTypeSessionNextStepStarted      EventListResponseType = "session.next.step.started"
-	EventListResponseTypeSessionNextSynthetic        EventListResponseType = "session.next.synthetic"
-	EventListResponseTypeSessionNextTextDelta        EventListResponseType = "session.next.text.delta"
-	EventListResponseTypeSessionNextTextEnded        EventListResponseType = "session.next.text.ended"
-	EventListResponseTypeSessionNextTextStarted      EventListResponseType = "session.next.text.started"
-	EventListResponseTypeSessionNextToolCalled       EventListResponseType = "session.next.tool.called"
-	EventListResponseTypeSessionNextToolFailed       EventListResponseType = "session.next.tool.failed"
-	EventListResponseTypeSessionNextToolInputDelta   EventListResponseType = "session.next.tool.input.delta"
-	EventListResponseTypeSessionNextToolInputEnded   EventListResponseType = "session.next.tool.input.ended"
-	EventListResponseTypeSessionNextToolInputStarted EventListResponseType = "session.next.tool.input.started"
-	EventListResponseTypeSessionNextToolProgress     EventListResponseType = "session.next.tool.progress"
-	EventListResponseTypeSessionNextToolSuccess      EventListResponseType = "session.next.tool.success"
-	EventListResponseTypeSessionStatus              EventListResponseType = "session.status"
-	EventListResponseTypeSessionUpdated             EventListResponseType = "session.updated"
-	EventListResponseTypeTodoUpdated                EventListResponseType = "todo.updated"
-	EventListResponseTypeTuiCommandExecute           EventListResponseType = "tui.command.execute"
-	EventListResponseTypeTuiPromptAppend             EventListResponseType = "tui.prompt.append"
-	EventListResponseTypeTuiSessionSelect            EventListResponseType = "tui.session.select"
-	EventListResponseTypeTuiToastShow               EventListResponseType = "tui.toast.show"
-	EventListResponseTypeVcsBranchUpdated            EventListResponseType = "vcs.branch.updated"
-	EventListResponseTypeWorkspaceFailed             EventListResponseType = "workspace.failed"
-	EventListResponseTypeWorkspaceReady             EventListResponseType = "workspace.ready"
-	EventListResponseTypeWorkspaceStatus            EventListResponseType = "workspace.status"
-	EventListResponseTypeWorktreeFailed             EventListResponseType = "worktree.failed"
-	EventListResponseTypeWorktreeReady              EventListResponseType = "worktree.ready"
+	EventListResponseTypeSessionNextModelSwitched     EventListResponseType = "session.next.model.switched"
+	EventListResponseTypeSessionNextPrompted          EventListResponseType = "session.next.prompted"
+	EventListResponseTypeSessionNextReasoningDelta    EventListResponseType = "session.next.reasoning.delta"
+	EventListResponseTypeSessionNextReasoningEnded    EventListResponseType = "session.next.reasoning.ended"
+	EventListResponseTypeSessionNextReasoningStarted  EventListResponseType = "session.next.reasoning.started"
+	EventListResponseTypeSessionNextRetried           EventListResponseType = "session.next.retried"
+	EventListResponseTypeSessionNextShellEnded        EventListResponseType = "session.next.shell.ended"
+	EventListResponseTypeSessionNextShellStarted      EventListResponseType = "session.next.shell.started"
+	EventListResponseTypeSessionNextStepEnded         EventListResponseType = "session.next.step.ended"
+	EventListResponseTypeSessionNextStepFailed        EventListResponseType = "session.next.step.failed"
+	EventListResponseTypeSessionNextStepStarted       EventListResponseType = "session.next.step.started"
+	EventListResponseTypeSessionNextSynthetic         EventListResponseType = "session.next.synthetic"
+	EventListResponseTypeSessionNextTextDelta         EventListResponseType = "session.next.text.delta"
+	EventListResponseTypeSessionNextTextEnded         EventListResponseType = "session.next.text.ended"
+	EventListResponseTypeSessionNextTextStarted       EventListResponseType = "session.next.text.started"
+	EventListResponseTypeSessionNextToolCalled        EventListResponseType = "session.next.tool.called"
+	EventListResponseTypeSessionNextToolFailed        EventListResponseType = "session.next.tool.failed"
+	EventListResponseTypeSessionNextToolInputDelta    EventListResponseType = "session.next.tool.input.delta"
+	EventListResponseTypeSessionNextToolInputEnded    EventListResponseType = "session.next.tool.input.ended"
+	EventListResponseTypeSessionNextToolInputStarted  EventListResponseType = "session.next.tool.input.started"
+	EventListResponseTypeSessionNextToolProgress      EventListResponseType = "session.next.tool.progress"
+	EventListResponseTypeSessionNextToolSuccess       EventListResponseType = "session.next.tool.success"
+	EventListResponseTypeSessionStatus                EventListResponseType = "session.status"
+	EventListResponseTypeSessionUpdated               EventListResponseType = "session.updated"
+	EventListResponseTypeTodoUpdated                  EventListResponseType = "todo.updated"
+	EventListResponseTypeTuiCommandExecute            EventListResponseType = "tui.command.execute"
+	EventListResponseTypeTuiPromptAppend              EventListResponseType = "tui.prompt.append"
+	EventListResponseTypeTuiSessionSelect             EventListResponseType = "tui.session.select"
+	EventListResponseTypeTuiToastShow                 EventListResponseType = "tui.toast.show"
+	EventListResponseTypeVcsBranchUpdated             EventListResponseType = "vcs.branch.updated"
+	EventListResponseTypeWorkspaceFailed              EventListResponseType = "workspace.failed"
+	EventListResponseTypeWorkspaceReady               EventListResponseType = "workspace.ready"
+	EventListResponseTypeWorkspaceStatus              EventListResponseType = "workspace.status"
+	EventListResponseTypeWorktreeFailed               EventListResponseType = "worktree.failed"
+	EventListResponseTypeWorktreeReady                EventListResponseType = "worktree.ready"
 )
 
 func (r EventListResponseType) IsKnown() bool {
