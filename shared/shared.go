@@ -822,3 +822,306 @@ func (r WorktreeErrorName) IsKnown() bool {
 	}
 	return false
 }
+
+// === _tag-based errors (HTTP infrastructure errors) ===
+
+type InvalidCursorError struct {
+	Tag     InvalidCursorErrorTag     `json:"_tag,required"`
+	Message string                    `json:"message,required"`
+	JSON    invalidCursorErrorJSON    `json:"-"`
+}
+
+type invalidCursorErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *InvalidCursorError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r invalidCursorErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type InvalidCursorErrorTag string
+
+const (
+	InvalidCursorErrorTagInvalidCursorError InvalidCursorErrorTag = "InvalidCursorError"
+)
+
+func (r InvalidCursorErrorTag) IsKnown() bool {
+	switch r {
+	case InvalidCursorErrorTagInvalidCursorError:
+		return true
+	}
+	return false
+}
+
+type InvalidRequestError struct {
+	Tag     InvalidRequestErrorTag  `json:"_tag,required"`
+	Message string                  `json:"message,required"`
+	Kind    string                  `json:"kind"`
+	Field   string                  `json:"field"`
+	JSON    invalidRequestErrorJSON `json:"-"`
+}
+
+type invalidRequestErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	Kind        apijson.Field
+	Field       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *InvalidRequestError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r invalidRequestErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type InvalidRequestErrorTag string
+
+const (
+	InvalidRequestErrorTagInvalidRequestError InvalidRequestErrorTag = "InvalidRequestError"
+)
+
+func (r InvalidRequestErrorTag) IsKnown() bool {
+	switch r {
+	case InvalidRequestErrorTagInvalidRequestError:
+		return true
+	}
+	return false
+}
+
+type McpUnsupportedOAuthError struct {
+	Error string                         `json:"error,required"`
+	JSON  mcpUnsupportedOAuthErrorJSON   `json:"-"`
+}
+
+type mcpUnsupportedOAuthErrorJSON struct {
+	Error       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *McpUnsupportedOAuthError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r mcpUnsupportedOAuthErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProviderNotFoundError struct {
+	Tag        ProviderNotFoundErrorTag `json:"_tag,required"`
+	ProviderID string                   `json:"providerID,required"`
+	Message    string                   `json:"message,required"`
+	JSON       providerNotFoundErrorJSON `json:"-"`
+}
+
+type providerNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	ProviderID  apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProviderNotFoundErrorTag string
+
+const (
+	ProviderNotFoundErrorTagProviderNotFoundError ProviderNotFoundErrorTag = "ProviderNotFoundError"
+)
+
+func (r ProviderNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case ProviderNotFoundErrorTagProviderNotFoundError:
+		return true
+	}
+	return false
+}
+
+type ServiceUnavailableError struct {
+	Tag     ServiceUnavailableErrorTag  `json:"_tag,required"`
+	Message string                      `json:"message,required"`
+	Service string                      `json:"service"`
+	JSON    serviceUnavailableErrorJSON `json:"-"`
+}
+
+type serviceUnavailableErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	Service     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ServiceUnavailableError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r serviceUnavailableErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ServiceUnavailableErrorTag string
+
+const (
+	ServiceUnavailableErrorTagServiceUnavailableError ServiceUnavailableErrorTag = "ServiceUnavailableError"
+)
+
+func (r ServiceUnavailableErrorTag) IsKnown() bool {
+	switch r {
+	case ServiceUnavailableErrorTagServiceUnavailableError:
+		return true
+	}
+	return false
+}
+
+type UnauthorizedError struct {
+	Tag     UnauthorizedErrorTag  `json:"_tag,required"`
+	Message string                `json:"message,required"`
+	JSON    unauthorizedErrorJSON `json:"-"`
+}
+
+type unauthorizedErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UnauthorizedError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r unauthorizedErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type UnauthorizedErrorTag string
+
+const (
+	UnauthorizedErrorTagUnauthorizedError UnauthorizedErrorTag = "UnauthorizedError"
+)
+
+func (r UnauthorizedErrorTag) IsKnown() bool {
+	switch r {
+	case UnauthorizedErrorTagUnauthorizedError:
+		return true
+	}
+	return false
+}
+
+type EffectHttpApiErrorBadRequest struct {
+	Tag  EffectHttpApiErrorBadRequestTag `json:"_tag,required"`
+	JSON effectHttpApiErrorBadRequestJSON `json:"-"`
+}
+
+type effectHttpApiErrorBadRequestJSON struct {
+	Tag         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EffectHttpApiErrorBadRequest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r effectHttpApiErrorBadRequestJSON) RawJSON() string {
+	return r.raw
+}
+
+type EffectHttpApiErrorBadRequestTag string
+
+const (
+	EffectHttpApiErrorBadRequestTagBadRequest EffectHttpApiErrorBadRequestTag = "BadRequest"
+)
+
+func (r EffectHttpApiErrorBadRequestTag) IsKnown() bool {
+	switch r {
+	case EffectHttpApiErrorBadRequestTagBadRequest:
+		return true
+	}
+	return false
+}
+
+type EffectHttpApiErrorForbidden struct {
+	Tag  EffectHttpApiErrorForbiddenTag `json:"_tag,required"`
+	JSON effectHttpApiErrorForbiddenJSON `json:"-"`
+}
+
+type effectHttpApiErrorForbiddenJSON struct {
+	Tag         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EffectHttpApiErrorForbidden) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r effectHttpApiErrorForbiddenJSON) RawJSON() string {
+	return r.raw
+}
+
+type EffectHttpApiErrorForbiddenTag string
+
+const (
+	EffectHttpApiErrorForbiddenTagForbidden EffectHttpApiErrorForbiddenTag = "Forbidden"
+)
+
+func (r EffectHttpApiErrorForbiddenTag) IsKnown() bool {
+	switch r {
+	case EffectHttpApiErrorForbiddenTagForbidden:
+		return true
+	}
+	return false
+}
+
+type EffectHttpApiErrorInternalServerError struct {
+	Tag  EffectHttpApiErrorInternalServerErrorTag `json:"_tag,required"`
+	JSON effectHttpApiErrorInternalServerErrorJSON `json:"-"`
+}
+
+type effectHttpApiErrorInternalServerErrorJSON struct {
+	Tag         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EffectHttpApiErrorInternalServerError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r effectHttpApiErrorInternalServerErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type EffectHttpApiErrorInternalServerErrorTag string
+
+const (
+	EffectHttpApiErrorInternalServerErrorTagInternalServerError EffectHttpApiErrorInternalServerErrorTag = "InternalServerError"
+)
+
+func (r EffectHttpApiErrorInternalServerErrorTag) IsKnown() bool {
+	switch r {
+	case EffectHttpApiErrorInternalServerErrorTagInternalServerError:
+		return true
+	}
+	return false
+}

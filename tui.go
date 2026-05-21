@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
@@ -13,6 +14,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // TuiService contains methods and other services that help with interacting with
@@ -498,8 +500,11 @@ func (r TuiControlNextParams) URLQuery() (v url.Values) {
 }
 
 type TuiControlNextResponse struct {
-	Path string       `json:"path,required"`
-	Body interface{} `json:"body,required"`
+	Path string `json:"path,required"`
+	// This field can have the runtime type of [TuiPublishBodyPromptAppend],
+	// [TuiPublishBodyCommandExecute], [TuiPublishBodyToastShow],
+	// [TuiPublishBodySessionSelect].
+	Body interface{}               `json:"body,required"`
 	JSON tuicontrolNextResponseJSON `json:"-"`
 }
 
@@ -526,4 +531,27 @@ type TuiControlResponseParams struct {
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*TuiPublishBodyUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TuiPublishBodyPromptAppend{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TuiPublishBodyCommandExecute{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TuiPublishBodyToastShow{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TuiPublishBodySessionSelect{}),
+		},
+	)
 }

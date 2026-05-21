@@ -3468,7 +3468,7 @@ func (r SessionPromptParamsPart) MarshalJSON() (data []byte, err error) {
 func (r SessionPromptParamsPart) implementsSessionPromptParamsPartUnion() {}
 
 // Satisfied by [TextPartInputParam], [FilePartInputParam], [AgentPartInputParam],
-// [SessionPromptParamsPart].
+// [SubtaskPartInputParam], [SessionPromptParamsPart].
 type SessionPromptParamsPartUnion interface {
 	implementsSessionPromptParamsPartUnion()
 }
@@ -3544,6 +3544,48 @@ func (r SessionPromptParamsFormatJsonSchemaType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SessionPromptParamsPartUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(TextPartInputParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(FilePartInputParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(AgentPartInputParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SubtaskPartInputParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SessionPromptParamsPart{}),
+		},
+	)
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SessionPromptParamsFormatUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SessionPromptParamsFormatText{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SessionPromptParamsFormatJsonSchema{}),
+		},
+	)
 }
 
 type SessionPromptParamsModel struct {

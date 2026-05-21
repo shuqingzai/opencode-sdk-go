@@ -218,3 +218,80 @@ const WorktreeErrorNameWorktreeResetFailedError = shared.WorktreeErrorNameWorktr
 
 // This is an alias to an internal value.
 const WorktreeErrorNameWorktreeListFailedError = shared.WorktreeErrorNameWorktreeListFailedError
+
+// === _tag-based error type aliases ===
+
+// This is an alias to an internal type.
+type InvalidCursorError = shared.InvalidCursorError
+
+// This is an alias to an internal type.
+type InvalidCursorErrorTag = shared.InvalidCursorErrorTag
+
+// This is an alias to an internal value.
+const InvalidCursorErrorTagInvalidCursorError = shared.InvalidCursorErrorTagInvalidCursorError
+
+// This is an alias to an internal type.
+type InvalidRequestError = shared.InvalidRequestError
+
+// This is an alias to an internal type.
+type InvalidRequestErrorTag = shared.InvalidRequestErrorTag
+
+// This is an alias to an internal value.
+const InvalidRequestErrorTagInvalidRequestError = shared.InvalidRequestErrorTagInvalidRequestError
+
+// This is an alias to an internal type.
+type McpUnsupportedOAuthError = shared.McpUnsupportedOAuthError
+
+// This is an alias to an internal type.
+type ProviderNotFoundError = shared.ProviderNotFoundError
+
+// This is an alias to an internal type.
+type ProviderNotFoundErrorTag = shared.ProviderNotFoundErrorTag
+
+// This is an alias to an internal value.
+const ProviderNotFoundErrorTagProviderNotFoundError = shared.ProviderNotFoundErrorTagProviderNotFoundError
+
+// This is an alias to an internal type.
+type ServiceUnavailableError = shared.ServiceUnavailableError
+
+// This is an alias to an internal type.
+type ServiceUnavailableErrorTag = shared.ServiceUnavailableErrorTag
+
+// This is an alias to an internal value.
+const ServiceUnavailableErrorTagServiceUnavailableError = shared.ServiceUnavailableErrorTagServiceUnavailableError
+
+// This is an alias to an internal type.
+type UnauthorizedError = shared.UnauthorizedError
+
+// This is an alias to an internal type.
+type UnauthorizedErrorTag = shared.UnauthorizedErrorTag
+
+// This is an alias to an internal value.
+const UnauthorizedErrorTagUnauthorizedError = shared.UnauthorizedErrorTagUnauthorizedError
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorBadRequest = shared.EffectHttpApiErrorBadRequest
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorBadRequestTag = shared.EffectHttpApiErrorBadRequestTag
+
+// This is an alias to an internal value.
+const EffectHttpApiErrorBadRequestTagBadRequest = shared.EffectHttpApiErrorBadRequestTagBadRequest
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorForbidden = shared.EffectHttpApiErrorForbidden
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorForbiddenTag = shared.EffectHttpApiErrorForbiddenTag
+
+// This is an alias to an internal value.
+const EffectHttpApiErrorForbiddenTagForbidden = shared.EffectHttpApiErrorForbiddenTagForbidden
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorInternalServerError = shared.EffectHttpApiErrorInternalServerError
+
+// This is an alias to an internal type.
+type EffectHttpApiErrorInternalServerErrorTag = shared.EffectHttpApiErrorInternalServerErrorTag
+
+// This is an alias to an internal value.
+const EffectHttpApiErrorInternalServerErrorTagInternalServerError = shared.EffectHttpApiErrorInternalServerErrorTagInternalServerError
