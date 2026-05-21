@@ -29,9 +29,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewSessionService] method instead.
 type SessionService struct {
-	Options     []option.RequestOption
-	Permissions *SessionPermissionService
-	Part        *PartService
+	Options []option.RequestOption
+	Part    *PartService
 }
 
 // NewSessionService generates a new service that applies the given options to each
@@ -40,7 +39,6 @@ type SessionService struct {
 func NewSessionService(opts ...option.RequestOption) (r *SessionService) {
 	r = &SessionService{}
 	r.Options = opts
-	r.Permissions = NewSessionPermissionService(opts...)
 	r.Part = NewPartService(opts...)
 	return
 }

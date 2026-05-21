@@ -843,6 +843,170 @@ func (r SyncEventResponseType) IsKnown() bool {
 	return false
 }
 
+// GlobalEventResponseType enumerates all possible event types in the
+// [GlobalEvent.Payload] field. Each value corresponds to the Type field
+// of the concrete variant stored in Payload.
+type GlobalEventResponseType string
+
+const (
+	GlobalEventResponseTypeCatalogModelUpdated       GlobalEventResponseType = "catalog.model.updated"
+	GlobalEventResponseTypeCommandExecuted           GlobalEventResponseType = "command.executed"
+	GlobalEventResponseTypeFileEdited                GlobalEventResponseType = "file.edited"
+	GlobalEventResponseTypeFileWatcherUpdated        GlobalEventResponseType = "file.watcher.updated"
+	GlobalEventResponseTypeGlobalDisposed            GlobalEventResponseType = "global.disposed"
+	GlobalEventResponseTypeInstallationUpdateAvailable GlobalEventResponseType = "installation.update-available"
+	GlobalEventResponseTypeInstallationUpdated       GlobalEventResponseType = "installation.updated"
+	GlobalEventResponseTypeLspClientDiagnostics       GlobalEventResponseType = "lsp.client.diagnostics"
+	GlobalEventResponseTypeLspUpdated                GlobalEventResponseType = "lsp.updated"
+	GlobalEventResponseTypeMcpBrowserOpenFailed       GlobalEventResponseType = "mcp.browser.open.failed"
+	GlobalEventResponseTypeMcpToolsChanged           GlobalEventResponseType = "mcp.tools.changed"
+	GlobalEventResponseTypeMessagePartDelta          GlobalEventResponseType = "message.part.delta"
+	GlobalEventResponseTypeMessagePartRemoved        GlobalEventResponseType = "message.part.removed"
+	GlobalEventResponseTypeMessagePartUpdated        GlobalEventResponseType = "message.part.updated"
+	GlobalEventResponseTypeMessageRemoved            GlobalEventResponseType = "message.removed"
+	GlobalEventResponseTypeMessageUpdated            GlobalEventResponseType = "message.updated"
+	GlobalEventResponseTypePermissionAsked           GlobalEventResponseType = "permission.asked"
+	GlobalEventResponseTypePermissionReplied         GlobalEventResponseType = "permission.replied"
+	GlobalEventResponseTypeProjectUpdated            GlobalEventResponseType = "project.updated"
+	GlobalEventResponseTypePtyCreated                GlobalEventResponseType = "pty.created"
+	GlobalEventResponseTypePtyDeleted                GlobalEventResponseType = "pty.deleted"
+	GlobalEventResponseTypePtyExited                 GlobalEventResponseType = "pty.exited"
+	GlobalEventResponseTypePtyUpdated                GlobalEventResponseType = "pty.updated"
+	GlobalEventResponseTypeQuestionAsked             GlobalEventResponseType = "question.asked"
+	GlobalEventResponseTypeQuestionRejected          GlobalEventResponseType = "question.rejected"
+	GlobalEventResponseTypeQuestionReplied           GlobalEventResponseType = "question.replied"
+	GlobalEventResponseTypeServerConnected           GlobalEventResponseType = "server.connected"
+	GlobalEventResponseTypeServerInstanceDisposed    GlobalEventResponseType = "server.instance.disposed"
+	GlobalEventResponseTypeSessionCompacted          GlobalEventResponseType = "session.compacted"
+	GlobalEventResponseTypeSessionCreated            GlobalEventResponseType = "session.created"
+	GlobalEventResponseTypeSessionDeleted            GlobalEventResponseType = "session.deleted"
+	GlobalEventResponseTypeSessionDiff               GlobalEventResponseType = "session.diff"
+	GlobalEventResponseTypeSessionError              GlobalEventResponseType = "session.error"
+	GlobalEventResponseTypeSessionIdle               GlobalEventResponseType = "session.idle"
+	GlobalEventResponseTypeSessionNextAgentSwitched  GlobalEventResponseType = "session.next.agent.switched"
+	GlobalEventResponseTypeSessionNextCompactionDelta GlobalEventResponseType = "session.next.compaction.delta"
+	GlobalEventResponseTypeSessionNextCompactionEnded GlobalEventResponseType = "session.next.compaction.ended"
+	GlobalEventResponseTypeSessionNextCompactionStarted GlobalEventResponseType = "session.next.compaction.started"
+	GlobalEventResponseTypeSessionNextModelSwitched  GlobalEventResponseType = "session.next.model.switched"
+	GlobalEventResponseTypeSessionNextPrompted       GlobalEventResponseType = "session.next.prompted"
+	GlobalEventResponseTypeSessionNextReasoningDelta GlobalEventResponseType = "session.next.reasoning.delta"
+	GlobalEventResponseTypeSessionNextReasoningEnded GlobalEventResponseType = "session.next.reasoning.ended"
+	GlobalEventResponseTypeSessionNextReasoningStarted GlobalEventResponseType = "session.next.reasoning.started"
+	GlobalEventResponseTypeSessionNextRetried        GlobalEventResponseType = "session.next.retried"
+	GlobalEventResponseTypeSessionNextShellEnded     GlobalEventResponseType = "session.next.shell.ended"
+	GlobalEventResponseTypeSessionNextShellStarted    GlobalEventResponseType = "session.next.shell.started"
+	GlobalEventResponseTypeSessionNextStepEnded      GlobalEventResponseType = "session.next.step.ended"
+	GlobalEventResponseTypeSessionNextStepFailed     GlobalEventResponseType = "session.next.step.failed"
+	GlobalEventResponseTypeSessionNextStepStarted    GlobalEventResponseType = "session.next.step.started"
+	GlobalEventResponseTypeSessionNextSynthetic      GlobalEventResponseType = "session.next.synthetic"
+	GlobalEventResponseTypeSessionNextTextDelta      GlobalEventResponseType = "session.next.text.delta"
+	GlobalEventResponseTypeSessionNextTextEnded      GlobalEventResponseType = "session.next.text.ended"
+	GlobalEventResponseTypeSessionNextTextStarted    GlobalEventResponseType = "session.next.text.started"
+	GlobalEventResponseTypeSessionNextToolCalled     GlobalEventResponseType = "session.next.tool.called"
+	GlobalEventResponseTypeSessionNextToolFailed     GlobalEventResponseType = "session.next.tool.failed"
+	GlobalEventResponseTypeSessionNextToolInputDelta GlobalEventResponseType = "session.next.tool.input.delta"
+	GlobalEventResponseTypeSessionNextToolInputEnded GlobalEventResponseType = "session.next.tool.input.ended"
+	GlobalEventResponseTypeSessionNextToolInputStarted GlobalEventResponseType = "session.next.tool.input.started"
+	GlobalEventResponseTypeSessionNextToolProgress   GlobalEventResponseType = "session.next.tool.progress"
+	GlobalEventResponseTypeSessionNextToolSuccess    GlobalEventResponseType = "session.next.tool.success"
+	GlobalEventResponseTypeSessionStatus             GlobalEventResponseType = "session.status"
+	GlobalEventResponseTypeSessionUpdated            GlobalEventResponseType = "session.updated"
+	GlobalEventResponseTypeTodoUpdated               GlobalEventResponseType = "todo.updated"
+	GlobalEventResponseTypeTuiCommandExecute          GlobalEventResponseType = "tui.command.execute"
+	GlobalEventResponseTypeTuiPromptAppend            GlobalEventResponseType = "tui.prompt.append"
+	GlobalEventResponseTypeTuiSessionSelect           GlobalEventResponseType = "tui.session.select"
+	GlobalEventResponseTypeTuiToastShow              GlobalEventResponseType = "tui.toast.show"
+	GlobalEventResponseTypeVcsBranchUpdated           GlobalEventResponseType = "vcs.branch.updated"
+	GlobalEventResponseTypeWorkspaceFailed            GlobalEventResponseType = "workspace.failed"
+	GlobalEventResponseTypeWorkspaceReady            GlobalEventResponseType = "workspace.ready"
+	GlobalEventResponseTypeWorkspaceStatus           GlobalEventResponseType = "workspace.status"
+	GlobalEventResponseTypeWorktreeFailed            GlobalEventResponseType = "worktree.failed"
+	GlobalEventResponseTypeWorktreeReady             GlobalEventResponseType = "worktree.ready"
+	// SyncEventResponse type — all V1 SyncEvents use "sync" as the type value.
+	GlobalEventResponseTypeSync                      GlobalEventResponseType = "sync"
+)
+
+func (r GlobalEventResponseType) IsKnown() bool {
+	switch r {
+	case GlobalEventResponseTypeCatalogModelUpdated,
+		GlobalEventResponseTypeCommandExecuted,
+		GlobalEventResponseTypeFileEdited,
+		GlobalEventResponseTypeFileWatcherUpdated,
+		GlobalEventResponseTypeGlobalDisposed,
+		GlobalEventResponseTypeInstallationUpdateAvailable,
+		GlobalEventResponseTypeInstallationUpdated,
+		GlobalEventResponseTypeLspClientDiagnostics,
+		GlobalEventResponseTypeLspUpdated,
+		GlobalEventResponseTypeMcpBrowserOpenFailed,
+		GlobalEventResponseTypeMcpToolsChanged,
+		GlobalEventResponseTypeMessagePartDelta,
+		GlobalEventResponseTypeMessagePartRemoved,
+		GlobalEventResponseTypeMessagePartUpdated,
+		GlobalEventResponseTypeMessageRemoved,
+		GlobalEventResponseTypeMessageUpdated,
+		GlobalEventResponseTypePermissionAsked,
+		GlobalEventResponseTypePermissionReplied,
+		GlobalEventResponseTypeProjectUpdated,
+		GlobalEventResponseTypePtyCreated,
+		GlobalEventResponseTypePtyDeleted,
+		GlobalEventResponseTypePtyExited,
+		GlobalEventResponseTypePtyUpdated,
+		GlobalEventResponseTypeQuestionAsked,
+		GlobalEventResponseTypeQuestionRejected,
+		GlobalEventResponseTypeQuestionReplied,
+		GlobalEventResponseTypeServerConnected,
+		GlobalEventResponseTypeServerInstanceDisposed,
+		GlobalEventResponseTypeSessionCompacted,
+		GlobalEventResponseTypeSessionCreated,
+		GlobalEventResponseTypeSessionDeleted,
+		GlobalEventResponseTypeSessionDiff,
+		GlobalEventResponseTypeSessionError,
+		GlobalEventResponseTypeSessionIdle,
+		GlobalEventResponseTypeSessionNextAgentSwitched,
+		GlobalEventResponseTypeSessionNextCompactionDelta,
+		GlobalEventResponseTypeSessionNextCompactionEnded,
+		GlobalEventResponseTypeSessionNextCompactionStarted,
+		GlobalEventResponseTypeSessionNextModelSwitched,
+		GlobalEventResponseTypeSessionNextPrompted,
+		GlobalEventResponseTypeSessionNextReasoningDelta,
+		GlobalEventResponseTypeSessionNextReasoningEnded,
+		GlobalEventResponseTypeSessionNextReasoningStarted,
+		GlobalEventResponseTypeSessionNextRetried,
+		GlobalEventResponseTypeSessionNextShellEnded,
+		GlobalEventResponseTypeSessionNextShellStarted,
+		GlobalEventResponseTypeSessionNextStepEnded,
+		GlobalEventResponseTypeSessionNextStepFailed,
+		GlobalEventResponseTypeSessionNextStepStarted,
+		GlobalEventResponseTypeSessionNextSynthetic,
+		GlobalEventResponseTypeSessionNextTextDelta,
+		GlobalEventResponseTypeSessionNextTextEnded,
+		GlobalEventResponseTypeSessionNextTextStarted,
+		GlobalEventResponseTypeSessionNextToolCalled,
+		GlobalEventResponseTypeSessionNextToolFailed,
+		GlobalEventResponseTypeSessionNextToolInputDelta,
+		GlobalEventResponseTypeSessionNextToolInputEnded,
+		GlobalEventResponseTypeSessionNextToolInputStarted,
+		GlobalEventResponseTypeSessionNextToolProgress,
+		GlobalEventResponseTypeSessionNextToolSuccess,
+		GlobalEventResponseTypeSessionStatus,
+		GlobalEventResponseTypeSessionUpdated,
+		GlobalEventResponseTypeTodoUpdated,
+		GlobalEventResponseTypeTuiCommandExecute,
+		GlobalEventResponseTypeTuiPromptAppend,
+		GlobalEventResponseTypeTuiSessionSelect,
+		GlobalEventResponseTypeTuiToastShow,
+		GlobalEventResponseTypeVcsBranchUpdated,
+		GlobalEventResponseTypeWorkspaceFailed,
+		GlobalEventResponseTypeWorkspaceReady,
+		GlobalEventResponseTypeWorkspaceStatus,
+		GlobalEventResponseTypeWorktreeFailed,
+		GlobalEventResponseTypeWorktreeReady,
+		GlobalEventResponseTypeSync:
+		return true
+	}
+	return false
+}
+
 // SyncEventResponseSyncEventType values correspond to sync event versioned type names.
 type SyncEventResponseSyncEventType string
 
