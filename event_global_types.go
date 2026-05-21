@@ -32,14 +32,14 @@ func (r EventListResponseEventMessageUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventMessageUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessageUpdatedProperties struct {
-	SessionID string `json:"sessionID,required"`
-	Info Message `json:"info,required"`
+	SessionID string                                             `json:"sessionID,required"`
+	Info      Message                                            `json:"info,required"`
 	JSON      eventListResponseEventMessageUpdatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventMessageUpdatedPropertiesJSON struct {
 	SessionID   apijson.Field
-	Info   apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -92,8 +92,8 @@ func (r EventListResponseEventMessageRemoved) implementsEventListResponse() {}
 func (r EventListResponseEventMessageRemoved) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessageRemovedProperties struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
+	MessageID string                                             `json:"messageID,required"`
+	SessionID string                                             `json:"sessionID,required"`
 	JSON      eventListResponseEventMessageRemovedPropertiesJSON `json:"-"`
 }
 
@@ -152,16 +152,16 @@ func (r EventListResponseEventMessagePartUpdated) implementsEventListResponse() 
 func (r EventListResponseEventMessagePartUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessagePartUpdatedProperties struct {
-	Part Part `json:"part,required"`
-	SessionID string `json:"sessionID,required"`
-	Time int64 `json:"time,required"`
+	Part      Part                                                   `json:"part,required"`
+	SessionID string                                                 `json:"sessionID,required"`
+	Time      int64                                                  `json:"time,required"`
 	JSON      eventListResponseEventMessagePartUpdatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventMessagePartUpdatedPropertiesJSON struct {
-	Part   apijson.Field
+	Part        apijson.Field
 	SessionID   apijson.Field
-	Time   apijson.Field
+	Time        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -214,15 +214,15 @@ func (r EventListResponseEventMessagePartRemoved) implementsEventListResponse() 
 func (r EventListResponseEventMessagePartRemoved) implementsGlobalEventPayload() {}
 
 type EventListResponseEventMessagePartRemovedProperties struct {
-	MessageID string `json:"messageID,required"`
-	PartID string `json:"partID,required"`
-	SessionID string `json:"sessionID,required"`
+	MessageID string                                                 `json:"messageID,required"`
+	PartID    string                                                 `json:"partID,required"`
+	SessionID string                                                 `json:"sessionID,required"`
 	JSON      eventListResponseEventMessagePartRemovedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventMessagePartRemovedPropertiesJSON struct {
 	MessageID   apijson.Field
-	PartID   apijson.Field
+	PartID      apijson.Field
 	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -276,14 +276,14 @@ func (r EventListResponseEventSessionCreated) implementsEventListResponse() {}
 func (r EventListResponseEventSessionCreated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionCreatedProperties struct {
-	SessionID string `json:"sessionID,required"`
-	Info Session `json:"info,required"`
+	SessionID string                                             `json:"sessionID,required"`
+	Info      Session                                            `json:"info,required"`
 	JSON      eventListResponseEventSessionCreatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionCreatedPropertiesJSON struct {
 	SessionID   apijson.Field
-	Info   apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -336,14 +336,14 @@ func (r EventListResponseEventSessionUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventSessionUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionUpdatedProperties struct {
-	SessionID string `json:"sessionID,required"`
-	Info Session `json:"info,required"`
+	SessionID string                                             `json:"sessionID,required"`
+	Info      Session                                            `json:"info,required"`
 	JSON      eventListResponseEventSessionUpdatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionUpdatedPropertiesJSON struct {
 	SessionID   apijson.Field
-	Info   apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -396,14 +396,14 @@ func (r EventListResponseEventSessionDeleted) implementsEventListResponse() {}
 func (r EventListResponseEventSessionDeleted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionDeletedProperties struct {
-	SessionID string `json:"sessionID,required"`
-	Info Session `json:"info,required"`
+	SessionID string                                             `json:"sessionID,required"`
+	Info      Session                                            `json:"info,required"`
 	JSON      eventListResponseEventSessionDeletedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionDeletedPropertiesJSON struct {
 	SessionID   apijson.Field
-	Info   apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -456,16 +456,16 @@ func (r EventListResponseEventSessionNextAgentSwitched) implementsEventListRespo
 func (r EventListResponseEventSessionNextAgentSwitched) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextAgentSwitchedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Agent string `json:"agent,required"`
+	Timestamp int64                                                        `json:"timestamp,required"`
+	SessionID string                                                       `json:"sessionID,required"`
+	Agent     string                                                       `json:"agent,required"`
 	JSON      eventListResponseEventSessionNextAgentSwitchedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextAgentSwitchedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Agent   apijson.Field
+	Agent       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -518,16 +518,16 @@ func (r EventListResponseEventSessionNextModelSwitched) implementsEventListRespo
 func (r EventListResponseEventSessionNextModelSwitched) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextModelSwitchedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Model EventListResponseEventSessionNextModelSwitchedModel `json:"model,required"`
+	Timestamp int64                                                        `json:"timestamp,required"`
+	SessionID string                                                       `json:"sessionID,required"`
+	Model     EventListResponseEventSessionNextModelSwitchedModel          `json:"model,required"`
 	JSON      eventListResponseEventSessionNextModelSwitchedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextModelSwitchedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Model   apijson.Field
+	Model       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -580,16 +580,16 @@ func (r EventListResponseEventSessionNextPrompted) implementsEventListResponse()
 func (r EventListResponseEventSessionNextPrompted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextPromptedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Prompt EventListResponseEventSessionNextPromptedPrompt `json:"prompt,required"`
+	Timestamp int64                                                   `json:"timestamp,required"`
+	SessionID string                                                  `json:"sessionID,required"`
+	Prompt    EventListResponseEventSessionNextPromptedPrompt         `json:"prompt,required"`
 	JSON      eventListResponseEventSessionNextPromptedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Prompt   apijson.Field
+	Prompt      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -642,16 +642,16 @@ func (r EventListResponseEventSessionNextSynthetic) implementsEventListResponse(
 func (r EventListResponseEventSessionNextSynthetic) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextSyntheticProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
+	Timestamp int64                                                    `json:"timestamp,required"`
+	SessionID string                                                   `json:"sessionID,required"`
+	Text      string                                                   `json:"text,required"`
 	JSON      eventListResponseEventSessionNextSyntheticPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextSyntheticPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Text   apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -704,18 +704,18 @@ func (r EventListResponseEventSessionNextShellStarted) implementsEventListRespon
 func (r EventListResponseEventSessionNextShellStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextShellStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Command string `json:"command,required"`
+	Timestamp int64                                                       `json:"timestamp,required"`
+	SessionID string                                                      `json:"sessionID,required"`
+	CallID    string                                                      `json:"callID,required"`
+	Command   string                                                      `json:"command,required"`
 	JSON      eventListResponseEventSessionNextShellStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextShellStartedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Command   apijson.Field
+	CallID      apijson.Field
+	Command     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -768,18 +768,18 @@ func (r EventListResponseEventSessionNextShellEnded) implementsEventListResponse
 func (r EventListResponseEventSessionNextShellEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextShellEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Output string `json:"output,required"`
+	Timestamp int64                                                     `json:"timestamp,required"`
+	SessionID string                                                    `json:"sessionID,required"`
+	CallID    string                                                    `json:"callID,required"`
+	Output    string                                                    `json:"output,required"`
 	JSON      eventListResponseEventSessionNextShellEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextShellEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Output   apijson.Field
+	CallID      apijson.Field
+	Output      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -832,20 +832,20 @@ func (r EventListResponseEventSessionNextStepStarted) implementsEventListRespons
 func (r EventListResponseEventSessionNextStepStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextStepStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Agent string `json:"agent,required"`
-	Model EventListResponseEventSessionNextModelSwitchedModel `json:"model,required"`
-	Snapshot string `json:"snapshot"`
+	Timestamp int64                                                      `json:"timestamp,required"`
+	SessionID string                                                     `json:"sessionID,required"`
+	Agent     string                                                     `json:"agent,required"`
+	Model     EventListResponseEventSessionNextModelSwitchedModel        `json:"model,required"`
+	Snapshot  string                                                     `json:"snapshot"`
 	JSON      eventListResponseEventSessionNextStepStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepStartedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Agent   apijson.Field
-	Model   apijson.Field
-	Snapshot   apijson.Field
+	Agent       apijson.Field
+	Model       apijson.Field
+	Snapshot    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -898,22 +898,22 @@ func (r EventListResponseEventSessionNextStepEnded) implementsEventListResponse(
 func (r EventListResponseEventSessionNextStepEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextStepEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Finish string `json:"finish,required"`
-	Cost float64 `json:"cost,required"`
-	Tokens EventListResponseEventSessionNextStepEndedTokens `json:"tokens,required"`
-	Snapshot string `json:"snapshot"`
+	Timestamp int64                                                    `json:"timestamp,required"`
+	SessionID string                                                   `json:"sessionID,required"`
+	Finish    string                                                   `json:"finish,required"`
+	Cost      float64                                                  `json:"cost,required"`
+	Tokens    EventListResponseEventSessionNextStepEndedTokens         `json:"tokens,required"`
+	Snapshot  string                                                   `json:"snapshot"`
 	JSON      eventListResponseEventSessionNextStepEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Finish   apijson.Field
-	Cost   apijson.Field
-	Tokens   apijson.Field
-	Snapshot   apijson.Field
+	Finish      apijson.Field
+	Cost        apijson.Field
+	Tokens      apijson.Field
+	Snapshot    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -966,16 +966,16 @@ func (r EventListResponseEventSessionNextStepFailed) implementsEventListResponse
 func (r EventListResponseEventSessionNextStepFailed) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextStepFailedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Error SessionErrorUnknown `json:"error,required"`
+	Timestamp int64                                                     `json:"timestamp,required"`
+	SessionID string                                                    `json:"sessionID,required"`
+	Error     SessionErrorUnknown                                       `json:"error,required"`
 	JSON      eventListResponseEventSessionNextStepFailedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepFailedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Error   apijson.Field
+	Error       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1028,8 +1028,8 @@ func (r EventListResponseEventSessionNextTextStarted) implementsEventListRespons
 func (r EventListResponseEventSessionNextTextStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextTextStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
+	Timestamp int64                                                      `json:"timestamp,required"`
+	SessionID string                                                     `json:"sessionID,required"`
 	JSON      eventListResponseEventSessionNextTextStartedPropertiesJSON `json:"-"`
 }
 
@@ -1088,16 +1088,16 @@ func (r EventListResponseEventSessionNextTextDelta) implementsEventListResponse(
 func (r EventListResponseEventSessionNextTextDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextTextDeltaProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Delta string `json:"delta,required"`
+	Timestamp int64                                                    `json:"timestamp,required"`
+	SessionID string                                                   `json:"sessionID,required"`
+	Delta     string                                                   `json:"delta,required"`
 	JSON      eventListResponseEventSessionNextTextDeltaPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextTextDeltaPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Delta   apijson.Field
+	Delta       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1150,16 +1150,16 @@ func (r EventListResponseEventSessionNextTextEnded) implementsEventListResponse(
 func (r EventListResponseEventSessionNextTextEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextTextEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
+	Timestamp int64                                                    `json:"timestamp,required"`
+	SessionID string                                                   `json:"sessionID,required"`
+	Text      string                                                   `json:"text,required"`
 	JSON      eventListResponseEventSessionNextTextEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextTextEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Text   apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1212,16 +1212,16 @@ func (r EventListResponseEventSessionNextReasoningStarted) implementsEventListRe
 func (r EventListResponseEventSessionNextReasoningStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	ReasoningID string `json:"reasoningID,required"`
-	JSON      eventListResponseEventSessionNextReasoningStartedPropertiesJSON `json:"-"`
+	Timestamp   int64                                                           `json:"timestamp,required"`
+	SessionID   string                                                          `json:"sessionID,required"`
+	ReasoningID string                                                          `json:"reasoningID,required"`
+	JSON        eventListResponseEventSessionNextReasoningStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningStartedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	ReasoningID   apijson.Field
+	ReasoningID apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1274,18 +1274,18 @@ func (r EventListResponseEventSessionNextReasoningDelta) implementsEventListResp
 func (r EventListResponseEventSessionNextReasoningDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningDeltaProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	ReasoningID string `json:"reasoningID,required"`
-	Delta string `json:"delta,required"`
-	JSON      eventListResponseEventSessionNextReasoningDeltaPropertiesJSON `json:"-"`
+	Timestamp   int64                                                         `json:"timestamp,required"`
+	SessionID   string                                                        `json:"sessionID,required"`
+	ReasoningID string                                                        `json:"reasoningID,required"`
+	Delta       string                                                        `json:"delta,required"`
+	JSON        eventListResponseEventSessionNextReasoningDeltaPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningDeltaPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	ReasoningID   apijson.Field
-	Delta   apijson.Field
+	ReasoningID apijson.Field
+	Delta       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1338,18 +1338,18 @@ func (r EventListResponseEventSessionNextReasoningEnded) implementsEventListResp
 func (r EventListResponseEventSessionNextReasoningEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	ReasoningID string `json:"reasoningID,required"`
-	Text string `json:"text,required"`
-	JSON      eventListResponseEventSessionNextReasoningEndedPropertiesJSON `json:"-"`
+	Timestamp   int64                                                         `json:"timestamp,required"`
+	SessionID   string                                                        `json:"sessionID,required"`
+	ReasoningID string                                                        `json:"reasoningID,required"`
+	Text        string                                                        `json:"text,required"`
+	JSON        eventListResponseEventSessionNextReasoningEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	ReasoningID   apijson.Field
-	Text   apijson.Field
+	ReasoningID apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1402,18 +1402,18 @@ func (r EventListResponseEventSessionNextToolInputStarted) implementsEventListRe
 func (r EventListResponseEventSessionNextToolInputStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolInputStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Name string `json:"name,required"`
+	Timestamp int64                                                           `json:"timestamp,required"`
+	SessionID string                                                          `json:"sessionID,required"`
+	CallID    string                                                          `json:"callID,required"`
+	Name      string                                                          `json:"name,required"`
 	JSON      eventListResponseEventSessionNextToolInputStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputStartedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Name   apijson.Field
+	CallID      apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1466,18 +1466,18 @@ func (r EventListResponseEventSessionNextToolInputDelta) implementsEventListResp
 func (r EventListResponseEventSessionNextToolInputDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolInputDeltaProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Delta string `json:"delta,required"`
+	Timestamp int64                                                         `json:"timestamp,required"`
+	SessionID string                                                        `json:"sessionID,required"`
+	CallID    string                                                        `json:"callID,required"`
+	Delta     string                                                        `json:"delta,required"`
 	JSON      eventListResponseEventSessionNextToolInputDeltaPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputDeltaPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Delta   apijson.Field
+	CallID      apijson.Field
+	Delta       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1530,18 +1530,18 @@ func (r EventListResponseEventSessionNextToolInputEnded) implementsEventListResp
 func (r EventListResponseEventSessionNextToolInputEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolInputEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Text string `json:"text,required"`
+	Timestamp int64                                                         `json:"timestamp,required"`
+	SessionID string                                                        `json:"sessionID,required"`
+	CallID    string                                                        `json:"callID,required"`
+	Text      string                                                        `json:"text,required"`
 	JSON      eventListResponseEventSessionNextToolInputEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Text   apijson.Field
+	CallID      apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1594,23 +1594,23 @@ func (r EventListResponseEventSessionNextToolCalled) implementsEventListResponse
 func (r EventListResponseEventSessionNextToolCalled) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolCalledProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
+	Timestamp int64  `json:"timestamp,required"`
 	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Tool string `json:"tool,required"`
+	CallID    string `json:"callID,required"`
+	Tool      string `json:"tool,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Input interface{} `json:"input,required"`
-	Provider EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
-	JSON      eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
+	Input    interface{}                                               `json:"input,required"`
+	Provider EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
+	JSON     eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolCalledPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Tool   apijson.Field
-	Input   apijson.Field
-	Provider   apijson.Field
+	CallID      apijson.Field
+	Tool        apijson.Field
+	Input       apijson.Field
+	Provider    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1663,22 +1663,22 @@ func (r EventListResponseEventSessionNextToolProgress) implementsEventListRespon
 func (r EventListResponseEventSessionNextToolProgress) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolProgressProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
+	Timestamp int64  `json:"timestamp,required"`
 	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
+	CallID    string `json:"callID,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Structured interface{} `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content []interface{} `json:"content,required"`
-	JSON      eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
+	Content []interface{}                                               `json:"content,required"`
+	JSON    eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolProgressPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Structured   apijson.Field
-	Content   apijson.Field
+	CallID      apijson.Field
+	Structured  apijson.Field
+	Content     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1731,24 +1731,24 @@ func (r EventListResponseEventSessionNextToolSuccess) implementsEventListRespons
 func (r EventListResponseEventSessionNextToolSuccess) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolSuccessProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
+	Timestamp int64  `json:"timestamp,required"`
 	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
+	CallID    string `json:"callID,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Structured interface{} `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content []interface{} `json:"content,required"`
-	Provider EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
-	JSON      eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
+	Content  []interface{}                                              `json:"content,required"`
+	Provider EventListResponseEventSessionNextToolCalledProvider        `json:"provider,required"`
+	JSON     eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolSuccessPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Structured   apijson.Field
-	Content   apijson.Field
-	Provider   apijson.Field
+	CallID      apijson.Field
+	Structured  apijson.Field
+	Content     apijson.Field
+	Provider    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1801,20 +1801,20 @@ func (r EventListResponseEventSessionNextToolFailed) implementsEventListResponse
 func (r EventListResponseEventSessionNextToolFailed) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolFailedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	CallID string `json:"callID,required"`
-	Error SessionErrorUnknown `json:"error,required"`
-	Provider EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
+	Timestamp int64                                                     `json:"timestamp,required"`
+	SessionID string                                                    `json:"sessionID,required"`
+	CallID    string                                                    `json:"callID,required"`
+	Error     SessionErrorUnknown                                       `json:"error,required"`
+	Provider  EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
 	JSON      eventListResponseEventSessionNextToolFailedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolFailedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	CallID   apijson.Field
-	Error   apijson.Field
-	Provider   apijson.Field
+	CallID      apijson.Field
+	Error       apijson.Field
+	Provider    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1867,18 +1867,18 @@ func (r EventListResponseEventSessionNextRetried) implementsEventListResponse() 
 func (r EventListResponseEventSessionNextRetried) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextRetriedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Attempt int64 `json:"attempt,required"`
-	Error EventListResponseEventSessionNextRetriedError `json:"error,required"`
+	Timestamp int64                                                  `json:"timestamp,required"`
+	SessionID string                                                 `json:"sessionID,required"`
+	Attempt   int64                                                  `json:"attempt,required"`
+	Error     EventListResponseEventSessionNextRetriedError          `json:"error,required"`
 	JSON      eventListResponseEventSessionNextRetriedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextRetriedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Attempt   apijson.Field
-	Error   apijson.Field
+	Attempt     apijson.Field
+	Error       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1931,16 +1931,16 @@ func (r EventListResponseEventSessionNextCompactionStarted) implementsEventListR
 func (r EventListResponseEventSessionNextCompactionStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextCompactionStartedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Reason string `json:"reason,required"`
+	Timestamp int64                                                            `json:"timestamp,required"`
+	SessionID string                                                           `json:"sessionID,required"`
+	Reason    string                                                           `json:"reason,required"`
 	JSON      eventListResponseEventSessionNextCompactionStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionStartedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Reason   apijson.Field
+	Reason      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1993,16 +1993,16 @@ func (r EventListResponseEventSessionNextCompactionDelta) implementsEventListRes
 func (r EventListResponseEventSessionNextCompactionDelta) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextCompactionDeltaProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
+	Timestamp int64                                                          `json:"timestamp,required"`
+	SessionID string                                                         `json:"sessionID,required"`
+	Text      string                                                         `json:"text,required"`
 	JSON      eventListResponseEventSessionNextCompactionDeltaPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionDeltaPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Text   apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2055,18 +2055,18 @@ func (r EventListResponseEventSessionNextCompactionEnded) implementsEventListRes
 func (r EventListResponseEventSessionNextCompactionEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextCompactionEndedProperties struct {
-	Timestamp int64 `json:"timestamp,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Include string `json:"include"`
+	Timestamp int64                                                          `json:"timestamp,required"`
+	SessionID string                                                         `json:"sessionID,required"`
+	Text      string                                                         `json:"text,required"`
+	Include   string                                                         `json:"include"`
 	JSON      eventListResponseEventSessionNextCompactionEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionEndedPropertiesJSON struct {
 	Timestamp   apijson.Field
 	SessionID   apijson.Field
-	Text   apijson.Field
-	Include   apijson.Field
+	Text        apijson.Field
+	Include     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2093,12 +2093,11 @@ func (r EventListResponseEventSessionNextCompactionEndedType) IsKnown() bool {
 	return false
 }
 
-
 // EventListResponseEventSessionNextModelSwitchedModel
 type EventListResponseEventSessionNextModelSwitchedModel struct {
-	ID         string `json:"id,required"`
-	ProviderID string `json:"providerID,required"`
-	Variant    string `json:"variant,required"`
+	ID         string                                                  `json:"id,required"`
+	ProviderID string                                                  `json:"providerID,required"`
+	Variant    string                                                  `json:"variant,required"`
 	JSON       eventListResponseEventSessionNextModelSwitchedModelJSON `json:"-"`
 }
 
@@ -2122,7 +2121,7 @@ func (r eventListResponseEventSessionNextModelSwitchedModelJSON) RawJSON() strin
 type EventListResponseEventSessionNextToolCalledProvider struct {
 	Executed bool `json:"executed,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
+	Metadata interface{}                                             `json:"metadata"`
 	JSON     eventListResponseEventSessionNextToolCalledProviderJSON `json:"-"`
 }
 
@@ -2143,12 +2142,12 @@ func (r eventListResponseEventSessionNextToolCalledProviderJSON) RawJSON() strin
 
 // EventListResponseEventSessionNextRetriedError
 type EventListResponseEventSessionNextRetriedError struct {
-	Message         string            `json:"message,required"`
-	IsRetryable     bool              `json:"isRetryable,required"`
-	StatusCode      int64             `json:"statusCode"`
-	ResponseHeaders map[string]string `json:"responseHeaders"`
-	ResponseBody    string            `json:"responseBody"`
-	Metadata        map[string]string `json:"metadata"`
+	Message         string                                            `json:"message,required"`
+	IsRetryable     bool                                              `json:"isRetryable,required"`
+	StatusCode      int64                                             `json:"statusCode"`
+	ResponseHeaders map[string]string                                 `json:"responseHeaders"`
+	ResponseBody    string                                            `json:"responseBody"`
+	Metadata        map[string]string                                 `json:"metadata"`
 	JSON            eventListResponseEventSessionNextRetriedErrorJSON `json:"-"`
 }
 
@@ -2173,10 +2172,10 @@ func (r eventListResponseEventSessionNextRetriedErrorJSON) RawJSON() string {
 
 // EventListResponseEventSessionNextPromptedPrompt
 type EventListResponseEventSessionNextPromptedPrompt struct {
-	Text       string                        `json:"text,required"`
-	Files      []V2PromptFileAttachment      `json:"files"`
-	Agents     []V2PromptAgentAttachment     `json:"agents"`
-	References []V2PromptReferenceAttachment `json:"references"`
+	Text       string                                              `json:"text,required"`
+	Files      []V2PromptFileAttachment                            `json:"files"`
+	Agents     []V2PromptAgentAttachment                           `json:"agents"`
+	References []V2PromptReferenceAttachment                       `json:"references"`
 	JSON       eventListResponseEventSessionNextPromptedPromptJSON `json:"-"`
 }
 
@@ -2199,9 +2198,9 @@ func (r eventListResponseEventSessionNextPromptedPromptJSON) RawJSON() string {
 
 // EventListResponseEventSessionNextStepEndedTokens
 type EventListResponseEventSessionNextStepEndedTokens struct {
-	Input     int64 `json:"input,required"`
-	Output    int64 `json:"output,required"`
-	Reasoning int64 `json:"reasoning,required"`
+	Input     int64                                                 `json:"input,required"`
+	Output    int64                                                 `json:"output,required"`
+	Reasoning int64                                                 `json:"reasoning,required"`
 	Cache     EventListResponseEventSessionNextStepEndedTokensCache `json:"cache,required"`
 	JSON      eventListResponseEventSessionNextStepEndedTokensJSON  `json:"-"`
 }
@@ -2225,8 +2224,8 @@ func (r eventListResponseEventSessionNextStepEndedTokensJSON) RawJSON() string {
 
 // EventListResponseEventSessionNextStepEndedTokensCache
 type EventListResponseEventSessionNextStepEndedTokensCache struct {
-	Read  int64 `json:"read,required"`
-	Write int64 `json:"write,required"`
+	Read  int64                                                     `json:"read,required"`
+	Write int64                                                     `json:"write,required"`
 	JSON  eventListResponseEventSessionNextStepEndedTokensCacheJSON `json:"-"`
 }
 
@@ -2287,7 +2286,7 @@ func (r EventListResponseEventCatalogModelUpdated) implementsEventListResponse()
 func (r EventListResponseEventCatalogModelUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventCatalogModelUpdatedProperties struct {
-	Model V2ModelInfo                                            `json:"model,required"`
+	Model V2ModelInfo                                             `json:"model,required"`
 	JSON  eventListResponseEventCatalogModelUpdatedPropertiesJSON `json:"-"`
 }
 

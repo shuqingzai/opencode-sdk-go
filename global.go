@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"reflect"
 	"slices"
@@ -267,40 +268,7 @@ type GlobalEvent struct {
 	// [EventListResponseEventWorktreeFailed],
 	// [EventListResponseEventWorktreeReady],
 	//
-	// [SyncEventXxx] (33 V1 SyncEvent types):
-	// [SyncEventMessagePartRemoved],
-	// [SyncEventMessagePartUpdated],
-	// [SyncEventMessageRemoved],
-	// [SyncEventMessageUpdated],
-	// [SyncEventSessionCreated],
-	// [SyncEventSessionDeleted],
-	// [SyncEventSessionNextAgentSwitched],
-	// [SyncEventSessionNextCompactionDelta],
-	// [SyncEventSessionNextCompactionEnded],
-	// [SyncEventSessionNextCompactionStarted],
-	// [SyncEventSessionNextModelSwitched],
-	// [SyncEventSessionNextPrompted],
-	// [SyncEventSessionNextReasoningDelta],
-	// [SyncEventSessionNextReasoningEnded],
-	// [SyncEventSessionNextReasoningStarted],
-	// [SyncEventSessionNextRetried],
-	// [SyncEventSessionNextShellEnded],
-	// [SyncEventSessionNextShellStarted],
-	// [SyncEventSessionNextStepEnded],
-	// [SyncEventSessionNextStepFailed],
-	// [SyncEventSessionNextStepStarted],
-	// [SyncEventSessionNextSynthetic],
-	// [SyncEventSessionNextTextDelta],
-	// [SyncEventSessionNextTextEnded],
-	// [SyncEventSessionNextTextStarted],
-	// [SyncEventSessionNextToolCalled],
-	// [SyncEventSessionNextToolFailed],
-	// [SyncEventSessionNextToolInputDelta],
-	// [SyncEventSessionNextToolInputEnded],
-	// [SyncEventSessionNextToolInputStarted],
-	// [SyncEventSessionNextToolProgress],
-	// [SyncEventSessionNextToolSuccess],
-	// [SyncEventSessionUpdated].
+	// [SyncEventResponse] (V1 SyncEvent).
 	Payload   interface{}            `json:"payload,required"`
 	Project   string                 `json:"project"`
 	Workspace string                 `json:"workspace"`
@@ -343,35 +311,30 @@ func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
 	r.Workspace = alias.Workspace
 	r.JSON = alias.JSON
 
-	// Phase 2: extract the payload sub-object and determine the union match target.
-	//
-	// V2 events → payload has the shape {id, type, properties}. Match directly.
-	//
-	// V1 SyncEvents → the server wraps them as {type: "sync", syncEvent: {...}, id: "..."}.
-	//                  The actual SyncEvent variant fields ({type, name, id, seq,
-	//                  aggregateID, data}) are nested under "syncEvent". We extract
-	//                  that inner object so the existing SyncEvent* structs
-	//                  (registered as union variants) can match correctly.
+	// Phase 2: extract the payload and route to the correct handler.
 	result := gjson.ParseBytes(data)
 	payloadResult := result.Get("payload")
 	if !payloadResult.Exists() {
 		return nil
 	}
 
-	matchTarget := payloadResult
+	// V1 SyncEvents: the server wraps them as {type:"sync", syncEvent:{...}}.
+	// SyncEventResponse handles this directly via its own UnmarshalJSON.
 	if payloadResult.Get("type").String() == "sync" {
-		if inner := payloadResult.Get("syncEvent"); inner.Exists() {
-			matchTarget = inner
+		var resp SyncEventResponse
+		if err := json.Unmarshal([]byte(payloadResult.Raw), &resp); err != nil {
+			return err
 		}
+		r.union = resp
+		r.Payload = resp
+		return nil
 	}
 
-	if err := apijson.UnmarshalRoot([]byte(matchTarget.Raw), &r.union); err != nil {
+	// V2 events: payload has the shape {id, type, properties}.
+	// Match directly against the union of EventListResponseEventXxx types.
+	if err := apijson.UnmarshalRoot([]byte(payloadResult.Raw), &r.union); err != nil {
 		return err
 	}
-
-	// Set Payload to the matched union variant (a properly typed struct like
-	// EventListResponseEventMessageUpdated or SyncEventMessageUpdated) instead
-	// of a raw map[string]interface{}.
 	r.Payload = r.union
 	return nil
 }
@@ -380,12 +343,12 @@ func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
 // specific types for more type safety.
 //
 // Possible runtime types of the union are all V2 Event types (EventListResponseEvent*)
-// and all V1 SyncEvent types (SyncEvent*).
+// and SyncEventResponse (for V1 SyncEvent types).
 func (r GlobalEvent) AsUnion() GlobalEventPayloadUnion {
 	return r.union
 }
 
-// GlobalEventPayloadUnion is a union of all V2 Event types and V1 SyncEvent types
+// GlobalEventPayloadUnion is a union of all V2 Event types and SyncEventResponse
 // that can appear in the GlobalEvent.payload field.
 type GlobalEventPayloadUnion interface {
 	implementsGlobalEventPayload()
@@ -684,7 +647,26 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionEnded{}),
 		},
-		// V1 SyncEvent types
+		// V1 SyncEvent types — wrapped in SyncEventResponse
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventResponse{}),
+		},
+		// V2 Event: catalog.model.updated
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
+		},
+	)
+
+	// SyncEventResponseSyncEventDataUnion: V1 SyncEvent parent types registered
+	// as union variants. Each parent type carries a polymorphic Data field whose
+	// concrete type reuses the V2 EventListResponseEventXxxProperties for the
+	// same event (except session.updated which uses a custom Data type).
+	// The parent type's enum Type field provides the discriminator for matching.
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SyncEventResponseSyncEventDataUnion)(nil)).Elem(),
+		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventMessageUpdated{}),
@@ -817,10 +799,205 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextCompactionEnded{}),
 		},
-		// V2 Event: catalog.model.updated
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
-		},
 	)
 }
+
+// SyncEventResponse wraps the server's V1 SyncEvent format:
+// {type: "sync", syncEvent: {type: "message.updated.1", ...}, id: "..."}.
+type SyncEventResponse struct {
+	Type      SyncEventResponseType      `json:"type,required"`
+	SyncEvent SyncEventResponseSyncEvent `json:"syncEvent,required"`
+	ID        string                     `json:"id"`
+	JSON      syncEventResponseJSON      `json:"-"`
+}
+
+type syncEventResponseJSON struct {
+	Type        apijson.Field
+	SyncEvent   apijson.Field
+	ID          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventResponse) implementsGlobalEventPayload() {}
+
+type SyncEventResponseType string
+
+const (
+	SyncEventResponseTypeSync SyncEventResponseType = "sync"
+)
+
+func (r SyncEventResponseType) IsKnown() bool {
+	switch r {
+	case SyncEventResponseTypeSync:
+		return true
+	}
+	return false
+}
+
+// SyncEventResponseSyncEventType values correspond to sync event versioned type names.
+type SyncEventResponseSyncEventType string
+
+const (
+	SyncEventResponseSyncEventTypeMessageUpdated1              SyncEventResponseSyncEventType = "message.updated.1"
+	SyncEventResponseSyncEventTypeMessageRemoved1              SyncEventResponseSyncEventType = "message.removed.1"
+	SyncEventResponseSyncEventTypeMessagePartUpdated1          SyncEventResponseSyncEventType = "message.part.updated.1"
+	SyncEventResponseSyncEventTypeMessagePartRemoved1          SyncEventResponseSyncEventType = "message.part.removed.1"
+	SyncEventResponseSyncEventTypeSessionCreated1              SyncEventResponseSyncEventType = "session.created.1"
+	SyncEventResponseSyncEventTypeSessionUpdated1              SyncEventResponseSyncEventType = "session.updated.1"
+	SyncEventResponseSyncEventTypeSessionDeleted1              SyncEventResponseSyncEventType = "session.deleted.1"
+	SyncEventResponseSyncEventTypeSessionNextAgentSwitched1    SyncEventResponseSyncEventType = "session.next.agent.switched.1"
+	SyncEventResponseSyncEventTypeSessionNextModelSwitched1    SyncEventResponseSyncEventType = "session.next.model.switched.1"
+	SyncEventResponseSyncEventTypeSessionNextPrompted1         SyncEventResponseSyncEventType = "session.next.prompted.1"
+	SyncEventResponseSyncEventTypeSessionNextSynthetic1        SyncEventResponseSyncEventType = "session.next.synthetic.1"
+	SyncEventResponseSyncEventTypeSessionNextShellStarted1     SyncEventResponseSyncEventType = "session.next.shell.started.1"
+	SyncEventResponseSyncEventTypeSessionNextShellEnded1       SyncEventResponseSyncEventType = "session.next.shell.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextStepStarted1      SyncEventResponseSyncEventType = "session.next.step.started.1"
+	SyncEventResponseSyncEventTypeSessionNextStepEnded1        SyncEventResponseSyncEventType = "session.next.step.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextStepFailed1       SyncEventResponseSyncEventType = "session.next.step.failed.1"
+	SyncEventResponseSyncEventTypeSessionNextTextStarted1      SyncEventResponseSyncEventType = "session.next.text.started.1"
+	SyncEventResponseSyncEventTypeSessionNextTextDelta1        SyncEventResponseSyncEventType = "session.next.text.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextTextEnded1        SyncEventResponseSyncEventType = "session.next.text.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningStarted1 SyncEventResponseSyncEventType = "session.next.reasoning.started.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningDelta1   SyncEventResponseSyncEventType = "session.next.reasoning.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningEnded1   SyncEventResponseSyncEventType = "session.next.reasoning.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputStarted1 SyncEventResponseSyncEventType = "session.next.tool.input.started.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputDelta1   SyncEventResponseSyncEventType = "session.next.tool.input.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputEnded1   SyncEventResponseSyncEventType = "session.next.tool.input.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextToolCalled1       SyncEventResponseSyncEventType = "session.next.tool.called.1"
+	SyncEventResponseSyncEventTypeSessionNextToolProgress1     SyncEventResponseSyncEventType = "session.next.tool.progress.1"
+	SyncEventResponseSyncEventTypeSessionNextToolSuccess1      SyncEventResponseSyncEventType = "session.next.tool.success.1"
+	SyncEventResponseSyncEventTypeSessionNextToolFailed1       SyncEventResponseSyncEventType = "session.next.tool.failed.1"
+	SyncEventResponseSyncEventTypeSessionNextRetried1          SyncEventResponseSyncEventType = "session.next.retried.1"
+	SyncEventResponseSyncEventTypeSessionNextCompactionStarted1 SyncEventResponseSyncEventType = "session.next.compaction.started.1"
+	SyncEventResponseSyncEventTypeSessionNextCompactionDelta1   SyncEventResponseSyncEventType = "session.next.compaction.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextCompactionEnded1   SyncEventResponseSyncEventType = "session.next.compaction.ended.1"
+)
+
+func (r SyncEventResponseSyncEventType) IsKnown() bool {
+	switch r {
+	case SyncEventResponseSyncEventTypeMessageUpdated1,
+		SyncEventResponseSyncEventTypeMessageRemoved1,
+		SyncEventResponseSyncEventTypeMessagePartUpdated1,
+		SyncEventResponseSyncEventTypeMessagePartRemoved1,
+		SyncEventResponseSyncEventTypeSessionCreated1,
+		SyncEventResponseSyncEventTypeSessionUpdated1,
+		SyncEventResponseSyncEventTypeSessionDeleted1,
+		SyncEventResponseSyncEventTypeSessionNextAgentSwitched1,
+		SyncEventResponseSyncEventTypeSessionNextModelSwitched1,
+		SyncEventResponseSyncEventTypeSessionNextPrompted1,
+		SyncEventResponseSyncEventTypeSessionNextSynthetic1,
+		SyncEventResponseSyncEventTypeSessionNextShellStarted1,
+		SyncEventResponseSyncEventTypeSessionNextShellEnded1,
+		SyncEventResponseSyncEventTypeSessionNextStepStarted1,
+		SyncEventResponseSyncEventTypeSessionNextStepEnded1,
+		SyncEventResponseSyncEventTypeSessionNextStepFailed1,
+		SyncEventResponseSyncEventTypeSessionNextTextStarted1,
+		SyncEventResponseSyncEventTypeSessionNextTextDelta1,
+		SyncEventResponseSyncEventTypeSessionNextTextEnded1,
+		SyncEventResponseSyncEventTypeSessionNextReasoningStarted1,
+		SyncEventResponseSyncEventTypeSessionNextReasoningDelta1,
+		SyncEventResponseSyncEventTypeSessionNextReasoningEnded1,
+		SyncEventResponseSyncEventTypeSessionNextToolInputStarted1,
+		SyncEventResponseSyncEventTypeSessionNextToolInputDelta1,
+		SyncEventResponseSyncEventTypeSessionNextToolInputEnded1,
+		SyncEventResponseSyncEventTypeSessionNextToolCalled1,
+		SyncEventResponseSyncEventTypeSessionNextToolProgress1,
+		SyncEventResponseSyncEventTypeSessionNextToolSuccess1,
+		SyncEventResponseSyncEventTypeSessionNextToolFailed1,
+		SyncEventResponseSyncEventTypeSessionNextRetried1,
+		SyncEventResponseSyncEventTypeSessionNextCompactionStarted1,
+		SyncEventResponseSyncEventTypeSessionNextCompactionDelta1,
+		SyncEventResponseSyncEventTypeSessionNextCompactionEnded1:
+		return true
+	}
+	return false
+}
+
+// SyncEventResponseSyncEventDataUnion is satisfied by all V1 SyncEvent types.
+type SyncEventResponseSyncEventDataUnion interface {
+	implementsSyncEventResponseSyncEventDataUnion()
+}
+
+// SyncEventResponseSyncEvent holds the actual SyncEvent fields.
+// The Data field is populated via union matching from the underlying SyncEvent type.
+type SyncEventResponseSyncEvent struct {
+	Type        SyncEventResponseSyncEventType `json:"type,required"`
+	Name        string                         `json:"name,required"`
+	ID          string                         `json:"id,required"`
+	Seq         int64                          `json:"seq,required"`
+	AggregateID string                         `json:"aggregateID,required"`
+	// This field reuses the corresponding V2 EventListResponseEventXxxProperties
+	// type for the same event (determined by union matching on the parent
+	// SyncEventXxx variant). The possible runtime types are:
+	// [EventListResponseEventMessageUpdatedProperties],
+	// [EventListResponseEventMessageRemovedProperties],
+	// [EventListResponseEventMessagePartUpdatedProperties],
+	// [EventListResponseEventMessagePartRemovedProperties],
+	// [EventListResponseEventSessionCreatedProperties],
+	// [SyncEventSessionUpdatedData] (custom — V1 is partial, V2 is full),
+	// [EventListResponseEventSessionDeletedProperties],
+	// [EventListResponseEventSessionNextAgentSwitchedProperties],
+	// [EventListResponseEventSessionNextModelSwitchedProperties],
+	// [EventListResponseEventSessionNextPromptedProperties],
+	// [EventListResponseEventSessionNextSyntheticProperties],
+	// [EventListResponseEventSessionNextShellStartedProperties],
+	// [EventListResponseEventSessionNextShellEndedProperties],
+	// [EventListResponseEventSessionNextStepStartedProperties],
+	// [EventListResponseEventSessionNextStepEndedProperties],
+	// [EventListResponseEventSessionNextStepFailedProperties],
+	// [EventListResponseEventSessionNextTextStartedProperties],
+	// [EventListResponseEventSessionNextTextDeltaProperties],
+	// [EventListResponseEventSessionNextTextEndedProperties],
+	// [EventListResponseEventSessionNextReasoningStartedProperties],
+	// [EventListResponseEventSessionNextReasoningDeltaProperties],
+	// [EventListResponseEventSessionNextReasoningEndedProperties],
+	// [EventListResponseEventSessionNextToolInputStartedProperties],
+	// [EventListResponseEventSessionNextToolInputDeltaProperties],
+	// [EventListResponseEventSessionNextToolInputEndedProperties],
+	// [EventListResponseEventSessionNextToolCalledProperties],
+	// [EventListResponseEventSessionNextToolProgressProperties],
+	// [EventListResponseEventSessionNextToolSuccessProperties],
+	// [EventListResponseEventSessionNextToolFailedProperties],
+	// [EventListResponseEventSessionNextRetriedProperties],
+	// [EventListResponseEventSessionNextCompactionStartedProperties],
+	// [EventListResponseEventSessionNextCompactionDeltaProperties],
+	// [EventListResponseEventSessionNextCompactionEndedProperties].
+	Data        interface{}                          `json:"data,required"`
+	JSON        syncEventResponseSyncEventJSON       `json:"-"`
+	union       SyncEventResponseSyncEventDataUnion
+}
+
+type syncEventResponseSyncEventJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventResponseSyncEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventResponseSyncEvent) UnmarshalJSON(data []byte) (err error) {
+	*r = SyncEventResponseSyncEvent{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+
