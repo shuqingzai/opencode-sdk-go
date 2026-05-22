@@ -193,7 +193,10 @@ func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
 type GlobalEvent struct {
 	Directory string                 `json:"directory,required"`
 	// This field can have the runtime type of
-	// [EventListResponseEventXxx] (73 V2 Event types):
+	// [EventListResponseEventXxx] (77 V2 Event types):
+	// [EventListResponseEventAccountAdded],
+	// [EventListResponseEventAccountRemoved],
+	// [EventListResponseEventAccountSwitched],
 	// [EventListResponseEventCatalogModelUpdated],
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
@@ -205,6 +208,7 @@ type GlobalEvent struct {
 	// [EventListResponseEventLspUpdated],
 	// [EventListResponseEventMcpBrowserOpenFailed],
 	// [EventListResponseEventMcpToolsChanged],
+	// [EventListResponseEventModelsDevRefreshed],
 	// [EventListResponseEventMessagePartDelta],
 	// [EventListResponseEventMessagePartRemoved],
 	// [EventListResponseEventMessagePartUpdated],
@@ -361,6 +365,18 @@ func init() {
 		// V2 Event types
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountAdded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountRemoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdated{}),
 		},
 		apijson.UnionVariant{
@@ -438,6 +454,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventMcpToolsChanged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventModelsDevRefreshed{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -849,6 +869,9 @@ func (r SyncEventResponseType) IsKnown() bool {
 type GlobalEventResponseType string
 
 const (
+	GlobalEventResponseTypeAccountAdded              GlobalEventResponseType = "account.added"
+	GlobalEventResponseTypeAccountRemoved            GlobalEventResponseType = "account.removed"
+	GlobalEventResponseTypeAccountSwitched           GlobalEventResponseType = "account.switched"
 	GlobalEventResponseTypeCatalogModelUpdated       GlobalEventResponseType = "catalog.model.updated"
 	GlobalEventResponseTypeCommandExecuted           GlobalEventResponseType = "command.executed"
 	GlobalEventResponseTypeFileEdited                GlobalEventResponseType = "file.edited"
@@ -860,6 +883,7 @@ const (
 	GlobalEventResponseTypeLspUpdated                GlobalEventResponseType = "lsp.updated"
 	GlobalEventResponseTypeMcpBrowserOpenFailed       GlobalEventResponseType = "mcp.browser.open.failed"
 	GlobalEventResponseTypeMcpToolsChanged           GlobalEventResponseType = "mcp.tools.changed"
+	GlobalEventResponseTypeModelsDevRefreshed        GlobalEventResponseType = "models-dev.refreshed"
 	GlobalEventResponseTypeMessagePartDelta          GlobalEventResponseType = "message.part.delta"
 	GlobalEventResponseTypeMessagePartRemoved        GlobalEventResponseType = "message.part.removed"
 	GlobalEventResponseTypeMessagePartUpdated        GlobalEventResponseType = "message.part.updated"
@@ -928,7 +952,10 @@ const (
 
 func (r GlobalEventResponseType) IsKnown() bool {
 	switch r {
-	case GlobalEventResponseTypeCatalogModelUpdated,
+	case GlobalEventResponseTypeAccountAdded,
+		GlobalEventResponseTypeAccountRemoved,
+		GlobalEventResponseTypeAccountSwitched,
+		GlobalEventResponseTypeCatalogModelUpdated,
 		GlobalEventResponseTypeCommandExecuted,
 		GlobalEventResponseTypeFileEdited,
 		GlobalEventResponseTypeFileWatcherUpdated,
@@ -939,6 +966,7 @@ func (r GlobalEventResponseType) IsKnown() bool {
 		GlobalEventResponseTypeLspUpdated,
 		GlobalEventResponseTypeMcpBrowserOpenFailed,
 		GlobalEventResponseTypeMcpToolsChanged,
+		GlobalEventResponseTypeModelsDevRefreshed,
 		GlobalEventResponseTypeMessagePartDelta,
 		GlobalEventResponseTypeMessagePartRemoved,
 		GlobalEventResponseTypeMessagePartUpdated,

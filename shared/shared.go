@@ -3,7 +3,10 @@
 package shared
 
 import (
+	"reflect"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
+	"github.com/tidwall/gjson"
 )
 
 type MessageAbortedError struct {
@@ -228,6 +231,7 @@ func (r UnknownError) ImplementsAssistantMessageError() {}
 
 type UnknownErrorData struct {
 	Message string               `json:"message,required"`
+	Ref     string               `json:"ref"`
 	JSON    unknownErrorDataJSON `json:"-"`
 }
 
@@ -235,6 +239,7 @@ type UnknownErrorData struct {
 // [UnknownErrorData]
 type unknownErrorDataJSON struct {
 	Message     apijson.Field
+	Ref         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -992,6 +997,80 @@ func (r ServiceUnavailableErrorTag) IsKnown() bool {
 	return false
 }
 
+type SessionNotFoundError struct {
+	Tag       SessionNotFoundErrorTag  `json:"_tag,required"`
+	SessionID string                   `json:"sessionID,required"`
+	Message   string                   `json:"message,required"`
+	JSON      sessionNotFoundErrorJSON `json:"-"`
+}
+
+type sessionNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	SessionID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionNotFoundErrorTag string
+
+const (
+	SessionNotFoundErrorTagSessionNotFoundError SessionNotFoundErrorTag = "SessionNotFoundError"
+)
+
+func (r SessionNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case SessionNotFoundErrorTagSessionNotFoundError:
+		return true
+	}
+	return false
+}
+
+type UnknownError1 struct {
+	Tag     UnknownError1Tag  `json:"_tag,required"`
+	Message string            `json:"message,required"`
+	Ref     string            `json:"ref"`
+	JSON    unknownError1JSON `json:"-"`
+}
+
+type unknownError1JSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	Ref         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *UnknownError1) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r unknownError1JSON) RawJSON() string {
+	return r.raw
+}
+
+type UnknownError1Tag string
+
+const (
+	UnknownError1TagUnknownError UnknownError1Tag = "UnknownError"
+)
+
+func (r UnknownError1Tag) IsKnown() bool {
+	switch r {
+	case UnknownError1TagUnknownError:
+		return true
+	}
+	return false
+}
+
 type UnauthorizedError struct {
 	Tag     UnauthorizedErrorTag  `json:"_tag,required"`
 	Message string                `json:"message,required"`
@@ -1124,4 +1203,116 @@ func (r EffectHttpApiErrorInternalServerErrorTag) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// === Account V2 types ===
+
+type AccountV2OAuthCredential struct {
+	Type    string                        `json:"type,required"`
+	Refresh string                        `json:"refresh,required"`
+	Access  string                        `json:"access,required"`
+	Expires int64                         `json:"expires,required"`
+	JSON    accountV2OAuthCredentialJSON  `json:"-"`
+}
+
+type accountV2OAuthCredentialJSON struct {
+	Type        apijson.Field
+	Refresh     apijson.Field
+	Access      apijson.Field
+	Expires     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AccountV2OAuthCredential) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r accountV2OAuthCredentialJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r AccountV2OAuthCredential) implementsAccountV2Credential() {}
+
+type AccountV2ApiKeyCredential struct {
+	Type     string                          `json:"type,required"`
+	Key      string                          `json:"key,required"`
+	Metadata map[string]string               `json:"metadata"`
+	JSON     accountV2ApiKeyCredentialJSON   `json:"-"`
+}
+
+type accountV2ApiKeyCredentialJSON struct {
+	Type        apijson.Field
+	Key         apijson.Field
+	Metadata    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AccountV2ApiKeyCredential) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r accountV2ApiKeyCredentialJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r AccountV2ApiKeyCredential) implementsAccountV2Credential() {}
+
+// AccountV2CredentialUnion represents the union of credential types for an account.
+// Possible runtime types are [AccountV2OAuthCredential], [AccountV2ApiKeyCredential].
+type AccountV2CredentialUnion interface {
+	implementsAccountV2Credential()
+}
+
+type AccountV2Info struct {
+	ID          string              `json:"id,required"`
+	ServiceID   string              `json:"serviceID,required"`
+	Description string              `json:"description,required"`
+	// This field can have the runtime type of [AccountV2OAuthCredential],
+	// [AccountV2ApiKeyCredential].
+	Credential      interface{}         `json:"credential,required"`
+	JSON            accountV2InfoJSON   `json:"-"`
+	credentialUnion AccountV2CredentialUnion
+}
+
+type accountV2InfoJSON struct {
+	ID          apijson.Field
+	ServiceID   apijson.Field
+	Description apijson.Field
+	Credential  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AccountV2Info) UnmarshalJSON(data []byte) (err error) {
+	*r = AccountV2Info{}
+	err = apijson.UnmarshalRoot(data, &r.credentialUnion)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.credentialUnion, r)
+}
+
+func (r accountV2InfoJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *AccountV2Info) AsUnion() AccountV2CredentialUnion {
+	return r.credentialUnion
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*AccountV2CredentialUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(AccountV2OAuthCredential{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(AccountV2ApiKeyCredential{}),
+		},
+	)
 }

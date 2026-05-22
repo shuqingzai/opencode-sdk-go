@@ -261,6 +261,36 @@ type ServiceUnavailableErrorTag = shared.ServiceUnavailableErrorTag
 const ServiceUnavailableErrorTagServiceUnavailableError = shared.ServiceUnavailableErrorTagServiceUnavailableError
 
 // This is an alias to an internal type.
+type SessionNotFoundError = shared.SessionNotFoundError
+
+// This is an alias to an internal type.
+type SessionNotFoundErrorTag = shared.SessionNotFoundErrorTag
+
+// This is an alias to an internal value.
+const SessionNotFoundErrorTagSessionNotFoundError = shared.SessionNotFoundErrorTagSessionNotFoundError
+
+// This is an alias to an internal type.
+type UnknownError1 = shared.UnknownError1
+
+// This is an alias to an internal type.
+type UnknownError1Tag = shared.UnknownError1Tag
+
+// This is an alias to an internal value.
+const UnknownError1TagUnknownError = shared.UnknownError1TagUnknownError
+
+// This is an alias to an internal type.
+type AccountV2OAuthCredential = shared.AccountV2OAuthCredential
+
+// This is an alias to an internal type.
+type AccountV2ApiKeyCredential = shared.AccountV2ApiKeyCredential
+
+// This is an alias to an internal type.
+type AccountV2CredentialUnion = shared.AccountV2CredentialUnion
+
+// This is an alias to an internal type.
+type AccountV2Info = shared.AccountV2Info
+
+// This is an alias to an internal type.
 type UnauthorizedError = shared.UnauthorizedError
 
 // This is an alias to an internal type.

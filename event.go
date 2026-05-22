@@ -55,6 +55,9 @@ func (r *EventService) ListStreaming(ctx context.Context, query EventListParams,
 type EventListResponse struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of
+	// [EventListResponseEventAccountAddedProperties],
+	// [EventListResponseEventAccountRemovedProperties],
+	// [EventListResponseEventAccountSwitchedProperties],
 	// [EventListResponseEventCatalogModelUpdatedProperties],
 	// [EventListResponseEventCommandExecutedProperties],
 	// [EventListResponseEventFileEditedProperties],
@@ -66,6 +69,7 @@ type EventListResponse struct {
 	// [EventListResponseEventLspUpdatedProperties],
 	// [EventListResponseEventMcpBrowserOpenFailedProperties],
 	// [EventListResponseEventMcpToolsChangedProperties],
+	// [EventListResponseEventModelsDevRefreshedProperties],
 	// [EventListResponseEventMessagePartDeltaProperties],
 	// [EventListResponseEventMessagePartRemovedProperties],
 	// [EventListResponseEventMessagePartUpdatedProperties],
@@ -321,6 +325,18 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountAdded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountRemoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventAccountSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventCommandExecuted{}),
 		},
 		apijson.UnionVariant{
@@ -358,6 +374,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventMcpToolsChanged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventModelsDevRefreshed{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -3451,12 +3471,265 @@ func (r EventListResponseEventWorkspaceStatusStatus) IsKnown() bool {
 }
 
 // =============================================================================
+// EventListResponseEventModelsDevRefreshed
+// =============================================================================
+
+type EventListResponseEventModelsDevRefreshed struct {
+	Properties EventListResponseEventModelsDevRefreshedProperties `json:"properties,required"`
+	Type       EventListResponseEventModelsDevRefreshedType       `json:"type,required"`
+	JSON       eventListResponseEventModelsDevRefreshedJSON       `json:"-"`
+}
+
+type eventListResponseEventModelsDevRefreshedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventModelsDevRefreshed) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventModelsDevRefreshedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventModelsDevRefreshed) implementsEventListResponse() {}
+
+func (r EventListResponseEventModelsDevRefreshed) implementsGlobalEventPayload() {}
+
+type EventListResponseEventModelsDevRefreshedProperties struct {
+	JSON eventListResponseEventModelsDevRefreshedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventModelsDevRefreshedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventModelsDevRefreshedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventModelsDevRefreshedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventModelsDevRefreshedType string
+
+const (
+	EventListResponseEventModelsDevRefreshedTypeModelsDevRefreshed EventListResponseEventModelsDevRefreshedType = "models-dev.refreshed"
+)
+
+func (r EventListResponseEventModelsDevRefreshedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventModelsDevRefreshedTypeModelsDevRefreshed:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventAccountAdded
+// =============================================================================
+
+type EventListResponseEventAccountAdded struct {
+	Properties EventListResponseEventAccountAddedProperties `json:"properties,required"`
+	Type       EventListResponseEventAccountAddedType       `json:"type,required"`
+	JSON       eventListResponseEventAccountAddedJSON       `json:"-"`
+}
+
+type eventListResponseEventAccountAddedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountAdded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountAddedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventAccountAdded) implementsEventListResponse() {}
+
+func (r EventListResponseEventAccountAdded) implementsGlobalEventPayload() {}
+
+type EventListResponseEventAccountAddedProperties struct {
+	Account AccountV2Info                                    `json:"account,required"`
+	JSON    eventListResponseEventAccountAddedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventAccountAddedPropertiesJSON struct {
+	Account     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountAddedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountAddedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventAccountAddedType string
+
+const (
+	EventListResponseEventAccountAddedTypeAccountAdded EventListResponseEventAccountAddedType = "account.added"
+)
+
+func (r EventListResponseEventAccountAddedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventAccountAddedTypeAccountAdded:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventAccountRemoved
+// =============================================================================
+
+type EventListResponseEventAccountRemoved struct {
+	Properties EventListResponseEventAccountRemovedProperties `json:"properties,required"`
+	Type       EventListResponseEventAccountRemovedType       `json:"type,required"`
+	JSON       eventListResponseEventAccountRemovedJSON       `json:"-"`
+}
+
+type eventListResponseEventAccountRemovedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountRemoved) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountRemovedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventAccountRemoved) implementsEventListResponse() {}
+
+func (r EventListResponseEventAccountRemoved) implementsGlobalEventPayload() {}
+
+type EventListResponseEventAccountRemovedProperties struct {
+	Account AccountV2Info                                      `json:"account,required"`
+	JSON    eventListResponseEventAccountRemovedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventAccountRemovedPropertiesJSON struct {
+	Account     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountRemovedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountRemovedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventAccountRemovedType string
+
+const (
+	EventListResponseEventAccountRemovedTypeAccountRemoved EventListResponseEventAccountRemovedType = "account.removed"
+)
+
+func (r EventListResponseEventAccountRemovedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventAccountRemovedTypeAccountRemoved:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventAccountSwitched
+// =============================================================================
+
+type EventListResponseEventAccountSwitched struct {
+	Properties EventListResponseEventAccountSwitchedProperties `json:"properties,required"`
+	Type       EventListResponseEventAccountSwitchedType       `json:"type,required"`
+	JSON       eventListResponseEventAccountSwitchedJSON       `json:"-"`
+}
+
+type eventListResponseEventAccountSwitchedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountSwitched) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountSwitchedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventAccountSwitched) implementsEventListResponse() {}
+
+func (r EventListResponseEventAccountSwitched) implementsGlobalEventPayload() {}
+
+type EventListResponseEventAccountSwitchedProperties struct {
+	ServiceID string                                          `json:"serviceID,required"`
+	From      string                                          `json:"from"`
+	To        string                                          `json:"to"`
+	JSON      eventListResponseEventAccountSwitchedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventAccountSwitchedPropertiesJSON struct {
+	ServiceID   apijson.Field
+	From        apijson.Field
+	To          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventAccountSwitchedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventAccountSwitchedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventAccountSwitchedType string
+
+const (
+	EventListResponseEventAccountSwitchedTypeAccountSwitched EventListResponseEventAccountSwitchedType = "account.switched"
+)
+
+func (r EventListResponseEventAccountSwitchedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventAccountSwitchedTypeAccountSwitched:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
 // EventListResponseEventSessionNextAgentSwitched
 // =============================================================================
 
 type EventListResponseType string
 
 const (
+	EventListResponseTypeAccountAdded                 EventListResponseType = "account.added"
+	EventListResponseTypeAccountRemoved               EventListResponseType = "account.removed"
+	EventListResponseTypeAccountSwitched              EventListResponseType = "account.switched"
 	EventListResponseTypeCatalogModelUpdated          EventListResponseType = "catalog.model.updated"
 	EventListResponseTypeCommandExecuted              EventListResponseType = "command.executed"
 	EventListResponseTypeFileEdited                   EventListResponseType = "file.edited"
@@ -3468,6 +3741,7 @@ const (
 	EventListResponseTypeLspUpdated                   EventListResponseType = "lsp.updated"
 	EventListResponseTypeMcpBrowserOpenFailed         EventListResponseType = "mcp.browser.open.failed"
 	EventListResponseTypeMcpToolsChanged              EventListResponseType = "mcp.tools.changed"
+	EventListResponseTypeModelsDevRefreshed           EventListResponseType = "models-dev.refreshed"
 	EventListResponseTypeMessagePartDelta             EventListResponseType = "message.part.delta"
 	EventListResponseTypeMessagePartRemoved           EventListResponseType = "message.part.removed"
 	EventListResponseTypeMessagePartUpdated           EventListResponseType = "message.part.updated"
@@ -3534,7 +3808,10 @@ const (
 
 func (r EventListResponseType) IsKnown() bool {
 	switch r {
-	case EventListResponseTypeCatalogModelUpdated,
+	case EventListResponseTypeAccountAdded,
+		EventListResponseTypeAccountRemoved,
+		EventListResponseTypeAccountSwitched,
+		EventListResponseTypeCatalogModelUpdated,
 		EventListResponseTypeCommandExecuted,
 		EventListResponseTypeFileEdited,
 		EventListResponseTypeFileWatcherUpdated,
@@ -3545,6 +3822,7 @@ func (r EventListResponseType) IsKnown() bool {
 		EventListResponseTypeLspUpdated,
 		EventListResponseTypeMcpBrowserOpenFailed,
 		EventListResponseTypeMcpToolsChanged,
+		EventListResponseTypeModelsDevRefreshed,
 		EventListResponseTypeMessagePartDelta,
 		EventListResponseTypeMessagePartRemoved,
 		EventListResponseTypeMessagePartUpdated,
