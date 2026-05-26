@@ -325,3 +325,68 @@ type EffectHttpApiErrorInternalServerErrorTag = shared.EffectHttpApiErrorInterna
 
 // This is an alias to an internal value.
 const EffectHttpApiErrorInternalServerErrorTagInternalServerError = shared.EffectHttpApiErrorInternalServerErrorTagInternalServerError
+
+// === v1.15.10 新增错误类型别名 ===
+
+// This is an alias to an internal type.
+type McpServerNotFoundError = shared.McpServerNotFoundError
+
+// This is an alias to an internal type.
+type McpServerNotFoundErrorTag = shared.McpServerNotFoundErrorTag
+
+// This is an alias to an internal value.
+const McpServerNotFoundErrorTagMcpServerNotFoundError = shared.McpServerNotFoundErrorTagMcpServerNotFoundError
+
+// This is an alias to an internal type.
+type ProjectNotFoundError = shared.ProjectNotFoundError
+
+// This is an alias to an internal type.
+type ProjectNotFoundErrorTag = shared.ProjectNotFoundErrorTag
+
+// This is an alias to an internal value.
+const ProjectNotFoundErrorTagProjectNotFoundError = shared.ProjectNotFoundErrorTagProjectNotFoundError
+
+// This is an alias to an internal type.
+type PtyNotFoundError = shared.PtyNotFoundError
+
+// This is an alias to an internal type.
+type PtyNotFoundErrorTag = shared.PtyNotFoundErrorTag
+
+// This is an alias to an internal value.
+const PtyNotFoundErrorTagPtyNotFoundError = shared.PtyNotFoundErrorTagPtyNotFoundError
+
+// This is an alias to an internal type.
+type PtyForbiddenError = shared.PtyForbiddenError
+
+// This is an alias to an internal type.
+type PtyForbiddenErrorTag = shared.PtyForbiddenErrorTag
+
+// This is an alias to an internal value.
+const PtyForbiddenErrorTagPtyForbiddenError = shared.PtyForbiddenErrorTagPtyForbiddenError
+
+// This is an alias to an internal type.
+type QuestionNotFoundError = shared.QuestionNotFoundError
+
+// This is an alias to an internal type.
+type QuestionNotFoundErrorTag = shared.QuestionNotFoundErrorTag
+
+// This is an alias to an internal value.
+const QuestionNotFoundErrorTagQuestionNotFoundError = shared.QuestionNotFoundErrorTagQuestionNotFoundError
+
+// This is an alias to an internal type.
+type PermissionNotFoundError = shared.PermissionNotFoundError
+
+// This is an alias to an internal type.
+type PermissionNotFoundErrorTag = shared.PermissionNotFoundErrorTag
+
+// This is an alias to an internal value.
+const PermissionNotFoundErrorTagPermissionNotFoundError = shared.PermissionNotFoundErrorTagPermissionNotFoundError
+
+// This is an alias to an internal type.
+type SessionBusyError = shared.SessionBusyError
+
+// This is an alias to an internal type.
+type SessionBusyErrorTag = shared.SessionBusyErrorTag
+
+// This is an alias to an internal value.
+const SessionBusyErrorTagSessionBusyError = shared.SessionBusyErrorTagSessionBusyError

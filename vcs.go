@@ -74,6 +74,7 @@ type VcsDiffParams struct {
 	Directory param.Field[string]            `query:"directory"`
 	Workspace param.Field[string]            `query:"workspace"`
 	Mode      param.Field[VcsDiffParamsMode] `query:"mode,required"`
+	Context   param.Field[int64]             `query:"context"`
 }
 
 func (r VcsDiffParams) URLQuery() (v url.Values) {

@@ -1139,6 +1139,265 @@ func (r EffectHttpApiErrorBadRequestTag) IsKnown() bool {
 	return false
 }
 
+// === v1.15.10 — 新的标签式 HTTP 错误类型 ===
+
+type McpServerNotFoundError struct {
+	Tag     McpServerNotFoundErrorTag `json:"_tag,required"`
+	Name    string                    `json:"name,required"`
+	Message string                    `json:"message,required"`
+	JSON    mcpServerNotFoundErrorJSON `json:"-"`
+}
+
+type mcpServerNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	Name        apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *McpServerNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r mcpServerNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type McpServerNotFoundErrorTag string
+
+const (
+	McpServerNotFoundErrorTagMcpServerNotFoundError McpServerNotFoundErrorTag = "McpServerNotFoundError"
+)
+
+func (r McpServerNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case McpServerNotFoundErrorTagMcpServerNotFoundError:
+		return true
+	}
+	return false
+}
+
+type ProjectNotFoundError struct {
+	Tag       ProjectNotFoundErrorTag `json:"_tag,required"`
+	ProjectID string                  `json:"projectID,required"`
+	Message   string                  `json:"message,required"`
+	JSON      projectNotFoundError1JSON `json:"-"`
+}
+
+type projectNotFoundError1JSON struct {
+	Tag         apijson.Field
+	ProjectID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectNotFoundError1JSON) RawJSON() string {
+	return r.raw
+}
+
+type ProjectNotFoundErrorTag string
+
+const (
+	ProjectNotFoundErrorTagProjectNotFoundError ProjectNotFoundErrorTag = "ProjectNotFoundError"
+)
+
+func (r ProjectNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case ProjectNotFoundErrorTagProjectNotFoundError:
+		return true
+	}
+	return false
+}
+
+type PtyNotFoundError struct {
+	Tag     PtyNotFoundErrorTag `json:"_tag,required"`
+	PtyID   string              `json:"ptyID,required"`
+	Message string              `json:"message,required"`
+	JSON    ptyNotFoundErrorJSON `json:"-"`
+}
+
+type ptyNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	PtyID       apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type PtyNotFoundErrorTag string
+
+const (
+	PtyNotFoundErrorTagPtyNotFoundError PtyNotFoundErrorTag = "PtyNotFoundError"
+)
+
+func (r PtyNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case PtyNotFoundErrorTagPtyNotFoundError:
+		return true
+	}
+	return false
+}
+
+type PtyForbiddenError struct {
+	Tag     PtyForbiddenErrorTag `json:"_tag,required"`
+	Message string               `json:"message,required"`
+	JSON    ptyForbiddenErrorJSON `json:"-"`
+}
+
+type ptyForbiddenErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyForbiddenError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyForbiddenErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type PtyForbiddenErrorTag string
+
+const (
+	PtyForbiddenErrorTagPtyForbiddenError PtyForbiddenErrorTag = "PtyForbiddenError"
+)
+
+func (r PtyForbiddenErrorTag) IsKnown() bool {
+	switch r {
+	case PtyForbiddenErrorTagPtyForbiddenError:
+		return true
+	}
+	return false
+}
+
+type QuestionNotFoundError struct {
+	Tag       QuestionNotFoundErrorTag `json:"_tag,required"`
+	RequestID string                   `json:"requestID,required"`
+	Message   string                   `json:"message,required"`
+	JSON      questionNotFoundErrorJSON `json:"-"`
+}
+
+type questionNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	RequestID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *QuestionNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r questionNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type QuestionNotFoundErrorTag string
+
+const (
+	QuestionNotFoundErrorTagQuestionNotFoundError QuestionNotFoundErrorTag = "QuestionNotFoundError"
+)
+
+func (r QuestionNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case QuestionNotFoundErrorTagQuestionNotFoundError:
+		return true
+	}
+	return false
+}
+
+type PermissionNotFoundError struct {
+	Tag       PermissionNotFoundErrorTag `json:"_tag,required"`
+	RequestID string                     `json:"requestID,required"`
+	Message   string                     `json:"message,required"`
+	JSON      permissionNotFoundError1JSON `json:"-"`
+}
+
+type permissionNotFoundError1JSON struct {
+	Tag         apijson.Field
+	RequestID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PermissionNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r permissionNotFoundError1JSON) RawJSON() string {
+	return r.raw
+}
+
+type PermissionNotFoundErrorTag string
+
+const (
+	PermissionNotFoundErrorTagPermissionNotFoundError PermissionNotFoundErrorTag = "PermissionNotFoundError"
+)
+
+func (r PermissionNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case PermissionNotFoundErrorTagPermissionNotFoundError:
+		return true
+	}
+	return false
+}
+
+type SessionBusyError struct {
+	Tag       SessionBusyErrorTag `json:"_tag,required"`
+	SessionID string              `json:"sessionID,required"`
+	Message   string              `json:"message,required"`
+	JSON      sessionBusyErrorJSON `json:"-"`
+}
+
+type sessionBusyErrorJSON struct {
+	Tag         apijson.Field
+	SessionID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionBusyError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionBusyErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionBusyErrorTag string
+
+const (
+	SessionBusyErrorTagSessionBusyError SessionBusyErrorTag = "SessionBusyError"
+)
+
+func (r SessionBusyErrorTag) IsKnown() bool {
+	switch r {
+	case SessionBusyErrorTagSessionBusyError:
+		return true
+	}
+	return false
+}
+
 type EffectHttpApiErrorForbidden struct {
 	Tag  EffectHttpApiErrorForbiddenTag `json:"_tag,required"`
 	JSON effectHttpApiErrorForbiddenJSON `json:"-"`

@@ -338,8 +338,10 @@ type McpOAuthConfig struct {
 	ClientSecret string `json:"clientSecret"`
 	// OAuth scopes to request during authorization
 	Scope string `json:"scope"`
+	// OAuth callback port for the local HTTP server
+	CallbackPort int64 `json:"callbackPort"`
 	// OAuth redirect URI
-	RedirectURI string            `json:"redirectUri"`
+	RedirectURI string             `json:"redirectUri"`
 	JSON        mcpOAuthConfigJSON `json:"-"`
 }
 
@@ -348,6 +350,7 @@ type mcpOAuthConfigJSON struct {
 	ClientID     apijson.Field
 	ClientSecret apijson.Field
 	Scope        apijson.Field
+	CallbackPort apijson.Field
 	RedirectURI  apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
