@@ -2689,8 +2689,8 @@ func (r configProviderModelsLimitJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsModalities struct {
-	Input  []ConfigProviderModelsModalitiesInput  `json:"input,required"`
-	Output []ConfigProviderModelsModalitiesOutput `json:"output,required"`
+	Input  []ConfigProviderModelsModalitiesInput  `json:"input"`
+	Output []ConfigProviderModelsModalitiesOutput `json:"output"`
 	JSON   configProviderModelsModalitiesJSON     `json:"-"`
 }
 
@@ -2788,21 +2788,25 @@ func (r ConfigProviderModelsStatus) IsKnown() bool {
 type ConfigProviderOptions struct {
 	APIKey  string `json:"apiKey"`
 	BaseURL string `json:"baseURL"`
-	// Timeout in milliseconds for requests to this provider. Default is 300000 (5
-	// minutes). Set to false to disable timeout.
-	Timeout     ConfigProviderOptionsTimeoutUnion `json:"timeout"`
-	ExtraFields map[string]interface{}            `json:"-,extras"`
-	JSON        configProviderOptionsJSON         `json:"-"`
+	// Timeout in milliseconds for full requests to this provider. Set to false to
+	// disable timeout.
+	Timeout ConfigProviderOptionsTimeoutUnion `json:"timeout"`
+	// Timeout in milliseconds to wait for response headers. Provider integrations
+	// may set defaults. Set to false to disable timeout.
+	HeaderTimeout ConfigProviderOptionsTimeoutUnion `json:"headerTimeout"`
+	ExtraFields   map[string]interface{}            `json:"-,extras"`
+	JSON          configProviderOptionsJSON         `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
 // [ConfigProviderOptions]
 type configProviderOptionsJSON struct {
-	APIKey      apijson.Field
-	BaseURL     apijson.Field
-	Timeout     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	APIKey        apijson.Field
+	BaseURL       apijson.Field
+	Timeout       apijson.Field
+	HeaderTimeout apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *ConfigProviderOptions) UnmarshalJSON(data []byte) (err error) {
@@ -2813,8 +2817,9 @@ func (r configProviderOptionsJSON) RawJSON() string {
 	return r.raw
 }
 
-// Timeout in milliseconds for requests to this provider. Default is 300000 (5
-// minutes). Set to false to disable timeout.
+// ConfigProviderOptionsTimeoutUnion represents a timeout duration as either an
+// integer (milliseconds, > 0) or false (to disable). Used by [ConfigProviderOptions.Timeout]
+// and [ConfigProviderOptions.HeaderTimeout].
 //
 // Union satisfied by [shared.UnionInt] or [shared.UnionBool].
 type ConfigProviderOptionsTimeoutUnion interface {
