@@ -270,7 +270,7 @@ func (r *SessionService) Unshare(ctx context.Context, id string, body SessionUns
 // Get session status
 //
 // Retrieve the current status of all sessions, including active, idle, and completed states.
-func (r *SessionService) Status(ctx context.Context, query SessionStatusParams, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
+func (r *SessionService) Status(ctx context.Context, query SessionStatusParams, opts ...option.RequestOption) (res *SessionStatusMap, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "session/status"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -3795,6 +3795,51 @@ func (r SessionStatusBusy) ImplementsSessionStatus() {}
 // Union satisfied by [SessionStatusIdle], [SessionStatusRetry], [SessionStatusBusy].
 type SessionStatus interface {
 	ImplementsSessionStatus()
+}
+
+// SessionStatusMap is a map of session IDs to their status, returned by [SessionService.Status].
+// It implements [json.Unmarshaler] to correctly deserialize the discriminated union values.
+type SessionStatusMap map[string]SessionStatus
+
+func (m *SessionStatusMap) UnmarshalJSON(data []byte) error {
+	raw := gjson.ParseBytes(data)
+	if !raw.IsObject() {
+		return fmt.Errorf("SessionStatusMap: expected JSON object, got %s", raw.Type)
+	}
+	*m = make(SessionStatusMap, len(raw.Map()))
+	var decodeErr error
+	raw.ForEach(func(key, value gjson.Result) bool {
+		var status SessionStatus
+		if err := apijson.UnmarshalRoot([]byte(value.Raw), &status); err != nil {
+			decodeErr = err
+			return false
+		}
+		(*m)[key.String()] = status
+		return true
+	})
+	return decodeErr
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SessionStatus)(nil)).Elem(),
+		"type",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "idle",
+			Type:               reflect.TypeOf(SessionStatusIdle{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "retry",
+			Type:               reflect.TypeOf(SessionStatusRetry{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "busy",
+			Type:               reflect.TypeOf(SessionStatusBusy{}),
+		},
+	)
 }
 
 // SnapshotFileDiff represents a diff for a file in a snapshot
