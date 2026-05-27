@@ -275,8 +275,8 @@ func (r providerModelLimitJSON) RawJSON() string {
 
 // ProviderModelModalities represents input and output modalities for a model.
 type ProviderModelModalities struct {
-	Input  []string                    `json:"input,required"`
-	Output []string                    `json:"output,required"`
+	Input  []string                    `json:"input"`
+	Output []string                    `json:"output"`
 	JSON   providerModelModalitiesJSON `json:"-"`
 }
 

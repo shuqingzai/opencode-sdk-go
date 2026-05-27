@@ -2818,8 +2818,8 @@ func (r configProviderOptionsJSON) RawJSON() string {
 }
 
 // ConfigProviderOptionsTimeoutUnion represents a timeout duration as either an
-// integer (milliseconds, > 0) or false (to disable). Used by [ConfigProviderOptions.Timeout]
-// and [ConfigProviderOptions.HeaderTimeout].
+// integer (milliseconds, > 0) or false (to disable). Used by
+// [ConfigProviderOptions.Timeout] and [ConfigProviderOptions.HeaderTimeout].
 //
 // Union satisfied by [shared.UnionInt] or [shared.UnionBool].
 type ConfigProviderOptionsTimeoutUnion interface {
