@@ -268,10 +268,12 @@ func (r *SessionService) Unshare(ctx context.Context, id string, body SessionUns
 }
 
 // Get session status
-func (r *SessionService) Status(ctx context.Context, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
+//
+// Retrieve the current status of all sessions, including active, idle, and completed states.
+func (r *SessionService) Status(ctx context.Context, query SessionStatusParams, opts ...option.RequestOption) (res *map[string]SessionStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "session/status"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
 
@@ -3876,6 +3878,18 @@ type SessionDeleteMessageParams struct {
 }
 
 func (r SessionDeleteMessageParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type SessionStatusParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r SessionStatusParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
