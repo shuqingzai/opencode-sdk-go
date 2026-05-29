@@ -225,6 +225,8 @@ func (r PtyListParams) URLQuery() (v url.Values) {
 type PtyConnectParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	Cursor    param.Field[string] `query:"cursor"`
+	Ticket    param.Field[string] `query:"ticket"`
 }
 
 // URLQuery serializes [PtyConnectParams]'s query parameters as `url.Values`.
