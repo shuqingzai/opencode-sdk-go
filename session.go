@@ -369,13 +369,40 @@ func (r PermissionAction) IsKnown() bool {
 	return false
 }
 
+// PermissionRule is used for request parameters.
 type PermissionRule struct {
 	Permission param.Field[string]         `json:"permission,required"`
 	Pattern    param.Field[string]         `json:"pattern,required"`
 	Action     param.Field[PermissionAction] `json:"action,required"`
 }
 
-type PermissionRuleset []PermissionRule
+// PermissionRuleResponse is used for response deserialization.
+type PermissionRuleResponse struct {
+	Permission string                     `json:"permission,required"`
+	Pattern    string                     `json:"pattern,required"`
+	Action     PermissionAction           `json:"action,required"`
+	JSON       permissionRuleResponseJSON `json:"-"`
+}
+
+// permissionRuleResponseJSON contains the JSON metadata for the struct [PermissionRuleResponse]
+type permissionRuleResponseJSON struct {
+	Permission  apijson.Field
+	Pattern     apijson.Field
+	Action      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PermissionRuleResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r permissionRuleResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// PermissionRuleset is used for response deserialization.
+type PermissionRuleset []PermissionRuleResponse
 
 type AgentPart struct {
 	ID        string          `json:"id,required"`
@@ -1721,7 +1748,7 @@ type Session struct {
 	Summary     SessionSummary `json:"summary"`
 	Tokens      SessionTokens  `json:"tokens"`
 	WorkspaceID string         `json:"workspaceID"`
-	// This field can have the runtime type of [[]PermissionRule].
+	// This field can have the runtime type of [[]PermissionRuleResponse].
 	Permission interface{} `json:"permission"`
 	JSON       sessionJSON `json:"-"`
 }
@@ -3212,7 +3239,7 @@ type SessionNewParams struct {
 	Title       param.Field[string]                  `json:"title"`
 	Agent       param.Field[string]                  `json:"agent"`
 	Model       param.Field[SessionNewParamsModel]   `json:"model"`
-	Permission  param.Field[PermissionRuleset]       `json:"permission"`
+	Permission  param.Field[[]PermissionRule]        `json:"permission"`
 	WorkspaceID param.Field[string]                  `json:"workspaceID"`
 }
 
@@ -3238,7 +3265,7 @@ type SessionUpdateParams struct {
 	Directory  param.Field[string]                  `query:"directory"`
 	Workspace  param.Field[string]                  `query:"workspace"`
 	Title      param.Field[string]                  `json:"title"`
-	Permission param.Field[PermissionRuleset]       `json:"permission"`
+	Permission param.Field[[]PermissionRule]        `json:"permission"`
 	Time       param.Field[SessionUpdateParamsTime] `json:"time"`
 }
 
