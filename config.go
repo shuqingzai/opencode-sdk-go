@@ -1632,13 +1632,14 @@ func (r configCommandJSON) RawJSON() string {
 }
 
 type ConfigExperimental struct {
-	BatchTool           bool                   `json:"batch_tool"`
-	ContinueLoopOnDeny  bool                   `json:"continue_loop_on_deny"`
-	DisablePasteSummary bool                   `json:"disable_paste_summary"`
-	McpTimeout          int64                  `json:"mcp_timeout"`
-	OpenTelemetry       bool                   `json:"openTelemetry"`
-	PrimaryTools        []string               `json:"primary_tools"`
-	JSON                configExperimentalJSON `json:"-"`
+	BatchTool           bool                       `json:"batch_tool"`
+	ContinueLoopOnDeny  bool                       `json:"continue_loop_on_deny"`
+	DisablePasteSummary bool                       `json:"disable_paste_summary"`
+	McpTimeout          int64                      `json:"mcp_timeout"`
+	OpenTelemetry       bool                       `json:"openTelemetry"`
+	Policies            []ConfigV2ExperimentalPolicy `json:"policies"`
+	PrimaryTools        []string                   `json:"primary_tools"`
+	JSON                configExperimentalJSON     `json:"-"`
 }
 
 // configExperimentalJSON contains the JSON metadata for the struct
@@ -1649,6 +1650,7 @@ type configExperimentalJSON struct {
 	DisablePasteSummary apijson.Field
 	McpTimeout          apijson.Field
 	OpenTelemetry       apijson.Field
+	Policies            apijson.Field
 	PrimaryTools        apijson.Field
 	raw                 string
 	ExtraFields         map[string]apijson.Field
@@ -1659,6 +1661,60 @@ func (r *ConfigExperimental) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r configExperimentalJSON) RawJSON() string {
+	return r.raw
+}
+
+type PolicyEffect string
+
+const (
+	PolicyEffectAllow PolicyEffect = "allow"
+	PolicyEffectDeny  PolicyEffect = "deny"
+)
+
+func (r PolicyEffect) IsKnown() bool {
+	switch r {
+	case PolicyEffectAllow, PolicyEffectDeny:
+		return true
+	}
+	return false
+}
+
+type ConfigV2ExperimentalPolicyAction string
+
+const (
+	ConfigV2ExperimentalPolicyActionProviderUse ConfigV2ExperimentalPolicyAction = "provider.use"
+)
+
+func (r ConfigV2ExperimentalPolicyAction) IsKnown() bool {
+	switch r {
+	case ConfigV2ExperimentalPolicyActionProviderUse:
+		return true
+	}
+	return false
+}
+
+type ConfigV2ExperimentalPolicy struct {
+	Action   ConfigV2ExperimentalPolicyAction `json:"action,required"`
+	Effect   PolicyEffect                     `json:"effect,required"`
+	Resource string                           `json:"resource,required"`
+	JSON     configV2ExperimentalPolicyJSON   `json:"-"`
+}
+
+// configV2ExperimentalPolicyJSON contains the JSON metadata for the struct
+// [ConfigV2ExperimentalPolicy]
+type configV2ExperimentalPolicyJSON struct {
+	Action      apijson.Field
+	Effect      apijson.Field
+	Resource    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigV2ExperimentalPolicy) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configV2ExperimentalPolicyJSON) RawJSON() string {
 	return r.raw
 }
 

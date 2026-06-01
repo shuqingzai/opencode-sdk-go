@@ -216,6 +216,7 @@ type GlobalEvent struct {
 	// [EventListResponseEventMessageUpdated],
 	// [EventListResponseEventPermissionAsked],
 	// [EventListResponseEventPermissionReplied],
+	// [EventListResponseEventPluginAdded],
 	// [EventListResponseEventProjectUpdated],
 	// [EventListResponseEventPtyCreated],
 	// [EventListResponseEventPtyDeleted],
@@ -677,6 +678,11 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
 		},
+		// V2 Event: plugin.added
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPluginAdded{}),
+		},
 	)
 
 	// SyncEventResponseSyncEventDataUnion: V1 SyncEvent parent types registered
@@ -891,6 +897,7 @@ const (
 	GlobalEventResponseTypeMessageUpdated            GlobalEventResponseType = "message.updated"
 	GlobalEventResponseTypePermissionAsked           GlobalEventResponseType = "permission.asked"
 	GlobalEventResponseTypePermissionReplied         GlobalEventResponseType = "permission.replied"
+	GlobalEventResponseTypePluginAdded              GlobalEventResponseType = "plugin.added"
 	GlobalEventResponseTypeProjectUpdated            GlobalEventResponseType = "project.updated"
 	GlobalEventResponseTypePtyCreated                GlobalEventResponseType = "pty.created"
 	GlobalEventResponseTypePtyDeleted                GlobalEventResponseType = "pty.deleted"
@@ -974,6 +981,7 @@ func (r GlobalEventResponseType) IsKnown() bool {
 		GlobalEventResponseTypeMessageUpdated,
 		GlobalEventResponseTypePermissionAsked,
 		GlobalEventResponseTypePermissionReplied,
+		GlobalEventResponseTypePluginAdded,
 		GlobalEventResponseTypeProjectUpdated,
 		GlobalEventResponseTypePtyCreated,
 		GlobalEventResponseTypePtyDeleted,

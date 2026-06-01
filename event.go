@@ -77,6 +77,7 @@ type EventListResponse struct {
 	// [EventListResponseEventMessageUpdatedProperties],
 	// [EventListResponseEventPermissionAskedProperties],
 	// [EventListResponseEventPermissionRepliedProperties],
+	// [EventListResponseEventPluginAddedProperties],
 	// [EventListResponseEventProjectUpdatedProperties],
 	// [EventListResponseEventPtyCreatedProperties],
 	// [EventListResponseEventPtyDeletedProperties],
@@ -183,6 +184,7 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventMessageUpdated],
 // [EventListResponseEventPermissionAsked],
 // [EventListResponseEventPermissionReplied],
+// [EventListResponseEventPluginAdded],
 // [EventListResponseEventProjectUpdated],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyDeleted],
@@ -260,6 +262,7 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventMessageUpdated],
 // [EventListResponseEventPermissionAsked],
 // [EventListResponseEventPermissionReplied],
+// [EventListResponseEventPluginAdded],
 // [EventListResponseEventProjectUpdated],
 // [EventListResponseEventPtyCreated],
 // [EventListResponseEventPtyDeleted],
@@ -631,6 +634,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPluginAdded{}),
 		},
 	)
 }
@@ -3749,6 +3756,7 @@ const (
 	EventListResponseTypeMessageUpdated               EventListResponseType = "message.updated"
 	EventListResponseTypePermissionAsked              EventListResponseType = "permission.asked"
 	EventListResponseTypePermissionReplied            EventListResponseType = "permission.replied"
+	EventListResponseTypePluginAdded                 EventListResponseType = "plugin.added"
 	EventListResponseTypeProjectUpdated               EventListResponseType = "project.updated"
 	EventListResponseTypePtyCreated                   EventListResponseType = "pty.created"
 	EventListResponseTypePtyDeleted                   EventListResponseType = "pty.deleted"
@@ -3830,6 +3838,7 @@ func (r EventListResponseType) IsKnown() bool {
 		EventListResponseTypeMessageUpdated,
 		EventListResponseTypePermissionAsked,
 		EventListResponseTypePermissionReplied,
+		EventListResponseTypePluginAdded,
 		EventListResponseTypeProjectUpdated,
 		EventListResponseTypePtyCreated,
 		EventListResponseTypePtyDeleted,

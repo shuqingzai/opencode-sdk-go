@@ -1750,6 +1750,8 @@ type Session struct {
 	WorkspaceID string         `json:"workspaceID"`
 	// This field can have the runtime type of [[]PermissionRuleResponse].
 	Permission interface{} `json:"permission"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata   interface{} `json:"metadata"`
 	JSON       sessionJSON `json:"-"`
 }
 
@@ -1773,6 +1775,7 @@ type sessionJSON struct {
 	Tokens      apijson.Field
 	WorkspaceID apijson.Field
 	Permission  apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3241,6 +3244,7 @@ type SessionNewParams struct {
 	Model       param.Field[SessionNewParamsModel]   `json:"model"`
 	Permission  param.Field[[]PermissionRule]        `json:"permission"`
 	WorkspaceID param.Field[string]                  `json:"workspaceID"`
+	Metadata    param.Field[interface{}]             `json:"metadata"`
 }
 
 type SessionNewParamsModel struct {
@@ -3267,6 +3271,7 @@ type SessionUpdateParams struct {
 	Title      param.Field[string]                  `json:"title"`
 	Permission param.Field[[]PermissionRule]        `json:"permission"`
 	Time       param.Field[SessionUpdateParamsTime] `json:"time"`
+	Metadata   param.Field[interface{}]             `json:"metadata"`
 }
 
 type SessionUpdateParamsTime struct {

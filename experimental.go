@@ -491,7 +491,9 @@ type GlobalSession struct {
 	Model       *GlobalSessionModel       `json:"model,omitempty"`
 	Permission  PermissionRuleset         `json:"permission,omitempty"`
 	Revert      *GlobalSessionRevert      `json:"revert,omitempty"`
-	JSON        globalSessionJSON         `json:"-"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}           `json:"metadata,omitempty"`
+	JSON     globalSessionJSON     `json:"-"`
 }
 
 // globalSessionJSON contains the JSON metadata for the struct [GlobalSession]
@@ -515,6 +517,7 @@ type globalSessionJSON struct {
 	Model       apijson.Field
 	Permission  apijson.Field
 	Revert      apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

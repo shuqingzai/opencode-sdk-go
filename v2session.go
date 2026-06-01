@@ -210,7 +210,7 @@ func (r v2SessionInfoTimeJSON) RawJSON() string {
 type V2SessionInfoModel struct {
 	ID         string              `json:"id,required"`
 	ProviderID string              `json:"providerID,required"`
-	Variant    string              `json:"variant,required"`
+	Variant    string              `json:"variant"`
 	JSON       v2SessionInfoModelJSON `json:"-"`
 }
 
@@ -660,7 +660,7 @@ func (r v2SessionMessageAssistantTimeJSON) RawJSON() string {
 type V2SessionMessageModel struct {
 	ID         string                     `json:"id,required"`
 	ProviderID string                     `json:"providerID,required"`
-	Variant    string                     `json:"variant,required"`
+	Variant    string                     `json:"variant"`
 	JSON       v2SessionMessageModelJSON  `json:"-"`
 }
 

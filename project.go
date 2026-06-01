@@ -76,6 +76,8 @@ type Project struct {
 	Icon      ProjectIcon     `json:"icon"`
 	Commands  ProjectCommands `json:"commands"`
 	Vcs       ProjectVcs      `json:"vcs"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata  interface{}     `json:"metadata"`
 	JSON      projectJSON     `json:"-"`
 }
 
@@ -89,6 +91,7 @@ type projectJSON struct {
 	Icon        apijson.Field
 	Commands    apijson.Field
 	Vcs         apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

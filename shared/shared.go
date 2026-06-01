@@ -634,6 +634,62 @@ func (r WorkspaceWarpErrorName) IsKnown() bool {
 	return false
 }
 
+type WorkspaceCreateError struct {
+	Data WorkspaceCreateErrorData `json:"data,required"`
+	Name WorkspaceCreateErrorName `json:"name,required"`
+	JSON workspaceCreateErrorJSON `json:"-"`
+}
+
+// workspaceCreateErrorJSON contains the JSON metadata for the struct [WorkspaceCreateError]
+type workspaceCreateErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceCreateError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceCreateErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkspaceCreateErrorData struct {
+	Message string                      `json:"message,required"`
+	JSON    workspaceCreateErrorDataJSON `json:"-"`
+}
+
+// workspaceCreateErrorDataJSON contains the JSON metadata for the struct [WorkspaceCreateErrorData]
+type workspaceCreateErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WorkspaceCreateErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r workspaceCreateErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type WorkspaceCreateErrorName string
+
+const (
+	WorkspaceCreateErrorNameWorkspaceCreateError WorkspaceCreateErrorName = "WorkspaceCreateError"
+)
+
+func (r WorkspaceCreateErrorName) IsKnown() bool {
+	switch r {
+	case WorkspaceCreateErrorNameWorkspaceCreateError:
+		return true
+	}
+	return false
+}
+
 type NotFoundError struct {
 	Data NotFoundErrorData `json:"data,required"`
 	Name NotFoundErrorName `json:"name,required"`

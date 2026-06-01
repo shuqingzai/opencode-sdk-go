@@ -2097,7 +2097,7 @@ func (r EventListResponseEventSessionNextCompactionEndedType) IsKnown() bool {
 type EventListResponseEventSessionNextModelSwitchedModel struct {
 	ID         string                                                  `json:"id,required"`
 	ProviderID string                                                  `json:"providerID,required"`
-	Variant    string                                                  `json:"variant,required"`
+	Variant    string                                                  `json:"variant"`
 	JSON       eventListResponseEventSessionNextModelSwitchedModelJSON `json:"-"`
 }
 
@@ -2313,6 +2313,64 @@ const (
 func (r EventListResponseEventCatalogModelUpdatedType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventCatalogModelUpdatedTypeCatalogModelUpdated:
+		return true
+	}
+	return false
+}
+
+type EventListResponseEventPluginAdded struct {
+	Properties EventListResponseEventPluginAddedProperties `json:"properties,required"`
+	Type       EventListResponseEventPluginAddedType       `json:"type,required"`
+	JSON       eventListResponseEventPluginAddedJSON       `json:"-"`
+}
+
+type eventListResponseEventPluginAddedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPluginAdded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPluginAddedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventPluginAdded) implementsEventListResponse() {}
+
+func (r EventListResponseEventPluginAdded) implementsGlobalEventPayload() {}
+
+type EventListResponseEventPluginAddedProperties struct {
+	ID   string                                           `json:"id,required"`
+	JSON eventListResponseEventPluginAddedPropertiesJSON  `json:"-"`
+}
+
+type eventListResponseEventPluginAddedPropertiesJSON struct {
+	ID          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPluginAddedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPluginAddedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventPluginAddedType string
+
+const (
+	EventListResponseEventPluginAddedTypePluginAdded EventListResponseEventPluginAddedType = "plugin.added"
+)
+
+func (r EventListResponseEventPluginAddedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventPluginAddedTypePluginAdded:
 		return true
 	}
 	return false

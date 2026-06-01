@@ -1527,6 +1527,8 @@ type SyncEventSessionUpdatedDataInfo struct {
 	Agent       string                                 `json:"agent"`
 	Model       SyncEventSessionUpdatedDataInfoModel   `json:"model"`
 	Version     string                                 `json:"version"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata    interface{}                            `json:"metadata"`
 	Time        SyncEventSessionUpdatedDataInfoTime    `json:"time"`
 	Permission  PermissionRuleset                      `json:"permission"`
 	Revert      SyncEventSessionUpdatedDataInfoRevert  `json:"revert"`
@@ -1549,6 +1551,7 @@ type syncEventSessionUpdatedDataInfoJSON struct {
 	Agent       apijson.Field
 	Model       apijson.Field
 	Version     apijson.Field
+	Metadata    apijson.Field
 	Time        apijson.Field
 	Permission  apijson.Field
 	Revert      apijson.Field

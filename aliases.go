@@ -148,6 +148,18 @@ type WorkspaceWarpErrorName = shared.WorkspaceWarpErrorName
 const WorkspaceWarpErrorNameWorkspaceWarpError = shared.WorkspaceWarpErrorNameWorkspaceWarpError
 
 // This is an alias to an internal type.
+type WorkspaceCreateError = shared.WorkspaceCreateError
+
+// This is an alias to an internal type.
+type WorkspaceCreateErrorData = shared.WorkspaceCreateErrorData
+
+// This is an alias to an internal type.
+type WorkspaceCreateErrorName = shared.WorkspaceCreateErrorName
+
+// This is an alias to an internal value.
+const WorkspaceCreateErrorNameWorkspaceCreateError = shared.WorkspaceCreateErrorNameWorkspaceCreateError
+
+// This is an alias to an internal type.
 type NotFoundError = shared.NotFoundError
 
 // This is an alias to an internal type.
