@@ -1346,6 +1346,38 @@ func init() {
 			Type:       reflect.TypeOf(V2SessionMessageToolStateError{}),
 		},
 	)
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2SessionMessage)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageAgentSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageModelSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageUser{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageSynthetic{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageShell{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageAssistant{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageCompaction{}),
+		},
+	)
 }
 
 // ===== Param Types =====
