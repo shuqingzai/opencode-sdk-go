@@ -102,7 +102,7 @@ func (r *V2SessionService) Wait(ctx context.Context, sessionID string, query V2S
 //
 // Retrieve the active context messages for a v2 session (all messages after the
 // last compaction).
-func (r *V2SessionService) Context(ctx context.Context, sessionID string, query V2SessionContextParams, opts ...option.RequestOption) (res *[]V2SessionMessage, err error) {
+func (r *V2SessionService) Context(ctx context.Context, sessionID string, query V2SessionContextParams, opts ...option.RequestOption) (res *V2SessionContextResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -262,13 +262,13 @@ func (r *V2SessionService) Message(ctx context.Context, sessionID string, messag
 // ===== Response Types =====
 
 type V2SessionsResponse struct {
-	Items  []V2SessionInfo         `json:"items,required"`
+	Data   []V2SessionInfo         `json:"data,required"`
 	Cursor V2Cursor              `json:"cursor,required"`
 	JSON   v2SessionsResponseJSON `json:"-"`
 }
 
 type v2SessionsResponseJSON struct {
-	Items       apijson.Field
+	Data        apijson.Field
 	Cursor      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -414,13 +414,13 @@ func (r v2CursorJSON) RawJSON() string {
 }
 
 type V2SessionMessagesResponse struct {
-	Items  []V2SessionMessage            `json:"items,required"`
+	Data   []V2SessionMessage            `json:"data,required"`
 	Cursor V2Cursor                      `json:"cursor,required"`
 	JSON   v2SessionMessagesResponseJSON `json:"-"`
 }
 
 type v2SessionMessagesResponseJSON struct {
-	Items       apijson.Field
+	Data        apijson.Field
 	Cursor      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -431,6 +431,27 @@ func (r *V2SessionMessagesResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionMessagesResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2SessionContextResponse is returned by the Context method. It wraps messages
+// in a data field.
+type V2SessionContextResponse struct {
+	Data []V2SessionMessage              `json:"data,required"`
+	JSON v2SessionContextResponseJSON    `json:"-"`
+}
+
+type v2SessionContextResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionContextResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionContextResponseJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -647,7 +668,7 @@ type V2SessionMessageCompaction struct {
 	Type     string                                    `json:"type,required"`
 	Reason   V2SessionMessageCompactionReason           `json:"reason,required"`
 	Summary  string                                    `json:"summary,required"`
-	Include  string                                    `json:"include"`
+	Recent   string                                    `json:"recent,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                               `json:"metadata"`
 	JSON     v2SessionMessageCompactionJSON            `json:"-"`
@@ -659,7 +680,7 @@ type v2SessionMessageCompactionJSON struct {
 	Type        apijson.Field
 	Reason      apijson.Field
 	Summary     apijson.Field
-	Include     apijson.Field
+	Recent      apijson.Field
 	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -876,12 +897,14 @@ func (r v2SessionMessageAssistantContentJSON) RawJSON() string {
 type V2SessionMessageAssistantSnapshot struct {
 	Start string                                `json:"start"`
 	End   string                                `json:"end"`
+	Files []string                              `json:"files"`
 	JSON  v2SessionMessageAssistantSnapshotJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantSnapshotJSON struct {
 	Start       apijson.Field
 	End         apijson.Field
+	Files       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -950,9 +973,84 @@ func (r v2SessionMessageToolTimeJSON) RawJSON() string {
 // possible fields across content types; the concrete sub-types provide
 // type-safe alternatives.
 
-// V2SessionPromptResponse is returned by the Prompt method. It represents a
-// V2SessionMessage union type.
-type V2SessionPromptResponse = V2SessionMessage
+// V2SessionInputAdmitted is returned by the Prompt method. It represents the
+// server's admission of a prompt input.
+type V2SessionInputAdmitted struct {
+	AdmittedSeq int64                          `json:"admittedSeq,required"`
+	ID          string                         `json:"id,required"`
+	SessionID   string                         `json:"sessionID,required"`
+	Prompt      V2SessionInputPrompt           `json:"prompt,required"`
+	Delivery    string                         `json:"delivery"`
+	TimeCreated int64                          `json:"timeCreated,required"`
+	PromotedSeq int64                          `json:"promotedSeq"`
+	JSON        v2SessionInputAdmittedJSON     `json:"-"`
+}
+
+type v2SessionInputAdmittedJSON struct {
+	AdmittedSeq apijson.Field
+	ID          apijson.Field
+	SessionID   apijson.Field
+	Prompt      apijson.Field
+	Delivery    apijson.Field
+	TimeCreated apijson.Field
+	PromotedSeq apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionInputAdmitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionInputAdmittedJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2SessionPromptResponse wraps the SessionInputAdmitted returned by the v2
+// Prompt endpoint. The OpenAPI response is {data: SessionInputAdmitted}.
+type V2SessionPromptResponse struct {
+	Data V2SessionInputAdmitted       `json:"data,required"`
+	JSON v2SessionPromptResponseJSON  `json:"-"`
+}
+
+type v2SessionPromptResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionPromptResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionPromptResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type V2SessionInputPrompt struct {
+	Text       string                          `json:"text,required"`
+	Files      []V2PromptFileAttachment        `json:"files"`
+	Agents     []V2PromptAgentAttachment       `json:"agents"`
+	References []V2PromptReferenceAttachment   `json:"references"`
+	JSON       v2SessionInputPromptJSON        `json:"-"`
+}
+
+type v2SessionInputPromptJSON struct {
+	Text        apijson.Field
+	Files       apijson.Field
+	Agents      apijson.Field
+	References  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionInputPrompt) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionInputPromptJSON) RawJSON() string {
+	return r.raw
+}
 
 // ===== Prompt Attachment Types =====
 

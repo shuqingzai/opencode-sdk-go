@@ -145,7 +145,10 @@ type EventListResponse struct {
 	// [EventListResponseEventSessionNextMovedProperties],
 	// [EventListResponseEventSessionNextRevertStagedProperties],
 	// [EventListResponseEventSessionNextRevertClearedProperties],
-	// [EventListResponseEventSessionNextRevertCommittedProperties].
+	// [EventListResponseEventSessionNextRevertCommittedProperties],
+	// [EventListResponseEventSessionNextPromptAdmittedProperties],
+	// [EventListResponseEventSessionNextContextUpdatedProperties],
+	// [EventListResponseEventProjectDirectoriesUpdatedProperties].
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
 	JSON       eventListResponseJSON `json:"-"`
@@ -265,7 +268,10 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventSessionNextMoved],
 // [EventListResponseEventSessionNextRevertStaged],
 // [EventListResponseEventSessionNextRevertCleared],
-// [EventListResponseEventSessionNextRevertCommitted].
+// [EventListResponseEventSessionNextRevertCommitted],
+// [EventListResponseEventSessionNextPromptAdmitted],
+// [EventListResponseEventSessionNextContextUpdated],
+// [EventListResponseEventProjectDirectoriesUpdated].
 func (r EventListResponse) AsUnion() EventListResponseUnion {
 	return r.union
 }
@@ -356,7 +362,10 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventSessionNextMoved],
 // [EventListResponseEventSessionNextRevertStaged],
 // [EventListResponseEventSessionNextRevertCleared],
-// [EventListResponseEventSessionNextRevertCommitted].
+// [EventListResponseEventSessionNextRevertCommitted],
+// [EventListResponseEventSessionNextPromptAdmitted],
+// [EventListResponseEventSessionNextContextUpdated],
+// [EventListResponseEventProjectDirectoriesUpdated].
 type EventListResponseUnion interface {
 	implementsEventListResponse()
 }
@@ -729,6 +738,18 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCommitted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextPromptAdmitted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextContextUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventProjectDirectoriesUpdated{}),
 		},
 	)
 }

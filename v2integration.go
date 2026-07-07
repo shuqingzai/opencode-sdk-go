@@ -315,9 +315,9 @@ type IntegrationOAuthMethod struct {
 	ID      string                       `json:"id,required"`
 	Type    IntegrationOAuthMethodType   `json:"type,required"`
 	Label   string                       `json:"label,required"`
-	// This field can have the runtime type of []IntegrationTextPrompt,
-	// []IntegrationSelectPrompt.
-	Prompts interface{}                  `json:"prompts"`
+	// This field can have the runtime type of [IntegrationTextPrompt],
+	// [IntegrationSelectPrompt].
+	Prompts []IntegrationPromptUnion     `json:"prompts"`
 	JSON    integrationOAuthMethodJSON   `json:"-"`
 }
 
@@ -555,6 +555,21 @@ func init() {
 	)
 }
 
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*IntegrationPromptUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationTextPrompt{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationSelectPrompt{}),
+		},
+	)
+}
+
 // ===== IntegrationAttempt =====
 
 // IntegrationAttempt represents an OAuth integration attempt.
@@ -764,6 +779,18 @@ func (r IntegrationSelectPromptType) IsKnown() bool {
 	return false
 }
 
+// ===== IntegrationPrompt Union =====
+
+// IntegrationPromptUnion represents the union of prompt types.
+// Possible runtime types are [IntegrationTextPrompt], [IntegrationSelectPrompt].
+type IntegrationPromptUnion interface {
+	implementsIntegrationPromptUnion()
+}
+
+func (r IntegrationTextPrompt) implementsIntegrationPromptUnion() {}
+
+func (r IntegrationSelectPrompt) implementsIntegrationPromptUnion() {}
+
 // IntegrationSelectOption represents an option within a select prompt.
 type IntegrationSelectOption struct {
 	Label string                     `json:"label,required"`
@@ -877,8 +904,21 @@ func (r V2IntegrationConnectKeyParams) URLQuery() (v url.Values) {
 
 // V2IntegrationConnectKeyParamsBody contains the body fields for the connect key request.
 type V2IntegrationConnectKeyParamsBody struct {
-	Key   string              `json:"key,required"`
-	Label param.Field[string] `json:"label"`
+	Key   param.Field[string]                     `json:"key,required"`
+	Label param.Field[string]                     `json:"label"`
+	JSON  v2IntegrationConnectKeyParamsBodyJSON   `json:"-"`
+}
+
+// v2IntegrationConnectKeyParamsBodyJSON contains the JSON metadata for the struct [V2IntegrationConnectKeyParamsBody]
+type v2IntegrationConnectKeyParamsBodyJSON struct {
+	Key         apijson.Field
+	Label       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2IntegrationConnectKeyParamsBodyJSON) RawJSON() string {
+	return r.raw
 }
 
 func (r V2IntegrationConnectKeyParamsBody) MarshalJSON() (data []byte, err error) {

@@ -35,11 +35,34 @@ func NewV2AgentService(opts ...option.RequestOption) (r *V2AgentService) {
 }
 
 // List agents
-func (r *V2AgentService) List(ctx context.Context, query V2AgentListParams, opts ...option.RequestOption) (res *[]V2AgentInfo, err error) {
+func (r *V2AgentService) List(ctx context.Context, query V2AgentListParams, opts ...option.RequestOption) (res *V2AgentListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/agent"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// V2AgentListResponse contains the response from the agent list endpoint.
+type V2AgentListResponse struct {
+	Location LocationInfo            `json:"location,required"`
+	Data     []V2AgentInfo           `json:"data,required"`
+	JSON     v2AgentListResponseJSON `json:"-"`
+}
+
+// v2AgentListResponseJSON contains the JSON metadata for the struct [V2AgentListResponse]
+type v2AgentListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2AgentListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2AgentListResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2AgentInfo struct {

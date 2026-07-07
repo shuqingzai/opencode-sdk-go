@@ -3375,3 +3375,225 @@ func (r EventListResponseEventSessionNextRevertCommittedType) IsKnown() bool {
 	}
 	return false
 }
+
+// =============================================================================
+// EventListResponseEventSessionNextPromptAdmitted
+// =============================================================================
+
+type EventListResponseEventSessionNextPromptAdmitted struct {
+	Properties EventListResponseEventSessionNextPromptAdmittedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextPromptAdmittedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextPromptAdmittedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextPromptAdmittedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextPromptAdmitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextPromptAdmittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextPromptAdmitted) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextPromptAdmitted) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextPromptAdmittedProperties struct {
+	Timestamp int64                                                              `json:"timestamp,required"`
+	SessionID string                                                             `json:"sessionID,required"`
+	MessageID string                                                             `json:"messageID,required"`
+	Prompt    EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt    `json:"prompt,required"`
+	Delivery  string                                                             `json:"delivery,required"`
+	JSON      eventListResponseEventSessionNextPromptAdmittedPropertiesJSON      `json:"-"`
+}
+
+type eventListResponseEventSessionNextPromptAdmittedPropertiesJSON struct {
+	Timestamp   apijson.Field
+	SessionID   apijson.Field
+	MessageID   apijson.Field
+	Prompt      apijson.Field
+	Delivery    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextPromptAdmittedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextPromptAdmittedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt struct {
+	Text       string                                                             `json:"text,required"`
+	Files      []V2PromptFileAttachment                                           `json:"files"`
+	Agents     []V2PromptAgentAttachment                                          `json:"agents"`
+	References []V2PromptReferenceAttachment                                      `json:"references"`
+	JSON       eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON `json:"-"`
+}
+
+type eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON struct {
+	Text        apijson.Field
+	Files       apijson.Field
+	Agents      apijson.Field
+	References  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextPromptAdmittedType string
+
+const (
+	EventListResponseEventSessionNextPromptAdmittedTypeSessionNextPromptAdmitted EventListResponseEventSessionNextPromptAdmittedType = "session.next.prompt.admitted"
+)
+
+func (r EventListResponseEventSessionNextPromptAdmittedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextPromptAdmittedTypeSessionNextPromptAdmitted:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventSessionNextContextUpdated
+// =============================================================================
+
+type EventListResponseEventSessionNextContextUpdated struct {
+	Properties EventListResponseEventSessionNextContextUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextContextUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextContextUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextContextUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextContextUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextContextUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextContextUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextContextUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextContextUpdatedProperties struct {
+	Timestamp int64                                                               `json:"timestamp,required"`
+	SessionID string                                                              `json:"sessionID,required"`
+	MessageID string                                                              `json:"messageID,required"`
+	Text      string                                                              `json:"text,required"`
+	JSON      eventListResponseEventSessionNextContextUpdatedPropertiesJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextContextUpdatedPropertiesJSON struct {
+	Timestamp   apijson.Field
+	SessionID   apijson.Field
+	MessageID   apijson.Field
+	Text        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextContextUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextContextUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextContextUpdatedType string
+
+const (
+	EventListResponseEventSessionNextContextUpdatedTypeSessionNextContextUpdated EventListResponseEventSessionNextContextUpdatedType = "session.next.context.updated"
+)
+
+func (r EventListResponseEventSessionNextContextUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextContextUpdatedTypeSessionNextContextUpdated:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventProjectDirectoriesUpdated
+// =============================================================================
+
+type EventListResponseEventProjectDirectoriesUpdated struct {
+	Properties EventListResponseEventProjectDirectoriesUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventProjectDirectoriesUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventProjectDirectoriesUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventProjectDirectoriesUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventProjectDirectoriesUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventProjectDirectoriesUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventProjectDirectoriesUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventProjectDirectoriesUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventProjectDirectoriesUpdatedProperties struct {
+	ProjectID string                                                                `json:"projectID,required"`
+	JSON      eventListResponseEventProjectDirectoriesUpdatedPropertiesJSON         `json:"-"`
+}
+
+type eventListResponseEventProjectDirectoriesUpdatedPropertiesJSON struct {
+	ProjectID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventProjectDirectoriesUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventProjectDirectoriesUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventProjectDirectoriesUpdatedType string
+
+const (
+	EventListResponseEventProjectDirectoriesUpdatedTypeProjectDirectoriesUpdated EventListResponseEventProjectDirectoriesUpdatedType = "project.directories.updated"
+)
+
+func (r EventListResponseEventProjectDirectoriesUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventProjectDirectoriesUpdatedTypeProjectDirectoriesUpdated:
+		return true
+	}
+	return false
+}

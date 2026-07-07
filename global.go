@@ -750,6 +750,18 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventPluginAdded{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextPromptAdmitted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextContextUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventProjectDirectoriesUpdated{}),
+		},
 	)
 
 	// SyncEventResponseSyncEventDataUnion: V1 SyncEvent parent types registered

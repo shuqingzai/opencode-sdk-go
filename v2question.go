@@ -56,11 +56,34 @@ func NewV2QuestionRequestService(opts ...option.RequestOption) (r *V2QuestionReq
 }
 
 // List pending question requests for a location.
-func (r *V2QuestionRequestService) List(ctx context.Context, query V2QuestionRequestListParams, opts ...option.RequestOption) (res *[]QuestionV2Request, err error) {
+func (r *V2QuestionRequestService) List(ctx context.Context, query V2QuestionRequestListParams, opts ...option.RequestOption) (res *V2QuestionRequestListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/question/request"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// V2QuestionRequestListResponse contains the response from the question request list endpoint.
+type V2QuestionRequestListResponse struct {
+	Location LocationInfo                     `json:"location,required"`
+	Data     []QuestionV2Request              `json:"data,required"`
+	JSON     v2QuestionRequestListResponseJSON `json:"-"`
+}
+
+// v2QuestionRequestListResponseJSON contains the JSON metadata for the struct [V2QuestionRequestListResponse]
+type v2QuestionRequestListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2QuestionRequestListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2QuestionRequestListResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 type QuestionV2Request struct {

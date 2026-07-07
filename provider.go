@@ -145,8 +145,7 @@ type ProviderModelInfo struct {
 	Attachment   bool                            `json:"attachment,required"`
 	Reasoning    bool                            `json:"reasoning,required"`
 	Temperature  bool                            `json:"temperature,required"`
-	ToolCall     bool                            `json:"tool_call,required"`
-	Interleaved  interface{}                     `json:"interleaved"`
+	ToolCall     bool                            `json:"toolcall,required"`
 	Cost         ProviderModelCost               `json:"cost"`
 	Limit        ProviderModelLimit              `json:"limit,required"`
 	Modalities   ProviderModelModalities         `json:"modalities"`
@@ -154,6 +153,7 @@ type ProviderModelInfo struct {
 	Status       string                          `json:"status"`
 	Options      map[string]interface{}          `json:"options,required"`
 	Headers      map[string]string               `json:"headers"`
+	API          ProviderModelInfoAPI            `json:"api"`
 	Provider     ProviderModelProvider           `json:"provider"`
 	Variants     map[string]ProviderModelVariant `json:"variants"`
 	JSON         providerModelInfoJSON           `json:"-"`
@@ -169,7 +169,6 @@ type providerModelInfoJSON struct {
 	Reasoning    apijson.Field
 	Temperature  apijson.Field
 	ToolCall     apijson.Field
-	Interleaved  apijson.Field
 	Cost         apijson.Field
 	Limit        apijson.Field
 	Modalities   apijson.Field
@@ -177,6 +176,7 @@ type providerModelInfoJSON struct {
 	Status       apijson.Field
 	Options      apijson.Field
 	Headers      apijson.Field
+	API          apijson.Field
 	Provider     apijson.Field
 	Variants     apijson.Field
 	raw          string
@@ -191,13 +191,38 @@ func (r providerModelInfoJSON) RawJSON() string {
 	return r.raw
 }
 
+// ProviderModelInfoAPI represents API information for a model.
+type ProviderModelInfoAPI struct {
+	ID   string                       `json:"id"`
+	URL  string                       `json:"url"`
+	NPM  string                       `json:"npm"`
+	JSON providerModelInfoAPIJSON     `json:"-"`
+}
+
+// providerModelInfoAPIJSON contains the JSON metadata for the struct [ProviderModelInfoAPI]
+type providerModelInfoAPIJSON struct {
+	ID          apijson.Field
+	URL         apijson.Field
+	NPM         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelInfoAPI) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelInfoAPIJSON) RawJSON() string {
+	return r.raw
+}
+
 // ProviderModelCost represents the cost structure for a model.
 type ProviderModelCost struct {
 	Input           float64                          `json:"input,required"`
-	Output          int64                          `json:"output,required"`
+	Output          float64                          `json:"output,required"`
 	CacheRead       float64                          `json:"cache_read"`
 	CacheWrite      float64                          `json:"cache_write"`
-	ContextOver200k ProviderModelCostContextOver200k `json:"context_over_200k"`
+	ContextOver200k ProviderModelCostContextOver200k `json:"experimentalOver200K"`
 	JSON            providerModelCostJSON            `json:"-"`
 }
 
@@ -223,7 +248,7 @@ func (r providerModelCostJSON) RawJSON() string {
 // ProviderModelCostContextOver200k represents cost structure for context over 200k tokens.
 type ProviderModelCostContextOver200k struct {
 	Input      float64                              `json:"input,required"`
-	Output     int64                              `json:"output,required"`
+	Output     float64                              `json:"output,required"`
 	CacheRead  float64                              `json:"cache_read"`
 	CacheWrite float64                              `json:"cache_write"`
 	JSON       providerModelCostContextOver200kJSON `json:"-"`

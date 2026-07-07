@@ -37,26 +37,26 @@ func NewV2CredentialService(opts ...option.RequestOption) (r *V2CredentialServic
 }
 
 // Update credential label
-func (r *V2CredentialService) Update(ctx context.Context, credentialID string, body V2CredentialUpdateParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2CredentialService) Update(ctx context.Context, credentialID string, body V2CredentialUpdateParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if credentialID == "" {
 		err = errors.New("missing required credentialID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/credential/%s", credentialID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, nil, opts...)
 	return
 }
 
 // Remove credential
-func (r *V2CredentialService) Remove(ctx context.Context, credentialID string, query V2CredentialRemoveParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2CredentialService) Remove(ctx context.Context, credentialID string, query V2CredentialRemoveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if credentialID == "" {
 		err = errors.New("missing required credentialID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/credential/%s", credentialID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, nil, opts...)
 	return
 }
 

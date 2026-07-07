@@ -252,18 +252,22 @@ func (r configSkillsJSON) RawJSON() string {
 }
 
 type ConfigCompaction struct {
-	Auto     bool                 `json:"auto"`
-	Prune    bool                 `json:"prune"`
-	Reserved int64                `json:"reserved"`
-	JSON     configCompactionJSON `json:"-"`
+	Auto                 bool                 `json:"auto"`
+	Prune                bool                 `json:"prune"`
+	Reserved             int64                `json:"reserved"`
+	TailTurns            int64                `json:"tail_turns"`
+	PreserveRecentTokens int64                `json:"preserve_recent_tokens"`
+	JSON                 configCompactionJSON `json:"-"`
 }
 
 type configCompactionJSON struct {
-	Auto        apijson.Field
-	Prune       apijson.Field
-	Reserved    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Auto                 apijson.Field
+	Prune                apijson.Field
+	Reserved             apijson.Field
+	TailTurns            apijson.Field
+	PreserveRecentTokens apijson.Field
+	raw                  string
+	ExtraFields          map[string]apijson.Field
 }
 
 func (r *ConfigCompaction) UnmarshalJSON(data []byte) error {

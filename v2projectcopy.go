@@ -49,26 +49,26 @@ func (r *V2ProjectCopyService) Create(ctx context.Context, projectID string, bod
 }
 
 // Refresh a project copy
-func (r *V2ProjectCopyService) Refresh(ctx context.Context, projectID string, query V2ProjectCopyRefreshParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2ProjectCopyService) Refresh(ctx context.Context, projectID string, query V2ProjectCopyRefreshParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if projectID == "" {
 		err = errors.New("missing required projectID parameter")
 		return
 	}
 	path := fmt.Sprintf("experimental/project/%s/copy/refresh", projectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, nil, opts...)
 	return
 }
 
 // Remove a project copy
-func (r *V2ProjectCopyService) Remove(ctx context.Context, projectID string, body V2ProjectCopyRemoveParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2ProjectCopyService) Remove(ctx context.Context, projectID string, body V2ProjectCopyRemoveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if projectID == "" {
 		err = errors.New("missing required projectID parameter")
 		return
 	}
 	path := fmt.Sprintf("experimental/project/%s/copy", projectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
 	return
 }
 

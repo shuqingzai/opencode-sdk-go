@@ -59,7 +59,7 @@ func TestV2SessionPromptParams(t *testing.T) {
 
 func TestV2SessionsResponseUnmarshal(t *testing.T) {
 	jsonStr := `{
-		"items": [
+		"data": [
 			{
 				"id": "ses_123",
 				"projectID": "proj_1",
@@ -76,11 +76,11 @@ func TestV2SessionsResponseUnmarshal(t *testing.T) {
 	if err := resp.UnmarshalJSON([]byte(jsonStr)); err != nil {
 		t.Fatal(err)
 	}
-	if len(resp.Items) != 1 {
-		t.Errorf("expected 1 item, got %d", len(resp.Items))
+	if len(resp.Data) != 1 {
+		t.Errorf("expected 1 item, got %d", len(resp.Data))
 	}
-	if resp.Items[0].ID != "ses_123" {
-		t.Errorf("expected ses_123, got %s", resp.Items[0].ID)
+	if resp.Data[0].ID != "ses_123" {
+		t.Errorf("expected ses_123, got %s", resp.Data[0].ID)
 	}
 	if resp.Cursor.Previous != "abc" {
 		t.Errorf("expected abc, got %s", resp.Cursor.Previous)
@@ -89,7 +89,7 @@ func TestV2SessionsResponseUnmarshal(t *testing.T) {
 
 func TestV2SessionMessagesResponseUnmarshal(t *testing.T) {
 	jsonStr := `{
-		"items": [],
+		"data": [],
 		"cursor": {
 			"previous": "",
 			"next": ""
@@ -99,8 +99,8 @@ func TestV2SessionMessagesResponseUnmarshal(t *testing.T) {
 	if err := resp.UnmarshalJSON([]byte(jsonStr)); err != nil {
 		t.Fatal(err)
 	}
-	if len(resp.Items) != 0 {
-		t.Errorf("expected 0 items, got %d", len(resp.Items))
+	if len(resp.Data) != 0 {
+		t.Errorf("expected 0 items, got %d", len(resp.Data))
 	}
 }
 

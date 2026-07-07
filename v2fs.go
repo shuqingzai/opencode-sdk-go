@@ -79,7 +79,7 @@ func (r V2FsListParams) URLQuery() (v url.Values) {
 type V2FsFindParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 	Query    param.Field[string]          `query:"query,required"`
-	Type     param.Field[string]          `query:"type"`
+	Type     param.Field[FileSystemEntryType] `query:"type"`
 	Limit    param.Field[string]          `query:"limit"`
 }
 

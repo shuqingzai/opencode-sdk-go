@@ -35,11 +35,34 @@ func NewV2CommandService(opts ...option.RequestOption) (r *V2CommandService) {
 }
 
 // List v2 commands
-func (r *V2CommandService) List(ctx context.Context, query V2CommandListParams, opts ...option.RequestOption) (res *[]V2CommandInfo, err error) {
+func (r *V2CommandService) List(ctx context.Context, query V2CommandListParams, opts ...option.RequestOption) (res *V2CommandListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/command"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// V2CommandListResponse contains the response from the command list endpoint.
+type V2CommandListResponse struct {
+	Location LocationInfo              `json:"location,required"`
+	Data     []V2CommandInfo           `json:"data,required"`
+	JSON     v2CommandListResponseJSON `json:"-"`
+}
+
+// v2CommandListResponseJSON contains the JSON metadata for the struct [V2CommandListResponse]
+type v2CommandListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2CommandListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2CommandListResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 // V2CommandInfo represents a registered command.
