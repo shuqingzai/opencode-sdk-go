@@ -321,51 +321,6 @@ func (r *SyncEventSessionNextAgentSwitched) UnmarshalJSON(data []byte) (err erro
 
 func (r SyncEventSessionNextAgentSwitched) implementsSyncEventResponseSyncEventDataUnion() {}
 
-type SyncEventSessionNextCompactionDeltaType string
-
-const (
-	SyncEventSessionNextCompactionDeltaTypeSessionNextCompactionDelta1 SyncEventSessionNextCompactionDeltaType = "session.next.compaction.delta.1"
-)
-
-func (r SyncEventSessionNextCompactionDeltaType) IsKnown() bool {
-	switch r {
-	case SyncEventSessionNextCompactionDeltaTypeSessionNextCompactionDelta1:
-		return true
-	}
-	return false
-}
-
-type SyncEventSessionNextCompactionDelta struct {
-	Type        SyncEventSessionNextCompactionDeltaType                    `json:"type,required"`
-	Name        string                                                     `json:"name,required"`
-	ID          string                                                     `json:"id,required"`
-	Seq         int64                                                      `json:"seq,required"`
-	AggregateID string                                                     `json:"aggregateID,required"`
-	Data        EventListResponseEventSessionNextCompactionDeltaProperties `json:"data,required"`
-	JSON        syncEventSessionNextCompactionDeltaJSON                    `json:"-"`
-}
-
-type syncEventSessionNextCompactionDeltaJSON struct {
-	Type        apijson.Field
-	Name        apijson.Field
-	ID          apijson.Field
-	Seq         apijson.Field
-	AggregateID apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextCompactionDeltaJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextCompactionDelta) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r SyncEventSessionNextCompactionDelta) implementsSyncEventResponseSyncEventDataUnion() {}
-
 type SyncEventSessionNextCompactionEndedType string
 
 const (
@@ -545,51 +500,6 @@ func (r *SyncEventSessionNextPrompted) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r SyncEventSessionNextPrompted) implementsSyncEventResponseSyncEventDataUnion() {}
-
-type SyncEventSessionNextReasoningDeltaType string
-
-const (
-	SyncEventSessionNextReasoningDeltaTypeSessionNextReasoningDelta1 SyncEventSessionNextReasoningDeltaType = "session.next.reasoning.delta.1"
-)
-
-func (r SyncEventSessionNextReasoningDeltaType) IsKnown() bool {
-	switch r {
-	case SyncEventSessionNextReasoningDeltaTypeSessionNextReasoningDelta1:
-		return true
-	}
-	return false
-}
-
-type SyncEventSessionNextReasoningDelta struct {
-	Type        SyncEventSessionNextReasoningDeltaType                    `json:"type,required"`
-	Name        string                                                    `json:"name,required"`
-	ID          string                                                    `json:"id,required"`
-	Seq         int64                                                     `json:"seq,required"`
-	AggregateID string                                                    `json:"aggregateID,required"`
-	Data        EventListResponseEventSessionNextReasoningDeltaProperties `json:"data,required"`
-	JSON        syncEventSessionNextReasoningDeltaJSON                    `json:"-"`
-}
-
-type syncEventSessionNextReasoningDeltaJSON struct {
-	Type        apijson.Field
-	Name        apijson.Field
-	ID          apijson.Field
-	Seq         apijson.Field
-	AggregateID apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextReasoningDeltaJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextReasoningDelta) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r SyncEventSessionNextReasoningDelta) implementsSyncEventResponseSyncEventDataUnion() {}
 
 type SyncEventSessionNextReasoningEndedType string
 
@@ -819,12 +729,12 @@ func (r SyncEventSessionNextShellStarted) implementsSyncEventResponseSyncEventDa
 type SyncEventSessionNextStepEndedType string
 
 const (
-	SyncEventSessionNextStepEndedTypeSessionNextStepEnded1 SyncEventSessionNextStepEndedType = "session.next.step.ended.1"
+	SyncEventSessionNextStepEndedTypeSessionNextStepEnded2 SyncEventSessionNextStepEndedType = "session.next.step.ended.2"
 )
 
 func (r SyncEventSessionNextStepEndedType) IsKnown() bool {
 	switch r {
-	case SyncEventSessionNextStepEndedTypeSessionNextStepEnded1:
+	case SyncEventSessionNextStepEndedTypeSessionNextStepEnded2:
 		return true
 	}
 	return false
@@ -864,12 +774,12 @@ func (r SyncEventSessionNextStepEnded) implementsSyncEventResponseSyncEventDataU
 type SyncEventSessionNextStepFailedType string
 
 const (
-	SyncEventSessionNextStepFailedTypeSessionNextStepFailed1 SyncEventSessionNextStepFailedType = "session.next.step.failed.1"
+	SyncEventSessionNextStepFailedTypeSessionNextStepFailed2 SyncEventSessionNextStepFailedType = "session.next.step.failed.2"
 )
 
 func (r SyncEventSessionNextStepFailedType) IsKnown() bool {
 	switch r {
-	case SyncEventSessionNextStepFailedTypeSessionNextStepFailed1:
+	case SyncEventSessionNextStepFailedTypeSessionNextStepFailed2:
 		return true
 	}
 	return false
@@ -995,51 +905,6 @@ func (r *SyncEventSessionNextSynthetic) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r SyncEventSessionNextSynthetic) implementsSyncEventResponseSyncEventDataUnion() {}
-
-type SyncEventSessionNextTextDeltaType string
-
-const (
-	SyncEventSessionNextTextDeltaTypeSessionNextTextDelta1 SyncEventSessionNextTextDeltaType = "session.next.text.delta.1"
-)
-
-func (r SyncEventSessionNextTextDeltaType) IsKnown() bool {
-	switch r {
-	case SyncEventSessionNextTextDeltaTypeSessionNextTextDelta1:
-		return true
-	}
-	return false
-}
-
-type SyncEventSessionNextTextDelta struct {
-	Type        SyncEventSessionNextTextDeltaType                    `json:"type,required"`
-	Name        string                                               `json:"name,required"`
-	ID          string                                               `json:"id,required"`
-	Seq         int64                                                `json:"seq,required"`
-	AggregateID string                                               `json:"aggregateID,required"`
-	Data        EventListResponseEventSessionNextTextDeltaProperties `json:"data,required"`
-	JSON        syncEventSessionNextTextDeltaJSON                    `json:"-"`
-}
-
-type syncEventSessionNextTextDeltaJSON struct {
-	Type        apijson.Field
-	Name        apijson.Field
-	ID          apijson.Field
-	Seq         apijson.Field
-	AggregateID apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextTextDeltaJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextTextDelta) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r SyncEventSessionNextTextDelta) implementsSyncEventResponseSyncEventDataUnion() {}
 
 type SyncEventSessionNextTextEndedType string
 
@@ -1220,51 +1085,6 @@ func (r *SyncEventSessionNextToolFailed) UnmarshalJSON(data []byte) (err error) 
 }
 
 func (r SyncEventSessionNextToolFailed) implementsSyncEventResponseSyncEventDataUnion() {}
-
-type SyncEventSessionNextToolInputDeltaType string
-
-const (
-	SyncEventSessionNextToolInputDeltaTypeSessionNextToolInputDelta1 SyncEventSessionNextToolInputDeltaType = "session.next.tool.input.delta.1"
-)
-
-func (r SyncEventSessionNextToolInputDeltaType) IsKnown() bool {
-	switch r {
-	case SyncEventSessionNextToolInputDeltaTypeSessionNextToolInputDelta1:
-		return true
-	}
-	return false
-}
-
-type SyncEventSessionNextToolInputDelta struct {
-	Type        SyncEventSessionNextToolInputDeltaType                    `json:"type,required"`
-	Name        string                                                    `json:"name,required"`
-	ID          string                                                    `json:"id,required"`
-	Seq         int64                                                     `json:"seq,required"`
-	AggregateID string                                                    `json:"aggregateID,required"`
-	Data        EventListResponseEventSessionNextToolInputDeltaProperties `json:"data,required"`
-	JSON        syncEventSessionNextToolInputDeltaJSON                    `json:"-"`
-}
-
-type syncEventSessionNextToolInputDeltaJSON struct {
-	Type        apijson.Field
-	Name        apijson.Field
-	ID          apijson.Field
-	Seq         apijson.Field
-	AggregateID apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextToolInputDeltaJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextToolInputDelta) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r SyncEventSessionNextToolInputDelta) implementsSyncEventResponseSyncEventDataUnion() {}
 
 type SyncEventSessionNextToolInputEndedType string
 
@@ -1907,3 +1727,186 @@ func (r *SyncEventSessionNextRevertCommitted) UnmarshalJSON(data []byte) (err er
 }
 
 func (r SyncEventSessionNextRevertCommitted) implementsSyncEventResponseSyncEventDataUnion() {}
+
+// SyncEventPrompt represents a prompt input, matching OpenAPI's Prompt schema
+// used by SyncEventSessionNextPromptAdmitted.
+type SyncEventPrompt struct {
+	Text   string                              `json:"text,required"`
+	Files  []V2PromptFileAttachment            `json:"files"`
+	Agents []V2PromptAgentAttachment           `json:"agents"`
+	JSON   syncEventPromptJSON                 `json:"-"`
+}
+
+type syncEventPromptJSON struct {
+	Text        apijson.Field
+	Files       apijson.Field
+	Agents      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventPromptJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventPrompt) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type SyncEventSessionNextContextUpdatedType string
+
+const (
+	SyncEventSessionNextContextUpdatedTypeSessionNextContextUpdated1 SyncEventSessionNextContextUpdatedType = "session.next.context.updated.1"
+)
+
+func (r SyncEventSessionNextContextUpdatedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextContextUpdatedTypeSessionNextContextUpdated1:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextContextUpdatedProperties struct {
+	Timestamp int64                                              `json:"timestamp,required"`
+	SessionID string                                             `json:"sessionID,required"`
+	MessageID string                                             `json:"messageID,required"`
+	Text      string                                             `json:"text,required"`
+	JSON      syncEventSessionNextContextUpdatedPropertiesJSON    `json:"-"`
+}
+
+type syncEventSessionNextContextUpdatedPropertiesJSON struct {
+	Timestamp   apijson.Field
+	SessionID   apijson.Field
+	MessageID   apijson.Field
+	Text        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextContextUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextContextUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type SyncEventSessionNextContextUpdated struct {
+	Type        SyncEventSessionNextContextUpdatedType             `json:"type,required"`
+	Name        string                                            `json:"name,required"`
+	ID          string                                            `json:"id,required"`
+	Seq         int64                                             `json:"seq,required"`
+	AggregateID string                                            `json:"aggregateID,required"`
+	Data        SyncEventSessionNextContextUpdatedProperties      `json:"data,required"`
+	JSON        syncEventSessionNextContextUpdatedJSON             `json:"-"`
+}
+
+type syncEventSessionNextContextUpdatedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextContextUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextContextUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextContextUpdated) implementsSyncEventResponseSyncEventDataUnion() {}
+
+type SyncEventSessionNextPromptAdmittedType string
+
+const (
+	SyncEventSessionNextPromptAdmittedTypeSessionNextPromptAdmitted1 SyncEventSessionNextPromptAdmittedType = "session.next.prompt.admitted.1"
+)
+
+func (r SyncEventSessionNextPromptAdmittedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextPromptAdmittedTypeSessionNextPromptAdmitted1:
+		return true
+	}
+	return false
+}
+
+// SyncEventSessionNextPromptAdmittedDelivery is the delivery mode for an admitted prompt.
+type SyncEventSessionNextPromptAdmittedDelivery string
+
+const (
+	SyncEventSessionNextPromptAdmittedDeliverySteer SyncEventSessionNextPromptAdmittedDelivery = "steer"
+	SyncEventSessionNextPromptAdmittedDeliveryQueue SyncEventSessionNextPromptAdmittedDelivery = "queue"
+)
+
+func (r SyncEventSessionNextPromptAdmittedDelivery) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextPromptAdmittedDeliverySteer, SyncEventSessionNextPromptAdmittedDeliveryQueue:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextPromptAdmittedProperties struct {
+	Timestamp int64                                       `json:"timestamp,required"`
+	SessionID string                                      `json:"sessionID,required"`
+	MessageID string                                      `json:"messageID,required"`
+	Prompt    SyncEventPrompt                             `json:"prompt,required"`
+	Delivery  SyncEventSessionNextPromptAdmittedDelivery  `json:"delivery,required"`
+	JSON      syncEventSessionNextPromptAdmittedPropertiesJSON `json:"-"`
+}
+
+type syncEventSessionNextPromptAdmittedPropertiesJSON struct {
+	Timestamp   apijson.Field
+	SessionID   apijson.Field
+	MessageID   apijson.Field
+	Prompt      apijson.Field
+	Delivery    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextPromptAdmittedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextPromptAdmittedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type SyncEventSessionNextPromptAdmitted struct {
+	Type        SyncEventSessionNextPromptAdmittedType         `json:"type,required"`
+	Name        string                                        `json:"name,required"`
+	ID          string                                        `json:"id,required"`
+	Seq         int64                                         `json:"seq,required"`
+	AggregateID string                                        `json:"aggregateID,required"`
+	Data        SyncEventSessionNextPromptAdmittedProperties  `json:"data,required"`
+	JSON        syncEventSessionNextPromptAdmittedJSON         `json:"-"`
+}
+
+type syncEventSessionNextPromptAdmittedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextPromptAdmittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextPromptAdmitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextPromptAdmitted) implementsSyncEventResponseSyncEventDataUnion() {}

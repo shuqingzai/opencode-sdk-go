@@ -369,8 +369,9 @@ type McpAddBody struct {
 	// Name of the MCP server
 	Name string `json:"name,required"`
 	// Configuration for the MCP server
-	Config McpAddBodyConfigUnion `json:"config,required"`
-	JSON   mcpAddBodyJSON        `json:"-"`
+	// This field can have the runtime type of [McpAddBodyConfigLocal], [McpAddBodyConfigRemote].
+	Config interface{}    `json:"config,required"`
+	JSON   mcpAddBodyJSON `json:"-"`
 }
 
 // mcpAddBodyJSON contains the JSON metadata for the struct [McpAddBody]
@@ -567,10 +568,11 @@ func (r McpStatusParams) URLQuery() (v url.Values) {
 
 // McpAddParams contains the parameters for adding an MCP server.
 type McpAddParams struct {
-	Directory param.Field[string]   `query:"directory"`
-	Workspace param.Field[string]   `query:"workspace"`
-	Name      param.Field[string]   `json:"name,required"`
-	Config    McpAddBodyConfigUnion `json:"config,required"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Name      param.Field[string] `json:"name,required"`
+	// This field can have the runtime type of [McpAddBodyConfigLocal], [McpAddBodyConfigRemote].
+	Config interface{} `json:"config,required"`
 }
 
 // MarshalJSON serializes [McpAddParams] omitting query parameters.

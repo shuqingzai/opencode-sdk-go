@@ -789,11 +789,19 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextPromptAdmitted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextSynthetic{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextShellStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextContextUpdated{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -817,10 +825,6 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SyncEventSessionNextTextDelta{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextTextEnded{}),
 		},
 		apijson.UnionVariant{
@@ -829,19 +833,11 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SyncEventSessionNextReasoningDelta{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextReasoningEnded{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextToolInputStarted{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SyncEventSessionNextToolInputDelta{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -870,10 +866,6 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextCompactionStarted{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SyncEventSessionNextCompactionDelta{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1146,20 +1138,19 @@ const (
 	SyncEventResponseSyncEventTypeSessionNextAgentSwitched1     SyncEventResponseSyncEventType = "session.next.agent.switched.1"
 	SyncEventResponseSyncEventTypeSessionNextModelSwitched1     SyncEventResponseSyncEventType = "session.next.model.switched.1"
 	SyncEventResponseSyncEventTypeSessionNextPrompted1          SyncEventResponseSyncEventType = "session.next.prompted.1"
+	SyncEventResponseSyncEventTypeSessionNextPromptAdmitted1    SyncEventResponseSyncEventType = "session.next.prompt.admitted.1"
 	SyncEventResponseSyncEventTypeSessionNextSynthetic1         SyncEventResponseSyncEventType = "session.next.synthetic.1"
 	SyncEventResponseSyncEventTypeSessionNextShellStarted1      SyncEventResponseSyncEventType = "session.next.shell.started.1"
+	SyncEventResponseSyncEventTypeSessionNextContextUpdated1    SyncEventResponseSyncEventType = "session.next.context.updated.1"
 	SyncEventResponseSyncEventTypeSessionNextShellEnded1        SyncEventResponseSyncEventType = "session.next.shell.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextStepStarted1       SyncEventResponseSyncEventType = "session.next.step.started.1"
-	SyncEventResponseSyncEventTypeSessionNextStepEnded1         SyncEventResponseSyncEventType = "session.next.step.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextStepFailed1        SyncEventResponseSyncEventType = "session.next.step.failed.1"
-	SyncEventResponseSyncEventTypeSessionNextTextStarted1       SyncEventResponseSyncEventType = "session.next.text.started.1"
-	SyncEventResponseSyncEventTypeSessionNextTextDelta1         SyncEventResponseSyncEventType = "session.next.text.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextStepEnded2         SyncEventResponseSyncEventType = "session.next.step.ended.2"
+	SyncEventResponseSyncEventTypeSessionNextStepFailed2        SyncEventResponseSyncEventType = "session.next.step.failed.2"
+	SyncEventResponseSyncEventTypeSessionNextTextStarted1      SyncEventResponseSyncEventType = "session.next.text.started.1"
 	SyncEventResponseSyncEventTypeSessionNextTextEnded1         SyncEventResponseSyncEventType = "session.next.text.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextReasoningStarted1  SyncEventResponseSyncEventType = "session.next.reasoning.started.1"
-	SyncEventResponseSyncEventTypeSessionNextReasoningDelta1    SyncEventResponseSyncEventType = "session.next.reasoning.delta.1"
 	SyncEventResponseSyncEventTypeSessionNextReasoningEnded1    SyncEventResponseSyncEventType = "session.next.reasoning.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextToolInputStarted1  SyncEventResponseSyncEventType = "session.next.tool.input.started.1"
-	SyncEventResponseSyncEventTypeSessionNextToolInputDelta1    SyncEventResponseSyncEventType = "session.next.tool.input.delta.1"
 	SyncEventResponseSyncEventTypeSessionNextToolInputEnded1    SyncEventResponseSyncEventType = "session.next.tool.input.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextToolCalled1        SyncEventResponseSyncEventType = "session.next.tool.called.1"
 	SyncEventResponseSyncEventTypeSessionNextToolProgress1      SyncEventResponseSyncEventType = "session.next.tool.progress.1"
@@ -1167,7 +1158,6 @@ const (
 	SyncEventResponseSyncEventTypeSessionNextToolFailed1        SyncEventResponseSyncEventType = "session.next.tool.failed.1"
 	SyncEventResponseSyncEventTypeSessionNextRetried1           SyncEventResponseSyncEventType = "session.next.retried.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionStarted1 SyncEventResponseSyncEventType = "session.next.compaction.started.1"
-	SyncEventResponseSyncEventTypeSessionNextCompactionDelta1   SyncEventResponseSyncEventType = "session.next.compaction.delta.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionEnded1   SyncEventResponseSyncEventType = "session.next.compaction.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextMoved1             SyncEventResponseSyncEventType = "session.next.moved.1"
 	SyncEventResponseSyncEventTypeSessionNextRevertStaged1      SyncEventResponseSyncEventType = "session.next.revert.staged.1"
@@ -1187,20 +1177,19 @@ func (r SyncEventResponseSyncEventType) IsKnown() bool {
 		SyncEventResponseSyncEventTypeSessionNextAgentSwitched1,
 		SyncEventResponseSyncEventTypeSessionNextModelSwitched1,
 		SyncEventResponseSyncEventTypeSessionNextPrompted1,
+		SyncEventResponseSyncEventTypeSessionNextPromptAdmitted1,
 		SyncEventResponseSyncEventTypeSessionNextSynthetic1,
 		SyncEventResponseSyncEventTypeSessionNextShellStarted1,
+		SyncEventResponseSyncEventTypeSessionNextContextUpdated1,
 		SyncEventResponseSyncEventTypeSessionNextShellEnded1,
 		SyncEventResponseSyncEventTypeSessionNextStepStarted1,
-		SyncEventResponseSyncEventTypeSessionNextStepEnded1,
-		SyncEventResponseSyncEventTypeSessionNextStepFailed1,
+		SyncEventResponseSyncEventTypeSessionNextStepEnded2,
+		SyncEventResponseSyncEventTypeSessionNextStepFailed2,
 		SyncEventResponseSyncEventTypeSessionNextTextStarted1,
-		SyncEventResponseSyncEventTypeSessionNextTextDelta1,
 		SyncEventResponseSyncEventTypeSessionNextTextEnded1,
 		SyncEventResponseSyncEventTypeSessionNextReasoningStarted1,
-		SyncEventResponseSyncEventTypeSessionNextReasoningDelta1,
 		SyncEventResponseSyncEventTypeSessionNextReasoningEnded1,
 		SyncEventResponseSyncEventTypeSessionNextToolInputStarted1,
-		SyncEventResponseSyncEventTypeSessionNextToolInputDelta1,
 		SyncEventResponseSyncEventTypeSessionNextToolInputEnded1,
 		SyncEventResponseSyncEventTypeSessionNextToolCalled1,
 		SyncEventResponseSyncEventTypeSessionNextToolProgress1,
@@ -1208,7 +1197,6 @@ func (r SyncEventResponseSyncEventType) IsKnown() bool {
 		SyncEventResponseSyncEventTypeSessionNextToolFailed1,
 		SyncEventResponseSyncEventTypeSessionNextRetried1,
 		SyncEventResponseSyncEventTypeSessionNextCompactionStarted1,
-		SyncEventResponseSyncEventTypeSessionNextCompactionDelta1,
 		SyncEventResponseSyncEventTypeSessionNextCompactionEnded1,
 		SyncEventResponseSyncEventTypeSessionNextMoved1,
 		SyncEventResponseSyncEventTypeSessionNextRevertStaged1,
@@ -1232,9 +1220,8 @@ type SyncEventResponseSyncEvent struct {
 	ID          string                         `json:"id,required"`
 	Seq         int64                          `json:"seq,required"`
 	AggregateID string                         `json:"aggregateID,required"`
-	// This field reuses the corresponding V2 EventListResponseEventXxxProperties
-	// type for the same event (determined by union matching on the parent
-	// SyncEventXxx variant). The possible runtime types are:
+	// This field's runtime type is determined by the underlying SyncEvent variant
+	// (populated via union matching). Possible runtime types include:
 	// [EventListResponseEventMessageUpdatedProperties],
 	// [EventListResponseEventMessageRemovedProperties],
 	// [EventListResponseEventMessagePartUpdatedProperties],
@@ -1245,20 +1232,19 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventSessionNextAgentSwitchedProperties],
 	// [EventListResponseEventSessionNextModelSwitchedProperties],
 	// [EventListResponseEventSessionNextPromptedProperties],
+	// [EventListResponseEventSessionNextPromptAdmittedProperties],
 	// [EventListResponseEventSessionNextSyntheticProperties],
 	// [EventListResponseEventSessionNextShellStartedProperties],
+	// [EventListResponseEventSessionNextContextUpdatedProperties],
 	// [EventListResponseEventSessionNextShellEndedProperties],
 	// [EventListResponseEventSessionNextStepStartedProperties],
 	// [EventListResponseEventSessionNextStepEndedProperties],
 	// [EventListResponseEventSessionNextStepFailedProperties],
 	// [EventListResponseEventSessionNextTextStartedProperties],
-	// [EventListResponseEventSessionNextTextDeltaProperties],
 	// [EventListResponseEventSessionNextTextEndedProperties],
 	// [EventListResponseEventSessionNextReasoningStartedProperties],
-	// [EventListResponseEventSessionNextReasoningDeltaProperties],
 	// [EventListResponseEventSessionNextReasoningEndedProperties],
 	// [EventListResponseEventSessionNextToolInputStartedProperties],
-	// [EventListResponseEventSessionNextToolInputDeltaProperties],
 	// [EventListResponseEventSessionNextToolInputEndedProperties],
 	// [EventListResponseEventSessionNextToolCalledProperties],
 	// [EventListResponseEventSessionNextToolProgressProperties],
@@ -1266,8 +1252,7 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventSessionNextToolFailedProperties],
 	// [EventListResponseEventSessionNextRetriedProperties],
 	// [EventListResponseEventSessionNextCompactionStartedProperties],
-	// [EventListResponseEventSessionNextCompactionDeltaProperties],
-	// [EventListResponseEventSessionNextCompactionEndedProperties].
+	// [EventListResponseEventSessionNextCompactionEndedProperties],
 	// [EventListResponseEventSessionNextMovedProperties],
 	// [EventListResponseEventSessionNextRevertStagedProperties],
 	// [EventListResponseEventSessionNextRevertClearedProperties],

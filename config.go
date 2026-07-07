@@ -399,7 +399,8 @@ func (r ConfigAgentBuildMode) IsKnown() bool {
 }
 
 type ConfigAgentBuildPermission struct {
-	Bash     ConfigAgentBuildPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentBuildPermissionBashString], [ConfigAgentBuildPermissionBashMap].
+	Bash     interface{}                         `json:"bash"`
 	Edit     ConfigAgentBuildPermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentBuildPermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentBuildPermissionJSON      `json:"-"`
@@ -582,7 +583,8 @@ func (r ConfigAgentGeneralMode) IsKnown() bool {
 }
 
 type ConfigAgentGeneralPermission struct {
-	Bash     ConfigAgentGeneralPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentGeneralPermissionBashString], [ConfigAgentGeneralPermissionBashMap].
+	Bash     interface{}                            `json:"bash"`
 	Edit     ConfigAgentGeneralPermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentGeneralPermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentGeneralPermissionJSON      `json:"-"`
@@ -764,7 +766,8 @@ func (r ConfigAgentPlanMode) IsKnown() bool {
 }
 
 type ConfigAgentPlanPermission struct {
-	Bash     ConfigAgentPlanPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentPlanPermissionBashString], [ConfigAgentPlanPermissionBashMap].
+	Bash     interface{}                         `json:"bash"`
 	Edit     ConfigAgentPlanPermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentPlanPermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentPlanPermissionJSON      `json:"-"`
@@ -946,7 +949,8 @@ func (r ConfigAgentExploreMode) IsKnown() bool {
 }
 
 type ConfigAgentExplorePermission struct {
-	Bash     ConfigAgentExplorePermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentExplorePermissionBashString], [ConfigAgentExplorePermissionBashMap].
+	Bash     interface{}                            `json:"bash"`
 	Edit     ConfigAgentExplorePermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentExplorePermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentExplorePermissionJSON      `json:"-"`
@@ -1127,7 +1131,8 @@ func (r ConfigAgentTitleMode) IsKnown() bool {
 }
 
 type ConfigAgentTitlePermission struct {
-	Bash     ConfigAgentTitlePermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentTitlePermissionBashString], [ConfigAgentTitlePermissionBashMap].
+	Bash     interface{}                         `json:"bash"`
 	Edit     ConfigAgentTitlePermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentTitlePermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentTitlePermissionJSON      `json:"-"`
@@ -1308,7 +1313,8 @@ func (r ConfigAgentSummaryMode) IsKnown() bool {
 }
 
 type ConfigAgentSummaryPermission struct {
-	Bash     ConfigAgentSummaryPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentSummaryPermissionBashString], [ConfigAgentSummaryPermissionBashMap].
+	Bash     interface{}                            `json:"bash"`
 	Edit     ConfigAgentSummaryPermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentSummaryPermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentSummaryPermissionJSON      `json:"-"`
@@ -1490,7 +1496,8 @@ func (r ConfigAgentCompactionMode) IsKnown() bool {
 }
 
 type ConfigAgentCompactionPermission struct {
-	Bash     ConfigAgentCompactionPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigAgentCompactionPermissionBashString], [ConfigAgentCompactionPermissionBashMap].
+	Bash     interface{}                               `json:"bash"`
 	Edit     ConfigAgentCompactionPermissionEdit      `json:"edit"`
 	Webfetch ConfigAgentCompactionPermissionWebfetch  `json:"webfetch"`
 	JSON     configAgentCompactionPermissionJSON      `json:"-"`
@@ -2062,7 +2069,8 @@ func (r ConfigModeBuildMode) IsKnown() bool {
 }
 
 type ConfigModeBuildPermission struct {
-	Bash     ConfigModeBuildPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigModeBuildPermissionBashString], [ConfigModeBuildPermissionBashMap].
+	Bash     interface{}                         `json:"bash"`
 	Edit     ConfigModeBuildPermissionEdit      `json:"edit"`
 	Webfetch ConfigModeBuildPermissionWebfetch  `json:"webfetch"`
 	JSON     configModeBuildPermissionJSON      `json:"-"`
@@ -2232,7 +2240,8 @@ func (r ConfigModePlanMode) IsKnown() bool {
 }
 
 type ConfigModePlanPermission struct {
-	Bash     ConfigModePlanPermissionBashUnion `json:"bash"`
+	// This field can have the runtime type of [ConfigModePlanPermissionBashString], [ConfigModePlanPermissionBashMap].
+	Bash     interface{}                         `json:"bash"`
 	Edit     ConfigModePlanPermissionEdit      `json:"edit"`
 	Webfetch ConfigModePlanPermissionWebfetch  `json:"webfetch"`
 	JSON     configModePlanPermissionJSON      `json:"-"`
@@ -2348,8 +2357,9 @@ func (r ConfigModePlanPermissionWebfetch) IsKnown() bool {
 }
 
 type ConfigPermission struct {
-	Bash     ConfigPermissionBashUnion `json:"bash"`
-	Edit     ConfigPermissionEdit      `json:"edit"`
+	// This field can have the runtime type of [ConfigPermissionBashString], [ConfigPermissionBashMap].
+	Bash     interface{}            `json:"bash"`
+	Edit     ConfigPermissionEdit   `json:"edit"`
 	Webfetch ConfigPermissionWebfetch  `json:"webfetch"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	Read interface{} `json:"read"`
@@ -2850,12 +2860,14 @@ type ConfigProviderOptions struct {
 	BaseURL string `json:"baseURL"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
-	Timeout ConfigProviderOptionsTimeoutUnion `json:"timeout"`
+	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
+	Timeout interface{} `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
-	HeaderTimeout ConfigProviderOptionsTimeoutUnion `json:"headerTimeout"`
-	ExtraFields   map[string]interface{}            `json:"-,extras"`
-	JSON          configProviderOptionsJSON         `json:"-"`
+	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
+	HeaderTimeout interface{} `json:"headerTimeout"`
+	ExtraFields   map[string]interface{} `json:"-,extras"`
+	JSON          configProviderOptionsJSON      `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
