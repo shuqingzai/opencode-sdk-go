@@ -185,17 +185,17 @@ func (r *ExperimentalService) ResourceList(ctx context.Context, query Experiment
 }
 
 type Workspace struct {
-	ID        string        `json:"id,required"`
-	Type      string        `json:"type,required"`
-	Name      string        `json:"name,required"`
-	Branch    string        `json:"branch"`
-	Directory string        `json:"directory"`
-	Extra     any           `json:"extra"`
-	ProjectID string        `json:"projectID,required"`
+	ID        string `json:"id,required"`
+	Type      string `json:"type,required"`
+	Name      string `json:"name,required"`
+	Branch    string `json:"branch"`
+	Directory string `json:"directory"`
+	Extra     any    `json:"extra"`
+	ProjectID string `json:"projectID,required"`
 	// The amount of time in milliseconds that this workspace has been used.
 	// This field can have the runtime type of float64, "NaN", "Infinity", or "-Infinity".
-	TimeUsed  float64       `json:"timeUsed,required"`
-	JSON      workspaceJSON `json:"-"`
+	TimeUsed float64       `json:"timeUsed,required"`
+	JSON     workspaceJSON `json:"-"`
 }
 
 // workspaceJSON contains the JSON metadata for the struct [Workspace]
@@ -502,14 +502,14 @@ func (r consoleSwitchOrgInputJSON) RawJSON() string {
 }
 
 type ExperimentalSessionListParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[int64]   `query:"start"`
-	Cursor    param.Field[int64]   `query:"cursor"`
-	Search    param.Field[string]  `query:"search"`
-	Limit     param.Field[int64]   `query:"limit"`
-	Archived  param.Field[bool]    `query:"archived"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Roots     param.Field[bool]   `query:"roots"`
+	Start     param.Field[int64]  `query:"start"`
+	Cursor    param.Field[int64]  `query:"cursor"`
+	Search    param.Field[string] `query:"search"`
+	Limit     param.Field[int64]  `query:"limit"`
+	Archived  param.Field[bool]   `query:"archived"`
 }
 
 func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
@@ -520,28 +520,28 @@ func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
 }
 
 type GlobalSession struct {
-	ID          string                    `json:"id,required"`
-	Slug        string                    `json:"slug,required"`
-	ProjectID   string                    `json:"projectID,required"`
-	Directory   string                    `json:"directory,required"`
-	Title       string                    `json:"title,required"`
-	Version     string                    `json:"version,required"`
-	Time        GlobalSessionTime         `json:"time,required"`
-	Project     *ProjectSummary           `json:"project,required"`
-	WorkspaceID string                    `json:"workspaceID,omitempty"`
-	Path        string                    `json:"path,omitempty"`
-	ParentID    string                    `json:"parentID,omitempty"`
-	Summary     *GlobalSessionSummary     `json:"summary,omitempty"`
-	Cost        float64                   `json:"cost,omitempty"`
-	Tokens      *GlobalSessionTokens      `json:"tokens,omitempty"`
-	Share       *GlobalSessionShare       `json:"share,omitempty"`
-	Agent       string                    `json:"agent,omitempty"`
-	Model       *GlobalSessionModel       `json:"model,omitempty"`
-	Permission  PermissionRuleset         `json:"permission,omitempty"`
-	Revert      *GlobalSessionRevert      `json:"revert,omitempty"`
+	ID          string                `json:"id,required"`
+	Slug        string                `json:"slug,required"`
+	ProjectID   string                `json:"projectID,required"`
+	Directory   string                `json:"directory,required"`
+	Title       string                `json:"title,required"`
+	Version     string                `json:"version,required"`
+	Time        GlobalSessionTime     `json:"time,required"`
+	Project     *ProjectSummary       `json:"project,required"`
+	WorkspaceID string                `json:"workspaceID,omitempty"`
+	Path        string                `json:"path,omitempty"`
+	ParentID    string                `json:"parentID,omitempty"`
+	Summary     *GlobalSessionSummary `json:"summary,omitempty"`
+	Cost        float64               `json:"cost,omitempty"`
+	Tokens      *GlobalSessionTokens  `json:"tokens,omitempty"`
+	Share       *GlobalSessionShare   `json:"share,omitempty"`
+	Agent       string                `json:"agent,omitempty"`
+	Model       *GlobalSessionModel   `json:"model,omitempty"`
+	Permission  PermissionRuleset     `json:"permission,omitempty"`
+	Revert      *GlobalSessionRevert  `json:"revert,omitempty"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}           `json:"metadata,omitempty"`
-	JSON     globalSessionJSON     `json:"-"`
+	Metadata interface{}       `json:"metadata,omitempty"`
+	JSON     globalSessionJSON `json:"-"`
 }
 
 // globalSessionJSON contains the JSON metadata for the struct [GlobalSession]
@@ -579,11 +579,11 @@ func (r globalSessionJSON) RawJSON() string {
 }
 
 type GlobalSessionTime struct {
-	Created    int64                   `json:"created,required"`
-	Updated    int64                   `json:"updated,required"`
-	Compacting int64                   `json:"compacting,omitempty"`
-	Archived   int64                  `json:"archived,omitempty"`
-	JSON       globalSessionTimeJSON  `json:"-"`
+	Created    int64                 `json:"created,required"`
+	Updated    int64                 `json:"updated,required"`
+	Compacting int64                 `json:"compacting,omitempty"`
+	Archived   int64                 `json:"archived,omitempty"`
+	JSON       globalSessionTimeJSON `json:"-"`
 }
 
 // globalSessionTimeJSON contains the JSON metadata for the struct [GlobalSessionTime]
@@ -605,11 +605,11 @@ func (r globalSessionTimeJSON) RawJSON() string {
 }
 
 type GlobalSessionTokens struct {
-	Input      int64                       `json:"input,required"`
-	Output     int64                       `json:"output,required"`
-	Reasoning  int64                       `json:"reasoning,required"`
-	Cache      GlobalSessionTokensCache    `json:"cache,required"`
-	JSON       globalSessionTokensJSON     `json:"-"`
+	Input     int64                    `json:"input,required"`
+	Output    int64                    `json:"output,required"`
+	Reasoning int64                    `json:"reasoning,required"`
+	Cache     GlobalSessionTokensCache `json:"cache,required"`
+	JSON      globalSessionTokensJSON  `json:"-"`
 }
 
 // globalSessionTokensJSON contains the JSON metadata for the struct [GlobalSessionTokens]
@@ -631,9 +631,9 @@ func (r globalSessionTokensJSON) RawJSON() string {
 }
 
 type GlobalSessionTokensCache struct {
-	Read  int64                         `json:"read,required"`
-	Write int64                         `json:"write,required"`
-	JSON  globalSessionTokensCacheJSON  `json:"-"`
+	Read  int64                        `json:"read,required"`
+	Write int64                        `json:"write,required"`
+	JSON  globalSessionTokensCacheJSON `json:"-"`
 }
 
 // globalSessionTokensCacheJSON contains the JSON metadata for the struct [GlobalSessionTokensCache]
@@ -653,8 +653,8 @@ func (r globalSessionTokensCacheJSON) RawJSON() string {
 }
 
 type GlobalSessionShare struct {
-	URL  string                    `json:"url,required"`
-	JSON globalSessionShareJSON    `json:"-"`
+	URL  string                 `json:"url,required"`
+	JSON globalSessionShareJSON `json:"-"`
 }
 
 // globalSessionShareJSON contains the JSON metadata for the struct [GlobalSessionShare]
@@ -673,10 +673,10 @@ func (r globalSessionShareJSON) RawJSON() string {
 }
 
 type GlobalSessionModel struct {
-	ID         string                     `json:"id,required"`
-	ProviderID string                     `json:"providerID,required"`
-	Variant    string                     `json:"variant,omitempty"`
-	JSON       globalSessionModelJSON     `json:"-"`
+	ID         string                 `json:"id,required"`
+	ProviderID string                 `json:"providerID,required"`
+	Variant    string                 `json:"variant,omitempty"`
+	JSON       globalSessionModelJSON `json:"-"`
 }
 
 // globalSessionModelJSON contains the JSON metadata for the struct [GlobalSessionModel]
@@ -697,11 +697,11 @@ func (r globalSessionModelJSON) RawJSON() string {
 }
 
 type GlobalSessionRevert struct {
-	MessageID string                      `json:"messageID,required"`
-	PartID    string                      `json:"partID,omitempty"`
-	Snapshot  string                      `json:"snapshot,omitempty"`
-	Diff      string                      `json:"diff,omitempty"`
-	JSON      globalSessionRevertJSON     `json:"-"`
+	MessageID string                  `json:"messageID,required"`
+	PartID    string                  `json:"partID,omitempty"`
+	Snapshot  string                  `json:"snapshot,omitempty"`
+	Diff      string                  `json:"diff,omitempty"`
+	JSON      globalSessionRevertJSON `json:"-"`
 }
 
 // globalSessionRevertJSON contains the JSON metadata for the struct [GlobalSessionRevert]
@@ -748,10 +748,10 @@ func (r globalSessionSummaryJSON) RawJSON() string {
 }
 
 type ProjectSummary struct {
-	ID       string              `json:"id,required"`
-	Worktree string              `json:"worktree,required"`
-	Name     string              `json:"name,omitempty"`
-	JSON     projectSummaryJSON  `json:"-"`
+	ID       string             `json:"id,required"`
+	Worktree string             `json:"worktree,required"`
+	Name     string             `json:"name,omitempty"`
+	JSON     projectSummaryJSON `json:"-"`
 }
 
 // projectSummaryJSON contains the JSON metadata for the struct [ProjectSummary]
@@ -862,10 +862,10 @@ type MoveSessionDestination struct {
 }
 
 type ExperimentalControlPlaneMoveSessionParams struct {
-	SessionID   param.Field[string]                             `json:"sessionID,required"`
-	Destination param.Field[MoveSessionDestination]             `json:"destination,required"`
-	MoveChanges param.Field[bool]                               `json:"moveChanges"`
-	JSON        experimentalControlPlaneMoveSessionParamsJSON   `json:"-"`
+	SessionID   param.Field[string]                           `json:"sessionID,required"`
+	Destination param.Field[MoveSessionDestination]           `json:"destination,required"`
+	MoveChanges param.Field[bool]                             `json:"moveChanges"`
+	JSON        experimentalControlPlaneMoveSessionParamsJSON `json:"-"`
 }
 
 // experimentalControlPlaneMoveSessionParamsJSON contains the JSON metadata for the struct
@@ -892,8 +892,8 @@ func (r experimentalControlPlaneMoveSessionParamsJSON) RawJSON() string {
 
 // ProjectCopyGenerateNameResponse represents the response from generating a project copy name.
 type ProjectCopyGenerateNameResponse struct {
-	Name string                                 `json:"name,required"`
-	JSON projectCopyGenerateNameResponseJSON    `json:"-"`
+	Name string                              `json:"name,required"`
+	JSON projectCopyGenerateNameResponseJSON `json:"-"`
 }
 
 // projectCopyGenerateNameResponseJSON contains the JSON metadata for the struct

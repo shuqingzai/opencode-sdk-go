@@ -64,14 +64,14 @@ type V2ProviderInfo struct {
 	// This field can have the runtime type of [V2ProviderInfoEnabledEnv],
 	// [V2ProviderInfoEnabledAuth], [V2ProviderInfoEnabledCustom].
 	// When the provider is disabled, this field is `false` (a JSON boolean).
-	Enabled  interface{}            `json:"enabled,required"`
-	Env      []string               `json:"env,required"`
+	Enabled interface{} `json:"enabled,required"`
+	Env     []string    `json:"env,required"`
 	// This field can have the runtime type of [V2ModelInfoEndpointUnknown],
 	// [V2ModelInfoEndpointOpenAIResponses], [V2ModelInfoEndpointOpenAICompletions],
 	// [V2ModelInfoEndpointAnthropicMessages], [V2ModelInfoEndpointAisdk].
-	Endpoint interface{}            `json:"endpoint,required"`
-	Options  V2ModelInfoOptions     `json:"options,required"`
-	JSON     v2ProviderInfoJSON     `json:"-"`
+	Endpoint      interface{}        `json:"endpoint,required"`
+	Options       V2ModelInfoOptions `json:"options,required"`
+	JSON          v2ProviderInfoJSON `json:"-"`
 	enabledUnion  V2ProviderInfoEnabledUnion
 	endpointUnion V2ModelInfoEndpointUnion
 }
@@ -127,9 +127,9 @@ type V2ProviderInfoEnabledUnion interface {
 }
 
 type V2ProviderInfoEnabledEnv struct {
-	Via  string                          `json:"via,required"`
-	Name string                          `json:"name,required"`
-	JSON v2ProviderInfoEnabledEnvJSON    `json:"-"`
+	Via  string                       `json:"via,required"`
+	Name string                       `json:"name,required"`
+	JSON v2ProviderInfoEnabledEnvJSON `json:"-"`
 }
 
 type v2ProviderInfoEnabledEnvJSON struct {
@@ -150,9 +150,9 @@ func (r v2ProviderInfoEnabledEnvJSON) RawJSON() string {
 func (r V2ProviderInfoEnabledEnv) implementsV2ProviderInfoEnabledUnion() {}
 
 type V2ProviderInfoEnabledAuth struct {
-	Via     string                           `json:"via,required"`
-	Service string                           `json:"service,required"`
-	JSON    v2ProviderInfoEnabledAuthJSON    `json:"-"`
+	Via     string                        `json:"via,required"`
+	Service string                        `json:"service,required"`
+	JSON    v2ProviderInfoEnabledAuthJSON `json:"-"`
 }
 
 type v2ProviderInfoEnabledAuthJSON struct {
@@ -173,9 +173,9 @@ func (r v2ProviderInfoEnabledAuthJSON) RawJSON() string {
 func (r V2ProviderInfoEnabledAuth) implementsV2ProviderInfoEnabledUnion() {}
 
 type V2ProviderInfoEnabledCustom struct {
-	Via  string                            `json:"via,required"`
-	Data map[string]interface{}            `json:"data,required"`
-	JSON v2ProviderInfoEnabledCustomJSON   `json:"-"`
+	Via  string                          `json:"via,required"`
+	Data map[string]interface{}          `json:"data,required"`
+	JSON v2ProviderInfoEnabledCustomJSON `json:"-"`
 }
 
 type v2ProviderInfoEnabledCustomJSON struct {

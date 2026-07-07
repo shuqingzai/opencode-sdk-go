@@ -173,9 +173,9 @@ func (r V2PtyStatus) IsKnown() bool {
 
 // PtyConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
 type PtyConnectToken struct {
-	Ticket    string                `json:"ticket,required"`
-	ExpiresIn int64                 `json:"expires_in,required"`
-	JSON      ptyConnectTokenJSON   `json:"-"`
+	Ticket    string              `json:"ticket,required"`
+	ExpiresIn int64               `json:"expires_in,required"`
+	JSON      ptyConnectTokenJSON `json:"-"`
 }
 
 // ptyConnectTokenJSON contains the JSON metadata for the struct [PtyConnectToken]
@@ -199,12 +199,12 @@ func (r ptyConnectTokenJSON) RawJSON() string {
 // This field can have the runtime type of [PtyCreatedEvent], [PtyUpdatedEvent],
 // [PtyExitedEvent], [PtyDeletedEvent].
 type PtyEvent struct {
-	ID       string      `json:"id,required"`
-	Type     string      `json:"type,required"`
-	Metadata interface{} `json:"metadata"`
-	Durable  PtyDurable  `json:"durable"`
-	Location PtyLocation `json:"location"`
-	Data     interface{} `json:"data,required"`
+	ID       string       `json:"id,required"`
+	Type     string       `json:"type,required"`
+	Metadata interface{}  `json:"metadata"`
+	Durable  PtyDurable   `json:"durable"`
+	Location PtyLocation  `json:"location"`
+	Data     interface{}  `json:"data,required"`
 	JSON     ptyEventJSON `json:"-"`
 }
 
@@ -230,9 +230,9 @@ func (r ptyEventJSON) RawJSON() string {
 
 // PtyDurable represents the durable identifier metadata for a PTY event.
 type PtyDurable struct {
-	AggregateID string        `json:"aggregateID,required"`
-	Seq         int64         `json:"seq,required"`
-	Version     int64         `json:"version,required"`
+	AggregateID string         `json:"aggregateID,required"`
+	Seq         int64          `json:"seq,required"`
+	Version     int64          `json:"version,required"`
 	JSON        ptyDurableJSON `json:"-"`
 }
 
@@ -255,9 +255,9 @@ func (r ptyDurableJSON) RawJSON() string {
 
 // PtyLocation represents the location context for a PTY event.
 type PtyLocation struct {
-	Directory   string           `json:"directory,required"`
-	WorkspaceID string           `json:"workspaceID"`
-	JSON        ptyLocationJSON  `json:"-"`
+	Directory   string          `json:"directory,required"`
+	WorkspaceID string          `json:"workspaceID"`
+	JSON        ptyLocationJSON `json:"-"`
 }
 
 // ptyLocationJSON contains the JSON metadata for the struct [PtyLocation]
@@ -345,9 +345,9 @@ func (r V2PtyUpdateParams) URLQuery() (v url.Values) {
 
 // V2PtySize represents the terminal size for a PTY.
 type V2PtySize struct {
-	Rows int64          `json:"rows,required"`
-	Cols int64          `json:"cols,required"`
-	JSON v2PtySizeJSON  `json:"-"`
+	Rows int64         `json:"rows,required"`
+	Cols int64         `json:"cols,required"`
+	JSON v2PtySizeJSON `json:"-"`
 }
 
 // v2PtySizeJSON contains the JSON metadata for the struct [V2PtySize]

@@ -51,7 +51,7 @@ func TestMcpAdd(t *testing.T) {
 	)
 	_, err := client.Mcp.Add(context.TODO(), opencode.McpAddParams{
 		Directory: opencode.F("directory"),
-		Name:     opencode.F("name"),
+		Name:      opencode.F("name"),
 		Config: opencode.McpAddBodyConfigLocal{
 			Type:    opencode.McpLocalConfigTypeLocal,
 			Command: []string{"command"},

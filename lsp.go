@@ -31,11 +31,11 @@ func (r *LspService) Status(ctx context.Context, query LspStatusParams, opts ...
 }
 
 type LspStatus struct {
-	ID     string           `json:"id,required"`
-	Name   string           `json:"name,required"`
-	Root   string           `json:"root,required"`
-	Status LspStatusStatus  `json:"status,required"`
-	JSON   lspStatusJSON    `json:"-"`
+	ID     string          `json:"id,required"`
+	Name   string          `json:"name,required"`
+	Root   string          `json:"root,required"`
+	Status LspStatusStatus `json:"status,required"`
+	JSON   lspStatusJSON   `json:"-"`
 }
 
 // LspStatusStatus represents the status of an LSP server connection.
@@ -43,7 +43,7 @@ type LspStatusStatus string
 
 const (
 	LspStatusStatusConnected LspStatusStatus = "connected"
-	LspStatusStatusError    LspStatusStatus = "error"
+	LspStatusStatusError     LspStatusStatus = "error"
 )
 
 func (r LspStatusStatus) IsKnown() bool {

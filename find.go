@@ -151,8 +151,8 @@ func (r symbolPositionJSON) RawJSON() string {
 }
 
 type FindTextResponse struct {
-	AbsoluteOffset int64                    `json:"absolute_offset,required"`
-	LineNumber     int64                    `json:"line_number,required"`
+	AbsoluteOffset int64                      `json:"absolute_offset,required"`
+	LineNumber     int64                      `json:"line_number,required"`
 	Lines          FindTextResponseLines      `json:"lines,required"`
 	Path           FindTextResponsePath       `json:"path,required"`
 	Submatches     []FindTextResponseSubmatch `json:"submatches,required"`
@@ -222,9 +222,9 @@ func (r findTextResponsePathJSON) RawJSON() string {
 }
 
 type FindTextResponseSubmatch struct {
-	End   int64                         `json:"end,required"`
+	End   int64                           `json:"end,required"`
 	Match FindTextResponseSubmatchesMatch `json:"match,required"`
-	Start int64                         `json:"start,required"`
+	Start int64                           `json:"start,required"`
 	JSON  findTextResponseSubmatchJSON    `json:"-"`
 }
 
@@ -268,12 +268,12 @@ func (r findTextResponseSubmatchesMatchJSON) RawJSON() string {
 }
 
 type FindFilesParams struct {
-	Query     param.Field[string]            `query:"query,required"`
-	Directory param.Field[string]            `query:"directory"`
-	Workspace param.Field[string]            `query:"workspace"`
+	Query     param.Field[string]              `query:"query,required"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
 	Dirs      param.Field[FindFilesParamsDirs] `query:"dirs"`
 	Type      param.Field[FindFilesParamsType] `query:"type"`
-	Limit     param.Field[int64]             `query:"limit"`
+	Limit     param.Field[int64]               `query:"limit"`
 }
 
 // FindFilesParamsDirs controls whether to include directories in file search results.

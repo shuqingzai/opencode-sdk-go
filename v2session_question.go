@@ -37,7 +37,7 @@ func NewV2SessionQuestionService(opts ...option.RequestOption) (r *V2SessionQues
 // List session question requests
 //
 // Retrieve pending question requests owned by a session.
-func (r *V2SessionQuestionService) List(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *[]QuestionV2Request, err error) {
+func (r *V2SessionQuestionService) List(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *V2SessionQuestionListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -51,7 +51,7 @@ func (r *V2SessionQuestionService) List(ctx context.Context, sessionID string, o
 // Reply to pending question request
 //
 // Answer a pending question request owned by a session.
-func (r *V2SessionQuestionService) Reply(ctx context.Context, sessionID string, requestID string, body V2SessionQuestionReplyParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionQuestionService) Reply(ctx context.Context, sessionID string, requestID string, body V2SessionQuestionReplyParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -62,14 +62,14 @@ func (r *V2SessionQuestionService) Reply(ctx context.Context, sessionID string, 
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/question/%s/reply", sessionID, requestID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
 // Reject pending question request
 //
 // Reject a pending question request owned by a session.
-func (r *V2SessionQuestionService) Reject(ctx context.Context, sessionID string, requestID string, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionQuestionService) Reject(ctx context.Context, sessionID string, requestID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -80,7 +80,7 @@ func (r *V2SessionQuestionService) Reject(ctx context.Context, sessionID string,
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/question/%s/reject", sessionID, requestID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
@@ -100,4 +100,26 @@ type QuestionV2Answer []string
 
 func (r QuestionV2Answer) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// ===== Response Types =====
+
+// V2SessionQuestionListResponse is returned by the Questions.List method.
+type V2SessionQuestionListResponse struct {
+	Data []QuestionV2Request               `json:"data,required"`
+	JSON v2SessionQuestionListResponseJSON `json:"-"`
+}
+
+type v2SessionQuestionListResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionQuestionListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionQuestionListResponseJSON) RawJSON() string {
+	return r.raw
 }

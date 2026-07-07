@@ -77,10 +77,10 @@ func (r V2FsListParams) URLQuery() (v url.Values) {
 
 // V2FsFindParams contains the query parameters for finding files.
 type V2FsFindParams struct {
-	Location param.Field[V2LocationParam] `query:"location"`
-	Query    param.Field[string]          `query:"query,required"`
+	Location param.Field[V2LocationParam]     `query:"location"`
+	Query    param.Field[string]              `query:"query,required"`
 	Type     param.Field[FileSystemEntryType] `query:"type"`
-	Limit    param.Field[string]          `query:"limit"`
+	Limit    param.Field[string]              `query:"limit"`
 }
 
 func (r V2FsFindParams) URLQuery() (v url.Values) {
@@ -104,8 +104,8 @@ func (r V2FsReadParams) URLQuery() (v url.Values) {
 
 // V2FsListResponse represents the response from the v2.fs.list endpoint.
 type V2FsListResponse struct {
-	Location LocationInfo        `json:"location,required"`
-	Data     []FileSystemEntry   `json:"data,required"`
+	Location LocationInfo         `json:"location,required"`
+	Data     []FileSystemEntry    `json:"data,required"`
 	JSON     v2FsListResponseJSON `json:"-"`
 }
 
@@ -127,8 +127,8 @@ func (r v2FsListResponseJSON) RawJSON() string {
 
 // V2FsFindResponse represents the response from the v2.fs.find endpoint.
 type V2FsFindResponse struct {
-	Location LocationInfo        `json:"location,required"`
-	Data     []FileSystemEntry   `json:"data,required"`
+	Location LocationInfo         `json:"location,required"`
+	Data     []FileSystemEntry    `json:"data,required"`
 	JSON     v2FsFindResponseJSON `json:"-"`
 }
 

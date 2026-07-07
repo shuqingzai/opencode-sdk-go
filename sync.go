@@ -72,7 +72,7 @@ func (r *SyncService) HistoryList(ctx context.Context, params SyncHistoryListPar
 }
 
 type SyncReplayResponse struct {
-	SessionID string               `json:"sessionID,required"`
+	SessionID string                 `json:"sessionID,required"`
 	JSON      syncReplayResponseJSON `json:"-"`
 }
 
@@ -91,7 +91,7 @@ func (r syncReplayResponseJSON) RawJSON() string {
 }
 
 type SyncStealResponse struct {
-	SessionID string              `json:"sessionID,required"`
+	SessionID string                `json:"sessionID,required"`
 	JSON      syncStealResponseJSON `json:"-"`
 }
 
@@ -150,9 +150,9 @@ func (r SyncStartParams) URLQuery() (v url.Values) {
 }
 
 type SyncReplayParams struct {
-	Directory param.Field[string]             `query:"directory"`
-	Workspace param.Field[string]             `query:"workspace"`
-	Body      SyncReplayParamsBody            `json:"body,required"`
+	Directory param.Field[string]  `query:"directory"`
+	Workspace param.Field[string]  `query:"workspace"`
+	Body      SyncReplayParamsBody `json:"body,required"`
 }
 
 func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
@@ -168,7 +168,7 @@ func (r SyncReplayParams) URLQuery() (v url.Values) {
 }
 
 type SyncReplayParamsBody struct {
-	Directory param.Field[string]                    `json:"directory,required"`
+	Directory param.Field[string]                      `json:"directory,required"`
 	Events    param.Field[[]SyncReplayParamsBodyEvent] `json:"events,required"`
 }
 
@@ -177,11 +177,11 @@ func (r SyncReplayParamsBody) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncReplayParamsBodyEvent struct {
-	ID          param.Field[string]             `json:"id,required"`
-	AggregateID param.Field[string]             `json:"aggregateID,required"`
-	Seq         param.Field[int64]              `json:"seq,required"`
-	Type        param.Field[string]             `json:"type,required"`
-	Data        param.Field[map[string]any]     `json:"data,required"`
+	ID          param.Field[string]         `json:"id,required"`
+	AggregateID param.Field[string]         `json:"aggregateID,required"`
+	Seq         param.Field[int64]          `json:"seq,required"`
+	Type        param.Field[string]         `json:"type,required"`
+	Data        param.Field[map[string]any] `json:"data,required"`
 }
 
 func (r SyncReplayParamsBodyEvent) MarshalJSON() (data []byte, err error) {
@@ -215,9 +215,9 @@ func (r SyncStealParamsBody) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncHistoryListParams struct {
-	Directory param.Field[string]           `query:"directory"`
-	Workspace param.Field[string]           `query:"workspace"`
-	Body      SyncHistoryListParamsBody     `json:"body,required"`
+	Directory param.Field[string]       `query:"directory"`
+	Workspace param.Field[string]       `query:"workspace"`
+	Body      SyncHistoryListParamsBody `json:"body,required"`
 }
 
 func (r SyncHistoryListParams) MarshalJSON() (data []byte, err error) {

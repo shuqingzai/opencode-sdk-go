@@ -121,7 +121,7 @@ type Config struct {
 	SmallModel string `json:"small_model"`
 	Snapshot   bool   `json:"snapshot"`
 	// Theme name to use for the interface
-	Theme string          `json:"theme"`
+	Theme string `json:"theme"`
 	// Tool output configuration
 	ToolOutput ConfigToolOutput `json:"tool_output"`
 	Tools      map[string]bool  `json:"tools"`
@@ -1636,14 +1636,14 @@ func (r configCommandJSON) RawJSON() string {
 }
 
 type ConfigExperimental struct {
-	BatchTool           bool                       `json:"batch_tool"`
-	ContinueLoopOnDeny  bool                       `json:"continue_loop_on_deny"`
-	DisablePasteSummary bool                       `json:"disable_paste_summary"`
-	McpTimeout          int64                      `json:"mcp_timeout"`
-	OpenTelemetry       bool                       `json:"openTelemetry"`
+	BatchTool           bool                         `json:"batch_tool"`
+	ContinueLoopOnDeny  bool                         `json:"continue_loop_on_deny"`
+	DisablePasteSummary bool                         `json:"disable_paste_summary"`
+	McpTimeout          int64                        `json:"mcp_timeout"`
+	OpenTelemetry       bool                         `json:"openTelemetry"`
 	Policies            []ConfigV2ExperimentalPolicy `json:"policies"`
-	PrimaryTools        []string                   `json:"primary_tools"`
-	JSON                configExperimentalJSON     `json:"-"`
+	PrimaryTools        []string                     `json:"primary_tools"`
+	JSON                configExperimentalJSON       `json:"-"`
 }
 
 // configExperimentalJSON contains the JSON metadata for the struct
@@ -1985,10 +1985,10 @@ func (r ConfigMcpType) IsKnown() bool {
 
 // @deprecated Use `agent` field instead.
 type ConfigMode struct {
-	Build       ConfigModeBuild       `json:"build"`
-	Plan        ConfigModePlan        `json:"plan"`
+	Build       ConfigModeBuild        `json:"build"`
+	Plan        ConfigModePlan         `json:"plan"`
 	ExtraFields map[string]ConfigAgent `json:"-,extras"`
-	JSON        configModeJSON        `json:"-"`
+	JSON        configModeJSON         `json:"-"`
 }
 
 // configModeJSON contains the JSON metadata for the struct [ConfigMode]
@@ -2370,7 +2370,7 @@ type ConfigPermission struct {
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	Websearch interface{} `json:"websearch"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
-	Lsp      interface{} `json:"lsp"`
+	Lsp interface{} `json:"lsp"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	DoomLoop interface{} `json:"doom_loop"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
@@ -2691,7 +2691,7 @@ func (r configProviderModelJSON) RawJSON() string {
 
 type ConfigProviderModelsCost struct {
 	Input           float64                                 `json:"input,required"`
-	Output          int64                                 `json:"output,required"`
+	Output          int64                                   `json:"output,required"`
 	CacheRead       float64                                 `json:"cache_read"`
 	CacheWrite      float64                                 `json:"cache_write"`
 	ContextOver200k ConfigProviderModelsCostContextOver200k `json:"contextOver200k"`
@@ -2726,8 +2726,8 @@ func (r configProviderModelsCostJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsLimit struct {
-	Context int64                       `json:"context,required"`
-	Output  int64                       `json:"output,required"`
+	Context int64                         `json:"context,required"`
+	Output  int64                         `json:"output,required"`
 	JSON    configProviderModelsLimitJSON `json:"-"`
 }
 
@@ -2831,10 +2831,10 @@ func (r configProviderModelsProviderJSON) RawJSON() string {
 type ConfigProviderModelsStatus string
 
 const (
-	ConfigProviderModelsStatusAlpha     ConfigProviderModelsStatus = "alpha"
-	ConfigProviderModelsStatusBeta      ConfigProviderModelsStatus = "beta"
+	ConfigProviderModelsStatusAlpha      ConfigProviderModelsStatus = "alpha"
+	ConfigProviderModelsStatusBeta       ConfigProviderModelsStatus = "beta"
 	ConfigProviderModelsStatusDeprecated ConfigProviderModelsStatus = "deprecated"
-	ConfigProviderModelsStatusActive    ConfigProviderModelsStatus = "active"
+	ConfigProviderModelsStatusActive     ConfigProviderModelsStatus = "active"
 )
 
 func (r ConfigProviderModelsStatus) IsKnown() bool {
@@ -3253,43 +3253,43 @@ type ConfigUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 	// Body parameters — all Config fields as optional
-	Schema            param.Field[string]                        `json:"$schema"`
-	Agent             param.Field[ConfigAgent]                   `json:"agent"`
-	Attachment        param.Field[AttachmentConfig]              `json:"attachment"`
-	Autoshare         param.Field[bool]                          `json:"autoshare"`
-	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand]      `json:"command"`
-	Compaction        param.Field[ConfigCompaction]              `json:"compaction"`
-	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]              `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]            `json:"experimental"`
-	Formatter         param.Field[map[string]ConfigFormatter]    `json:"formatter"`
-	Instructions      param.Field[[]string]                      `json:"instructions"`
-	Keybinds          param.Field[KeybindsConfig]                `json:"keybinds"`
-	Layout            param.Field[ConfigLayout]                  `json:"layout"`
-	LogLevel          param.Field[ConfigLogLevel]                `json:"logLevel"`
-	Lsp               param.Field[map[string]ConfigLsp]          `json:"lsp"`
-	Mcp               param.Field[map[string]ConfigMcp]          `json:"mcp"`
-	Mode              param.Field[ConfigMode]                    `json:"mode"`
-	Model             param.Field[string]                        `json:"model"`
-	Permission        param.Field[ConfigPermission]              `json:"permission"`
-	Plugin            param.Field[[]string]                      `json:"plugin"`
-	Provider          param.Field[map[string]ConfigProvider]     `json:"provider"`
-	Reference         param.Field[ReferenceConfig]               `json:"reference"`
-	Share             param.Field[ConfigShare]                   `json:"share"`
-	Shell             param.Field[string]                        `json:"shell"`
-	Server            param.Field[ServerConfig]                  `json:"server"`
-	Skills            param.Field[ConfigSkills]                  `json:"skills"`
-	SmallModel        param.Field[string]                        `json:"small_model"`
-	Snapshot          param.Field[bool]                          `json:"snapshot"`
-	Theme             param.Field[string]                        `json:"theme"`
-	ToolOutput        param.Field[ConfigToolOutput]              `json:"tool_output"`
-	Tools             param.Field[map[string]bool]               `json:"tools"`
-	Tui               param.Field[ConfigTui]                     `json:"tui"`
-	Username          param.Field[string]                        `json:"username"`
-	Watcher           param.Field[ConfigWatcher]                 `json:"watcher"`
-	DefaultAgent      param.Field[string]                        `json:"default_agent"`
+	Schema            param.Field[string]                     `json:"$schema"`
+	Agent             param.Field[ConfigAgent]                `json:"agent"`
+	Attachment        param.Field[AttachmentConfig]           `json:"attachment"`
+	Autoshare         param.Field[bool]                       `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]                `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand]   `json:"command"`
+	Compaction        param.Field[ConfigCompaction]           `json:"compaction"`
+	DisabledProviders param.Field[[]string]                   `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                   `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]           `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
+	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
+	Instructions      param.Field[[]string]                   `json:"instructions"`
+	Keybinds          param.Field[KeybindsConfig]             `json:"keybinds"`
+	Layout            param.Field[ConfigLayout]               `json:"layout"`
+	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
+	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
+	Mcp               param.Field[map[string]ConfigMcp]       `json:"mcp"`
+	Mode              param.Field[ConfigMode]                 `json:"mode"`
+	Model             param.Field[string]                     `json:"model"`
+	Permission        param.Field[ConfigPermission]           `json:"permission"`
+	Plugin            param.Field[[]string]                   `json:"plugin"`
+	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
+	Reference         param.Field[ReferenceConfig]            `json:"reference"`
+	Share             param.Field[ConfigShare]                `json:"share"`
+	Shell             param.Field[string]                     `json:"shell"`
+	Server            param.Field[ServerConfig]               `json:"server"`
+	Skills            param.Field[ConfigSkills]               `json:"skills"`
+	SmallModel        param.Field[string]                     `json:"small_model"`
+	Snapshot          param.Field[bool]                       `json:"snapshot"`
+	Theme             param.Field[string]                     `json:"theme"`
+	ToolOutput        param.Field[ConfigToolOutput]           `json:"tool_output"`
+	Tools             param.Field[map[string]bool]            `json:"tools"`
+	Tui               param.Field[ConfigTui]                  `json:"tui"`
+	Username          param.Field[string]                     `json:"username"`
+	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
+	DefaultAgent      param.Field[string]                     `json:"default_agent"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3318,16 +3318,16 @@ func (r ConfigProvidersParams) URLQuery() (v url.Values) {
 }
 
 type ConfigProvidersResponse struct {
-	Default   map[string]string `json:"default,required"`
-	Providers []Provider        `json:"providers,required"`
+	Default   map[string]string           `json:"default,required"`
+	Providers []Provider                  `json:"providers,required"`
 	JSON      configProvidersResponseJSON `json:"-"`
 }
 
 // configProvidersResponseJSON contains the JSON metadata for the struct [ConfigProvidersResponse]
 type configProvidersResponseJSON struct {
-	Default    apijson.Field
-	Providers  apijson.Field
-	raw        string
+	Default     apijson.Field
+	Providers   apijson.Field
+	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
@@ -3370,7 +3370,7 @@ type ImageAttachmentConfig struct {
 	// Maximum image height in pixels
 	MaxHeight int64 `json:"max_height"`
 	// Maximum base64 encoded image size in bytes
-	MaxBase64Bytes int64                    `json:"max_base64_bytes"`
+	MaxBase64Bytes int64                     `json:"max_base64_bytes"`
 	JSON           imageAttachmentConfigJSON `json:"-"`
 }
 
@@ -3404,7 +3404,7 @@ type ReferenceConfigEntryRepository struct {
 	// Git repository URL, host/path reference, or GitHub owner/repo shorthand
 	Repository string `json:"repository"`
 	// Branch to reference
-	Branch string                           `json:"branch"`
+	Branch string                             `json:"branch"`
 	JSON   referenceConfigEntryRepositoryJSON `json:"-"`
 }
 
@@ -3427,7 +3427,7 @@ func (r referenceConfigEntryRepositoryJSON) RawJSON() string {
 // Reference configuration entry for a local path
 type ReferenceConfigEntryPath struct {
 	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
-	Path string                         `json:"path"`
+	Path string                       `json:"path"`
 	JSON referenceConfigEntryPathJSON `json:"-"`
 }
 
@@ -3451,7 +3451,7 @@ type ConfigToolOutput struct {
 	// Maximum number of lines to display in tool output
 	MaxLines int64 `json:"max_lines"`
 	// Maximum number of bytes to display in tool output
-	MaxBytes int64                 `json:"max_bytes"`
+	MaxBytes int64                `json:"max_bytes"`
 	JSON     configToolOutputJSON `json:"-"`
 }
 

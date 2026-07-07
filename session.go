@@ -330,9 +330,9 @@ func (r *SessionService) PromptAsync(ctx context.Context, id string, params Sess
 }
 
 type Todo struct {
-	Content  string  `json:"content,required"`
-	Status   string  `json:"status,required"`
-	Priority string  `json:"priority,required"`
+	Content  string   `json:"content,required"`
+	Status   string   `json:"status,required"`
+	Priority string   `json:"priority,required"`
 	JSON     todoJSON `json:"-"`
 }
 
@@ -371,8 +371,8 @@ func (r PermissionAction) IsKnown() bool {
 
 // PermissionRule is used for request parameters.
 type PermissionRule struct {
-	Permission param.Field[string]         `json:"permission,required"`
-	Pattern    param.Field[string]         `json:"pattern,required"`
+	Permission param.Field[string]           `json:"permission,required"`
+	Pattern    param.Field[string]           `json:"pattern,required"`
 	Action     param.Field[PermissionAction] `json:"action,required"`
 }
 
@@ -502,13 +502,13 @@ func (r AgentPartInputType) IsKnown() bool {
 }
 
 type SubtaskPartInputParam struct {
-	ID          param.Field[string]                 `json:"id"`
-	Type        param.Field[SubtaskPartInputType]  `json:"type,required"`
-	Prompt      param.Field[string]                 `json:"prompt,required"`
-	Description param.Field[string]                 `json:"description,required"`
-	Agent       param.Field[string]                 `json:"agent,required"`
-	Model       param.Field[SubtaskPartModel]      `json:"model"`
-	Command     param.Field[string]                 `json:"command"`
+	ID          param.Field[string]               `json:"id"`
+	Type        param.Field[SubtaskPartInputType] `json:"type,required"`
+	Prompt      param.Field[string]               `json:"prompt,required"`
+	Description param.Field[string]               `json:"description,required"`
+	Agent       param.Field[string]               `json:"agent,required"`
+	Model       param.Field[SubtaskPartModel]     `json:"model"`
+	Command     param.Field[string]               `json:"command"`
 }
 
 func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
@@ -555,12 +555,12 @@ type AssistantMessage struct {
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
 	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
-	Structured interface{}            `json:"structured,omitzero"`
-	Variant    string                 `json:"variant,omitzero"`
-	Finish     string                 `json:"finish,omitzero"`
-	Error      AssistantMessageError  `json:"error"`
-	Summary    bool                   `json:"summary"`
-	JSON       assistantMessageJSON   `json:"-"`
+	Structured interface{}           `json:"structured,omitzero"`
+	Variant    string                `json:"variant,omitzero"`
+	Finish     string                `json:"finish,omitzero"`
+	Error      AssistantMessageError `json:"error"`
+	Summary    bool                  `json:"summary"`
+	JSON       assistantMessageJSON  `json:"-"`
 }
 
 // assistantMessageJSON contains the JSON metadata for the struct
@@ -635,8 +635,8 @@ func (r AssistantMessageRole) IsKnown() bool {
 }
 
 type AssistantMessageTime struct {
-	Created   int64                     `json:"created,required"`
-	Completed int64                     `json:"completed"`
+	Created   int64                    `json:"created,required"`
+	Completed int64                    `json:"completed"`
 	JSON      assistantMessageTimeJSON `json:"-"`
 }
 
@@ -659,10 +659,10 @@ func (r assistantMessageTimeJSON) RawJSON() string {
 
 type AssistantMessageTokens struct {
 	Cache     AssistantMessageTokensCache `json:"cache,required"`
-	Input     int64                     `json:"input,required"`
-	Output    int64                     `json:"output,required"`
-	Reasoning int64                     `json:"reasoning,required"`
-	Total     int64                     `json:"total"`
+	Input     int64                       `json:"input,required"`
+	Output    int64                       `json:"output,required"`
+	Reasoning int64                       `json:"reasoning,required"`
+	Total     int64                       `json:"total"`
 	JSON      assistantMessageTokensJSON  `json:"-"`
 }
 
@@ -687,8 +687,8 @@ func (r assistantMessageTokensJSON) RawJSON() string {
 }
 
 type AssistantMessageTokensCache struct {
-	Read  int64                         `json:"read,required"`
-	Write int64                         `json:"write,required"`
+	Read  int64                           `json:"read,required"`
+	Write int64                           `json:"write,required"`
 	JSON  assistantMessageTokensCacheJSON `json:"-"`
 }
 
@@ -1306,7 +1306,7 @@ type Part struct {
 	MessageID string   `json:"messageID,required"`
 	SessionID string   `json:"sessionID,required"`
 	Type      PartType `json:"type,required"`
-	Attempt   int64   `json:"attempt"`
+	Attempt   int64    `json:"attempt"`
 	CallID    string   `json:"callID"`
 	Cost      float64  `json:"cost"`
 	// This field can have the runtime type of [PartRetryPartError].
@@ -1501,7 +1501,7 @@ func (r PartPatchPartType) IsKnown() bool {
 
 type PartRetryPart struct {
 	ID        string             `json:"id,required"`
-	Attempt   int64               `json:"attempt,required"`
+	Attempt   int64              `json:"attempt,required"`
 	Error     PartRetryPartError `json:"error,required"`
 	MessageID string             `json:"messageID,required"`
 	SessionID string             `json:"sessionID,required"`
@@ -1561,7 +1561,7 @@ type PartRetryPartErrorData struct {
 	Message         string                     `json:"message,required"`
 	ResponseBody    string                     `json:"responseBody"`
 	ResponseHeaders map[string]string          `json:"responseHeaders"`
-	StatusCode      int64                       `json:"statusCode"`
+	StatusCode      int64                      `json:"statusCode"`
 	JSON            partRetryPartErrorDataJSON `json:"-"`
 }
 
@@ -1600,7 +1600,7 @@ func (r PartRetryPartErrorName) IsKnown() bool {
 }
 
 type PartRetryPartTime struct {
-	Created int64                  `json:"created,required"`
+	Created int64                 `json:"created,required"`
 	JSON    partRetryPartTimeJSON `json:"-"`
 }
 
@@ -1694,8 +1694,8 @@ func (r reasoningPartJSON) RawJSON() string {
 func (r ReasoningPart) implementsPart() {}
 
 type ReasoningPartTime struct {
-	Start int64               `json:"start,required"`
-	End   int64               `json:"end"`
+	Start int64                 `json:"start,required"`
+	End   int64                 `json:"end"`
 	JSON  reasoningPartTimeJSON `json:"-"`
 }
 
@@ -1751,8 +1751,8 @@ type Session struct {
 	// This field can have the runtime type of [[]PermissionRuleResponse].
 	Permission interface{} `json:"permission"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata   interface{} `json:"metadata"`
-	JSON       sessionJSON `json:"-"`
+	Metadata interface{} `json:"metadata"`
+	JSON     sessionJSON `json:"-"`
 }
 
 // sessionJSON contains the JSON metadata for the struct [Session]
@@ -1789,10 +1789,10 @@ func (r sessionJSON) RawJSON() string {
 }
 
 type SessionTime struct {
-	Created    int64            `json:"created,required"`
-	Updated    int64            `json:"updated,required"`
-	Compacting int64            `json:"compacting"`
-	Archived   int64          `json:"archived"`
+	Created    int64           `json:"created,required"`
+	Updated    int64           `json:"updated,required"`
+	Compacting int64           `json:"compacting"`
+	Archived   int64           `json:"archived"`
 	JSON       sessionTimeJSON `json:"-"`
 }
 
@@ -1865,7 +1865,7 @@ type SessionSummary struct {
 	Deletions int64              `json:"deletions,required"`
 	Files     int64              `json:"files,required"`
 	Diffs     []SnapshotFileDiff `json:"diffs"`
-	JSON      sessionSummaryJSON   `json:"-"`
+	JSON      sessionSummaryJSON `json:"-"`
 }
 
 // sessionSummaryJSON contains the JSON metadata for the struct [SessionSummary]
@@ -1887,10 +1887,10 @@ func (r sessionSummaryJSON) RawJSON() string {
 }
 
 type SessionModel struct {
-	ID        string            `json:"id,required"`
+	ID         string           `json:"id,required"`
 	ProviderID string           `json:"providerID,required"`
-	Variant   string            `json:"variant"`
-	JSON      sessionModelJSON  `json:"-"`
+	Variant    string           `json:"variant"`
+	JSON       sessionModelJSON `json:"-"`
 }
 
 // sessionModelJSON contains the JSON metadata for the struct [SessionModel]
@@ -1911,9 +1911,9 @@ func (r sessionModelJSON) RawJSON() string {
 }
 
 type SessionTokens struct {
-	Input     int64            `json:"input,required"`
-	Output    int64            `json:"output,required"`
-	Reasoning int64            `json:"reasoning,required"`
+	Input     int64              `json:"input,required"`
+	Output    int64              `json:"output,required"`
+	Reasoning int64              `json:"reasoning,required"`
 	Cache     SessionTokensCache `json:"cache,required"`
 	JSON      sessionTokensJSON  `json:"-"`
 }
@@ -1937,8 +1937,8 @@ func (r sessionTokensJSON) RawJSON() string {
 }
 
 type SessionTokensCache struct {
-	Read  int64                `json:"read,required"`
-	Write int64                `json:"write,required"`
+	Read  int64                  `json:"read,required"`
+	Write int64                  `json:"write,required"`
 	JSON  sessionTokensCacheJSON `json:"-"`
 }
 
@@ -2040,10 +2040,10 @@ func (r StepFinishPart) implementsPart() {}
 
 type StepFinishPartTokens struct {
 	Cache     StepFinishPartTokensCache `json:"cache,required"`
-	Input     int64                   `json:"input,required"`
-	Output    int64                   `json:"output,required"`
-	Reasoning int64                   `json:"reasoning,required"`
-	Total     int64                   `json:"total"`
+	Input     int64                     `json:"input,required"`
+	Output    int64                     `json:"output,required"`
+	Reasoning int64                     `json:"reasoning,required"`
+	Total     int64                     `json:"total"`
 	JSON      stepFinishPartTokensJSON  `json:"-"`
 }
 
@@ -2066,8 +2066,8 @@ func (r stepFinishPartTokensJSON) RawJSON() string {
 }
 
 type StepFinishPartTokensCache struct {
-	Read  int64                       `json:"read,required"`
-	Write int64                       `json:"write,required"`
+	Read  int64                         `json:"read,required"`
+	Write int64                         `json:"write,required"`
 	JSON  stepFinishPartTokensCacheJSON `json:"-"`
 }
 
@@ -2202,8 +2202,8 @@ func (r symbolSourceRangeJSON) RawJSON() string {
 }
 
 type SymbolSourceRangeEnd struct {
-	Character int64                  `json:"character,required"`
-	Line      int64                  `json:"line,required"`
+	Character int64                    `json:"character,required"`
+	Line      int64                    `json:"line,required"`
 	JSON      symbolSourceRangeEndJSON `json:"-"`
 }
 
@@ -2225,8 +2225,8 @@ func (r symbolSourceRangeEndJSON) RawJSON() string {
 }
 
 type SymbolSourceRangeStart struct {
-	Character int64                    `json:"character,required"`
-	Line      int64                    `json:"line,required"`
+	Character int64                      `json:"character,required"`
+	Line      int64                      `json:"line,required"`
 	JSON      symbolSourceRangeStartJSON `json:"-"`
 }
 
@@ -2469,13 +2469,13 @@ func (r subtaskPartModelJSON) RawJSON() string {
 }
 
 type CompactionPart struct {
-	ID          string            `json:"id,required"`
-	MessageID   string            `json:"messageID,required"`
-	SessionID   string            `json:"sessionID,required"`
+	ID          string             `json:"id,required"`
+	MessageID   string             `json:"messageID,required"`
+	SessionID   string             `json:"sessionID,required"`
 	Type        CompactionPartType `json:"type,required"`
-	Auto        bool              `json:"auto,required"`
-	Overflow    bool              `json:"overflow"`
-	TailStartID string            `json:"tail_start_id"`
+	Auto        bool               `json:"auto,required"`
+	Overflow    bool               `json:"overflow"`
+	TailStartID string             `json:"tail_start_id"`
 	JSON        compactionPartJSON `json:"-"`
 }
 
@@ -2530,8 +2530,8 @@ func (r TextPartType) IsKnown() bool {
 }
 
 type TextPartTime struct {
-	Start int64          `json:"start,required"`
-	End   int64          `json:"end"`
+	Start int64            `json:"start,required"`
+	End   int64            `json:"end"`
 	JSON  textPartTimeJSON `json:"-"`
 }
 
@@ -2557,7 +2557,7 @@ type TextPartInputParam struct {
 	ID        param.Field[string]                 `json:"id"`
 	Metadata  param.Field[map[string]interface{}] `json:"metadata"`
 	Synthetic param.Field[bool]                   `json:"synthetic"`
-	Ignored   param.Field[bool]                    `json:"ignored"`
+	Ignored   param.Field[bool]                   `json:"ignored"`
 	Time      param.Field[TextPartInputTimeParam] `json:"time"`
 }
 
@@ -2790,9 +2790,9 @@ func (r ToolStateCompletedStatus) IsKnown() bool {
 }
 
 type ToolStateCompletedTime struct {
-	End       int64                    `json:"end,required"`
-	Start     int64                    `json:"start,required"`
-	Compacted int64                    `json:"compacted"`
+	End       int64                      `json:"end,required"`
+	Start     int64                      `json:"start,required"`
+	Compacted int64                      `json:"compacted"`
 	JSON      toolStateCompletedTimeJSON `json:"-"`
 }
 
@@ -2859,8 +2859,8 @@ func (r ToolStateErrorStatus) IsKnown() bool {
 }
 
 type ToolStateErrorTime struct {
-	End   int64                `json:"end,required"`
-	Start int64                `json:"start,required"`
+	End   int64                  `json:"end,required"`
+	Start int64                  `json:"start,required"`
 	JSON  toolStateErrorTimeJSON `json:"-"`
 }
 
@@ -2970,7 +2970,7 @@ func (r ToolStateRunningStatus) IsKnown() bool {
 }
 
 type ToolStateRunningTime struct {
-	Start int64                  `json:"start,required"`
+	Start int64                    `json:"start,required"`
 	JSON  toolStateRunningTimeJSON `json:"-"`
 }
 
@@ -2991,16 +2991,16 @@ func (r toolStateRunningTimeJSON) RawJSON() string {
 }
 
 type UserMessage struct {
-	ID        string            `json:"id,required"`
-	Agent     string            `json:"agent,required"`
-	Model     UserMessageModel  `json:"model,required"`
-	Role      UserMessageRole   `json:"role,required"`
-	SessionID string            `json:"sessionID,required"`
-	Time      UserMessageTime   `json:"time,required"`
+	ID        string           `json:"id,required"`
+	Agent     string           `json:"agent,required"`
+	Model     UserMessageModel `json:"model,required"`
+	Role      UserMessageRole  `json:"role,required"`
+	SessionID string           `json:"sessionID,required"`
+	Time      UserMessageTime  `json:"time,required"`
 	// This field can have the runtime type of [OutputFormatUnion].
-	Format  interface{}       `json:"format,omitzero"`
-	System  string            `json:"system,omitzero"`
-	Tools   map[string]bool   `json:"tools,omitzero"`
+	Format  interface{}        `json:"format,omitzero"`
+	System  string             `json:"system,omitzero"`
+	Tools   map[string]bool    `json:"tools,omitzero"`
 	Summary UserMessageSummary `json:"summary"`
 	JSON    userMessageJSON    `json:"-"`
 }
@@ -3115,10 +3115,10 @@ func (r userMessageSummaryJSON) RawJSON() string {
 }
 
 type UserMessageSummaryDiff struct {
-	Additions int64                    `json:"additions,required"`
+	Additions int64                      `json:"additions,required"`
 	After     string                     `json:"after,required"`
 	Before    string                     `json:"before,required"`
-	Deletions int64                    `json:"deletions,required"`
+	Deletions int64                      `json:"deletions,required"`
 	File      string                     `json:"file,required"`
 	JSON      userMessageSummaryDiffJSON `json:"-"`
 }
@@ -3236,15 +3236,15 @@ func (r sessionPromptResponseJSON) RawJSON() string {
 }
 
 type SessionNewParams struct {
-	Directory   param.Field[string]                  `query:"directory"`
-	Workspace   param.Field[string]                  `query:"workspace"`
-	ParentID    param.Field[string]                  `json:"parentID"`
-	Title       param.Field[string]                  `json:"title"`
-	Agent       param.Field[string]                  `json:"agent"`
-	Model       param.Field[SessionNewParamsModel]   `json:"model"`
-	Permission  param.Field[[]PermissionRule]        `json:"permission"`
-	WorkspaceID param.Field[string]                  `json:"workspaceID"`
-	Metadata    param.Field[interface{}]             `json:"metadata"`
+	Directory   param.Field[string]                `query:"directory"`
+	Workspace   param.Field[string]                `query:"workspace"`
+	ParentID    param.Field[string]                `json:"parentID"`
+	Title       param.Field[string]                `json:"title"`
+	Agent       param.Field[string]                `json:"agent"`
+	Model       param.Field[SessionNewParamsModel] `json:"model"`
+	Permission  param.Field[[]PermissionRule]      `json:"permission"`
+	WorkspaceID param.Field[string]                `json:"workspaceID"`
+	Metadata    param.Field[interface{}]           `json:"metadata"`
 }
 
 type SessionNewParamsModel struct {
@@ -3291,14 +3291,14 @@ func (r SessionUpdateParams) URLQuery() (v url.Values) {
 }
 
 type SessionListParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Scope     param.Field[string]  `query:"scope"`
-	Path      param.Field[string]  `query:"path"`
-	Roots     param.Field[bool]    `query:"roots"`
-	Start     param.Field[int64] `query:"start"`
-	Search    param.Field[string]  `query:"search"`
-	Limit     param.Field[int64] `query:"limit"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Scope     param.Field[string] `query:"scope"`
+	Path      param.Field[string] `query:"path"`
+	Roots     param.Field[bool]   `query:"roots"`
+	Start     param.Field[int64]  `query:"start"`
+	Search    param.Field[string] `query:"search"`
+	Limit     param.Field[int64]  `query:"limit"`
 }
 
 // URLQuery serializes [SessionListParams]'s query parameters as `url.Values`.
@@ -3362,15 +3362,15 @@ func (r SessionTodoParams) URLQuery() (v url.Values) {
 }
 
 type SessionCommandParams struct {
-	Directory param.Field[string]                       `query:"directory"`
-	Workspace param.Field[string]                       `query:"workspace"`
-	Agent     param.Field[string]                       `json:"agent"`
-	Arguments param.Field[string]                       `json:"arguments,required"`
-	Command   param.Field[string]                       `json:"command,required"`
-	MessageID param.Field[string]                       `json:"messageID"`
-	Model     param.Field[string]                       `json:"model"`
-	Variant   param.Field[string]                       `json:"variant"`
-	Parts     param.Field[[]SessionCommandParamsPart]   `json:"parts"`
+	Directory param.Field[string]                     `query:"directory"`
+	Workspace param.Field[string]                     `query:"workspace"`
+	Agent     param.Field[string]                     `json:"agent"`
+	Arguments param.Field[string]                     `json:"arguments,required"`
+	Command   param.Field[string]                     `json:"command,required"`
+	MessageID param.Field[string]                     `json:"messageID"`
+	Model     param.Field[string]                     `json:"model"`
+	Variant   param.Field[string]                     `json:"variant"`
+	Parts     param.Field[[]SessionCommandParamsPart] `json:"parts"`
 }
 
 type SessionCommandParamsPart struct {
@@ -3465,7 +3465,7 @@ type SessionPromptParams struct {
 	NoReply   param.Field[bool]                           `json:"noReply"`
 	System    param.Field[string]                         `json:"system"`
 	Tools     param.Field[map[string]bool]                `json:"tools"`
-	Format    param.Field[SessionPromptParamsFormatUnion]  `json:"format"`
+	Format    param.Field[SessionPromptParamsFormatUnion] `json:"format"`
 	Variant   param.Field[string]                         `json:"variant"`
 }
 
@@ -3510,9 +3510,9 @@ type SessionPromptParamsPartUnion interface {
 type SessionPromptParamsPartsType string
 
 const (
-	SessionPromptParamsPartsTypeText   SessionPromptParamsPartsType = "text"
-	SessionPromptParamsPartsTypeFile   SessionPromptParamsPartsType = "file"
-	SessionPromptParamsPartsTypeAgent  SessionPromptParamsPartsType = "agent"
+	SessionPromptParamsPartsTypeText    SessionPromptParamsPartsType = "text"
+	SessionPromptParamsPartsTypeFile    SessionPromptParamsPartsType = "file"
+	SessionPromptParamsPartsTypeAgent   SessionPromptParamsPartsType = "agent"
 	SessionPromptParamsPartsTypeSubtask SessionPromptParamsPartsType = "subtask"
 )
 
@@ -3664,13 +3664,13 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 }
 
 type SessionShellParams struct {
-	Directory param.Field[string]                        `query:"directory"`
-	Workspace param.Field[string]                        `query:"workspace"`
-	Agent     param.Field[string]                        `json:"agent,required"`
-	Command   param.Field[string]                        `json:"command,required"`
-	MessageID param.Field[string]                        `json:"messageID"`
-	Model     param.Field[SessionPromptParamsModel]      `json:"model"`
-	Variant   param.Field[string]                        `json:"variant"`
+	Directory param.Field[string]                         `query:"directory"`
+	Workspace param.Field[string]                         `query:"workspace"`
+	Agent     param.Field[string]                         `json:"agent,required"`
+	Command   param.Field[string]                         `json:"command,required"`
+	MessageID param.Field[string]                         `json:"messageID"`
+	Model     param.Field[SessionPromptParamsModel]       `json:"model"`
+	Variant   param.Field[string]                         `json:"variant"`
 	Parts     param.Field[[]SessionPromptParamsPartUnion] `json:"parts"`
 }
 
@@ -3752,12 +3752,12 @@ func (r SessionStatusIdle) ImplementsSessionStatus() {}
 
 // SessionStatusRetry represents a retry session status
 type SessionStatusRetry struct {
-	Type    string                     `json:"type,required"`
-	Attempt int64                      `json:"attempt,required"`
-	Message string                     `json:"message,required"`
-	Action  SessionStatusRetryAction   `json:"action,omitzero"`
-	Next    int64                      `json:"next,required"`
-	JSON    sessionStatusRetryJSON     `json:"-"`
+	Type    string                   `json:"type,required"`
+	Attempt int64                    `json:"attempt,required"`
+	Message string                   `json:"message,required"`
+	Action  SessionStatusRetryAction `json:"action,omitzero"`
+	Next    int64                    `json:"next,required"`
+	JSON    sessionStatusRetryJSON   `json:"-"`
 }
 
 type sessionStatusRetryJSON struct {
@@ -3772,13 +3772,13 @@ type sessionStatusRetryJSON struct {
 
 // SessionStatusRetryAction represents the action to retry a session
 type SessionStatusRetryAction struct {
-	Reason   string                           `json:"reason,required"`
-	Provider string                           `json:"provider,required"`
-	Title    string                           `json:"title,required"`
-	Message  string                           `json:"message,required"`
-	Label    string                           `json:"label,required"`
-	Link     string                           `json:"link,omitzero"`
-	JSON     sessionStatusRetryActionJSON     `json:"-"`
+	Reason   string                       `json:"reason,required"`
+	Provider string                       `json:"provider,required"`
+	Title    string                       `json:"title,required"`
+	Message  string                       `json:"message,required"`
+	Label    string                       `json:"label,required"`
+	Link     string                       `json:"link,omitzero"`
+	JSON     sessionStatusRetryActionJSON `json:"-"`
 }
 
 type sessionStatusRetryActionJSON struct {
@@ -3876,12 +3876,12 @@ func init() {
 
 // SnapshotFileDiff represents a diff for a file in a snapshot
 type SnapshotFileDiff struct {
-	File      string                `json:"file"`
-	Patch     string                `json:"patch"`
-	Additions int64               `json:"additions,required"`
-	Deletions int64               `json:"deletions,required"`
+	File      string                 `json:"file"`
+	Patch     string                 `json:"patch"`
+	Additions int64                  `json:"additions,required"`
+	Deletions int64                  `json:"deletions,required"`
 	Status    SnapshotFileDiffStatus `json:"status"`
-	JSON      snapshotFileDiffJSON  `json:"-"`
+	JSON      snapshotFileDiffJSON   `json:"-"`
 }
 
 type snapshotFileDiffJSON struct {
@@ -3972,5 +3972,3 @@ func (r SessionStatusParams) URLQuery() (v url.Values) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
-
-

@@ -50,26 +50,26 @@ func (r *V2SessionRevertService) Stage(ctx context.Context, sessionID string, bo
 }
 
 // Clear staged revert
-func (r *V2SessionRevertService) Clear(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionRevertService) Clear(ctx context.Context, sessionID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/revert/clear", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
 // Commit staged revert
-func (r *V2SessionRevertService) Commit(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionRevertService) Commit(ctx context.Context, sessionID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/revert/commit", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
@@ -88,8 +88,8 @@ func (r V2SessionRevertStageParams) MarshalJSON() (data []byte, err error) {
 
 // V2SessionRevertStageResponse is returned by the Revert.Stage method.
 type V2SessionRevertStageResponse struct {
-	Data RevertState                          `json:"data,required"`
-	JSON v2SessionRevertStageResponseJSON     `json:"-"`
+	Data RevertState                      `json:"data,required"`
+	JSON v2SessionRevertStageResponseJSON `json:"-"`
 }
 
 type v2SessionRevertStageResponseJSON struct {

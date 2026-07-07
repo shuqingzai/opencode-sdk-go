@@ -37,7 +37,7 @@ func NewV2SessionPermissionService(opts ...option.RequestOption) (r *V2SessionPe
 // List session permission requests
 //
 // Retrieve pending permission requests owned by a session.
-func (r *V2SessionPermissionService) List(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *[]PermissionV2Request, err error) {
+func (r *V2SessionPermissionService) List(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *V2SessionPermissionListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -66,7 +66,7 @@ func (r *V2SessionPermissionService) Create(ctx context.Context, sessionID strin
 // Get permission request
 //
 // Retrieve a pending permission request owned by a session.
-func (r *V2SessionPermissionService) Get(ctx context.Context, sessionID string, requestID string, opts ...option.RequestOption) (res *PermissionV2Request, err error) {
+func (r *V2SessionPermissionService) Get(ctx context.Context, sessionID string, requestID string, opts ...option.RequestOption) (res *V2SessionPermissionGetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -102,14 +102,14 @@ func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string
 // ===== Param Types =====
 
 type V2SessionPermissionCreateParams struct {
-	ID        param.Field[string]                `json:"id"`
-	Action    param.Field[string]                `json:"action,required"`
-	Resources param.Field[[]string]              `json:"resources,required"`
-	Save      param.Field[[]string]              `json:"save"`
+	ID        param.Field[string]   `json:"id"`
+	Action    param.Field[string]   `json:"action,required"`
+	Resources param.Field[[]string] `json:"resources,required"`
+	Save      param.Field[[]string] `json:"save"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata  param.Field[interface{}]           `json:"metadata"`
-	Source    param.Field[PermissionV2Source]    `json:"source"`
-	Agent     param.Field[string]                `json:"agent"`
+	Metadata param.Field[interface{}]        `json:"metadata"`
+	Source   param.Field[PermissionV2Source] `json:"source"`
+	Agent    param.Field[string]             `json:"agent"`
 }
 
 func (r V2SessionPermissionCreateParams) MarshalJSON() (data []byte, err error) {
@@ -146,8 +146,8 @@ func (r PermissionV2Reply) IsKnown() bool {
 
 // V2SessionPermissionCreateResponse is returned by the Permissions.Create method.
 type V2SessionPermissionCreateResponse struct {
-	Data V2SessionPermissionCreateData           `json:"data,required"`
-	JSON v2SessionPermissionCreateResponseJSON   `json:"-"`
+	Data V2SessionPermissionCreateData         `json:"data,required"`
+	JSON v2SessionPermissionCreateResponseJSON `json:"-"`
 }
 
 type v2SessionPermissionCreateResponseJSON struct {
@@ -165,9 +165,9 @@ func (r v2SessionPermissionCreateResponseJSON) RawJSON() string {
 }
 
 type V2SessionPermissionCreateData struct {
-	ID     string                               `json:"id,required"`
-	Effect PermissionV2Effect                   `json:"effect,required"`
-	JSON   v2SessionPermissionCreateDataJSON    `json:"-"`
+	ID     string                            `json:"id,required"`
+	Effect PermissionV2Effect                `json:"effect,required"`
+	JSON   v2SessionPermissionCreateDataJSON `json:"-"`
 }
 
 type v2SessionPermissionCreateDataJSON struct {
@@ -182,5 +182,45 @@ func (r *V2SessionPermissionCreateData) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionPermissionCreateDataJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2SessionPermissionListResponse is returned by the Permissions.List method.
+type V2SessionPermissionListResponse struct {
+	Data []PermissionV2Request               `json:"data,required"`
+	JSON v2SessionPermissionListResponseJSON `json:"-"`
+}
+
+type v2SessionPermissionListResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionPermissionListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionPermissionListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2SessionPermissionGetResponse is returned by the Permissions.Get method.
+type V2SessionPermissionGetResponse struct {
+	Data PermissionV2Request                `json:"data,required"`
+	JSON v2SessionPermissionGetResponseJSON `json:"-"`
+}
+
+type v2SessionPermissionGetResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionPermissionGetResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionPermissionGetResponseJSON) RawJSON() string {
 	return r.raw
 }

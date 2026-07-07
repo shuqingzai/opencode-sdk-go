@@ -44,8 +44,8 @@ func (r *V2SkillService) List(ctx context.Context, query V2SkillListParams, opts
 
 // V2SkillListResponse contains the response from the skill list endpoint.
 type V2SkillListResponse struct {
-	Location LocationInfo    `json:"location,required"`
-	Data     []SkillV2Info   `json:"data,required"`
+	Location LocationInfo            `json:"location,required"`
+	Data     []SkillV2Info           `json:"data,required"`
 	JSON     v2SkillListResponseJSON `json:"-"`
 }
 
@@ -67,11 +67,11 @@ func (r v2SkillListResponseJSON) RawJSON() string {
 
 // SkillV2Info represents a v2 skill entry.
 type SkillV2Info struct {
-	Name        string `json:"name,required"`
-	Description string `json:"description"`
-	Slash       bool   `json:"slash"`
-	Location    string `json:"location,required"`
-	Content     string `json:"content,required"`
+	Name        string          `json:"name,required"`
+	Description string          `json:"description"`
+	Slash       bool            `json:"slash"`
+	Location    string          `json:"location,required"`
+	Content     string          `json:"content,required"`
 	JSON        skillV2InfoJSON `json:"-"`
 }
 
@@ -96,19 +96,19 @@ func (r skillV2InfoJSON) RawJSON() string {
 
 // LocationInfo represents location metadata returned in list responses.
 type LocationInfo struct {
-	Directory   string                `json:"directory,required"`
-	WorkspaceID string                `json:"workspaceID"`
-	Project     LocationInfoProject   `json:"project,required"`
-	JSON        locationInfoJSON      `json:"-"`
+	Directory   string              `json:"directory,required"`
+	WorkspaceID string              `json:"workspaceID"`
+	Project     LocationInfoProject `json:"project,required"`
+	JSON        locationInfoJSON    `json:"-"`
 }
 
 // locationInfoJSON contains the JSON metadata for the struct [LocationInfo]
 type locationInfoJSON struct {
-	Directory    apijson.Field
-	WorkspaceID  apijson.Field
-	Project      apijson.Field
-	raw          string
-	ExtraFields  map[string]apijson.Field
+	Directory   apijson.Field
+	WorkspaceID apijson.Field
+	Project     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
 }
 
 func (r *LocationInfo) UnmarshalJSON(data []byte) (err error) {
@@ -121,9 +121,9 @@ func (r locationInfoJSON) RawJSON() string {
 
 // LocationInfoProject represents project information within a location.
 type LocationInfoProject struct {
-	ID        string                    `json:"id,required"`
-	Directory string                    `json:"directory,required"`
-	JSON      locationInfoProjectJSON   `json:"-"`
+	ID        string                  `json:"id,required"`
+	Directory string                  `json:"directory,required"`
+	JSON      locationInfoProjectJSON `json:"-"`
 }
 
 // locationInfoProjectJSON contains the JSON metadata for the struct [LocationInfoProject]

@@ -67,13 +67,13 @@ func (r v2CommandListResponseJSON) RawJSON() string {
 
 // V2CommandInfo represents a registered command.
 type V2CommandInfo struct {
-	Name        string              `json:"name,required"`
-	Template    string              `json:"template,required"`
-	Description string              `json:"description"`
-	Agent       string              `json:"agent"`
-	Model       ModelRef            `json:"model"`
-	Subtask     bool                `json:"subtask"`
-	JSON        v2CommandInfoJSON   `json:"-"`
+	Name        string            `json:"name,required"`
+	Template    string            `json:"template,required"`
+	Description string            `json:"description"`
+	Agent       string            `json:"agent"`
+	Model       ModelRef          `json:"model"`
+	Subtask     bool              `json:"subtask"`
+	JSON        v2CommandInfoJSON `json:"-"`
 }
 
 // v2CommandInfoJSON contains the JSON metadata for the struct [V2CommandInfo]

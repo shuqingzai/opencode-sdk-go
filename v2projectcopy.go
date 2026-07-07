@@ -98,7 +98,7 @@ type V2ProjectCopyCreateParams struct {
 	// Location query params
 	Location param.Field[V2LocationParam] `query:"location"`
 	// Strategy for the copy operation
-	Strategy  param.Field[string] `json:"strategy,required"`
+	Strategy param.Field[string] `json:"strategy,required"`
 	// Directory for the copy
 	Directory param.Field[string] `json:"directory,required"`
 	// Name for the copy

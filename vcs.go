@@ -150,11 +150,11 @@ func (r *VcsService) Status(ctx context.Context, query VcsStatusParams, opts ...
 }
 
 type VcsFileStatus struct {
-	File      string              `json:"file,required"`
-	Additions int64               `json:"additions,required"`
-	Deletions int64               `json:"deletions,required"`
-	Status    VcsFileDiffStatus   `json:"status,required"`
-	JSON      vcsFileStatusJSON   `json:"-"`
+	File      string            `json:"file,required"`
+	Additions int64             `json:"additions,required"`
+	Deletions int64             `json:"deletions,required"`
+	Status    VcsFileDiffStatus `json:"status,required"`
+	JSON      vcsFileStatusJSON `json:"-"`
 }
 
 type vcsFileStatusJSON struct {
@@ -230,7 +230,7 @@ func (r VcsApplyParams) MarshalJSON() (data []byte, err error) {
 }
 
 type VcsApplyResponse struct {
-	Applied bool                `json:"applied,required"`
+	Applied bool                 `json:"applied,required"`
 	JSON    vcsApplyResponseJSON `json:"-"`
 }
 

@@ -26,9 +26,9 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewV2IntegrationService] method instead.
 type V2IntegrationService struct {
-	Options  []option.RequestOption
-	Connect  *V2IntegrationConnectService
-	Attempt  *V2IntegrationAttemptService
+	Options []option.RequestOption
+	Connect *V2IntegrationConnectService
+	Attempt *V2IntegrationAttemptService
 }
 
 // NewV2IntegrationService generates a new service that applies the given options to
@@ -178,8 +178,8 @@ func (r *V2IntegrationAttemptService) Complete(ctx context.Context, attemptID st
 
 // V2IntegrationListResponse contains the response from the integration list endpoint.
 type V2IntegrationListResponse struct {
-	Location LocationInfo                 `json:"location,required"`
-	Data     []IntegrationInfo            `json:"data,required"`
+	Location LocationInfo                  `json:"location,required"`
+	Data     []IntegrationInfo             `json:"data,required"`
 	JSON     v2IntegrationListResponseJSON `json:"-"`
 }
 
@@ -201,8 +201,8 @@ func (r v2IntegrationListResponseJSON) RawJSON() string {
 
 // V2IntegrationGetResponse contains the response from the integration get endpoint.
 type V2IntegrationGetResponse struct {
-	Location LocationInfo                `json:"location,required"`
-	Data     IntegrationInfo             `json:"data,required"`
+	Location LocationInfo                 `json:"location,required"`
+	Data     IntegrationInfo              `json:"data,required"`
 	JSON     v2IntegrationGetResponseJSON `json:"-"`
 }
 
@@ -224,8 +224,8 @@ func (r v2IntegrationGetResponseJSON) RawJSON() string {
 
 // V2IntegrationConnectOauthResponse contains the response from the oauth connect endpoint.
 type V2IntegrationConnectOauthResponse struct {
-	Location LocationInfo                         `json:"location,required"`
-	Data     IntegrationAttempt                   `json:"data,required"`
+	Location LocationInfo                          `json:"location,required"`
+	Data     IntegrationAttempt                    `json:"data,required"`
 	JSON     v2IntegrationConnectOauthResponseJSON `json:"-"`
 }
 
@@ -248,8 +248,8 @@ func (r v2IntegrationConnectOauthResponseJSON) RawJSON() string {
 // V2IntegrationAttemptStatusResponse contains the response from the attempt status endpoint.
 type V2IntegrationAttemptStatusResponse struct {
 	Location LocationInfo                           `json:"location,required"`
-	Data     IntegrationAttemptStatus                `json:"data,required"`
-	JSON     v2IntegrationAttemptStatusResponseJSON   `json:"-"`
+	Data     IntegrationAttemptStatus               `json:"data,required"`
+	JSON     v2IntegrationAttemptStatusResponseJSON `json:"-"`
 }
 
 // v2IntegrationAttemptStatusResponseJSON contains the JSON metadata for the struct [V2IntegrationAttemptStatusResponse]
@@ -276,11 +276,11 @@ type IntegrationInfo struct {
 	Name string `json:"name,required"`
 	// This field can have the runtime type of []IntegrationOAuthMethod,
 	// []IntegrationKeyMethod, []IntegrationEnvMethod.
-	Methods     interface{}              `json:"methods,required"`
+	Methods interface{} `json:"methods,required"`
 	// This field can have the runtime type of []ConnectionCredentialInfo,
 	// []ConnectionEnvInfo.
-	Connections interface{}              `json:"connections,required"`
-	JSON        integrationInfoJSON      `json:"-"`
+	Connections interface{}         `json:"connections,required"`
+	JSON        integrationInfoJSON `json:"-"`
 }
 
 // integrationInfoJSON contains the JSON metadata for the struct [IntegrationInfo]
@@ -312,13 +312,13 @@ type IntegrationMethodUnion interface {
 
 // IntegrationOAuthMethod represents an OAuth-based integration method.
 type IntegrationOAuthMethod struct {
-	ID      string                       `json:"id,required"`
-	Type    IntegrationOAuthMethodType   `json:"type,required"`
-	Label   string                       `json:"label,required"`
+	ID    string                     `json:"id,required"`
+	Type  IntegrationOAuthMethodType `json:"type,required"`
+	Label string                     `json:"label,required"`
 	// This field can have the runtime type of [IntegrationTextPrompt],
 	// [IntegrationSelectPrompt].
-	Prompts []IntegrationPromptUnion     `json:"prompts"`
-	JSON    integrationOAuthMethodJSON   `json:"-"`
+	Prompts []IntegrationPromptUnion   `json:"prompts"`
+	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 
 // integrationOAuthMethodJSON contains the JSON metadata for the struct [IntegrationOAuthMethod]
@@ -357,9 +357,9 @@ func (r IntegrationOAuthMethodType) IsKnown() bool {
 
 // IntegrationKeyMethod represents a key-based integration method.
 type IntegrationKeyMethod struct {
-	Type  IntegrationKeyMethodType  `json:"type,required"`
-	Label string                    `json:"label"`
-	JSON  integrationKeyMethodJSON  `json:"-"`
+	Type  IntegrationKeyMethodType `json:"type,required"`
+	Label string                   `json:"label"`
+	JSON  integrationKeyMethodJSON `json:"-"`
 }
 
 // integrationKeyMethodJSON contains the JSON metadata for the struct [IntegrationKeyMethod]
@@ -396,9 +396,9 @@ func (r IntegrationKeyMethodType) IsKnown() bool {
 
 // IntegrationEnvMethod represents an environment-variable-based integration method.
 type IntegrationEnvMethod struct {
-	Type  IntegrationEnvMethodType  `json:"type,required"`
-	Names []string                  `json:"names,required"`
-	JSON  integrationEnvMethodJSON  `json:"-"`
+	Type  IntegrationEnvMethodType `json:"type,required"`
+	Names []string                 `json:"names,required"`
+	JSON  integrationEnvMethodJSON `json:"-"`
 }
 
 // integrationEnvMethodJSON contains the JSON metadata for the struct [IntegrationEnvMethod]
@@ -462,10 +462,10 @@ type ConnectionInfoUnion interface {
 
 // ConnectionCredentialInfo represents a credential-based connection.
 type ConnectionCredentialInfo struct {
-	Type  ConnectionCredentialInfoType  `json:"type,required"`
-	ID    string                        `json:"id,required"`
-	Label string                        `json:"label,required"`
-	JSON  connectionCredentialInfoJSON  `json:"-"`
+	Type  ConnectionCredentialInfoType `json:"type,required"`
+	ID    string                       `json:"id,required"`
+	Label string                       `json:"label,required"`
+	JSON  connectionCredentialInfoJSON `json:"-"`
 }
 
 // connectionCredentialInfoJSON contains the JSON metadata for the struct [ConnectionCredentialInfo]
@@ -503,9 +503,9 @@ func (r ConnectionCredentialInfoType) IsKnown() bool {
 
 // ConnectionEnvInfo represents an environment-variable-based connection.
 type ConnectionEnvInfo struct {
-	Type ConnectionEnvInfoType  `json:"type,required"`
-	Name string                 `json:"name,required"`
-	JSON connectionEnvInfoJSON  `json:"-"`
+	Type ConnectionEnvInfoType `json:"type,required"`
+	Name string                `json:"name,required"`
+	JSON connectionEnvInfoJSON `json:"-"`
 }
 
 // connectionEnvInfoJSON contains the JSON metadata for the struct [ConnectionEnvInfo]
@@ -574,12 +574,12 @@ func init() {
 
 // IntegrationAttempt represents an OAuth integration attempt.
 type IntegrationAttempt struct {
-	AttemptID    string                   `json:"attemptID,required"`
-	URL          string                   `json:"url,required"`
-	Instructions string                   `json:"instructions,required"`
-	Mode         IntegrationAttemptMode   `json:"mode,required"`
-	Time         IntegrationAttemptTime   `json:"time,required"`
-	JSON         integrationAttemptJSON   `json:"-"`
+	AttemptID    string                 `json:"attemptID,required"`
+	URL          string                 `json:"url,required"`
+	Instructions string                 `json:"instructions,required"`
+	Mode         IntegrationAttemptMode `json:"mode,required"`
+	Time         IntegrationAttemptTime `json:"time,required"`
+	JSON         integrationAttemptJSON `json:"-"`
 }
 
 // integrationAttemptJSON contains the JSON metadata for the struct [IntegrationAttempt]
@@ -620,7 +620,7 @@ func (r IntegrationAttemptMode) IsKnown() bool {
 type IntegrationAttemptTime struct {
 	// The creation timestamp as a Unix timestamp. This field can have the runtime type
 	// of float64, "NaN", "Infinity", or "-Infinity".
-	Created float64                    `json:"created,required"`
+	Created float64 `json:"created,required"`
 	// The expiration timestamp as a Unix timestamp. This field can have the runtime
 	// type of float64, "NaN", "Infinity", or "-Infinity".
 	Expires float64                    `json:"expires,required"`
@@ -649,11 +649,11 @@ func (r integrationAttemptTimeJSON) RawJSON() string {
 // The status field determines which variant is returned: pending, complete,
 // failed, or expired.
 type IntegrationAttemptStatus struct {
-	Status  IntegrationAttemptStatusType  `json:"status,required"`
+	Status IntegrationAttemptStatusType `json:"status,required"`
 	// Message is present only when status is "failed".
-	Message string                        `json:"message"`
-	Time    IntegrationAttemptTime        `json:"time,required"`
-	JSON    integrationAttemptStatusJSON  `json:"-"`
+	Message string                       `json:"message"`
+	Time    IntegrationAttemptTime       `json:"time,required"`
+	JSON    integrationAttemptStatusJSON `json:"-"`
 }
 
 // integrationAttemptStatusJSON contains the JSON metadata for the struct [IntegrationAttemptStatus]
@@ -695,12 +695,12 @@ func (r IntegrationAttemptStatusType) IsKnown() bool {
 
 // IntegrationTextPrompt represents a text input prompt for integration configuration.
 type IntegrationTextPrompt struct {
-	Type        IntegrationTextPromptType  `json:"type,required"`
-	Key         string                     `json:"key,required"`
-	Message     string                     `json:"message,required"`
-	Placeholder string                     `json:"placeholder"`
-	When        IntegrationWhen            `json:"when"`
-	JSON        integrationTextPromptJSON  `json:"-"`
+	Type        IntegrationTextPromptType `json:"type,required"`
+	Key         string                    `json:"key,required"`
+	Message     string                    `json:"message,required"`
+	Placeholder string                    `json:"placeholder"`
+	When        IntegrationWhen           `json:"when"`
+	JSON        integrationTextPromptJSON `json:"-"`
 }
 
 // integrationTextPromptJSON contains the JSON metadata for the struct [IntegrationTextPrompt]
@@ -738,12 +738,12 @@ func (r IntegrationTextPromptType) IsKnown() bool {
 
 // IntegrationSelectPrompt represents a select/dropdown prompt for integration configuration.
 type IntegrationSelectPrompt struct {
-	Type    IntegrationSelectPromptType   `json:"type,required"`
-	Key     string                        `json:"key,required"`
-	Message string                        `json:"message,required"`
-	Options []IntegrationSelectOption     `json:"options,required"`
-	When    IntegrationWhen               `json:"when"`
-	JSON    integrationSelectPromptJSON   `json:"-"`
+	Type    IntegrationSelectPromptType `json:"type,required"`
+	Key     string                      `json:"key,required"`
+	Message string                      `json:"message,required"`
+	Options []IntegrationSelectOption   `json:"options,required"`
+	When    IntegrationWhen             `json:"when"`
+	JSON    integrationSelectPromptJSON `json:"-"`
 }
 
 // integrationSelectPromptJSON contains the JSON metadata for the struct [IntegrationSelectPrompt]
@@ -793,9 +793,9 @@ func (r IntegrationSelectPrompt) implementsIntegrationPromptUnion() {}
 
 // IntegrationSelectOption represents an option within a select prompt.
 type IntegrationSelectOption struct {
-	Label string                     `json:"label,required"`
-	Value string                     `json:"value,required"`
-	Hint  string                     `json:"hint"`
+	Label string                      `json:"label,required"`
+	Value string                      `json:"value,required"`
+	Hint  string                      `json:"hint"`
 	JSON  integrationSelectOptionJSON `json:"-"`
 }
 
@@ -820,10 +820,10 @@ func (r integrationSelectOptionJSON) RawJSON() string {
 
 // IntegrationWhen represents a conditional visibility rule for integration prompts.
 type IntegrationWhen struct {
-	Key   string                `json:"key,required"`
-	Op    IntegrationWhenOp     `json:"op,required"`
-	Value string                `json:"value,required"`
-	JSON  integrationWhenJSON   `json:"-"`
+	Key   string              `json:"key,required"`
+	Op    IntegrationWhenOp   `json:"op,required"`
+	Value string              `json:"value,required"`
+	JSON  integrationWhenJSON `json:"-"`
 }
 
 // integrationWhenJSON contains the JSON metadata for the struct [IntegrationWhen]
@@ -887,8 +887,8 @@ func (r V2IntegrationGetParams) URLQuery() (v url.Values) {
 // V2IntegrationConnectKeyParams contains the body and query parameters for connecting
 // with a key.
 type V2IntegrationConnectKeyParams struct {
-	Location param.Field[V2LocationParam]          `query:"location"`
-	Body     V2IntegrationConnectKeyParamsBody     `json:"-"`
+	Location param.Field[V2LocationParam]      `query:"location"`
+	Body     V2IntegrationConnectKeyParamsBody `json:"-"`
 }
 
 func (r V2IntegrationConnectKeyParams) MarshalJSON() (data []byte, err error) {
@@ -904,9 +904,9 @@ func (r V2IntegrationConnectKeyParams) URLQuery() (v url.Values) {
 
 // V2IntegrationConnectKeyParamsBody contains the body fields for the connect key request.
 type V2IntegrationConnectKeyParamsBody struct {
-	Key   param.Field[string]                     `json:"key,required"`
-	Label param.Field[string]                     `json:"label"`
-	JSON  v2IntegrationConnectKeyParamsBodyJSON   `json:"-"`
+	Key   param.Field[string]                   `json:"key,required"`
+	Label param.Field[string]                   `json:"label"`
+	JSON  v2IntegrationConnectKeyParamsBodyJSON `json:"-"`
 }
 
 // v2IntegrationConnectKeyParamsBodyJSON contains the JSON metadata for the struct [V2IntegrationConnectKeyParamsBody]
@@ -928,8 +928,8 @@ func (r V2IntegrationConnectKeyParamsBody) MarshalJSON() (data []byte, err error
 // V2IntegrationConnectOauthParams contains the body and query parameters for
 // beginning an OAuth connection.
 type V2IntegrationConnectOauthParams struct {
-	Location param.Field[V2LocationParam]            `query:"location"`
-	Body     V2IntegrationConnectOauthParamsBody     `json:"-"`
+	Location param.Field[V2LocationParam]        `query:"location"`
+	Body     V2IntegrationConnectOauthParamsBody `json:"-"`
 }
 
 func (r V2IntegrationConnectOauthParams) MarshalJSON() (data []byte, err error) {
@@ -945,8 +945,8 @@ func (r V2IntegrationConnectOauthParams) URLQuery() (v url.Values) {
 
 // V2IntegrationConnectOauthParamsBody contains the body fields for the oauth connect request.
 type V2IntegrationConnectOauthParamsBody struct {
-	MethodID string            `json:"methodID,required"`
-	Inputs   map[string]string `json:"inputs,required"`
+	MethodID string              `json:"methodID,required"`
+	Inputs   map[string]string   `json:"inputs,required"`
 	Label    param.Field[string] `json:"label"`
 }
 
@@ -969,8 +969,8 @@ func (r V2IntegrationAttemptStatusParams) URLQuery() (v url.Values) {
 // V2IntegrationAttemptCompleteParams contains the body and query parameters for
 // completing an OAuth attempt.
 type V2IntegrationAttemptCompleteParams struct {
-	Location param.Field[V2LocationParam]            `query:"location"`
-	Body     V2IntegrationAttemptCompleteParamsBody  `json:"-"`
+	Location param.Field[V2LocationParam]           `query:"location"`
+	Body     V2IntegrationAttemptCompleteParamsBody `json:"-"`
 }
 
 func (r V2IntegrationAttemptCompleteParams) MarshalJSON() (data []byte, err error) {

@@ -167,28 +167,28 @@ func (r *V2SessionService) Get(ctx context.Context, sessionID string, opts ...op
 // Switch session agent
 //
 // Switch the agent used by subsequent provider turns.
-func (r *V2SessionService) SwitchAgent(ctx context.Context, sessionID string, params V2SessionSwitchAgentParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionService) SwitchAgent(ctx context.Context, sessionID string, params V2SessionSwitchAgentParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/agent", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return
 }
 
 // Switch session model
 //
 // Switch the model used by subsequent provider turns.
-func (r *V2SessionService) SwitchModel(ctx context.Context, sessionID string, params V2SessionSwitchModelParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionService) SwitchModel(ctx context.Context, sessionID string, params V2SessionSwitchModelParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/model", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return
 }
 
@@ -230,14 +230,14 @@ func (r *V2SessionService) History(ctx context.Context, sessionID string, query 
 //
 // Interrupt active execution owned by this OpenCode process. Idle interruption is
 // a no-op.
-func (r *V2SessionService) Interrupt(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionService) Interrupt(ctx context.Context, sessionID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/interrupt", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
@@ -262,8 +262,8 @@ func (r *V2SessionService) Message(ctx context.Context, sessionID string, messag
 // ===== Response Types =====
 
 type V2SessionsResponse struct {
-	Data   []V2SessionInfo         `json:"data,required"`
-	Cursor V2Cursor              `json:"cursor,required"`
+	Data   []V2SessionInfo        `json:"data,required"`
+	Cursor V2Cursor               `json:"cursor,required"`
 	JSON   v2SessionsResponseJSON `json:"-"`
 }
 
@@ -283,19 +283,19 @@ func (r v2SessionsResponseJSON) RawJSON() string {
 }
 
 type V2SessionInfo struct {
-	ID        string               `json:"id,required"`
-	ProjectID string               `json:"projectID,required"`
-	Cost      float64              `json:"cost,required"`
-	Time      V2SessionInfoTime    `json:"time,required"`
-	Title     string               `json:"title,required"`
-	Tokens    V2SessionInfoTokens  `json:"tokens,required"`
-	ParentID  string               `json:"parentID"`
-	Location  LocationRef          `json:"location,required"`
-	Subpath   string               `json:"subpath"`
-	Agent     string               `json:"agent"`
-	Model     ModelRef             `json:"model"`
-	Revert    RevertState          `json:"revert"`
-	JSON      v2SessionInfoJSON    `json:"-"`
+	ID        string              `json:"id,required"`
+	ProjectID string              `json:"projectID,required"`
+	Cost      float64             `json:"cost,required"`
+	Time      V2SessionInfoTime   `json:"time,required"`
+	Title     string              `json:"title,required"`
+	Tokens    V2SessionInfoTokens `json:"tokens,required"`
+	ParentID  string              `json:"parentID"`
+	Location  LocationRef         `json:"location,required"`
+	Subpath   string              `json:"subpath"`
+	Agent     string              `json:"agent"`
+	Model     ModelRef            `json:"model"`
+	Revert    RevertState         `json:"revert"`
+	JSON      v2SessionInfoJSON   `json:"-"`
 }
 
 type v2SessionInfoJSON struct {
@@ -324,9 +324,9 @@ func (r v2SessionInfoJSON) RawJSON() string {
 }
 
 type V2SessionInfoTime struct {
-	Created  int64               `json:"created,required"`
-	Updated  int64               `json:"updated,required"`
-	Archived int64             `json:"archived"`
+	Created  int64                 `json:"created,required"`
+	Updated  int64                 `json:"updated,required"`
+	Archived int64                 `json:"archived"`
 	JSON     v2SessionInfoTimeJSON `json:"-"`
 }
 
@@ -350,8 +350,8 @@ type V2SessionInfoTokens struct {
 	Input     int64                    `json:"input,required"`
 	Output    int64                    `json:"output,required"`
 	Reasoning int64                    `json:"reasoning,required"`
-	Cache     V2SessionInfoTokensCache   `json:"cache,required"`
-	JSON      v2SessionInfoTokensJSON    `json:"-"`
+	Cache     V2SessionInfoTokensCache `json:"cache,required"`
+	JSON      v2SessionInfoTokensJSON  `json:"-"`
 }
 
 type v2SessionInfoTokensJSON struct {
@@ -374,7 +374,7 @@ func (r v2SessionInfoTokensJSON) RawJSON() string {
 type V2SessionInfoTokensCache struct {
 	Read  int64                        `json:"read,required"`
 	Write int64                        `json:"write,required"`
-	JSON  v2SessionInfoTokensCacheJSON   `json:"-"`
+	JSON  v2SessionInfoTokensCacheJSON `json:"-"`
 }
 
 type v2SessionInfoTokensCacheJSON struct {
@@ -393,8 +393,8 @@ func (r v2SessionInfoTokensCacheJSON) RawJSON() string {
 }
 
 type V2Cursor struct {
-	Previous string     `json:"previous"`
-	Next     string     `json:"next"`
+	Previous string       `json:"previous"`
+	Next     string       `json:"next"`
 	JSON     v2CursorJSON `json:"-"`
 }
 
@@ -437,8 +437,8 @@ func (r v2SessionMessagesResponseJSON) RawJSON() string {
 // V2SessionContextResponse is returned by the Context method. It wraps messages
 // in a data field.
 type V2SessionContextResponse struct {
-	Data []V2SessionMessage              `json:"data,required"`
-	JSON v2SessionContextResponseJSON    `json:"-"`
+	Data []V2SessionMessage           `json:"data,required"`
+	JSON v2SessionContextResponseJSON `json:"-"`
 }
 
 type v2SessionContextResponseJSON struct {
@@ -472,10 +472,10 @@ func (V2SessionMessageAssistant) implementsV2SessionMessage()     {}
 func (V2SessionMessageCompaction) implementsV2SessionMessage()    {}
 
 type V2SessionMessageAgentSwitched struct {
-	ID       string                            `json:"id,required"`
-	Time     V2SessionMessageTime              `json:"time,required"`
-	Type     string                            `json:"type,required"`
-	Agent    string                            `json:"agent,required"`
+	ID    string               `json:"id,required"`
+	Time  V2SessionMessageTime `json:"time,required"`
+	Type  string               `json:"type,required"`
+	Agent string               `json:"agent,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                       `json:"metadata"`
 	JSON     v2SessionMessageAgentSwitchedJSON `json:"-"`
@@ -500,10 +500,10 @@ func (r v2SessionMessageAgentSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageModelSwitched struct {
-	ID       string                            `json:"id,required"`
-	Time     V2SessionMessageTime              `json:"time,required"`
-	Type     string                            `json:"type,required"`
-	Model    V2SessionMessageModel             `json:"model,required"`
+	ID    string                `json:"id,required"`
+	Time  V2SessionMessageTime  `json:"time,required"`
+	Type  string                `json:"type,required"`
+	Model V2SessionMessageModel `json:"model,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                       `json:"metadata"`
 	JSON     v2SessionMessageModelSwitchedJSON `json:"-"`
@@ -528,15 +528,15 @@ func (r v2SessionMessageModelSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageUser struct {
-	ID         string                     `json:"id,required"`
-	Time       V2SessionMessageTime       `json:"time,required"`
-	Text       string                     `json:"text,required"`
-	Type       string                     `json:"type,required"`
-	Files      []V2PromptFileAttachment     `json:"files"`
-	Agents     []V2PromptAgentAttachment    `json:"agents"`
+	ID         string                        `json:"id,required"`
+	Time       V2SessionMessageTime          `json:"time,required"`
+	Text       string                        `json:"text,required"`
+	Type       string                        `json:"type,required"`
+	Files      []V2PromptFileAttachment      `json:"files"`
+	Agents     []V2PromptAgentAttachment     `json:"agents"`
 	References []V2PromptReferenceAttachment `json:"references"`
-	Metadata   interface{}                `json:"metadata"`
-	JSON       v2SessionMessageUserJSON   `json:"-"`
+	Metadata   interface{}                   `json:"metadata"`
+	JSON       v2SessionMessageUserJSON      `json:"-"`
 }
 
 type v2SessionMessageUserJSON struct {
@@ -561,13 +561,13 @@ func (r v2SessionMessageUserJSON) RawJSON() string {
 }
 
 type V2SessionMessageSynthetic struct {
-	ID        string                          `json:"id,required"`
-	Time      V2SessionMessageTime            `json:"time,required"`
-	SessionID string                          `json:"sessionID,required"`
-	Text      string                          `json:"text,required"`
-	Type      string                          `json:"type,required"`
-	Metadata  interface{}                     `json:"metadata"`
-	JSON      v2SessionMessageSyntheticJSON   `json:"-"`
+	ID        string                        `json:"id,required"`
+	Time      V2SessionMessageTime          `json:"time,required"`
+	SessionID string                        `json:"sessionID,required"`
+	Text      string                        `json:"text,required"`
+	Type      string                        `json:"type,required"`
+	Metadata  interface{}                   `json:"metadata"`
+	JSON      v2SessionMessageSyntheticJSON `json:"-"`
 }
 
 type v2SessionMessageSyntheticJSON struct {
@@ -590,15 +590,15 @@ func (r v2SessionMessageSyntheticJSON) RawJSON() string {
 }
 
 type V2SessionMessageShell struct {
-	ID       string                       `json:"id,required"`
-	Time     V2SessionMessageShellTime    `json:"time,required"`
-	Type     string                       `json:"type,required"`
-	CallID   string                       `json:"callID,required"`
-	Command  string                       `json:"command,required"`
-	Output   string                       `json:"output,required"`
+	ID      string                    `json:"id,required"`
+	Time    V2SessionMessageShellTime `json:"time,required"`
+	Type    string                    `json:"type,required"`
+	CallID  string                    `json:"callID,required"`
+	Command string                    `json:"command,required"`
+	Output  string                    `json:"output,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                  `json:"metadata"`
-	JSON     v2SessionMessageShellJSON    `json:"-"`
+	Metadata interface{}               `json:"metadata"`
+	JSON     v2SessionMessageShellJSON `json:"-"`
 }
 
 type v2SessionMessageShellJSON struct {
@@ -622,19 +622,19 @@ func (r v2SessionMessageShellJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistant struct {
-	ID        string                              `json:"id,required"`
-	Time      V2SessionMessageAssistantTime       `json:"time,required"`
-	Type      string                              `json:"type,required"`
-	Agent     string                              `json:"agent,required"`
-	Model     V2SessionMessageModel               `json:"model,required"`
-	Content   []V2SessionMessageAssistantContent  `json:"content,required"`
-	Snapshot  V2SessionMessageAssistantSnapshot   `json:"snapshot"`
-	Finish    string                              `json:"finish"`
-	Cost      float64                             `json:"cost"`
-	Tokens    V2SessionMessageTokens              `json:"tokens"`
-	Error     SessionErrorUnknown                 `json:"error"`
-	Metadata  interface{}                         `json:"metadata"`
-	JSON      v2SessionMessageAssistantJSON       `json:"-"`
+	ID       string                             `json:"id,required"`
+	Time     V2SessionMessageAssistantTime      `json:"time,required"`
+	Type     string                             `json:"type,required"`
+	Agent    string                             `json:"agent,required"`
+	Model    V2SessionMessageModel              `json:"model,required"`
+	Content  []V2SessionMessageAssistantContent `json:"content,required"`
+	Snapshot V2SessionMessageAssistantSnapshot  `json:"snapshot"`
+	Finish   string                             `json:"finish"`
+	Cost     float64                            `json:"cost"`
+	Tokens   V2SessionMessageTokens             `json:"tokens"`
+	Error    SessionErrorUnknown                `json:"error"`
+	Metadata interface{}                        `json:"metadata"`
+	JSON     v2SessionMessageAssistantJSON      `json:"-"`
 }
 
 type v2SessionMessageAssistantJSON struct {
@@ -663,15 +663,15 @@ func (r v2SessionMessageAssistantJSON) RawJSON() string {
 }
 
 type V2SessionMessageCompaction struct {
-	ID       string                                    `json:"id,required"`
-	Time     V2SessionMessageTime                      `json:"time,required"`
-	Type     string                                    `json:"type,required"`
-	Reason   V2SessionMessageCompactionReason           `json:"reason,required"`
-	Summary  string                                    `json:"summary,required"`
-	Recent   string                                    `json:"recent,required"`
+	ID      string                           `json:"id,required"`
+	Time    V2SessionMessageTime             `json:"time,required"`
+	Type    string                           `json:"type,required"`
+	Reason  V2SessionMessageCompactionReason `json:"reason,required"`
+	Summary string                           `json:"summary,required"`
+	Recent  string                           `json:"recent,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                               `json:"metadata"`
-	JSON     v2SessionMessageCompactionJSON            `json:"-"`
+	Metadata interface{}                    `json:"metadata"`
+	JSON     v2SessionMessageCompactionJSON `json:"-"`
 }
 
 type v2SessionMessageCompactionJSON struct {
@@ -710,9 +710,9 @@ func (r V2SessionMessageCompactionReason) IsKnown() bool {
 }
 
 type SessionErrorUnknown struct {
-	Type    string                    `json:"type,required"`
-	Message string                    `json:"message,required"`
-	JSON    sessionErrorUnknownJSON   `json:"-"`
+	Type    string                  `json:"type,required"`
+	Message string                  `json:"message,required"`
+	JSON    sessionErrorUnknownJSON `json:"-"`
 }
 
 // sessionErrorUnknownJSON contains the JSON metadata for the struct [SessionErrorUnknown]
@@ -734,7 +734,7 @@ func (r sessionErrorUnknownJSON) RawJSON() string {
 // Shared sub-types
 
 type V2SessionMessageTime struct {
-	Created int64                     `json:"created,required"`
+	Created int64                    `json:"created,required"`
 	JSON    v2SessionMessageTimeJSON `json:"-"`
 }
 
@@ -753,8 +753,8 @@ func (r v2SessionMessageTimeJSON) RawJSON() string {
 }
 
 type V2SessionMessageShellTime struct {
-	Created   int64                          `json:"created,required"`
-	Completed int64                          `json:"completed"`
+	Created   int64                         `json:"created,required"`
+	Completed int64                         `json:"completed"`
 	JSON      v2SessionMessageShellTimeJSON `json:"-"`
 }
 
@@ -774,9 +774,9 @@ func (r v2SessionMessageShellTimeJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantTime struct {
-	Created   int64                               `json:"created,required"`
-	Completed int64                               `json:"completed"`
-	JSON      v2SessionMessageAssistantTimeJSON  `json:"-"`
+	Created   int64                             `json:"created,required"`
+	Completed int64                             `json:"completed"`
+	JSON      v2SessionMessageAssistantTimeJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantTimeJSON struct {
@@ -795,10 +795,10 @@ func (r v2SessionMessageAssistantTimeJSON) RawJSON() string {
 }
 
 type V2SessionMessageModel struct {
-	ID         string                     `json:"id,required"`
-	ProviderID string                     `json:"providerID,required"`
-	Variant    string                     `json:"variant"`
-	JSON       v2SessionMessageModelJSON  `json:"-"`
+	ID         string                    `json:"id,required"`
+	ProviderID string                    `json:"providerID,required"`
+	Variant    string                    `json:"variant"`
+	JSON       v2SessionMessageModelJSON `json:"-"`
 }
 
 type v2SessionMessageModelJSON struct {
@@ -818,11 +818,11 @@ func (r v2SessionMessageModelJSON) RawJSON() string {
 }
 
 type V2SessionMessageTokens struct {
-	Input     int64                      `json:"input,required"`
-	Output    int64                      `json:"output,required"`
-	Reasoning int64                      `json:"reasoning,required"`
-	Cache     V2SessionMessageTokensCache  `json:"cache,required"`
-	JSON      v2SessionMessageTokensJSON   `json:"-"`
+	Input     int64                       `json:"input,required"`
+	Output    int64                       `json:"output,required"`
+	Reasoning int64                       `json:"reasoning,required"`
+	Cache     V2SessionMessageTokensCache `json:"cache,required"`
+	JSON      v2SessionMessageTokensJSON  `json:"-"`
 }
 
 type v2SessionMessageTokensJSON struct {
@@ -843,9 +843,9 @@ func (r v2SessionMessageTokensJSON) RawJSON() string {
 }
 
 type V2SessionMessageTokensCache struct {
-	Read  int64                          `json:"read,required"`
-	Write int64                          `json:"write,required"`
-	JSON  v2SessionMessageTokensCacheJSON  `json:"-"`
+	Read  int64                           `json:"read,required"`
+	Write int64                           `json:"write,required"`
+	JSON  v2SessionMessageTokensCacheJSON `json:"-"`
 }
 
 type v2SessionMessageTokensCacheJSON struct {
@@ -864,14 +864,14 @@ func (r v2SessionMessageTokensCacheJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantContent struct {
-	Type     string                                     `json:"type,required"`
-	Text     string                                     `json:"text"`
-	ID       string                                     `json:"id"`
-	Name     string                                     `json:"name"`
-	State    V2SessionMessageToolState                  `json:"state"`
-	Provider V2SessionMessageToolProvider               `json:"provider"`
-	Time     V2SessionMessageToolTime                   `json:"time"`
-	JSON     v2SessionMessageAssistantContentJSON       `json:"-"`
+	Type     string                               `json:"type,required"`
+	Text     string                               `json:"text"`
+	ID       string                               `json:"id"`
+	Name     string                               `json:"name"`
+	State    V2SessionMessageToolState            `json:"state"`
+	Provider V2SessionMessageToolProvider         `json:"provider"`
+	Time     V2SessionMessageToolTime             `json:"time"`
+	JSON     v2SessionMessageAssistantContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantContentJSON struct {
@@ -920,8 +920,8 @@ func (r v2SessionMessageAssistantSnapshotJSON) RawJSON() string {
 type V2SessionMessageToolProvider struct {
 	Executed bool `json:"executed,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                         `json:"metadata"`
-	JSON     v2SessionMessageToolProviderJSON    `json:"-"`
+	Metadata interface{}                      `json:"metadata"`
+	JSON     v2SessionMessageToolProviderJSON `json:"-"`
 }
 
 type v2SessionMessageToolProviderJSON struct {
@@ -940,11 +940,11 @@ func (r v2SessionMessageToolProviderJSON) RawJSON() string {
 }
 
 type V2SessionMessageToolTime struct {
-	Created   int64                           `json:"created,required"`
-	Ran       int64                           `json:"ran"`
-	Completed int64                           `json:"completed"`
+	Created   int64                        `json:"created,required"`
+	Ran       int64                        `json:"ran"`
+	Completed int64                        `json:"completed"`
 	Pruned    int64                        `json:"pruned"`
-	JSON      v2SessionMessageToolTimeJSON   `json:"-"`
+	JSON      v2SessionMessageToolTimeJSON `json:"-"`
 }
 
 type v2SessionMessageToolTimeJSON struct {
@@ -976,14 +976,14 @@ func (r v2SessionMessageToolTimeJSON) RawJSON() string {
 // V2SessionInputAdmitted is returned by the Prompt method. It represents the
 // server's admission of a prompt input.
 type V2SessionInputAdmitted struct {
-	AdmittedSeq int64                          `json:"admittedSeq,required"`
-	ID          string                         `json:"id,required"`
-	SessionID   string                         `json:"sessionID,required"`
-	Prompt      V2SessionInputPrompt           `json:"prompt,required"`
-	Delivery    string                         `json:"delivery"`
-	TimeCreated int64                          `json:"timeCreated,required"`
-	PromotedSeq int64                          `json:"promotedSeq"`
-	JSON        v2SessionInputAdmittedJSON     `json:"-"`
+	AdmittedSeq int64                      `json:"admittedSeq,required"`
+	ID          string                     `json:"id,required"`
+	SessionID   string                     `json:"sessionID,required"`
+	Prompt      V2SessionInputPrompt       `json:"prompt,required"`
+	Delivery    string                     `json:"delivery"`
+	TimeCreated int64                      `json:"timeCreated,required"`
+	PromotedSeq int64                      `json:"promotedSeq"`
+	JSON        v2SessionInputAdmittedJSON `json:"-"`
 }
 
 type v2SessionInputAdmittedJSON struct {
@@ -1009,8 +1009,8 @@ func (r v2SessionInputAdmittedJSON) RawJSON() string {
 // V2SessionPromptResponse wraps the SessionInputAdmitted returned by the v2
 // Prompt endpoint. The OpenAPI response is {data: SessionInputAdmitted}.
 type V2SessionPromptResponse struct {
-	Data V2SessionInputAdmitted       `json:"data,required"`
-	JSON v2SessionPromptResponseJSON  `json:"-"`
+	Data V2SessionInputAdmitted      `json:"data,required"`
+	JSON v2SessionPromptResponseJSON `json:"-"`
 }
 
 type v2SessionPromptResponseJSON struct {
@@ -1028,11 +1028,11 @@ func (r v2SessionPromptResponseJSON) RawJSON() string {
 }
 
 type V2SessionInputPrompt struct {
-	Text       string                          `json:"text,required"`
-	Files      []V2PromptFileAttachment        `json:"files"`
-	Agents     []V2PromptAgentAttachment       `json:"agents"`
-	References []V2PromptReferenceAttachment   `json:"references"`
-	JSON       v2SessionInputPromptJSON        `json:"-"`
+	Text       string                        `json:"text,required"`
+	Files      []V2PromptFileAttachment      `json:"files"`
+	Agents     []V2PromptAgentAttachment     `json:"agents"`
+	References []V2PromptReferenceAttachment `json:"references"`
+	JSON       v2SessionInputPromptJSON      `json:"-"`
 }
 
 type v2SessionInputPromptJSON struct {
@@ -1055,12 +1055,12 @@ func (r v2SessionInputPromptJSON) RawJSON() string {
 // ===== Prompt Attachment Types =====
 
 type V2PromptFileAttachment struct {
-	URI         string                       `json:"uri,required"`
-	Mime        string                       `json:"mime,required"`
-	Name        string                       `json:"name"`
-	Description string                       `json:"description"`
-	Source      V2PromptSource               `json:"source"`
-	JSON        v2PromptFileAttachmentJSON   `json:"-"`
+	URI         string                     `json:"uri,required"`
+	Mime        string                     `json:"mime,required"`
+	Name        string                     `json:"name"`
+	Description string                     `json:"description"`
+	Source      V2PromptSource             `json:"source"`
+	JSON        v2PromptFileAttachmentJSON `json:"-"`
 }
 
 type v2PromptFileAttachmentJSON struct {
@@ -1082,8 +1082,8 @@ func (r v2PromptFileAttachmentJSON) RawJSON() string {
 }
 
 type V2PromptAgentAttachment struct {
-	Name   string                     `json:"name,required"`
-	Source V2PromptSource             `json:"source"`
+	Name   string                      `json:"name,required"`
+	Source V2PromptSource              `json:"source"`
 	JSON   v2PromptAgentAttachmentJSON `json:"-"`
 }
 
@@ -1103,16 +1103,16 @@ func (r v2PromptAgentAttachmentJSON) RawJSON() string {
 }
 
 type V2PromptReferenceAttachment struct {
-	Name       string                              `json:"name,required"`
-	Kind       V2PromptReferenceAttachmentKind      `json:"kind,required"`
-	URI        string                              `json:"uri"`
-	Repository string                           `json:"repository"`
-	Branch     string                           `json:"branch"`
-	Target     string                           `json:"target"`
-	TargetURI  string                           `json:"targetUri"`
-	Problem    string                           `json:"problem"`
-	Source     V2PromptSource                   `json:"source"`
-	JSON       v2PromptReferenceAttachmentJSON  `json:"-"`
+	Name       string                          `json:"name,required"`
+	Kind       V2PromptReferenceAttachmentKind `json:"kind,required"`
+	URI        string                          `json:"uri"`
+	Repository string                          `json:"repository"`
+	Branch     string                          `json:"branch"`
+	Target     string                          `json:"target"`
+	TargetURI  string                          `json:"targetUri"`
+	Problem    string                          `json:"problem"`
+	Source     V2PromptSource                  `json:"source"`
+	JSON       v2PromptReferenceAttachmentJSON `json:"-"`
 }
 
 type v2PromptReferenceAttachmentJSON struct {
@@ -1154,9 +1154,9 @@ func (r V2PromptReferenceAttachmentKind) IsKnown() bool {
 }
 
 type V2PromptSource struct {
-	Start int64           `json:"start,required"`
-	End   int64           `json:"end,required"`
-	Text  string            `json:"text,required"`
+	Start int64              `json:"start,required"`
+	End   int64              `json:"end,required"`
+	Text  string             `json:"text,required"`
 	JSON  v2PromptSourceJSON `json:"-"`
 }
 
@@ -1179,9 +1179,9 @@ func (r v2PromptSourceJSON) RawJSON() string {
 // ===== V2 Content Sub-Types =====
 
 type V2SessionMessageAssistantTextContent struct {
-	Type string                                     `json:"type,required"`
-	Text string                                     `json:"text,required"`
-	JSON v2SessionMessageAssistantTextContentJSON   `json:"-"`
+	Type string                                   `json:"type,required"`
+	Text string                                   `json:"text,required"`
+	JSON v2SessionMessageAssistantTextContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantTextContentJSON struct {
@@ -1200,10 +1200,10 @@ func (r v2SessionMessageAssistantTextContentJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantReasoningContent struct {
-	Type string                                          `json:"type,required"`
-	ID   string                                          `json:"id,required"`
-	Text string                                          `json:"text,required"`
-	JSON v2SessionMessageAssistantReasoningContentJSON   `json:"-"`
+	Type string                                        `json:"type,required"`
+	ID   string                                        `json:"id,required"`
+	Text string                                        `json:"text,required"`
+	JSON v2SessionMessageAssistantReasoningContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantReasoningContentJSON struct {
@@ -1223,16 +1223,16 @@ func (r v2SessionMessageAssistantReasoningContentJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantToolContent struct {
-	Type     string                                     `json:"type,required"`
-	ID       string                                     `json:"id,required"`
-	Name     string                                     `json:"name,required"`
-	Provider V2SessionMessageToolProvider               `json:"provider"`
+	Type     string                       `json:"type,required"`
+	ID       string                       `json:"id,required"`
+	Name     string                       `json:"name,required"`
+	Provider V2SessionMessageToolProvider `json:"provider"`
 	// This field can have the runtime type of
 	// [V2SessionMessageToolStatePending], [V2SessionMessageToolStateRunning],
 	// [V2SessionMessageToolStateCompleted], [V2SessionMessageToolStateError].
-	State    V2SessionMessageToolState                  `json:"state,required"`
-	Time     V2SessionMessageToolTime                   `json:"time,required"`
-	JSON     v2SessionMessageAssistantToolContentJSON   `json:"-"`
+	State V2SessionMessageToolState                `json:"state,required"`
+	Time  V2SessionMessageToolTime                 `json:"time,required"`
+	JSON  v2SessionMessageAssistantToolContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantToolContentJSON struct {
@@ -1414,8 +1414,8 @@ type V2SessionMessageToolStateRunning struct {
 	Input      map[string]interface{}                 `json:"input,required"`
 	Structured map[string]interface{}                 `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content interface{}                               `json:"content,required"`
-	JSON    v2SessionMessageToolStateRunningJSON      `json:"-"`
+	Content interface{}                          `json:"content,required"`
+	JSON    v2SessionMessageToolStateRunningJSON `json:"-"`
 }
 
 type V2SessionMessageToolStateRunningStatus string
@@ -1452,13 +1452,13 @@ func (r v2SessionMessageToolStateRunningJSON) RawJSON() string {
 func (r V2SessionMessageToolStateRunning) implementsV2SessionMessageToolStateUnion() {}
 
 type V2SessionMessageToolStateCompleted struct {
-	Status      V2SessionMessageToolStateCompletedStatus `json:"status,required"`
-	Input       map[string]interface{}                   `json:"input,required"`
-	Structured  map[string]interface{}                   `json:"structured,required"`
+	Status     V2SessionMessageToolStateCompletedStatus `json:"status,required"`
+	Input      map[string]interface{}                   `json:"input,required"`
+	Structured map[string]interface{}                   `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     interface{}                              `json:"content,required"`
-	Attachments []V2PromptFileAttachment                 `json:"attachments"`
-	JSON        v2SessionMessageToolStateCompletedJSON   `json:"-"`
+	Content     interface{}                            `json:"content,required"`
+	Attachments []V2PromptFileAttachment               `json:"attachments"`
+	JSON        v2SessionMessageToolStateCompletedJSON `json:"-"`
 }
 
 type V2SessionMessageToolStateCompletedStatus string
@@ -1500,9 +1500,9 @@ type V2SessionMessageToolStateError struct {
 	Input      map[string]interface{}               `json:"input,required"`
 	Structured map[string]interface{}               `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content interface{}                              `json:"content,required"`
-	Error   SessionErrorUnknown                      `json:"error,required"`
-	JSON    v2SessionMessageToolStateErrorJSON        `json:"-"`
+	Content interface{}                        `json:"content,required"`
+	Error   SessionErrorUnknown                `json:"error,required"`
+	JSON    v2SessionMessageToolStateErrorJSON `json:"-"`
 }
 
 type V2SessionMessageToolStateErrorStatus string
@@ -1616,14 +1616,14 @@ func (r V2SessionOrder) IsKnown() bool {
 }
 
 type V2SessionListParams struct {
-	Directory param.Field[string]        `query:"directory"`
-	Workspace param.Field[string]        `query:"workspace"`
-	Limit     param.Field[int64]         `query:"limit"`
+	Directory param.Field[string]         `query:"directory"`
+	Workspace param.Field[string]         `query:"workspace"`
+	Limit     param.Field[int64]          `query:"limit"`
 	Order     param.Field[V2SessionOrder] `query:"order"`
-	Project   param.Field[string]        `query:"project"`
-	Subpath   param.Field[string]        `query:"subpath"`
-	Search    param.Field[string]        `query:"search"`
-	Cursor    param.Field[string]        `query:"cursor"`
+	Project   param.Field[string]         `query:"project"`
+	Subpath   param.Field[string]         `query:"subpath"`
+	Search    param.Field[string]         `query:"search"`
+	Cursor    param.Field[string]         `query:"cursor"`
 }
 
 func (r V2SessionListParams) URLQuery() (v url.Values) {
@@ -1634,9 +1634,9 @@ func (r V2SessionListParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionPromptParams struct {
-	Directory param.Field[string]           `query:"directory"`
-	Workspace param.Field[string]           `query:"workspace"`
-	Body      V2SessionPromptParamsBody     `json:"body,required"`
+	Directory param.Field[string]       `query:"directory"`
+	Workspace param.Field[string]       `query:"workspace"`
+	Body      V2SessionPromptParamsBody `json:"body,required"`
 }
 
 func (r V2SessionPromptParams) MarshalJSON() (data []byte, err error) {
@@ -1651,7 +1651,7 @@ func (r V2SessionPromptParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionPromptParamsBody struct {
-	Prompt   param.Field[V2Prompt]   `json:"prompt,required"`
+	Prompt   param.Field[V2Prompt]        `json:"prompt,required"`
 	Delivery param.Field[SessionDelivery] `json:"delivery"`
 }
 
@@ -1675,9 +1675,9 @@ func (r V2SessionPromptParamsBody) MarshalJSON() (data []byte, err error) {
 }
 
 type V2Prompt struct {
-	Text       param.Field[string]                            `json:"text,required"`
-	Files      param.Field[[]V2PromptFileAttachmentParam]     `json:"files"`
-	Agents     param.Field[[]V2PromptAgentAttachmentParam]    `json:"agents"`
+	Text       param.Field[string]                             `json:"text,required"`
+	Files      param.Field[[]V2PromptFileAttachmentParam]      `json:"files"`
+	Agents     param.Field[[]V2PromptAgentAttachmentParam]     `json:"agents"`
 	References param.Field[[]V2PromptReferenceAttachmentParam] `json:"references"`
 }
 
@@ -1686,10 +1686,10 @@ func (r V2Prompt) MarshalJSON() (data []byte, err error) {
 }
 
 type V2PromptFileAttachmentParam struct {
-	URI         param.Field[string]           `json:"uri,required"`
-	Mime        param.Field[string]           `json:"mime,required"`
-	Name        param.Field[string]           `json:"name"`
-	Description param.Field[string]           `json:"description"`
+	URI         param.Field[string]              `json:"uri,required"`
+	Mime        param.Field[string]              `json:"mime,required"`
+	Name        param.Field[string]              `json:"name"`
+	Description param.Field[string]              `json:"description"`
 	Source      param.Field[V2PromptSourceParam] `json:"source"`
 }
 
@@ -1698,7 +1698,7 @@ func (r V2PromptFileAttachmentParam) MarshalJSON() (data []byte, err error) {
 }
 
 type V2PromptAgentAttachmentParam struct {
-	Name   param.Field[string]            `json:"name,required"`
+	Name   param.Field[string]              `json:"name,required"`
 	Source param.Field[V2PromptSourceParam] `json:"source"`
 }
 
@@ -1707,14 +1707,14 @@ func (r V2PromptAgentAttachmentParam) MarshalJSON() (data []byte, err error) {
 }
 
 type V2PromptReferenceAttachmentParam struct {
-	Name       param.Field[string]            `json:"name,required"`
-	Kind       param.Field[string]            `json:"kind,required"`
-	URI        param.Field[string]            `json:"uri"`
-	Repository param.Field[string]            `json:"repository"`
-	Branch     param.Field[string]            `json:"branch"`
-	Target     param.Field[string]            `json:"target"`
-	TargetURI  param.Field[string]            `json:"targetUri"`
-	Problem    param.Field[string]            `json:"problem"`
+	Name       param.Field[string]              `json:"name,required"`
+	Kind       param.Field[string]              `json:"kind,required"`
+	URI        param.Field[string]              `json:"uri"`
+	Repository param.Field[string]              `json:"repository"`
+	Branch     param.Field[string]              `json:"branch"`
+	Target     param.Field[string]              `json:"target"`
+	TargetURI  param.Field[string]              `json:"targetUri"`
+	Problem    param.Field[string]              `json:"problem"`
 	Source     param.Field[V2PromptSourceParam] `json:"source"`
 }
 
@@ -1723,9 +1723,9 @@ func (r V2PromptReferenceAttachmentParam) MarshalJSON() (data []byte, err error)
 }
 
 type V2PromptSourceParam struct {
-	Start param.Field[int64] `json:"start,required"`
-	End   param.Field[int64] `json:"end,required"`
-	Text  param.Field[string]  `json:"text,required"`
+	Start param.Field[int64]  `json:"start,required"`
+	End   param.Field[int64]  `json:"end,required"`
+	Text  param.Field[string] `json:"text,required"`
 }
 
 func (r V2PromptSourceParam) MarshalJSON() (data []byte, err error) {
@@ -1769,11 +1769,11 @@ func (r V2SessionContextParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionMessagesParams struct {
-	Directory param.Field[string]        `query:"directory"`
-	Workspace param.Field[string]        `query:"workspace"`
-	Limit     param.Field[int64]         `query:"limit"`
+	Directory param.Field[string]         `query:"directory"`
+	Workspace param.Field[string]         `query:"workspace"`
+	Limit     param.Field[int64]          `query:"limit"`
 	Order     param.Field[V2SessionOrder] `query:"order"`
-	Cursor    param.Field[string]        `query:"cursor"`
+	Cursor    param.Field[string]         `query:"cursor"`
 }
 
 func (r V2SessionMessagesParams) URLQuery() (v url.Values) {
@@ -1840,10 +1840,10 @@ func (r revertStateJSON) RawJSON() string {
 // ===== V2SessionCreateParams =====
 
 type V2SessionCreateParams struct {
-	ID       param.Field[string]        `json:"id"`
-	Agent    param.Field[string]        `json:"agent"`
-	Model    param.Field[ModelRef]      `json:"model"`
-	Location param.Field[LocationRef]   `json:"location"`
+	ID       param.Field[string]      `json:"id"`
+	Agent    param.Field[string]      `json:"agent"`
+	Model    param.Field[ModelRef]    `json:"model"`
+	Location param.Field[LocationRef] `json:"location"`
 }
 
 func (r V2SessionCreateParams) MarshalJSON() (data []byte, err error) {
@@ -1886,8 +1886,8 @@ func (r V2SessionEventsParams) URLQuery() (v url.Values) {
 // ===== V2SessionHistoryParams =====
 
 type V2SessionHistoryParams struct {
-	Limit param.Field[int64]  `query:"limit"`
-	After param.Field[int64]  `query:"after"`
+	Limit param.Field[int64] `query:"limit"`
+	After param.Field[int64] `query:"after"`
 }
 
 func (r V2SessionHistoryParams) URLQuery() (v url.Values) {
@@ -1900,8 +1900,8 @@ func (r V2SessionHistoryParams) URLQuery() (v url.Values) {
 // ===== V2SessionCreateResponse =====
 
 type V2SessionCreateResponse struct {
-	Data V2SessionInfo                  `json:"data,required"`
-	JSON v2SessionCreateResponseJSON   `json:"-"`
+	Data V2SessionInfo               `json:"data,required"`
+	JSON v2SessionCreateResponseJSON `json:"-"`
 }
 
 type v2SessionCreateResponseJSON struct {
@@ -1922,8 +1922,8 @@ func (r v2SessionCreateResponseJSON) RawJSON() string {
 
 // V2SessionGetResponse is returned by the Get method.
 type V2SessionGetResponse struct {
-	Data V2SessionInfo                  `json:"data,required"`
-	JSON v2SessionGetResponseJSON      `json:"-"`
+	Data V2SessionInfo            `json:"data,required"`
+	JSON v2SessionGetResponseJSON `json:"-"`
 }
 
 type v2SessionGetResponseJSON struct {
@@ -1944,10 +1944,10 @@ func (r v2SessionGetResponseJSON) RawJSON() string {
 
 // V2SessionEventResponse represents an SSE event from the session event stream.
 type V2SessionEventResponse struct {
-	ID    string                       `json:"id,required"`
-	Event string                       `json:"event,required"`
-	Data  string                       `json:"data,required"`
-	JSON  v2SessionEventResponseJSON   `json:"-"`
+	ID    string                     `json:"id,required"`
+	Event string                     `json:"event,required"`
+	Data  string                     `json:"data,required"`
+	JSON  v2SessionEventResponseJSON `json:"-"`
 }
 
 type v2SessionEventResponseJSON struct {
@@ -1970,9 +1970,9 @@ func (r v2SessionEventResponseJSON) RawJSON() string {
 
 // V2SessionHistoryResponse is returned by the History method.
 type V2SessionHistoryResponse struct {
-	Data    []interface{}                   `json:"data,required"`
-	HasMore bool                            `json:"hasMore,required"`
-	JSON    v2SessionHistoryResponseJSON    `json:"-"`
+	Data    []interface{}                `json:"data,required"`
+	HasMore bool                         `json:"hasMore,required"`
+	JSON    v2SessionHistoryResponseJSON `json:"-"`
 }
 
 type v2SessionHistoryResponseJSON struct {
@@ -1994,13 +1994,13 @@ func (r v2SessionHistoryResponseJSON) RawJSON() string {
 
 // V2SessionMessageSystem represents a system message in the V2 session.
 type V2SessionMessageSystem struct {
-	ID       string                        `json:"id,required"`
-	Time     V2SessionMessageTime          `json:"time,required"`
-	Type     string                        `json:"type,required"`
-	Text     string                        `json:"text,required"`
+	ID   string               `json:"id,required"`
+	Time V2SessionMessageTime `json:"time,required"`
+	Type string               `json:"type,required"`
+	Text string               `json:"text,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                   `json:"metadata"`
-	JSON     v2SessionMessageSystemJSON    `json:"-"`
+	Metadata interface{}                `json:"metadata"`
+	JSON     v2SessionMessageSystemJSON `json:"-"`
 }
 
 type v2SessionMessageSystemJSON struct {
@@ -2028,8 +2028,8 @@ func (V2SessionMessageSystem) implementsV2SessionMessage() {}
 // V2SessionActiveResponse is returned by the Active method. It contains a map of
 // session IDs to their active state.
 type V2SessionActiveResponse struct {
-	Data map[string]interface{}              `json:"data,required"`
-	JSON v2SessionActiveResponseJSON         `json:"-"`
+	Data map[string]interface{}      `json:"data,required"`
+	JSON v2SessionActiveResponseJSON `json:"-"`
 }
 
 type v2SessionActiveResponseJSON struct {

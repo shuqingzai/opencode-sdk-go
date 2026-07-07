@@ -193,10 +193,10 @@ func (r providerModelInfoJSON) RawJSON() string {
 
 // ProviderModelInfoAPI represents API information for a model.
 type ProviderModelInfoAPI struct {
-	ID   string                       `json:"id"`
-	URL  string                       `json:"url"`
-	NPM  string                       `json:"npm"`
-	JSON providerModelInfoAPIJSON     `json:"-"`
+	ID   string                   `json:"id"`
+	URL  string                   `json:"url"`
+	NPM  string                   `json:"npm"`
+	JSON providerModelInfoAPIJSON `json:"-"`
 }
 
 // providerModelInfoAPIJSON contains the JSON metadata for the struct [ProviderModelInfoAPI]
@@ -275,9 +275,9 @@ func (r providerModelCostContextOver200kJSON) RawJSON() string {
 
 // ProviderModelLimit represents limits for a model.
 type ProviderModelLimit struct {
-	Context int64                `json:"context,required"`
-	Input   int64                `json:"input"`
-	Output  int64                `json:"output,required"`
+	Context int64                  `json:"context,required"`
+	Input   int64                  `json:"input"`
+	Output  int64                  `json:"output,required"`
 	JSON    providerModelLimitJSON `json:"-"`
 }
 
@@ -546,9 +546,9 @@ func (r providerAuthMethodPromptSelectOptionJSON) RawJSON() string {
 
 // ProviderOauthAuthorizeBody represents the body for OAuth authorization request.
 type ProviderOauthAuthorizeBody struct {
-	Method int64                            `json:"method,required"`
-	Inputs map[string]string                `json:"inputs"`
-	JSON   providerOauthAuthorizeBodyJSON   `json:"-"`
+	Method int64                          `json:"method,required"`
+	Inputs map[string]string              `json:"inputs"`
+	JSON   providerOauthAuthorizeBodyJSON `json:"-"`
 }
 
 // providerOauthAuthorizeBodyJSON contains the JSON metadata for the struct
@@ -570,10 +570,10 @@ func (r providerOauthAuthorizeBodyJSON) RawJSON() string {
 
 // ProviderOauthAuthorizeResponse represents the response from OAuth authorization.
 type ProviderOauthAuthorizeResponse struct {
-	URL          string                                 `json:"url,required"`
-	Method       ProviderOauthAuthorizeResponseMethod   `json:"method,required"`
-	Instructions string                                 `json:"instructions,required"`
-	JSON         providerOauthAuthorizeResponseJSON     `json:"-"`
+	URL          string                               `json:"url,required"`
+	Method       ProviderOauthAuthorizeResponseMethod `json:"method,required"`
+	Instructions string                               `json:"instructions,required"`
+	JSON         providerOauthAuthorizeResponseJSON   `json:"-"`
 }
 
 type ProviderOauthAuthorizeResponseMethod string
@@ -611,9 +611,9 @@ func (r providerOauthAuthorizeResponseJSON) RawJSON() string {
 
 // ProviderOauthCallbackBody represents the body for OAuth callback.
 type ProviderOauthCallbackBody struct {
-	Method int64                           `json:"method,required"`
-	Code   string                          `json:"code"`
-	JSON   providerOauthCallbackBodyJSON   `json:"-"`
+	Method int64                         `json:"method,required"`
+	Code   string                        `json:"code"`
+	JSON   providerOauthCallbackBodyJSON `json:"-"`
 }
 
 // providerOauthCallbackBodyJSON contains the JSON metadata for the struct
@@ -663,9 +663,9 @@ func (r ProviderAuthParams) URLQuery() (v url.Values) {
 
 // ProviderOauthAuthorizeParams contains the parameters for OAuth authorization.
 type ProviderOauthAuthorizeParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Method    param.Field[int64]  `json:"method,required"`
+	Directory param.Field[string]            `query:"directory"`
+	Workspace param.Field[string]            `query:"workspace"`
+	Method    param.Field[int64]             `json:"method,required"`
 	Inputs    param.Field[map[string]string] `json:"inputs"`
 }
 

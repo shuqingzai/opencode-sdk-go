@@ -1528,11 +1528,11 @@ type SyncEventSessionUpdatedDataInfo struct {
 	Model       SyncEventSessionUpdatedDataInfoModel   `json:"model"`
 	Version     string                                 `json:"version"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata    interface{}                            `json:"metadata"`
-	Time        SyncEventSessionUpdatedDataInfoTime    `json:"time"`
-	Permission  PermissionRuleset                      `json:"permission"`
-	Revert      SyncEventSessionUpdatedDataInfoRevert  `json:"revert"`
-	JSON        syncEventSessionUpdatedDataInfoJSON    `json:"-"`
+	Metadata   interface{}                           `json:"metadata"`
+	Time       SyncEventSessionUpdatedDataInfoTime   `json:"time"`
+	Permission PermissionRuleset                     `json:"permission"`
+	Revert     SyncEventSessionUpdatedDataInfoRevert `json:"revert"`
+	JSON       syncEventSessionUpdatedDataInfoJSON   `json:"-"`
 }
 
 type syncEventSessionUpdatedDataInfoJSON struct {

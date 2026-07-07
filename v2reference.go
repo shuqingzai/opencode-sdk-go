@@ -48,8 +48,8 @@ func (r *V2ReferenceService) List(ctx context.Context, query V2ReferenceListPara
 
 // V2ReferenceListResponse contains the response from the reference list endpoint.
 type V2ReferenceListResponse struct {
-	Location LocationInfo               `json:"location,required"`
-	Data     []V2ReferenceInfo          `json:"data,required"`
+	Location LocationInfo                `json:"location,required"`
+	Data     []V2ReferenceInfo           `json:"data,required"`
 	JSON     v2ReferenceListResponseJSON `json:"-"`
 }
 
@@ -77,8 +77,8 @@ type V2ReferenceInfo struct {
 	Hidden      bool   `json:"hidden"`
 	// This field can have the runtime type of [ReferenceLocalSource],
 	// [ReferenceGitSource].
-	Source      interface{}          `json:"source,required"`
-	JSON        v2ReferenceInfoJSON  `json:"-"`
+	Source      interface{}         `json:"source,required"`
+	JSON        v2ReferenceInfoJSON `json:"-"`
 	sourceUnion ReferenceSourceUnion
 }
 
@@ -119,11 +119,11 @@ type ReferenceSourceUnion interface {
 
 // ReferenceLocalSource represents a local reference source.
 type ReferenceLocalSource struct {
-	Type        string                      `json:"type,required"`
-	Path        string                      `json:"path,required"`
-	Description string                      `json:"description"`
-	Hidden      bool                        `json:"hidden"`
-	JSON        referenceLocalSourceJSON    `json:"-"`
+	Type        string                   `json:"type,required"`
+	Path        string                   `json:"path,required"`
+	Description string                   `json:"description"`
+	Hidden      bool                     `json:"hidden"`
+	JSON        referenceLocalSourceJSON `json:"-"`
 }
 
 // referenceLocalSourceJSON contains the JSON metadata for the struct [ReferenceLocalSource]
@@ -148,12 +148,12 @@ func (r ReferenceLocalSource) implementsReferenceSourceUnion() {}
 
 // ReferenceGitSource represents a git reference source.
 type ReferenceGitSource struct {
-	Type        string                    `json:"type,required"`
-	Repository  string                    `json:"repository,required"`
-	Branch      string                    `json:"branch"`
-	Description string                    `json:"description"`
-	Hidden      bool                      `json:"hidden"`
-	JSON        referenceGitSourceJSON    `json:"-"`
+	Type        string                 `json:"type,required"`
+	Repository  string                 `json:"repository,required"`
+	Branch      string                 `json:"branch"`
+	Description string                 `json:"description"`
+	Hidden      bool                   `json:"hidden"`
+	JSON        referenceGitSourceJSON `json:"-"`
 }
 
 // referenceGitSourceJSON contains the JSON metadata for the struct [ReferenceGitSource]

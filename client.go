@@ -16,50 +16,50 @@ import (
 // interacting with the opencode API. You should not instantiate this client
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
-	Options      []option.RequestOption
-	Event        *EventService
-	Path         *PathService
-	App          *AppService
-	Find         *FindService
-	File         *FileService
-	Config       *ConfigService
-	Command      *CommandService
-	Project      *ProjectService
-	Session      *SessionService
-	Tui          *TuiService
-	Auth         *AuthService
-	Global       *GlobalService
-	Experimental *ExperimentalService
-	Pty          *PtyService
-	Mcp          *McpService
-	Worktree     *WorktreeService
-	Permission   *PermissionService
-	Question     *QuestionService
-	Provider     *ProviderService
-	Instance     *InstanceService
-	Vcs          *VcsService
-	Lsp          *LspService
-	Formatter    *FormatterService
-	Sync         *SyncService
-	V2Agent      *V2AgentService
-	V2Session    *V2SessionService
+	Options       []option.RequestOption
+	Event         *EventService
+	Path          *PathService
+	App           *AppService
+	Find          *FindService
+	File          *FileService
+	Config        *ConfigService
+	Command       *CommandService
+	Project       *ProjectService
+	Session       *SessionService
+	Tui           *TuiService
+	Auth          *AuthService
+	Global        *GlobalService
+	Experimental  *ExperimentalService
+	Pty           *PtyService
+	Mcp           *McpService
+	Worktree      *WorktreeService
+	Permission    *PermissionService
+	Question      *QuestionService
+	Provider      *ProviderService
+	Instance      *InstanceService
+	Vcs           *VcsService
+	Lsp           *LspService
+	Formatter     *FormatterService
+	Sync          *SyncService
+	V2Agent       *V2AgentService
+	V2Session     *V2SessionService
 	V2Health      *V2HealthService
 	V2Integration *V2IntegrationService
 	V2Model       *V2ModelService
-	V2Provider   *V2ProviderService
-	V2Location   *V2LocationService
-	V2Command    *V2CommandService
-	V2Credential *V2CredentialService
-	V2Skill      *V2SkillService
-	V2Reference  *V2ReferenceService
+	V2Provider    *V2ProviderService
+	V2Location    *V2LocationService
+	V2Command     *V2CommandService
+	V2Credential  *V2CredentialService
+	V2Skill       *V2SkillService
+	V2Reference   *V2ReferenceService
 	V2Question    *V2QuestionService
 	V2ProjectCopy *V2ProjectCopyService
 	Tool          *ToolService
 	Part          *PartService
-	V2Permission *V2PermissionService
-	V2Pty        *V2PtyService
-	V2Event      *V2EventService
-	V2Fs         *V2FsService
+	V2Permission  *V2PermissionService
+	V2Pty         *V2PtyService
+	V2Event       *V2EventService
+	V2Fs          *V2FsService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should

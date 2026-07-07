@@ -147,43 +147,43 @@ func (r globalUpgradeResponseJSON) RawJSON() string {
 // All fields are optional for PATCH semantics.
 type GlobalConfigUpdateParams struct {
 	// Body parameters — all Config fields as optional
-	Schema            param.Field[string]                        `json:"$schema"`
-	Agent             param.Field[ConfigAgent]                   `json:"agent"`
-	Attachment        param.Field[AttachmentConfig]              `json:"attachment"`
-	Autoshare         param.Field[bool]                          `json:"autoshare"`
-	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand]      `json:"command"`
-	Compaction        param.Field[ConfigCompaction]              `json:"compaction"`
-	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]              `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]            `json:"experimental"`
-	Formatter         param.Field[map[string]ConfigFormatter]    `json:"formatter"`
-	Instructions      param.Field[[]string]                      `json:"instructions"`
-	Keybinds          param.Field[KeybindsConfig]                `json:"keybinds"`
-	Layout            param.Field[ConfigLayout]                  `json:"layout"`
-	LogLevel          param.Field[ConfigLogLevel]                `json:"logLevel"`
-	Lsp               param.Field[map[string]ConfigLsp]          `json:"lsp"`
-	Mcp               param.Field[map[string]ConfigMcp]          `json:"mcp"`
-	Mode              param.Field[ConfigMode]                    `json:"mode"`
-	Model             param.Field[string]                        `json:"model"`
-	Permission        param.Field[ConfigPermission]              `json:"permission"`
-	Plugin            param.Field[[]string]                      `json:"plugin"`
-	Provider          param.Field[map[string]ConfigProvider]     `json:"provider"`
-	Reference         param.Field[ReferenceConfig]               `json:"reference"`
-	Share             param.Field[ConfigShare]                   `json:"share"`
-	Shell             param.Field[string]                        `json:"shell"`
-	Server            param.Field[ServerConfig]                  `json:"server"`
-	Skills            param.Field[ConfigSkills]                  `json:"skills"`
-	SmallModel        param.Field[string]                        `json:"small_model"`
-	Snapshot          param.Field[bool]                          `json:"snapshot"`
-	Theme             param.Field[string]                        `json:"theme"`
-	ToolOutput        param.Field[ConfigToolOutput]              `json:"tool_output"`
-	Tools             param.Field[map[string]bool]               `json:"tools"`
-	Tui               param.Field[ConfigTui]                     `json:"tui"`
-	Username          param.Field[string]                        `json:"username"`
-	Watcher           param.Field[ConfigWatcher]                 `json:"watcher"`
-	DefaultAgent      param.Field[string]                        `json:"default_agent"`
+	Schema            param.Field[string]                     `json:"$schema"`
+	Agent             param.Field[ConfigAgent]                `json:"agent"`
+	Attachment        param.Field[AttachmentConfig]           `json:"attachment"`
+	Autoshare         param.Field[bool]                       `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]                `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand]   `json:"command"`
+	Compaction        param.Field[ConfigCompaction]           `json:"compaction"`
+	DisabledProviders param.Field[[]string]                   `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                   `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]           `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
+	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
+	Instructions      param.Field[[]string]                   `json:"instructions"`
+	Keybinds          param.Field[KeybindsConfig]             `json:"keybinds"`
+	Layout            param.Field[ConfigLayout]               `json:"layout"`
+	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
+	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
+	Mcp               param.Field[map[string]ConfigMcp]       `json:"mcp"`
+	Mode              param.Field[ConfigMode]                 `json:"mode"`
+	Model             param.Field[string]                     `json:"model"`
+	Permission        param.Field[ConfigPermission]           `json:"permission"`
+	Plugin            param.Field[[]string]                   `json:"plugin"`
+	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
+	Reference         param.Field[ReferenceConfig]            `json:"reference"`
+	Share             param.Field[ConfigShare]                `json:"share"`
+	Shell             param.Field[string]                     `json:"shell"`
+	Server            param.Field[ServerConfig]               `json:"server"`
+	Skills            param.Field[ConfigSkills]               `json:"skills"`
+	SmallModel        param.Field[string]                     `json:"small_model"`
+	Snapshot          param.Field[bool]                       `json:"snapshot"`
+	Theme             param.Field[string]                     `json:"theme"`
+	ToolOutput        param.Field[ConfigToolOutput]           `json:"tool_output"`
+	Tools             param.Field[map[string]bool]            `json:"tools"`
+	Tui               param.Field[ConfigTui]                  `json:"tui"`
+	Username          param.Field[string]                     `json:"username"`
+	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
+	DefaultAgent      param.Field[string]                     `json:"default_agent"`
 }
 
 func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -191,20 +191,15 @@ func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type GlobalEvent struct {
-	Directory string                 `json:"directory,required"`
+	Directory string `json:"directory,required"`
 	// This field can have the runtime type of
 	// [EventListResponseEventXxx] (77 V2 Event types):
-	// [EventListResponseEventAccountAdded],
-	// [EventListResponseEventAccountRemoved],
-	// [EventListResponseEventAccountSwitched],
-	// [EventListResponseEventCatalogModelUpdated],
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
 	// [EventListResponseEventFileWatcherUpdated],
 	// [EventListResponseEventGlobalDisposed],
 	// [EventListResponseEventInstallationUpdateAvailable],
 	// [EventListResponseEventInstallationUpdated],
-	// [EventListResponseEventLspClientDiagnostics],
 	// [EventListResponseEventLspUpdated],
 	// [EventListResponseEventMcpBrowserOpenFailed],
 	// [EventListResponseEventMcpToolsChanged],
@@ -288,10 +283,10 @@ type GlobalEvent struct {
 	// [EventListResponseEventSessionNextRevertCommitted],
 	//
 	// [SyncEventResponse] (V1 SyncEvent).
-	Payload   interface{}            `json:"payload,required"`
-	Project   string                 `json:"project"`
-	Workspace string                 `json:"workspace"`
-	JSON      globalEventJSON        `json:"-"`
+	Payload   interface{}     `json:"payload,required"`
+	Project   string          `json:"project"`
+	Workspace string          `json:"workspace"`
+	JSON      globalEventJSON `json:"-"`
 	union     GlobalEventPayloadUnion
 }
 
@@ -380,27 +375,11 @@ func init() {
 		// V2 Event types
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventAccountAdded{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventAccountRemoved{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventAccountSwitched{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdated{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdateAvailable{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventLspClientDiagnostics{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -741,10 +720,6 @@ func init() {
 			Type:       reflect.TypeOf(SyncEventResponse{}),
 		},
 		// V2 Event: catalog.model.updated
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventCatalogModelUpdated{}),
-		},
 		// V2 Event: plugin.added
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -970,86 +945,81 @@ func (r SyncEventResponseType) IsKnown() bool {
 type GlobalEventResponseType string
 
 const (
-	GlobalEventResponseTypeAccountAdded              GlobalEventResponseType = "account.added"
-	GlobalEventResponseTypeAccountRemoved            GlobalEventResponseType = "account.removed"
-	GlobalEventResponseTypeAccountSwitched           GlobalEventResponseType = "account.switched"
-	GlobalEventResponseTypeCatalogModelUpdated       GlobalEventResponseType = "catalog.model.updated"
-	GlobalEventResponseTypeCommandExecuted           GlobalEventResponseType = "command.executed"
-	GlobalEventResponseTypeFileEdited                GlobalEventResponseType = "file.edited"
-	GlobalEventResponseTypeFileWatcherUpdated        GlobalEventResponseType = "file.watcher.updated"
-	GlobalEventResponseTypeGlobalDisposed            GlobalEventResponseType = "global.disposed"
-	GlobalEventResponseTypeInstallationUpdateAvailable GlobalEventResponseType = "installation.update-available"
-	GlobalEventResponseTypeInstallationUpdated       GlobalEventResponseType = "installation.updated"
-	GlobalEventResponseTypeLspClientDiagnostics       GlobalEventResponseType = "lsp.client.diagnostics"
-	GlobalEventResponseTypeLspUpdated                GlobalEventResponseType = "lsp.updated"
-	GlobalEventResponseTypeMcpBrowserOpenFailed       GlobalEventResponseType = "mcp.browser.open.failed"
-	GlobalEventResponseTypeMcpToolsChanged           GlobalEventResponseType = "mcp.tools.changed"
-	GlobalEventResponseTypeModelsDevRefreshed        GlobalEventResponseType = "models-dev.refreshed"
-	GlobalEventResponseTypeMessagePartDelta          GlobalEventResponseType = "message.part.delta"
-	GlobalEventResponseTypeMessagePartRemoved        GlobalEventResponseType = "message.part.removed"
-	GlobalEventResponseTypeMessagePartUpdated        GlobalEventResponseType = "message.part.updated"
-	GlobalEventResponseTypeMessageRemoved            GlobalEventResponseType = "message.removed"
-	GlobalEventResponseTypeMessageUpdated            GlobalEventResponseType = "message.updated"
-	GlobalEventResponseTypePermissionAsked           GlobalEventResponseType = "permission.asked"
-	GlobalEventResponseTypePermissionReplied         GlobalEventResponseType = "permission.replied"
-	GlobalEventResponseTypePluginAdded              GlobalEventResponseType = "plugin.added"
-	GlobalEventResponseTypeProjectUpdated            GlobalEventResponseType = "project.updated"
-	GlobalEventResponseTypePtyCreated                GlobalEventResponseType = "pty.created"
-	GlobalEventResponseTypePtyDeleted                GlobalEventResponseType = "pty.deleted"
-	GlobalEventResponseTypePtyExited                 GlobalEventResponseType = "pty.exited"
-	GlobalEventResponseTypePtyUpdated                GlobalEventResponseType = "pty.updated"
-	GlobalEventResponseTypeQuestionAsked             GlobalEventResponseType = "question.asked"
-	GlobalEventResponseTypeQuestionRejected          GlobalEventResponseType = "question.rejected"
-	GlobalEventResponseTypeQuestionReplied           GlobalEventResponseType = "question.replied"
-	GlobalEventResponseTypeServerConnected           GlobalEventResponseType = "server.connected"
-	GlobalEventResponseTypeServerInstanceDisposed    GlobalEventResponseType = "server.instance.disposed"
-	GlobalEventResponseTypeSessionCompacted          GlobalEventResponseType = "session.compacted"
-	GlobalEventResponseTypeSessionCreated            GlobalEventResponseType = "session.created"
-	GlobalEventResponseTypeSessionDeleted            GlobalEventResponseType = "session.deleted"
-	GlobalEventResponseTypeSessionDiff               GlobalEventResponseType = "session.diff"
-	GlobalEventResponseTypeSessionError              GlobalEventResponseType = "session.error"
-	GlobalEventResponseTypeSessionIdle               GlobalEventResponseType = "session.idle"
-	GlobalEventResponseTypeSessionNextAgentSwitched  GlobalEventResponseType = "session.next.agent.switched"
-	GlobalEventResponseTypeSessionNextCompactionDelta GlobalEventResponseType = "session.next.compaction.delta"
-	GlobalEventResponseTypeSessionNextCompactionEnded GlobalEventResponseType = "session.next.compaction.ended"
+	GlobalEventResponseTypeCommandExecuted              GlobalEventResponseType = "command.executed"
+	GlobalEventResponseTypeFileEdited                   GlobalEventResponseType = "file.edited"
+	GlobalEventResponseTypeFileWatcherUpdated           GlobalEventResponseType = "file.watcher.updated"
+	GlobalEventResponseTypeGlobalDisposed               GlobalEventResponseType = "global.disposed"
+	GlobalEventResponseTypeInstallationUpdateAvailable  GlobalEventResponseType = "installation.update-available"
+	GlobalEventResponseTypeInstallationUpdated          GlobalEventResponseType = "installation.updated"
+	GlobalEventResponseTypeLspUpdated                   GlobalEventResponseType = "lsp.updated"
+	GlobalEventResponseTypeMcpBrowserOpenFailed         GlobalEventResponseType = "mcp.browser.open.failed"
+	GlobalEventResponseTypeMcpToolsChanged              GlobalEventResponseType = "mcp.tools.changed"
+	GlobalEventResponseTypeModelsDevRefreshed           GlobalEventResponseType = "models-dev.refreshed"
+	GlobalEventResponseTypeMessagePartDelta             GlobalEventResponseType = "message.part.delta"
+	GlobalEventResponseTypeMessagePartRemoved           GlobalEventResponseType = "message.part.removed"
+	GlobalEventResponseTypeMessagePartUpdated           GlobalEventResponseType = "message.part.updated"
+	GlobalEventResponseTypeMessageRemoved               GlobalEventResponseType = "message.removed"
+	GlobalEventResponseTypeMessageUpdated               GlobalEventResponseType = "message.updated"
+	GlobalEventResponseTypePermissionAsked              GlobalEventResponseType = "permission.asked"
+	GlobalEventResponseTypePermissionReplied            GlobalEventResponseType = "permission.replied"
+	GlobalEventResponseTypePluginAdded                  GlobalEventResponseType = "plugin.added"
+	GlobalEventResponseTypeProjectUpdated               GlobalEventResponseType = "project.updated"
+	GlobalEventResponseTypePtyCreated                   GlobalEventResponseType = "pty.created"
+	GlobalEventResponseTypePtyDeleted                   GlobalEventResponseType = "pty.deleted"
+	GlobalEventResponseTypePtyExited                    GlobalEventResponseType = "pty.exited"
+	GlobalEventResponseTypePtyUpdated                   GlobalEventResponseType = "pty.updated"
+	GlobalEventResponseTypeQuestionAsked                GlobalEventResponseType = "question.asked"
+	GlobalEventResponseTypeQuestionRejected             GlobalEventResponseType = "question.rejected"
+	GlobalEventResponseTypeQuestionReplied              GlobalEventResponseType = "question.replied"
+	GlobalEventResponseTypeServerConnected              GlobalEventResponseType = "server.connected"
+	GlobalEventResponseTypeServerInstanceDisposed       GlobalEventResponseType = "server.instance.disposed"
+	GlobalEventResponseTypeSessionCompacted             GlobalEventResponseType = "session.compacted"
+	GlobalEventResponseTypeSessionCreated               GlobalEventResponseType = "session.created"
+	GlobalEventResponseTypeSessionDeleted               GlobalEventResponseType = "session.deleted"
+	GlobalEventResponseTypeSessionDiff                  GlobalEventResponseType = "session.diff"
+	GlobalEventResponseTypeSessionError                 GlobalEventResponseType = "session.error"
+	GlobalEventResponseTypeSessionIdle                  GlobalEventResponseType = "session.idle"
+	GlobalEventResponseTypeSessionNextAgentSwitched     GlobalEventResponseType = "session.next.agent.switched"
+	GlobalEventResponseTypeSessionNextCompactionDelta   GlobalEventResponseType = "session.next.compaction.delta"
+	GlobalEventResponseTypeSessionNextCompactionEnded   GlobalEventResponseType = "session.next.compaction.ended"
 	GlobalEventResponseTypeSessionNextCompactionStarted GlobalEventResponseType = "session.next.compaction.started"
-	GlobalEventResponseTypeSessionNextModelSwitched  GlobalEventResponseType = "session.next.model.switched"
-	GlobalEventResponseTypeSessionNextPrompted       GlobalEventResponseType = "session.next.prompted"
-	GlobalEventResponseTypeSessionNextReasoningDelta GlobalEventResponseType = "session.next.reasoning.delta"
-	GlobalEventResponseTypeSessionNextReasoningEnded GlobalEventResponseType = "session.next.reasoning.ended"
-	GlobalEventResponseTypeSessionNextReasoningStarted GlobalEventResponseType = "session.next.reasoning.started"
-	GlobalEventResponseTypeSessionNextRetried        GlobalEventResponseType = "session.next.retried"
-	GlobalEventResponseTypeSessionNextShellEnded     GlobalEventResponseType = "session.next.shell.ended"
-	GlobalEventResponseTypeSessionNextShellStarted    GlobalEventResponseType = "session.next.shell.started"
-	GlobalEventResponseTypeSessionNextStepEnded      GlobalEventResponseType = "session.next.step.ended"
-	GlobalEventResponseTypeSessionNextStepFailed     GlobalEventResponseType = "session.next.step.failed"
-	GlobalEventResponseTypeSessionNextStepStarted    GlobalEventResponseType = "session.next.step.started"
-	GlobalEventResponseTypeSessionNextSynthetic      GlobalEventResponseType = "session.next.synthetic"
-	GlobalEventResponseTypeSessionNextTextDelta      GlobalEventResponseType = "session.next.text.delta"
-	GlobalEventResponseTypeSessionNextTextEnded      GlobalEventResponseType = "session.next.text.ended"
-	GlobalEventResponseTypeSessionNextTextStarted    GlobalEventResponseType = "session.next.text.started"
-	GlobalEventResponseTypeSessionNextToolCalled     GlobalEventResponseType = "session.next.tool.called"
-	GlobalEventResponseTypeSessionNextToolFailed     GlobalEventResponseType = "session.next.tool.failed"
-	GlobalEventResponseTypeSessionNextToolInputDelta GlobalEventResponseType = "session.next.tool.input.delta"
-	GlobalEventResponseTypeSessionNextToolInputEnded GlobalEventResponseType = "session.next.tool.input.ended"
-	GlobalEventResponseTypeSessionNextToolInputStarted GlobalEventResponseType = "session.next.tool.input.started"
-	GlobalEventResponseTypeSessionNextToolProgress   GlobalEventResponseType = "session.next.tool.progress"
-	GlobalEventResponseTypeSessionNextToolSuccess    GlobalEventResponseType = "session.next.tool.success"
-	GlobalEventResponseTypeSessionStatus             GlobalEventResponseType = "session.status"
-	GlobalEventResponseTypeSessionUpdated            GlobalEventResponseType = "session.updated"
-	GlobalEventResponseTypeTodoUpdated               GlobalEventResponseType = "todo.updated"
-	GlobalEventResponseTypeTuiCommandExecute          GlobalEventResponseType = "tui.command.execute"
-	GlobalEventResponseTypeTuiPromptAppend            GlobalEventResponseType = "tui.prompt.append"
-	GlobalEventResponseTypeTuiSessionSelect           GlobalEventResponseType = "tui.session.select"
-	GlobalEventResponseTypeTuiToastShow              GlobalEventResponseType = "tui.toast.show"
-	GlobalEventResponseTypeVcsBranchUpdated           GlobalEventResponseType = "vcs.branch.updated"
-	GlobalEventResponseTypeWorkspaceFailed            GlobalEventResponseType = "workspace.failed"
-	GlobalEventResponseTypeWorkspaceReady            GlobalEventResponseType = "workspace.ready"
-	GlobalEventResponseTypeWorkspaceStatus           GlobalEventResponseType = "workspace.status"
-	GlobalEventResponseTypeWorktreeFailed            GlobalEventResponseType = "worktree.failed"
-	GlobalEventResponseTypeWorktreeReady             GlobalEventResponseType = "worktree.ready"
+	GlobalEventResponseTypeSessionNextModelSwitched     GlobalEventResponseType = "session.next.model.switched"
+	GlobalEventResponseTypeSessionNextPrompted          GlobalEventResponseType = "session.next.prompted"
+	GlobalEventResponseTypeSessionNextReasoningDelta    GlobalEventResponseType = "session.next.reasoning.delta"
+	GlobalEventResponseTypeSessionNextReasoningEnded    GlobalEventResponseType = "session.next.reasoning.ended"
+	GlobalEventResponseTypeSessionNextReasoningStarted  GlobalEventResponseType = "session.next.reasoning.started"
+	GlobalEventResponseTypeSessionNextRetried           GlobalEventResponseType = "session.next.retried"
+	GlobalEventResponseTypeSessionNextShellEnded        GlobalEventResponseType = "session.next.shell.ended"
+	GlobalEventResponseTypeSessionNextShellStarted      GlobalEventResponseType = "session.next.shell.started"
+	GlobalEventResponseTypeSessionNextStepEnded         GlobalEventResponseType = "session.next.step.ended"
+	GlobalEventResponseTypeSessionNextStepFailed        GlobalEventResponseType = "session.next.step.failed"
+	GlobalEventResponseTypeSessionNextStepStarted       GlobalEventResponseType = "session.next.step.started"
+	GlobalEventResponseTypeSessionNextSynthetic         GlobalEventResponseType = "session.next.synthetic"
+	GlobalEventResponseTypeSessionNextTextDelta         GlobalEventResponseType = "session.next.text.delta"
+	GlobalEventResponseTypeSessionNextTextEnded         GlobalEventResponseType = "session.next.text.ended"
+	GlobalEventResponseTypeSessionNextTextStarted       GlobalEventResponseType = "session.next.text.started"
+	GlobalEventResponseTypeSessionNextToolCalled        GlobalEventResponseType = "session.next.tool.called"
+	GlobalEventResponseTypeSessionNextToolFailed        GlobalEventResponseType = "session.next.tool.failed"
+	GlobalEventResponseTypeSessionNextToolInputDelta    GlobalEventResponseType = "session.next.tool.input.delta"
+	GlobalEventResponseTypeSessionNextToolInputEnded    GlobalEventResponseType = "session.next.tool.input.ended"
+	GlobalEventResponseTypeSessionNextToolInputStarted  GlobalEventResponseType = "session.next.tool.input.started"
+	GlobalEventResponseTypeSessionNextToolProgress      GlobalEventResponseType = "session.next.tool.progress"
+	GlobalEventResponseTypeSessionNextToolSuccess       GlobalEventResponseType = "session.next.tool.success"
+	GlobalEventResponseTypeSessionStatus                GlobalEventResponseType = "session.status"
+	GlobalEventResponseTypeSessionUpdated               GlobalEventResponseType = "session.updated"
+	GlobalEventResponseTypeTodoUpdated                  GlobalEventResponseType = "todo.updated"
+	GlobalEventResponseTypeTuiCommandExecute            GlobalEventResponseType = "tui.command.execute"
+	GlobalEventResponseTypeTuiPromptAppend              GlobalEventResponseType = "tui.prompt.append"
+	GlobalEventResponseTypeTuiSessionSelect             GlobalEventResponseType = "tui.session.select"
+	GlobalEventResponseTypeTuiToastShow                 GlobalEventResponseType = "tui.toast.show"
+	GlobalEventResponseTypeVcsBranchUpdated             GlobalEventResponseType = "vcs.branch.updated"
+	GlobalEventResponseTypeWorkspaceFailed              GlobalEventResponseType = "workspace.failed"
+	GlobalEventResponseTypeWorkspaceReady               GlobalEventResponseType = "workspace.ready"
+	GlobalEventResponseTypeWorkspaceStatus              GlobalEventResponseType = "workspace.status"
+	GlobalEventResponseTypeWorktreeFailed               GlobalEventResponseType = "worktree.failed"
+	GlobalEventResponseTypeWorktreeReady                GlobalEventResponseType = "worktree.ready"
 	// SyncEventResponse type — all V1 SyncEvents use "sync" as the type value.
-	GlobalEventResponseTypeSync                      GlobalEventResponseType = "sync"
+	GlobalEventResponseTypeSync                         GlobalEventResponseType = "sync"
 	GlobalEventResponseTypeIntegrationUpdated           GlobalEventResponseType = "integration.updated"
 	GlobalEventResponseTypeIntegrationConnectionUpdated GlobalEventResponseType = "integration.connection.updated"
 	GlobalEventResponseTypeCatalogUpdated               GlobalEventResponseType = "catalog.updated"
@@ -1063,21 +1033,19 @@ const (
 	GlobalEventResponseTypeSessionNextRevertStaged      GlobalEventResponseType = "session.next.revert.staged"
 	GlobalEventResponseTypeSessionNextRevertCleared     GlobalEventResponseType = "session.next.revert.cleared"
 	GlobalEventResponseTypeSessionNextRevertCommitted   GlobalEventResponseType = "session.next.revert.committed"
+	GlobalEventResponseTypeSessionNextPromptAdmitted    GlobalEventResponseType = "session.next.prompt.admitted"
+	GlobalEventResponseTypeSessionNextContextUpdated    GlobalEventResponseType = "session.next.context.updated"
+	GlobalEventResponseTypeProjectDirectoriesUpdated    GlobalEventResponseType = "project.directories.updated"
 )
 
 func (r GlobalEventResponseType) IsKnown() bool {
 	switch r {
-	case GlobalEventResponseTypeAccountAdded,
-		GlobalEventResponseTypeAccountRemoved,
-		GlobalEventResponseTypeAccountSwitched,
-		GlobalEventResponseTypeCatalogModelUpdated,
-		GlobalEventResponseTypeCommandExecuted,
+	case GlobalEventResponseTypeCommandExecuted,
 		GlobalEventResponseTypeFileEdited,
 		GlobalEventResponseTypeFileWatcherUpdated,
 		GlobalEventResponseTypeGlobalDisposed,
 		GlobalEventResponseTypeInstallationUpdateAvailable,
 		GlobalEventResponseTypeInstallationUpdated,
-		GlobalEventResponseTypeLspClientDiagnostics,
 		GlobalEventResponseTypeLspUpdated,
 		GlobalEventResponseTypeMcpBrowserOpenFailed,
 		GlobalEventResponseTypeMcpToolsChanged,
@@ -1168,36 +1136,36 @@ func (r GlobalEventResponseType) IsKnown() bool {
 type SyncEventResponseSyncEventType string
 
 const (
-	SyncEventResponseSyncEventTypeMessageUpdated1              SyncEventResponseSyncEventType = "message.updated.1"
-	SyncEventResponseSyncEventTypeMessageRemoved1              SyncEventResponseSyncEventType = "message.removed.1"
-	SyncEventResponseSyncEventTypeMessagePartUpdated1          SyncEventResponseSyncEventType = "message.part.updated.1"
-	SyncEventResponseSyncEventTypeMessagePartRemoved1          SyncEventResponseSyncEventType = "message.part.removed.1"
-	SyncEventResponseSyncEventTypeSessionCreated1              SyncEventResponseSyncEventType = "session.created.1"
-	SyncEventResponseSyncEventTypeSessionUpdated1              SyncEventResponseSyncEventType = "session.updated.1"
-	SyncEventResponseSyncEventTypeSessionDeleted1              SyncEventResponseSyncEventType = "session.deleted.1"
-	SyncEventResponseSyncEventTypeSessionNextAgentSwitched1    SyncEventResponseSyncEventType = "session.next.agent.switched.1"
-	SyncEventResponseSyncEventTypeSessionNextModelSwitched1    SyncEventResponseSyncEventType = "session.next.model.switched.1"
-	SyncEventResponseSyncEventTypeSessionNextPrompted1         SyncEventResponseSyncEventType = "session.next.prompted.1"
-	SyncEventResponseSyncEventTypeSessionNextSynthetic1        SyncEventResponseSyncEventType = "session.next.synthetic.1"
-	SyncEventResponseSyncEventTypeSessionNextShellStarted1     SyncEventResponseSyncEventType = "session.next.shell.started.1"
-	SyncEventResponseSyncEventTypeSessionNextShellEnded1       SyncEventResponseSyncEventType = "session.next.shell.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextStepStarted1      SyncEventResponseSyncEventType = "session.next.step.started.1"
-	SyncEventResponseSyncEventTypeSessionNextStepEnded1        SyncEventResponseSyncEventType = "session.next.step.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextStepFailed1       SyncEventResponseSyncEventType = "session.next.step.failed.1"
-	SyncEventResponseSyncEventTypeSessionNextTextStarted1      SyncEventResponseSyncEventType = "session.next.text.started.1"
-	SyncEventResponseSyncEventTypeSessionNextTextDelta1        SyncEventResponseSyncEventType = "session.next.text.delta.1"
-	SyncEventResponseSyncEventTypeSessionNextTextEnded1        SyncEventResponseSyncEventType = "session.next.text.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextReasoningStarted1 SyncEventResponseSyncEventType = "session.next.reasoning.started.1"
-	SyncEventResponseSyncEventTypeSessionNextReasoningDelta1   SyncEventResponseSyncEventType = "session.next.reasoning.delta.1"
-	SyncEventResponseSyncEventTypeSessionNextReasoningEnded1   SyncEventResponseSyncEventType = "session.next.reasoning.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextToolInputStarted1 SyncEventResponseSyncEventType = "session.next.tool.input.started.1"
-	SyncEventResponseSyncEventTypeSessionNextToolInputDelta1   SyncEventResponseSyncEventType = "session.next.tool.input.delta.1"
-	SyncEventResponseSyncEventTypeSessionNextToolInputEnded1   SyncEventResponseSyncEventType = "session.next.tool.input.ended.1"
-	SyncEventResponseSyncEventTypeSessionNextToolCalled1       SyncEventResponseSyncEventType = "session.next.tool.called.1"
-	SyncEventResponseSyncEventTypeSessionNextToolProgress1     SyncEventResponseSyncEventType = "session.next.tool.progress.1"
-	SyncEventResponseSyncEventTypeSessionNextToolSuccess1      SyncEventResponseSyncEventType = "session.next.tool.success.1"
-	SyncEventResponseSyncEventTypeSessionNextToolFailed1       SyncEventResponseSyncEventType = "session.next.tool.failed.1"
-	SyncEventResponseSyncEventTypeSessionNextRetried1          SyncEventResponseSyncEventType = "session.next.retried.1"
+	SyncEventResponseSyncEventTypeMessageUpdated1               SyncEventResponseSyncEventType = "message.updated.1"
+	SyncEventResponseSyncEventTypeMessageRemoved1               SyncEventResponseSyncEventType = "message.removed.1"
+	SyncEventResponseSyncEventTypeMessagePartUpdated1           SyncEventResponseSyncEventType = "message.part.updated.1"
+	SyncEventResponseSyncEventTypeMessagePartRemoved1           SyncEventResponseSyncEventType = "message.part.removed.1"
+	SyncEventResponseSyncEventTypeSessionCreated1               SyncEventResponseSyncEventType = "session.created.1"
+	SyncEventResponseSyncEventTypeSessionUpdated1               SyncEventResponseSyncEventType = "session.updated.1"
+	SyncEventResponseSyncEventTypeSessionDeleted1               SyncEventResponseSyncEventType = "session.deleted.1"
+	SyncEventResponseSyncEventTypeSessionNextAgentSwitched1     SyncEventResponseSyncEventType = "session.next.agent.switched.1"
+	SyncEventResponseSyncEventTypeSessionNextModelSwitched1     SyncEventResponseSyncEventType = "session.next.model.switched.1"
+	SyncEventResponseSyncEventTypeSessionNextPrompted1          SyncEventResponseSyncEventType = "session.next.prompted.1"
+	SyncEventResponseSyncEventTypeSessionNextSynthetic1         SyncEventResponseSyncEventType = "session.next.synthetic.1"
+	SyncEventResponseSyncEventTypeSessionNextShellStarted1      SyncEventResponseSyncEventType = "session.next.shell.started.1"
+	SyncEventResponseSyncEventTypeSessionNextShellEnded1        SyncEventResponseSyncEventType = "session.next.shell.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextStepStarted1       SyncEventResponseSyncEventType = "session.next.step.started.1"
+	SyncEventResponseSyncEventTypeSessionNextStepEnded1         SyncEventResponseSyncEventType = "session.next.step.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextStepFailed1        SyncEventResponseSyncEventType = "session.next.step.failed.1"
+	SyncEventResponseSyncEventTypeSessionNextTextStarted1       SyncEventResponseSyncEventType = "session.next.text.started.1"
+	SyncEventResponseSyncEventTypeSessionNextTextDelta1         SyncEventResponseSyncEventType = "session.next.text.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextTextEnded1         SyncEventResponseSyncEventType = "session.next.text.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningStarted1  SyncEventResponseSyncEventType = "session.next.reasoning.started.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningDelta1    SyncEventResponseSyncEventType = "session.next.reasoning.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextReasoningEnded1    SyncEventResponseSyncEventType = "session.next.reasoning.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputStarted1  SyncEventResponseSyncEventType = "session.next.tool.input.started.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputDelta1    SyncEventResponseSyncEventType = "session.next.tool.input.delta.1"
+	SyncEventResponseSyncEventTypeSessionNextToolInputEnded1    SyncEventResponseSyncEventType = "session.next.tool.input.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextToolCalled1        SyncEventResponseSyncEventType = "session.next.tool.called.1"
+	SyncEventResponseSyncEventTypeSessionNextToolProgress1      SyncEventResponseSyncEventType = "session.next.tool.progress.1"
+	SyncEventResponseSyncEventTypeSessionNextToolSuccess1       SyncEventResponseSyncEventType = "session.next.tool.success.1"
+	SyncEventResponseSyncEventTypeSessionNextToolFailed1        SyncEventResponseSyncEventType = "session.next.tool.failed.1"
+	SyncEventResponseSyncEventTypeSessionNextRetried1           SyncEventResponseSyncEventType = "session.next.retried.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionStarted1 SyncEventResponseSyncEventType = "session.next.compaction.started.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionDelta1   SyncEventResponseSyncEventType = "session.next.compaction.delta.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionEnded1   SyncEventResponseSyncEventType = "session.next.compaction.ended.1"
@@ -1304,9 +1272,9 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventSessionNextRevertStagedProperties],
 	// [EventListResponseEventSessionNextRevertClearedProperties],
 	// [EventListResponseEventSessionNextRevertCommittedProperties].
-	Data        interface{}                          `json:"data,required"`
-	JSON        syncEventResponseSyncEventJSON       `json:"-"`
-	union       SyncEventResponseSyncEventDataUnion
+	Data  interface{}                    `json:"data,required"`
+	JSON  syncEventResponseSyncEventJSON `json:"-"`
+	union SyncEventResponseSyncEventDataUnion
 }
 
 type syncEventResponseSyncEventJSON struct {
@@ -1332,5 +1300,3 @@ func (r *SyncEventResponseSyncEvent) UnmarshalJSON(data []byte) (err error) {
 	}
 	return apijson.Port(r.union, &r)
 }
-
-

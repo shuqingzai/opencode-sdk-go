@@ -65,8 +65,8 @@ func (r *V2QuestionRequestService) List(ctx context.Context, query V2QuestionReq
 
 // V2QuestionRequestListResponse contains the response from the question request list endpoint.
 type V2QuestionRequestListResponse struct {
-	Location LocationInfo                     `json:"location,required"`
-	Data     []QuestionV2Request              `json:"data,required"`
+	Location LocationInfo                      `json:"location,required"`
+	Data     []QuestionV2Request               `json:"data,required"`
 	JSON     v2QuestionRequestListResponseJSON `json:"-"`
 }
 
@@ -87,12 +87,12 @@ func (r v2QuestionRequestListResponseJSON) RawJSON() string {
 }
 
 type QuestionV2Request struct {
-	ID        string                 `json:"id,required"`
-	SessionID string                 `json:"sessionID,required"`
+	ID        string `json:"id,required"`
+	SessionID string `json:"sessionID,required"`
 	// Questions to ask
-	Questions []QuestionV2Info       `json:"questions,required"`
-	Tool      QuestionV2Tool         `json:"tool"`
-	JSON      questionV2RequestJSON  `json:"-"`
+	Questions []QuestionV2Info      `json:"questions,required"`
+	Tool      QuestionV2Tool        `json:"tool"`
+	JSON      questionV2RequestJSON `json:"-"`
 }
 
 // questionV2RequestJSON contains the JSON metadata for the struct [QuestionV2Request]
@@ -115,11 +115,11 @@ func (r questionV2RequestJSON) RawJSON() string {
 
 type QuestionV2Info struct {
 	// Complete question
-	Question string              `json:"question,required"`
+	Question string `json:"question,required"`
 	// Very short label (max 30 chars)
-	Header  string              `json:"header,required"`
+	Header string `json:"header,required"`
 	// Available choices
-	Options []QuestionV2Option  `json:"options,required"`
+	Options  []QuestionV2Option `json:"options,required"`
 	Multiple bool               `json:"multiple"`
 	Custom   bool               `json:"custom"`
 	JSON     questionV2InfoJSON `json:"-"`

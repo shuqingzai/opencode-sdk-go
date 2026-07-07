@@ -291,18 +291,6 @@ type UnknownError1Tag = shared.UnknownError1Tag
 const UnknownError1TagUnknownError = shared.UnknownError1TagUnknownError
 
 // This is an alias to an internal type.
-type AccountV2OAuthCredential = shared.AccountV2OAuthCredential
-
-// This is an alias to an internal type.
-type AccountV2ApiKeyCredential = shared.AccountV2ApiKeyCredential
-
-// This is an alias to an internal type.
-type AccountV2CredentialUnion = shared.AccountV2CredentialUnion
-
-// This is an alias to an internal type.
-type AccountV2Info = shared.AccountV2Info
-
-// This is an alias to an internal type.
 type UnauthorizedError = shared.UnauthorizedError
 
 // This is an alias to an internal type.

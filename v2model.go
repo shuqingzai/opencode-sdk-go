@@ -53,16 +53,16 @@ type V2ModelInfo struct {
 	// This field can have the runtime type of [V2ModelInfoEndpointUnknown],
 	// [V2ModelInfoEndpointOpenAIResponses], [V2ModelInfoEndpointOpenAICompletions],
 	// [V2ModelInfoEndpointAnthropicMessages], [V2ModelInfoEndpointAisdk].
-	Endpoint     interface{}              `json:"endpoint,required"`
-	Capabilities V2ModelInfoCapabilities  `json:"capabilities,required"`
-	Options      V2ModelInfoOptions       `json:"options,required"`
-	Variants     []V2ModelInfoVariant     `json:"variants,required"`
-	Time         V2ModelInfoTime          `json:"time,required"`
-	Cost         []V2ModelInfoCostItem    `json:"cost,required"`
-	Status       V2ModelInfoStatus        `json:"status,required"`
-	Enabled      bool                     `json:"enabled,required"`
-	Limit        V2ModelInfoLimit         `json:"limit,required"`
-	JSON         v2ModelInfoJSON          `json:"-"`
+	Endpoint      interface{}             `json:"endpoint,required"`
+	Capabilities  V2ModelInfoCapabilities `json:"capabilities,required"`
+	Options       V2ModelInfoOptions      `json:"options,required"`
+	Variants      []V2ModelInfoVariant    `json:"variants,required"`
+	Time          V2ModelInfoTime         `json:"time,required"`
+	Cost          []V2ModelInfoCostItem   `json:"cost,required"`
+	Status        V2ModelInfoStatus       `json:"status,required"`
+	Enabled       bool                    `json:"enabled,required"`
+	Limit         V2ModelInfoLimit        `json:"limit,required"`
+	JSON          v2ModelInfoJSON         `json:"-"`
 	endpointUnion V2ModelInfoEndpointUnion
 }
 
@@ -126,18 +126,18 @@ type V2ModelInfoEndpointUnion interface {
 }
 
 type V2ModelInfoEndpointUnknown struct {
-	Type V2ModelInfoEndpointType            `json:"type,required"`
-	JSON v2ModelInfoEndpointUnknownJSON     `json:"-"`
+	Type V2ModelInfoEndpointType        `json:"type,required"`
+	JSON v2ModelInfoEndpointUnknownJSON `json:"-"`
 }
 
 type V2ModelInfoEndpointType string
 
 const (
-	V2ModelInfoEndpointTypeUnknown            V2ModelInfoEndpointType = "unknown"
-	V2ModelInfoEndpointTypeOpenAIResponses    V2ModelInfoEndpointType = "openai/responses"
-	V2ModelInfoEndpointTypeOpenAICompletions  V2ModelInfoEndpointType = "openai/completions"
-	V2ModelInfoEndpointTypeAnthropicMessages  V2ModelInfoEndpointType = "anthropic/messages"
-	V2ModelInfoEndpointTypeAisdk              V2ModelInfoEndpointType = "aisdk"
+	V2ModelInfoEndpointTypeUnknown           V2ModelInfoEndpointType = "unknown"
+	V2ModelInfoEndpointTypeOpenAIResponses   V2ModelInfoEndpointType = "openai/responses"
+	V2ModelInfoEndpointTypeOpenAICompletions V2ModelInfoEndpointType = "openai/completions"
+	V2ModelInfoEndpointTypeAnthropicMessages V2ModelInfoEndpointType = "anthropic/messages"
+	V2ModelInfoEndpointTypeAisdk             V2ModelInfoEndpointType = "aisdk"
 )
 
 func (r V2ModelInfoEndpointType) IsKnown() bool {
@@ -168,7 +168,7 @@ func (r v2ModelInfoEndpointUnknownJSON) RawJSON() string {
 func (r V2ModelInfoEndpointUnknown) implementsV2ModelInfoEndpointUnion() {}
 
 type V2ModelInfoEndpointOpenAIResponses struct {
-	Type      V2ModelInfoEndpointType               `json:"type,required"`
+	Type      V2ModelInfoEndpointType                `json:"type,required"`
 	URL       string                                 `json:"url,required"`
 	Websocket bool                                   `json:"websocket"`
 	JSON      v2ModelInfoEndpointOpenAIResponsesJSON `json:"-"`
@@ -197,8 +197,8 @@ type V2ModelInfoEndpointOpenAICompletions struct {
 	URL  string                  `json:"url,required"`
 	// This field can have the runtime type of [V2ModelInfoEndpointReasoningContent],
 	// [V2ModelInfoEndpointReasoningDetails].
-	Reasoning interface{}                                 `json:"reasoning"`
-	JSON      v2ModelInfoEndpointOpenAICompletionsJSON    `json:"-"`
+	Reasoning      interface{}                              `json:"reasoning"`
+	JSON           v2ModelInfoEndpointOpenAICompletionsJSON `json:"-"`
 	reasoningUnion V2ModelInfoEndpointReasoningUnion
 }
 
@@ -235,8 +235,8 @@ type V2ModelInfoEndpointReasoningUnion interface {
 }
 
 type V2ModelInfoEndpointReasoningContent struct {
-	Type V2ModelInfoEndpointReasoningType         `json:"type,required"`
-	JSON v2ModelInfoEndpointReasoningContentJSON  `json:"-"`
+	Type V2ModelInfoEndpointReasoningType        `json:"type,required"`
+	JSON v2ModelInfoEndpointReasoningContentJSON `json:"-"`
 }
 
 type V2ModelInfoEndpointReasoningType string
@@ -271,8 +271,8 @@ func (r v2ModelInfoEndpointReasoningContentJSON) RawJSON() string {
 func (r V2ModelInfoEndpointReasoningContent) implementsV2ModelInfoEndpointReasoningUnion() {}
 
 type V2ModelInfoEndpointReasoningDetails struct {
-	Type V2ModelInfoEndpointReasoningType          `json:"type,required"`
-	JSON v2ModelInfoEndpointReasoningDetailsJSON   `json:"-"`
+	Type V2ModelInfoEndpointReasoningType        `json:"type,required"`
+	JSON v2ModelInfoEndpointReasoningDetailsJSON `json:"-"`
 }
 
 type v2ModelInfoEndpointReasoningDetailsJSON struct {
@@ -308,8 +308,8 @@ func init() {
 
 type V2ModelInfoEndpointAnthropicMessages struct {
 	Type V2ModelInfoEndpointType                  `json:"type,required"`
-	URL  string                                    `json:"url,required"`
-	JSON v2ModelInfoEndpointAnthropicMessagesJSON  `json:"-"`
+	URL  string                                   `json:"url,required"`
+	JSON v2ModelInfoEndpointAnthropicMessagesJSON `json:"-"`
 }
 
 type v2ModelInfoEndpointAnthropicMessagesJSON struct {
@@ -330,10 +330,10 @@ func (r v2ModelInfoEndpointAnthropicMessagesJSON) RawJSON() string {
 func (r V2ModelInfoEndpointAnthropicMessages) implementsV2ModelInfoEndpointUnion() {}
 
 type V2ModelInfoEndpointAisdk struct {
-	Type    V2ModelInfoEndpointType        `json:"type,required"`
-	Package string                          `json:"package,required"`
-	URL     string                          `json:"url"`
-	JSON    v2ModelInfoEndpointAisdkJSON   `json:"-"`
+	Type    V2ModelInfoEndpointType      `json:"type,required"`
+	Package string                       `json:"package,required"`
+	URL     string                       `json:"url"`
+	JSON    v2ModelInfoEndpointAisdkJSON `json:"-"`
 }
 
 type v2ModelInfoEndpointAisdkJSON struct {
@@ -382,10 +382,10 @@ func init() {
 }
 
 type V2ModelInfoCapabilities struct {
-	Tools  bool                          `json:"tools,required"`
-	Input  []string                      `json:"input,required"`
-	Output []string                      `json:"output,required"`
-	JSON   v2ModelInfoCapabilitiesJSON   `json:"-"`
+	Tools  bool                        `json:"tools,required"`
+	Input  []string                    `json:"input,required"`
+	Output []string                    `json:"output,required"`
+	JSON   v2ModelInfoCapabilitiesJSON `json:"-"`
 }
 
 type v2ModelInfoCapabilitiesJSON struct {
@@ -405,11 +405,11 @@ func (r v2ModelInfoCapabilitiesJSON) RawJSON() string {
 }
 
 type V2ModelInfoOptions struct {
-	Headers map[string]string           `json:"headers,required"`
-	Body    map[string]interface{}      `json:"body,required"`
-	Aisdk   V2ModelInfoOptionsAisdk     `json:"aisdk,required"`
-	Variant string                      `json:"variant"`
-	JSON    v2ModelInfoOptionsJSON      `json:"-"`
+	Headers map[string]string       `json:"headers,required"`
+	Body    map[string]interface{}  `json:"body,required"`
+	Aisdk   V2ModelInfoOptionsAisdk `json:"aisdk,required"`
+	Variant string                  `json:"variant"`
+	JSON    v2ModelInfoOptionsJSON  `json:"-"`
 }
 
 type v2ModelInfoOptionsJSON struct {
@@ -451,11 +451,11 @@ func (r v2ModelInfoOptionsAisdkJSON) RawJSON() string {
 }
 
 type V2ModelInfoVariant struct {
-	ID      string                 `json:"id,required"`
-	Headers map[string]string      `json:"headers,required"`
-	Body    map[string]interface{} `json:"body,required"`
+	ID      string                  `json:"id,required"`
+	Headers map[string]string       `json:"headers,required"`
+	Body    map[string]interface{}  `json:"body,required"`
 	Aisdk   V2ModelInfoOptionsAisdk `json:"aisdk,required"`
-	JSON    v2ModelInfoVariantJSON `json:"-"`
+	JSON    v2ModelInfoVariantJSON  `json:"-"`
 }
 
 type v2ModelInfoVariantJSON struct {
@@ -478,7 +478,7 @@ func (r v2ModelInfoVariantJSON) RawJSON() string {
 type V2ModelInfoTime struct {
 	// The release date as a Unix timestamp. This field can have the runtime type of
 	// float64, "NaN", "Infinity", or "-Infinity".
-	Released float64            `json:"released,required"`
+	Released float64             `json:"released,required"`
 	JSON     v2ModelInfoTimeJSON `json:"-"`
 }
 
@@ -497,11 +497,11 @@ func (r v2ModelInfoTimeJSON) RawJSON() string {
 }
 
 type V2ModelInfoCostItem struct {
-	Tier   V2ModelInfoCostTier      `json:"tier"`
-	Input  int64                  `json:"input,required"`
-	Output int64                  `json:"output,required"`
-	Cache  V2ModelInfoCostCache     `json:"cache,required"`
-	JSON   v2ModelInfoCostItemJSON  `json:"-"`
+	Tier   V2ModelInfoCostTier     `json:"tier"`
+	Input  int64                   `json:"input,required"`
+	Output int64                   `json:"output,required"`
+	Cache  V2ModelInfoCostCache    `json:"cache,required"`
+	JSON   v2ModelInfoCostItemJSON `json:"-"`
 }
 
 type v2ModelInfoCostItemJSON struct {
@@ -522,8 +522,8 @@ func (r v2ModelInfoCostItemJSON) RawJSON() string {
 }
 
 type V2ModelInfoCostTier struct {
-	Type string                 `json:"type,required"`
-	Size int64                `json:"size,required"`
+	Type string                  `json:"type,required"`
+	Size int64                   `json:"size,required"`
 	JSON v2ModelInfoCostTierJSON `json:"-"`
 }
 
@@ -543,8 +543,8 @@ func (r v2ModelInfoCostTierJSON) RawJSON() string {
 }
 
 type V2ModelInfoCostCache struct {
-	Read  int64                  `json:"read,required"`
-	Write int64                  `json:"write,required"`
+	Read  int64                    `json:"read,required"`
+	Write int64                    `json:"write,required"`
 	JSON  v2ModelInfoCostCacheJSON `json:"-"`
 }
 
@@ -564,10 +564,10 @@ func (r v2ModelInfoCostCacheJSON) RawJSON() string {
 }
 
 type V2ModelInfoLimit struct {
-	Context int64                  `json:"context,required"`
-	Input   int64                  `json:"input"`
-	Output  int64                  `json:"output,required"`
-	JSON    v2ModelInfoLimitJSON   `json:"-"`
+	Context int64                `json:"context,required"`
+	Input   int64                `json:"input"`
+	Output  int64                `json:"output,required"`
+	JSON    v2ModelInfoLimitJSON `json:"-"`
 	// ExtraFields contains additional fields that may be present.
 	ExtraFields map[string]interface{} `json:"-"`
 }

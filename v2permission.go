@@ -134,9 +134,9 @@ func (r V2PermissionSavedListParams) URLQuery() (v url.Values) {
 
 // V2PermissionRequestListResponse is returned by the Request.List method.
 type V2PermissionRequestListResponse struct {
-	Location LocationInfo                            `json:"location,required"`
-	Data     []PermissionV2Request                   `json:"data,required"`
-	JSON     v2PermissionRequestListResponseJSON     `json:"-"`
+	Location LocationInfo                        `json:"location,required"`
+	Data     []PermissionV2Request               `json:"data,required"`
+	JSON     v2PermissionRequestListResponseJSON `json:"-"`
 }
 
 // v2PermissionRequestListResponseJSON contains the JSON metadata for the struct [V2PermissionRequestListResponse]
@@ -157,8 +157,8 @@ func (r v2PermissionRequestListResponseJSON) RawJSON() string {
 
 // V2PermissionSavedListResponse is returned by the Saved.List method.
 type V2PermissionSavedListResponse struct {
-	Data []PermissionSavedInfo                      `json:"data,required"`
-	JSON v2PermissionSavedListResponseJSON          `json:"-"`
+	Data []PermissionSavedInfo             `json:"data,required"`
+	JSON v2PermissionSavedListResponseJSON `json:"-"`
 }
 
 // v2PermissionSavedListResponseJSON contains the JSON metadata for the struct [V2PermissionSavedListResponse]
@@ -178,15 +178,15 @@ func (r v2PermissionSavedListResponseJSON) RawJSON() string {
 
 // PermissionV2Request represents a pending v2 permission request.
 type PermissionV2Request struct {
-	ID        string                   `json:"id,required"`
-	SessionID string                   `json:"sessionID,required"`
-	Action    string                   `json:"action,required"`
-	Resources []string                 `json:"resources,required"`
-	Save      []string                 `json:"save"`
+	ID        string   `json:"id,required"`
+	SessionID string   `json:"sessionID,required"`
+	Action    string   `json:"action,required"`
+	Resources []string `json:"resources,required"`
+	Save      []string `json:"save"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata  interface{}              `json:"metadata"`
-	Source    PermissionV2Source       `json:"source"`
-	JSON      permissionV2RequestJSON  `json:"-"`
+	Metadata interface{}             `json:"metadata"`
+	Source   PermissionV2Source      `json:"source"`
+	JSON     permissionV2RequestJSON `json:"-"`
 }
 
 // permissionV2RequestJSON contains the JSON metadata for the struct [PermissionV2Request]
@@ -212,10 +212,10 @@ func (r permissionV2RequestJSON) RawJSON() string {
 
 // PermissionV2Source represents the source tool of a permission v2 request.
 type PermissionV2Source struct {
-	Type      string                    `json:"type,required"`
-	MessageID string                    `json:"messageID,required"`
-	CallID    string                    `json:"callID,required"`
-	JSON      permissionV2SourceJSON    `json:"-"`
+	Type      string                 `json:"type,required"`
+	MessageID string                 `json:"messageID,required"`
+	CallID    string                 `json:"callID,required"`
+	JSON      permissionV2SourceJSON `json:"-"`
 }
 
 // permissionV2SourceJSON contains the JSON metadata for the struct [PermissionV2Source]
@@ -237,11 +237,11 @@ func (r permissionV2SourceJSON) RawJSON() string {
 
 // PermissionSavedInfo represents a saved permission entry.
 type PermissionSavedInfo struct {
-	ID        string                      `json:"id,required"`
-	ProjectID string                      `json:"projectID,required"`
-	Action    string                      `json:"action,required"`
-	Resource  string                      `json:"resource,required"`
-	JSON      permissionSavedInfoJSON     `json:"-"`
+	ID        string                  `json:"id,required"`
+	ProjectID string                  `json:"projectID,required"`
+	Action    string                  `json:"action,required"`
+	Resource  string                  `json:"resource,required"`
+	JSON      permissionSavedInfoJSON `json:"-"`
 }
 
 // permissionSavedInfoJSON contains the JSON metadata for the struct [PermissionSavedInfo]

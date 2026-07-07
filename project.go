@@ -77,8 +77,8 @@ type Project struct {
 	Commands  ProjectCommands `json:"commands"`
 	Vcs       ProjectVcs      `json:"vcs"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata  interface{}     `json:"metadata"`
-	JSON      projectJSON     `json:"-"`
+	Metadata interface{} `json:"metadata"`
+	JSON     projectJSON `json:"-"`
 }
 
 // projectJSON contains the JSON metadata for the struct [Project]
@@ -169,10 +169,10 @@ func (r ProjectCurrentParams) URLQuery() (v url.Values) {
 }
 
 type ProjectUpdateParams struct {
-	Directory param.Field[string]        `query:"directory"`
-	Workspace param.Field[string]        `query:"workspace"`
-	Name      param.Field[string]        `json:"name"`
-	Icon      param.Field[ProjectIcon]   `json:"icon"`
+	Directory param.Field[string]          `query:"directory"`
+	Workspace param.Field[string]          `query:"workspace"`
+	Name      param.Field[string]          `json:"name"`
+	Icon      param.Field[ProjectIcon]     `json:"icon"`
 	Commands  param.Field[ProjectCommands] `json:"commands"`
 }
 
@@ -208,16 +208,16 @@ func (r *ProjectService) Directories(ctx context.Context, projectID string, quer
 }
 
 type ProjectDirectoryEntry struct {
-	Directory string                   `json:"directory,required"`
-	Strategy  string                   `json:"strategy"`
+	Directory string                    `json:"directory,required"`
+	Strategy  string                    `json:"strategy"`
 	JSON      projectDirectoryEntryJSON `json:"-"`
 }
 
 // projectDirectoryEntryJSON contains the JSON metadata for the struct [ProjectDirectoryEntry]
 type projectDirectoryEntryJSON struct {
-	Directory  apijson.Field
-	Strategy   apijson.Field
-	raw        string
+	Directory   apijson.Field
+	Strategy    apijson.Field
+	raw         string
 	ExtraFields map[string]apijson.Field
 }
 

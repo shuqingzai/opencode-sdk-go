@@ -24,7 +24,7 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewTuiService] method instead.
 type TuiService struct {
-	Options  []option.RequestOption
+	Options []option.RequestOption
 	Control *TuiControlService
 }
 
@@ -308,8 +308,8 @@ func (r TuiSubmitPromptParams) URLQuery() (v url.Values) {
 }
 
 type TuiPublishParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
 	Body      param.Field[TuiPublishBodyUnion] `json:"body"`
 }
 
@@ -413,10 +413,10 @@ func (r TuiPublishBodyToastShowType) IsKnown() bool {
 }
 
 type TuiPublishBodyToastShowProperties struct {
-	Message  param.Field[string]                              `json:"message,required"`
+	Message  param.Field[string]                                   `json:"message,required"`
 	Variant  param.Field[TuiPublishBodyToastShowPropertiesVariant] `json:"variant,required"`
-	Title    param.Field[string]                              `json:"title"`
-	Duration param.Field[int64]                               `json:"duration"`
+	Title    param.Field[string]                                   `json:"title"`
+	Duration param.Field[int64]                                    `json:"duration"`
 }
 
 func (r TuiPublishBodyToastShowProperties) MarshalJSON() (data []byte, err error) {
@@ -504,7 +504,7 @@ type TuiControlNextResponse struct {
 	// This field can have the runtime type of [TuiPublishBodyPromptAppend],
 	// [TuiPublishBodyCommandExecute], [TuiPublishBodyToastShow],
 	// [TuiPublishBodySessionSelect].
-	Body interface{}               `json:"body,required"`
+	Body interface{}                `json:"body,required"`
 	JSON tuicontrolNextResponseJSON `json:"-"`
 }
 
@@ -524,8 +524,8 @@ func (r tuicontrolNextResponseJSON) RawJSON() string {
 }
 
 type TuiControlResponseParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Directory param.Field[string]      `query:"directory"`
+	Workspace param.Field[string]      `query:"workspace"`
 	Body      param.Field[interface{}] `json:"body"`
 }
 

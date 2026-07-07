@@ -128,7 +128,7 @@ func (r permissionRequestToolJSON) RawJSON() string {
 // Reply to a permission request
 type PermissionReplyParams struct {
 	// Reply type: "once", "always", or "reject"
-	Reply     param.Field[PermissionReplyParamsReply] `json:"reply,required"`
+	Reply param.Field[PermissionReplyParamsReply] `json:"reply,required"`
 	// Optional message to include with the reply
 	Message   param.Field[string] `json:"message"`
 	Directory param.Field[string] `query:"directory"`
@@ -152,9 +152,9 @@ func (r PermissionReplyParams) URLQuery() (v url.Values) {
 // Respond to a permission request (deprecated)
 type PermissionRespondParams struct {
 	// Response type: "once", "always", or "reject"
-	Response param.Field[PermissionRespondParamsResponse] `json:"response,required"`
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Response  param.Field[PermissionRespondParamsResponse] `json:"response,required"`
+	Directory param.Field[string]                          `query:"directory"`
+	Workspace param.Field[string]                          `query:"workspace"`
 }
 
 func (r PermissionRespondParams) MarshalJSON() (data []byte, err error) {

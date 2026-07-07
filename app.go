@@ -118,7 +118,7 @@ func (r modelJSON) RawJSON() string {
 }
 
 type ModelCost struct {
-	Input      int64 `json:"input,required"`
+	Input      int64   `json:"input,required"`
 	Output     float64 `json:"output,required"`
 	CacheRead  float64 `json:"cache_read"`
 	CacheWrite float64 `json:"cache_write"`
@@ -402,5 +402,3 @@ func (r AppLogParamsLevel) IsKnown() bool {
 	}
 	return false
 }
-
-

@@ -178,8 +178,8 @@ func (r QuestionListParams) URLQuery() (v url.Values) {
 type QuestionReplyParams struct {
 	// Answers to the questions (array of string arrays, one for each question)
 	Answers   param.Field[QuestionAnswer] `json:"answers,required"`
-	Directory param.Field[string]          `query:"directory"`
-	Workspace param.Field[string]          `query:"workspace"`
+	Directory param.Field[string]         `query:"directory"`
+	Workspace param.Field[string]         `query:"workspace"`
 }
 
 func (r QuestionReplyParams) MarshalJSON() (data []byte, err error) {

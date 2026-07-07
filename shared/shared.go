@@ -3,10 +3,7 @@
 package shared
 
 import (
-	"reflect"
-
 	"github.com/sst/opencode-sdk-go/internal/apijson"
-	"github.com/tidwall/gjson"
 )
 
 type MessageAbortedError struct {
@@ -358,8 +355,8 @@ func (r ContextOverflowError) ImplementsEventListResponseEventSessionErrorProper
 func (r ContextOverflowError) ImplementsAssistantMessageError() {}
 
 type ContextOverflowErrorData struct {
-	Message      string                      `json:"message,required"`
-	ResponseBody string                      `json:"responseBody"`
+	Message      string                       `json:"message,required"`
+	ResponseBody string                       `json:"responseBody"`
 	JSON         contextOverflowErrorDataJSON `json:"-"`
 }
 
@@ -395,9 +392,9 @@ func (r ContextOverflowErrorName) IsKnown() bool {
 }
 
 type MessageOutputLengthError struct {
-	Data interface{}                    `json:"data,required"`
-	Name MessageOutputLengthErrorName   `json:"name,required"`
-	JSON messageOutputLengthErrorJSON   `json:"-"`
+	Data interface{}                  `json:"data,required"`
+	Name MessageOutputLengthErrorName `json:"name,required"`
+	JSON messageOutputLengthErrorJSON `json:"-"`
 }
 
 // messageOutputLengthErrorJSON contains the JSON metadata for the struct
@@ -467,7 +464,7 @@ type APIErrorData struct {
 	Metadata        map[string]string `json:"metadata,omitempty"`
 	ResponseBody    string            `json:"responseBody,omitempty"`
 	ResponseHeaders map[string]string `json:"responseHeaders,omitempty"`
-	StatusCode      int64           `json:"statusCode,omitempty"`
+	StatusCode      int64             `json:"statusCode,omitempty"`
 	JSON            apiErrorDataJSON  `json:"-"`
 }
 
@@ -566,7 +563,7 @@ func (r VcsApplyErrorName) IsKnown() bool {
 type VcsApplyErrorReason string
 
 const (
-	VcsApplyErrorReasonNonGit  VcsApplyErrorReason = "non-git"
+	VcsApplyErrorReasonNonGit   VcsApplyErrorReason = "non-git"
 	VcsApplyErrorReasonNotClean VcsApplyErrorReason = "not-clean"
 )
 
@@ -657,7 +654,7 @@ func (r workspaceCreateErrorJSON) RawJSON() string {
 }
 
 type WorkspaceCreateErrorData struct {
-	Message string                      `json:"message,required"`
+	Message string                       `json:"message,required"`
 	JSON    workspaceCreateErrorDataJSON `json:"-"`
 }
 
@@ -769,8 +766,8 @@ func (r badRequestErrorJSON) RawJSON() string {
 }
 
 type BadRequestErrorData struct {
-	Message string                `json:"message,required"`
-	Kind    BadRequestErrorKind   `json:"kind"`
+	Message string                  `json:"message,required"`
+	Kind    BadRequestErrorKind     `json:"kind"`
 	JSON    badRequestErrorDataJSON `json:"-"`
 }
 
@@ -845,7 +842,7 @@ func (r worktreeErrorJSON) RawJSON() string {
 }
 
 type WorktreeErrorData struct {
-	Message string               `json:"message,required"`
+	Message string                `json:"message,required"`
 	JSON    worktreeErrorDataJSON `json:"-"`
 }
 
@@ -868,12 +865,12 @@ type WorktreeErrorName string
 
 const (
 	WorktreeErrorNameWorktreeNotGitError               WorktreeErrorName = "WorktreeNotGitError"
-	WorktreeErrorNameWorktreeNameGenerationFailedError  WorktreeErrorName = "WorktreeNameGenerationFailedError"
-	WorktreeErrorNameWorktreeCreateFailedError          WorktreeErrorName = "WorktreeCreateFailedError"
-	WorktreeErrorNameWorktreeStartCommandFailedError    WorktreeErrorName = "WorktreeStartCommandFailedError"
-	WorktreeErrorNameWorktreeRemoveFailedError          WorktreeErrorName = "WorktreeRemoveFailedError"
-	WorktreeErrorNameWorktreeResetFailedError           WorktreeErrorName = "WorktreeResetFailedError"
-	WorktreeErrorNameWorktreeListFailedError            WorktreeErrorName = "WorktreeListFailedError"
+	WorktreeErrorNameWorktreeNameGenerationFailedError WorktreeErrorName = "WorktreeNameGenerationFailedError"
+	WorktreeErrorNameWorktreeCreateFailedError         WorktreeErrorName = "WorktreeCreateFailedError"
+	WorktreeErrorNameWorktreeStartCommandFailedError   WorktreeErrorName = "WorktreeStartCommandFailedError"
+	WorktreeErrorNameWorktreeRemoveFailedError         WorktreeErrorName = "WorktreeRemoveFailedError"
+	WorktreeErrorNameWorktreeResetFailedError          WorktreeErrorName = "WorktreeResetFailedError"
+	WorktreeErrorNameWorktreeListFailedError           WorktreeErrorName = "WorktreeListFailedError"
 )
 
 func (r WorktreeErrorName) IsKnown() bool {
@@ -887,9 +884,9 @@ func (r WorktreeErrorName) IsKnown() bool {
 // === _tag-based errors (HTTP infrastructure errors) ===
 
 type InvalidCursorError struct {
-	Tag     InvalidCursorErrorTag     `json:"_tag,required"`
-	Message string                    `json:"message,required"`
-	JSON    invalidCursorErrorJSON    `json:"-"`
+	Tag     InvalidCursorErrorTag  `json:"_tag,required"`
+	Message string                 `json:"message,required"`
+	JSON    invalidCursorErrorJSON `json:"-"`
 }
 
 type invalidCursorErrorJSON struct {
@@ -961,8 +958,8 @@ func (r InvalidRequestErrorTag) IsKnown() bool {
 }
 
 type McpUnsupportedOAuthError struct {
-	Error string                         `json:"error,required"`
-	JSON  mcpUnsupportedOAuthErrorJSON   `json:"-"`
+	Error string                       `json:"error,required"`
+	JSON  mcpUnsupportedOAuthErrorJSON `json:"-"`
 }
 
 type mcpUnsupportedOAuthErrorJSON struct {
@@ -980,9 +977,9 @@ func (r mcpUnsupportedOAuthErrorJSON) RawJSON() string {
 }
 
 type ProviderNotFoundError struct {
-	Tag        ProviderNotFoundErrorTag `json:"_tag,required"`
-	ProviderID string                   `json:"providerID,required"`
-	Message    string                   `json:"message,required"`
+	Tag        ProviderNotFoundErrorTag  `json:"_tag,required"`
+	ProviderID string                    `json:"providerID,required"`
+	Message    string                    `json:"message,required"`
 	JSON       providerNotFoundErrorJSON `json:"-"`
 }
 
@@ -1163,7 +1160,7 @@ func (r UnauthorizedErrorTag) IsKnown() bool {
 }
 
 type EffectHttpApiErrorBadRequest struct {
-	Tag  EffectHttpApiErrorBadRequestTag `json:"_tag,required"`
+	Tag  EffectHttpApiErrorBadRequestTag  `json:"_tag,required"`
 	JSON effectHttpApiErrorBadRequestJSON `json:"-"`
 }
 
@@ -1198,9 +1195,9 @@ func (r EffectHttpApiErrorBadRequestTag) IsKnown() bool {
 // === v1.15.10 — 新的标签式 HTTP 错误类型 ===
 
 type McpServerNotFoundError struct {
-	Tag     McpServerNotFoundErrorTag `json:"_tag,required"`
-	Name    string                    `json:"name,required"`
-	Message string                    `json:"message,required"`
+	Tag     McpServerNotFoundErrorTag  `json:"_tag,required"`
+	Name    string                     `json:"name,required"`
+	Message string                     `json:"message,required"`
 	JSON    mcpServerNotFoundErrorJSON `json:"-"`
 }
 
@@ -1235,9 +1232,9 @@ func (r McpServerNotFoundErrorTag) IsKnown() bool {
 }
 
 type ProjectNotFoundError struct {
-	Tag       ProjectNotFoundErrorTag `json:"_tag,required"`
-	ProjectID string                  `json:"projectID,required"`
-	Message   string                  `json:"message,required"`
+	Tag       ProjectNotFoundErrorTag   `json:"_tag,required"`
+	ProjectID string                    `json:"projectID,required"`
+	Message   string                    `json:"message,required"`
 	JSON      projectNotFoundError1JSON `json:"-"`
 }
 
@@ -1272,9 +1269,9 @@ func (r ProjectNotFoundErrorTag) IsKnown() bool {
 }
 
 type PtyNotFoundError struct {
-	Tag     PtyNotFoundErrorTag `json:"_tag,required"`
-	PtyID   string              `json:"ptyID,required"`
-	Message string              `json:"message,required"`
+	Tag     PtyNotFoundErrorTag  `json:"_tag,required"`
+	PtyID   string               `json:"ptyID,required"`
+	Message string               `json:"message,required"`
 	JSON    ptyNotFoundErrorJSON `json:"-"`
 }
 
@@ -1309,8 +1306,8 @@ func (r PtyNotFoundErrorTag) IsKnown() bool {
 }
 
 type PtyForbiddenError struct {
-	Tag     PtyForbiddenErrorTag `json:"_tag,required"`
-	Message string               `json:"message,required"`
+	Tag     PtyForbiddenErrorTag  `json:"_tag,required"`
+	Message string                `json:"message,required"`
 	JSON    ptyForbiddenErrorJSON `json:"-"`
 }
 
@@ -1344,9 +1341,9 @@ func (r PtyForbiddenErrorTag) IsKnown() bool {
 }
 
 type QuestionNotFoundError struct {
-	Tag       QuestionNotFoundErrorTag `json:"_tag,required"`
-	RequestID string                   `json:"requestID,required"`
-	Message   string                   `json:"message,required"`
+	Tag       QuestionNotFoundErrorTag  `json:"_tag,required"`
+	RequestID string                    `json:"requestID,required"`
+	Message   string                    `json:"message,required"`
 	JSON      questionNotFoundErrorJSON `json:"-"`
 }
 
@@ -1381,9 +1378,9 @@ func (r QuestionNotFoundErrorTag) IsKnown() bool {
 }
 
 type PermissionNotFoundError struct {
-	Tag       PermissionNotFoundErrorTag `json:"_tag,required"`
-	RequestID string                     `json:"requestID,required"`
-	Message   string                     `json:"message,required"`
+	Tag       PermissionNotFoundErrorTag   `json:"_tag,required"`
+	RequestID string                       `json:"requestID,required"`
+	Message   string                       `json:"message,required"`
 	JSON      permissionNotFoundError1JSON `json:"-"`
 }
 
@@ -1418,9 +1415,9 @@ func (r PermissionNotFoundErrorTag) IsKnown() bool {
 }
 
 type SessionBusyError struct {
-	Tag       SessionBusyErrorTag `json:"_tag,required"`
-	SessionID string              `json:"sessionID,required"`
-	Message   string              `json:"message,required"`
+	Tag       SessionBusyErrorTag  `json:"_tag,required"`
+	SessionID string               `json:"sessionID,required"`
+	Message   string               `json:"message,required"`
 	JSON      sessionBusyErrorJSON `json:"-"`
 }
 
@@ -1455,7 +1452,7 @@ func (r SessionBusyErrorTag) IsKnown() bool {
 }
 
 type EffectHttpApiErrorForbidden struct {
-	Tag  EffectHttpApiErrorForbiddenTag `json:"_tag,required"`
+	Tag  EffectHttpApiErrorForbiddenTag  `json:"_tag,required"`
 	JSON effectHttpApiErrorForbiddenJSON `json:"-"`
 }
 
@@ -1488,7 +1485,7 @@ func (r EffectHttpApiErrorForbiddenTag) IsKnown() bool {
 }
 
 type EffectHttpApiErrorInternalServerError struct {
-	Tag  EffectHttpApiErrorInternalServerErrorTag `json:"_tag,required"`
+	Tag  EffectHttpApiErrorInternalServerErrorTag  `json:"_tag,required"`
 	JSON effectHttpApiErrorInternalServerErrorJSON `json:"-"`
 }
 
@@ -1518,116 +1515,4 @@ func (r EffectHttpApiErrorInternalServerErrorTag) IsKnown() bool {
 		return true
 	}
 	return false
-}
-
-// === Account V2 types ===
-
-type AccountV2OAuthCredential struct {
-	Type    string                        `json:"type,required"`
-	Refresh string                        `json:"refresh,required"`
-	Access  string                        `json:"access,required"`
-	Expires int64                         `json:"expires,required"`
-	JSON    accountV2OAuthCredentialJSON  `json:"-"`
-}
-
-type accountV2OAuthCredentialJSON struct {
-	Type        apijson.Field
-	Refresh     apijson.Field
-	Access      apijson.Field
-	Expires     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AccountV2OAuthCredential) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r accountV2OAuthCredentialJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r AccountV2OAuthCredential) implementsAccountV2Credential() {}
-
-type AccountV2ApiKeyCredential struct {
-	Type     string                          `json:"type,required"`
-	Key      string                          `json:"key,required"`
-	Metadata map[string]string               `json:"metadata"`
-	JSON     accountV2ApiKeyCredentialJSON   `json:"-"`
-}
-
-type accountV2ApiKeyCredentialJSON struct {
-	Type        apijson.Field
-	Key         apijson.Field
-	Metadata    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AccountV2ApiKeyCredential) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r accountV2ApiKeyCredentialJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r AccountV2ApiKeyCredential) implementsAccountV2Credential() {}
-
-// AccountV2CredentialUnion represents the union of credential types for an account.
-// Possible runtime types are [AccountV2OAuthCredential], [AccountV2ApiKeyCredential].
-type AccountV2CredentialUnion interface {
-	implementsAccountV2Credential()
-}
-
-type AccountV2Info struct {
-	ID          string              `json:"id,required"`
-	ServiceID   string              `json:"serviceID,required"`
-	Description string              `json:"description,required"`
-	// This field can have the runtime type of [AccountV2OAuthCredential],
-	// [AccountV2ApiKeyCredential].
-	Credential      interface{}         `json:"credential,required"`
-	JSON            accountV2InfoJSON   `json:"-"`
-	credentialUnion AccountV2CredentialUnion
-}
-
-type accountV2InfoJSON struct {
-	ID          apijson.Field
-	ServiceID   apijson.Field
-	Description apijson.Field
-	Credential  apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AccountV2Info) UnmarshalJSON(data []byte) (err error) {
-	*r = AccountV2Info{}
-	err = apijson.UnmarshalRoot(data, &r.credentialUnion)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.credentialUnion, r)
-}
-
-func (r accountV2InfoJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *AccountV2Info) AsUnion() AccountV2CredentialUnion {
-	return r.credentialUnion
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*AccountV2CredentialUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AccountV2OAuthCredential{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AccountV2ApiKeyCredential{}),
-		},
-	)
 }

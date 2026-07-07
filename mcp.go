@@ -567,10 +567,10 @@ func (r McpStatusParams) URLQuery() (v url.Values) {
 
 // McpAddParams contains the parameters for adding an MCP server.
 type McpAddParams struct {
-	Directory param.Field[string]       `query:"directory"`
-	Workspace param.Field[string]       `query:"workspace"`
-	Name      param.Field[string]      `json:"name,required"`
-	Config    McpAddBodyConfigUnion    `json:"config,required"`
+	Directory param.Field[string]   `query:"directory"`
+	Workspace param.Field[string]   `query:"workspace"`
+	Name      param.Field[string]   `json:"name,required"`
+	Config    McpAddBodyConfigUnion `json:"config,required"`
 }
 
 // MarshalJSON serializes [McpAddParams] omitting query parameters.
