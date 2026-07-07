@@ -2375,3 +2375,1003 @@ func (r EventListResponseEventPluginAddedType) IsKnown() bool {
 	}
 	return false
 }
+
+// =============================================================================
+// Shared sub-types for new Event variants
+// =============================================================================
+
+// LocationRef represents a reference to a location in a workspace.
+type EventListResponseEventSessionNextMovedPropertiesLocation struct {
+	Directory   string                                                         `json:"directory,required"`
+	WorkspaceID string                                                         `json:"workspaceID"`
+	JSON        eventListResponseEventSessionNextMovedPropertiesLocationJSON   `json:"-"`
+}
+
+type eventListResponseEventSessionNextMovedPropertiesLocationJSON struct {
+	Directory   apijson.Field
+	WorkspaceID apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextMovedPropertiesLocation) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextMovedPropertiesLocationJSON) RawJSON() string {
+	return r.raw
+}
+
+// RevertState represents a revert state for session.next.revert.staged.
+type EventListResponseEventSessionNextRevertStagedPropertiesRevert struct {
+	MessageID string                                                              `json:"messageID,required"`
+	PartID    string                                                              `json:"partID"`
+	Snapshot  string                                                              `json:"snapshot"`
+	Diff      string                                                              `json:"diff"`
+	Files     []VcsFileDiff                                                       `json:"files"`
+	JSON      eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON   `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON struct {
+	MessageID   apijson.Field
+	PartID      apijson.Field
+	Snapshot    apijson.Field
+	Diff        apijson.Field
+	Files       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertStagedPropertiesRevert) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON) RawJSON() string {
+	return r.raw
+}
+
+// PermissionV2Source represents the source tool of a permission v2 request.
+type EventListResponseEventPermissionV2AskedPropertiesSource struct {
+	Type      string                                                            `json:"type,required"`
+	MessageID string                                                            `json:"messageID,required"`
+	CallID    string                                                            `json:"callID,required"`
+	JSON      eventListResponseEventPermissionV2AskedPropertiesSourceJSON       `json:"-"`
+}
+
+type eventListResponseEventPermissionV2AskedPropertiesSourceJSON struct {
+	Type        apijson.Field
+	MessageID   apijson.Field
+	CallID      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPermissionV2AskedPropertiesSource) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPermissionV2AskedPropertiesSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+// PermissionV2ReplyType represents the reply type for permission v2 requests.
+type EventListResponseEventPermissionV2RepliedPropertiesReply string
+
+const (
+	EventListResponseEventPermissionV2RepliedPropertiesReplyOnce   EventListResponseEventPermissionV2RepliedPropertiesReply = "once"
+	EventListResponseEventPermissionV2RepliedPropertiesReplyAlways EventListResponseEventPermissionV2RepliedPropertiesReply = "always"
+	EventListResponseEventPermissionV2RepliedPropertiesReplyReject EventListResponseEventPermissionV2RepliedPropertiesReply = "reject"
+)
+
+func (r EventListResponseEventPermissionV2RepliedPropertiesReply) IsKnown() bool {
+	switch r {
+	case EventListResponseEventPermissionV2RepliedPropertiesReplyOnce,
+		EventListResponseEventPermissionV2RepliedPropertiesReplyAlways,
+		EventListResponseEventPermissionV2RepliedPropertiesReplyReject:
+		return true
+	}
+	return false
+}
+
+// QuestionV2Option represents an option in a v2 question.
+type EventListResponseEventQuestionV2AskedPropertiesQuestionsOption struct {
+	Label       string                                                                     `json:"label,required"`
+	Description string                                                                     `json:"description,required"`
+	JSON        eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON         `json:"-"`
+}
+
+type eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON struct {
+	Label       apijson.Field
+	Description apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2AskedPropertiesQuestionsOption) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON) RawJSON() string {
+	return r.raw
+}
+
+// QuestionV2Info represents a v2 question with options.
+type EventListResponseEventQuestionV2AskedPropertiesQuestions struct {
+	Question string                                                                 `json:"question,required"`
+	Header   string                                                                 `json:"header,required"`
+	Options  []EventListResponseEventQuestionV2AskedPropertiesQuestionsOption       `json:"options,required"`
+	Multiple bool                                                                   `json:"multiple"`
+	Custom   bool                                                                   `json:"custom"`
+	JSON     eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON           `json:"-"`
+}
+
+type eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON struct {
+	Question    apijson.Field
+	Header      apijson.Field
+	Options     apijson.Field
+	Multiple    apijson.Field
+	Custom      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2AskedPropertiesQuestions) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON) RawJSON() string {
+	return r.raw
+}
+
+// QuestionV2Tool represents the tool context for a v2 question.
+type EventListResponseEventQuestionV2AskedPropertiesTool struct {
+	MessageID string                                                          `json:"messageID,required"`
+	CallID    string                                                          `json:"callID,required"`
+	JSON      eventListResponseEventQuestionV2AskedPropertiesToolJSON         `json:"-"`
+}
+
+type eventListResponseEventQuestionV2AskedPropertiesToolJSON struct {
+	MessageID   apijson.Field
+	CallID      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2AskedPropertiesTool) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2AskedPropertiesToolJSON) RawJSON() string {
+	return r.raw
+}
+
+// =============================================================================
+// EventListResponseEventIntegrationUpdated
+// =============================================================================
+
+type EventListResponseEventIntegrationUpdated struct {
+	Properties EventListResponseEventIntegrationUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventIntegrationUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventIntegrationUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventIntegrationUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventIntegrationUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventIntegrationUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventIntegrationUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventIntegrationUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventIntegrationUpdatedProperties struct {
+	JSON eventListResponseEventIntegrationUpdatedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventIntegrationUpdatedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventIntegrationUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventIntegrationUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventIntegrationUpdatedType string
+
+const (
+	EventListResponseEventIntegrationUpdatedTypeIntegrationUpdated EventListResponseEventIntegrationUpdatedType = "integration.updated"
+)
+
+func (r EventListResponseEventIntegrationUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventIntegrationUpdatedTypeIntegrationUpdated:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventIntegrationConnectionUpdated
+// =============================================================================
+
+type EventListResponseEventIntegrationConnectionUpdated struct {
+	Properties EventListResponseEventIntegrationConnectionUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventIntegrationConnectionUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventIntegrationConnectionUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventIntegrationConnectionUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventIntegrationConnectionUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventIntegrationConnectionUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventIntegrationConnectionUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventIntegrationConnectionUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventIntegrationConnectionUpdatedProperties struct {
+	IntegrationID string                                                              `json:"integrationID,required"`
+	JSON          eventListResponseEventIntegrationConnectionUpdatedPropertiesJSON     `json:"-"`
+}
+
+type eventListResponseEventIntegrationConnectionUpdatedPropertiesJSON struct {
+	IntegrationID apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *EventListResponseEventIntegrationConnectionUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventIntegrationConnectionUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventIntegrationConnectionUpdatedType string
+
+const (
+	EventListResponseEventIntegrationConnectionUpdatedTypeIntegrationConnectionUpdated EventListResponseEventIntegrationConnectionUpdatedType = "integration.connection.updated"
+)
+
+func (r EventListResponseEventIntegrationConnectionUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventIntegrationConnectionUpdatedTypeIntegrationConnectionUpdated:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventCatalogUpdated
+// =============================================================================
+
+type EventListResponseEventCatalogUpdated struct {
+	Properties EventListResponseEventCatalogUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventCatalogUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventCatalogUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventCatalogUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventCatalogUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventCatalogUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventCatalogUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventCatalogUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventCatalogUpdatedProperties struct {
+	JSON eventListResponseEventCatalogUpdatedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventCatalogUpdatedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventCatalogUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventCatalogUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventCatalogUpdatedType string
+
+const (
+	EventListResponseEventCatalogUpdatedTypeCatalogUpdated EventListResponseEventCatalogUpdatedType = "catalog.updated"
+)
+
+func (r EventListResponseEventCatalogUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventCatalogUpdatedTypeCatalogUpdated:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventPermissionV2Asked
+// =============================================================================
+
+type EventListResponseEventPermissionV2Asked struct {
+	Properties EventListResponseEventPermissionV2AskedProperties `json:"properties,required"`
+	Type       EventListResponseEventPermissionV2AskedType       `json:"type,required"`
+	JSON       eventListResponseEventPermissionV2AskedJSON       `json:"-"`
+}
+
+type eventListResponseEventPermissionV2AskedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPermissionV2Asked) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPermissionV2AskedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventPermissionV2Asked) implementsEventListResponse()  {}
+func (r EventListResponseEventPermissionV2Asked) implementsGlobalEventPayload() {}
+
+type EventListResponseEventPermissionV2AskedProperties struct {
+	ID        string                                                           `json:"id,required"`
+	SessionID string                                                           `json:"sessionID,required"`
+	Action    string                                                           `json:"action,required"`
+	Resources []string                                                         `json:"resources,required"`
+	Save      []string                                                         `json:"save"`
+	Metadata  map[string]interface{}                                           `json:"metadata"`
+	Source    *EventListResponseEventPermissionV2AskedPropertiesSource         `json:"source"`
+	JSON      eventListResponseEventPermissionV2AskedPropertiesJSON            `json:"-"`
+}
+
+type eventListResponseEventPermissionV2AskedPropertiesJSON struct {
+	ID          apijson.Field
+	SessionID   apijson.Field
+	Action      apijson.Field
+	Resources   apijson.Field
+	Save        apijson.Field
+	Metadata    apijson.Field
+	Source      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPermissionV2AskedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPermissionV2AskedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventPermissionV2AskedType string
+
+const (
+	EventListResponseEventPermissionV2AskedTypePermissionV2Asked EventListResponseEventPermissionV2AskedType = "permission.v2.asked"
+)
+
+func (r EventListResponseEventPermissionV2AskedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventPermissionV2AskedTypePermissionV2Asked:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventPermissionV2Replied
+// =============================================================================
+
+type EventListResponseEventPermissionV2Replied struct {
+	Properties EventListResponseEventPermissionV2RepliedProperties `json:"properties,required"`
+	Type       EventListResponseEventPermissionV2RepliedType       `json:"type,required"`
+	JSON       eventListResponseEventPermissionV2RepliedJSON       `json:"-"`
+}
+
+type eventListResponseEventPermissionV2RepliedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPermissionV2Replied) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPermissionV2RepliedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventPermissionV2Replied) implementsEventListResponse()  {}
+func (r EventListResponseEventPermissionV2Replied) implementsGlobalEventPayload() {}
+
+type EventListResponseEventPermissionV2RepliedProperties struct {
+	SessionID string                                                     `json:"sessionID,required"`
+	RequestID string                                                     `json:"requestID,required"`
+	Reply     EventListResponseEventPermissionV2RepliedPropertiesReply   `json:"reply,required"`
+	JSON      eventListResponseEventPermissionV2RepliedPropertiesJSON    `json:"-"`
+}
+
+type eventListResponseEventPermissionV2RepliedPropertiesJSON struct {
+	SessionID   apijson.Field
+	RequestID   apijson.Field
+	Reply       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventPermissionV2RepliedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventPermissionV2RepliedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventPermissionV2RepliedType string
+
+const (
+	EventListResponseEventPermissionV2RepliedTypePermissionV2Replied EventListResponseEventPermissionV2RepliedType = "permission.v2.replied"
+)
+
+func (r EventListResponseEventPermissionV2RepliedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventPermissionV2RepliedTypePermissionV2Replied:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventReferenceUpdated
+// =============================================================================
+
+type EventListResponseEventReferenceUpdated struct {
+	Properties EventListResponseEventReferenceUpdatedProperties `json:"properties,required"`
+	Type       EventListResponseEventReferenceUpdatedType       `json:"type,required"`
+	JSON       eventListResponseEventReferenceUpdatedJSON       `json:"-"`
+}
+
+type eventListResponseEventReferenceUpdatedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventReferenceUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventReferenceUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventReferenceUpdated) implementsEventListResponse()  {}
+func (r EventListResponseEventReferenceUpdated) implementsGlobalEventPayload() {}
+
+type EventListResponseEventReferenceUpdatedProperties struct {
+	JSON eventListResponseEventReferenceUpdatedPropertiesJSON `json:"-"`
+}
+
+type eventListResponseEventReferenceUpdatedPropertiesJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventReferenceUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventReferenceUpdatedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventReferenceUpdatedType string
+
+const (
+	EventListResponseEventReferenceUpdatedTypeReferenceUpdated EventListResponseEventReferenceUpdatedType = "reference.updated"
+)
+
+func (r EventListResponseEventReferenceUpdatedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventReferenceUpdatedTypeReferenceUpdated:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventQuestionV2Asked
+// =============================================================================
+
+type EventListResponseEventQuestionV2Asked struct {
+	Properties EventListResponseEventQuestionV2AskedProperties `json:"properties,required"`
+	Type       EventListResponseEventQuestionV2AskedType       `json:"type,required"`
+	JSON       eventListResponseEventQuestionV2AskedJSON       `json:"-"`
+}
+
+type eventListResponseEventQuestionV2AskedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2Asked) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2AskedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventQuestionV2Asked) implementsEventListResponse()  {}
+func (r EventListResponseEventQuestionV2Asked) implementsGlobalEventPayload() {}
+
+type EventListResponseEventQuestionV2AskedProperties struct {
+	ID        string                                                             `json:"id,required"`
+	SessionID string                                                             `json:"sessionID,required"`
+	Questions []EventListResponseEventQuestionV2AskedPropertiesQuestions         `json:"questions,required"`
+	Tool      *EventListResponseEventQuestionV2AskedPropertiesTool               `json:"tool"`
+	JSON      eventListResponseEventQuestionV2AskedPropertiesJSON                `json:"-"`
+}
+
+type eventListResponseEventQuestionV2AskedPropertiesJSON struct {
+	ID          apijson.Field
+	SessionID   apijson.Field
+	Questions   apijson.Field
+	Tool        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2AskedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2AskedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventQuestionV2AskedType string
+
+const (
+	EventListResponseEventQuestionV2AskedTypeQuestionV2Asked EventListResponseEventQuestionV2AskedType = "question.v2.asked"
+)
+
+func (r EventListResponseEventQuestionV2AskedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventQuestionV2AskedTypeQuestionV2Asked:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventQuestionV2Replied
+// =============================================================================
+
+type EventListResponseEventQuestionV2Replied struct {
+	Properties EventListResponseEventQuestionV2RepliedProperties `json:"properties,required"`
+	Type       EventListResponseEventQuestionV2RepliedType       `json:"type,required"`
+	JSON       eventListResponseEventQuestionV2RepliedJSON       `json:"-"`
+}
+
+type eventListResponseEventQuestionV2RepliedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2Replied) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2RepliedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventQuestionV2Replied) implementsEventListResponse()  {}
+func (r EventListResponseEventQuestionV2Replied) implementsGlobalEventPayload() {}
+
+type EventListResponseEventQuestionV2RepliedProperties struct {
+	SessionID string                                                        `json:"sessionID,required"`
+	RequestID string                                                        `json:"requestID,required"`
+	Answers   [][]string                                                    `json:"answers,required"`
+	JSON      eventListResponseEventQuestionV2RepliedPropertiesJSON         `json:"-"`
+}
+
+type eventListResponseEventQuestionV2RepliedPropertiesJSON struct {
+	SessionID   apijson.Field
+	RequestID   apijson.Field
+	Answers     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2RepliedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2RepliedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventQuestionV2RepliedType string
+
+const (
+	EventListResponseEventQuestionV2RepliedTypeQuestionV2Replied EventListResponseEventQuestionV2RepliedType = "question.v2.replied"
+)
+
+func (r EventListResponseEventQuestionV2RepliedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventQuestionV2RepliedTypeQuestionV2Replied:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventQuestionV2Rejected
+// =============================================================================
+
+type EventListResponseEventQuestionV2Rejected struct {
+	Properties EventListResponseEventQuestionV2RejectedProperties `json:"properties,required"`
+	Type       EventListResponseEventQuestionV2RejectedType       `json:"type,required"`
+	JSON       eventListResponseEventQuestionV2RejectedJSON       `json:"-"`
+}
+
+type eventListResponseEventQuestionV2RejectedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2Rejected) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2RejectedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventQuestionV2Rejected) implementsEventListResponse()  {}
+func (r EventListResponseEventQuestionV2Rejected) implementsGlobalEventPayload() {}
+
+type EventListResponseEventQuestionV2RejectedProperties struct {
+	SessionID string                                                         `json:"sessionID,required"`
+	RequestID string                                                         `json:"requestID,required"`
+	JSON      eventListResponseEventQuestionV2RejectedPropertiesJSON         `json:"-"`
+}
+
+type eventListResponseEventQuestionV2RejectedPropertiesJSON struct {
+	SessionID   apijson.Field
+	RequestID   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventQuestionV2RejectedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventQuestionV2RejectedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventQuestionV2RejectedType string
+
+const (
+	EventListResponseEventQuestionV2RejectedTypeQuestionV2Rejected EventListResponseEventQuestionV2RejectedType = "question.v2.rejected"
+)
+
+func (r EventListResponseEventQuestionV2RejectedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventQuestionV2RejectedTypeQuestionV2Rejected:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventSessionNextMoved
+// =============================================================================
+
+type EventListResponseEventSessionNextMoved struct {
+	Properties EventListResponseEventSessionNextMovedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextMovedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextMovedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextMovedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextMoved) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextMovedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextMoved) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextMoved) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextMovedProperties struct {
+	Timestamp    int64                                                            `json:"timestamp,required"`
+	SessionID    string                                                           `json:"sessionID,required"`
+	Location     EventListResponseEventSessionNextMovedPropertiesLocation         `json:"location,required"`
+	Subdirectory string                                                           `json:"subdirectory"`
+	JSON         eventListResponseEventSessionNextMovedPropertiesJSON             `json:"-"`
+}
+
+type eventListResponseEventSessionNextMovedPropertiesJSON struct {
+	Timestamp    apijson.Field
+	SessionID    apijson.Field
+	Location     apijson.Field
+	Subdirectory apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextMovedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextMovedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextMovedType string
+
+const (
+	EventListResponseEventSessionNextMovedTypeSessionNextMoved EventListResponseEventSessionNextMovedType = "session.next.moved"
+)
+
+func (r EventListResponseEventSessionNextMovedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextMovedTypeSessionNextMoved:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventSessionNextRevertStaged
+// =============================================================================
+
+type EventListResponseEventSessionNextRevertStaged struct {
+	Properties EventListResponseEventSessionNextRevertStagedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextRevertStagedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextRevertStagedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertStagedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertStaged) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertStagedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextRevertStaged) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextRevertStaged) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextRevertStagedProperties struct {
+	Timestamp int64                                                                     `json:"timestamp,required"`
+	SessionID string                                                                    `json:"sessionID,required"`
+	Revert    EventListResponseEventSessionNextRevertStagedPropertiesRevert             `json:"revert,required"`
+	JSON      eventListResponseEventSessionNextRevertStagedPropertiesJSON               `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertStagedPropertiesJSON struct {
+	Timestamp    apijson.Field
+	SessionID    apijson.Field
+	Revert       apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertStagedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertStagedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextRevertStagedType string
+
+const (
+	EventListResponseEventSessionNextRevertStagedTypeSessionNextRevertStaged EventListResponseEventSessionNextRevertStagedType = "session.next.revert.staged"
+)
+
+func (r EventListResponseEventSessionNextRevertStagedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextRevertStagedTypeSessionNextRevertStaged:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventSessionNextRevertCleared
+// =============================================================================
+
+type EventListResponseEventSessionNextRevertCleared struct {
+	Properties EventListResponseEventSessionNextRevertClearedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextRevertClearedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextRevertClearedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertClearedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertCleared) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertClearedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextRevertCleared) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextRevertCleared) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextRevertClearedProperties struct {
+	Timestamp int64                                                                     `json:"timestamp,required"`
+	SessionID string                                                                    `json:"sessionID,required"`
+	JSON      eventListResponseEventSessionNextRevertClearedPropertiesJSON              `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertClearedPropertiesJSON struct {
+	Timestamp    apijson.Field
+	SessionID    apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertClearedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertClearedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextRevertClearedType string
+
+const (
+	EventListResponseEventSessionNextRevertClearedTypeSessionNextRevertCleared EventListResponseEventSessionNextRevertClearedType = "session.next.revert.cleared"
+)
+
+func (r EventListResponseEventSessionNextRevertClearedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextRevertClearedTypeSessionNextRevertCleared:
+		return true
+	}
+	return false
+}
+
+// =============================================================================
+// EventListResponseEventSessionNextRevertCommitted
+// =============================================================================
+
+type EventListResponseEventSessionNextRevertCommitted struct {
+	Properties EventListResponseEventSessionNextRevertCommittedProperties `json:"properties,required"`
+	Type       EventListResponseEventSessionNextRevertCommittedType       `json:"type,required"`
+	JSON       eventListResponseEventSessionNextRevertCommittedJSON       `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertCommittedJSON struct {
+	Properties  apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertCommitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertCommittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r EventListResponseEventSessionNextRevertCommitted) implementsEventListResponse()  {}
+func (r EventListResponseEventSessionNextRevertCommitted) implementsGlobalEventPayload() {}
+
+type EventListResponseEventSessionNextRevertCommittedProperties struct {
+	Timestamp int64                                                                        `json:"timestamp,required"`
+	SessionID string                                                                       `json:"sessionID,required"`
+	MessageID string                                                                       `json:"messageID,required"`
+	JSON      eventListResponseEventSessionNextRevertCommittedPropertiesJSON               `json:"-"`
+}
+
+type eventListResponseEventSessionNextRevertCommittedPropertiesJSON struct {
+	Timestamp    apijson.Field
+	SessionID    apijson.Field
+	MessageID    apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *EventListResponseEventSessionNextRevertCommittedProperties) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r eventListResponseEventSessionNextRevertCommittedPropertiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type EventListResponseEventSessionNextRevertCommittedType string
+
+const (
+	EventListResponseEventSessionNextRevertCommittedTypeSessionNextRevertCommitted EventListResponseEventSessionNextRevertCommittedType = "session.next.revert.committed"
+)
+
+func (r EventListResponseEventSessionNextRevertCommittedType) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextRevertCommittedTypeSessionNextRevertCommitted:
+		return true
+	}
+	return false
+}

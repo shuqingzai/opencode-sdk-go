@@ -132,7 +132,20 @@ type EventListResponse struct {
 	// [EventListResponseEventWorkspaceReadyProperties],
 	// [EventListResponseEventWorkspaceStatusProperties],
 	// [EventListResponseEventWorktreeFailedProperties],
-	// [EventListResponseEventWorktreeReadyProperties].
+	// [EventListResponseEventWorktreeReadyProperties],
+	// [EventListResponseEventIntegrationUpdatedProperties],
+	// [EventListResponseEventIntegrationConnectionUpdatedProperties],
+	// [EventListResponseEventCatalogUpdatedProperties],
+	// [EventListResponseEventPermissionV2AskedProperties],
+	// [EventListResponseEventPermissionV2RepliedProperties],
+	// [EventListResponseEventReferenceUpdatedProperties],
+	// [EventListResponseEventQuestionV2AskedProperties],
+	// [EventListResponseEventQuestionV2RepliedProperties],
+	// [EventListResponseEventQuestionV2RejectedProperties],
+	// [EventListResponseEventSessionNextMovedProperties],
+	// [EventListResponseEventSessionNextRevertStagedProperties],
+	// [EventListResponseEventSessionNextRevertClearedProperties],
+	// [EventListResponseEventSessionNextRevertCommittedProperties].
 	Properties interface{}           `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
 	JSON       eventListResponseJSON `json:"-"`
@@ -239,7 +252,20 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventWorktreeFailed],
-// [EventListResponseEventWorktreeReady].
+// [EventListResponseEventWorktreeReady],
+// [EventListResponseEventIntegrationUpdated],
+// [EventListResponseEventIntegrationConnectionUpdated],
+// [EventListResponseEventCatalogUpdated],
+// [EventListResponseEventPermissionV2Asked],
+// [EventListResponseEventPermissionV2Replied],
+// [EventListResponseEventReferenceUpdated],
+// [EventListResponseEventQuestionV2Asked],
+// [EventListResponseEventQuestionV2Replied],
+// [EventListResponseEventQuestionV2Rejected],
+// [EventListResponseEventSessionNextMoved],
+// [EventListResponseEventSessionNextRevertStaged],
+// [EventListResponseEventSessionNextRevertCleared],
+// [EventListResponseEventSessionNextRevertCommitted].
 func (r EventListResponse) AsUnion() EventListResponseUnion {
 	return r.union
 }
@@ -317,7 +343,20 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventWorkspaceReady],
 // [EventListResponseEventWorkspaceStatus],
 // [EventListResponseEventWorktreeFailed],
-// [EventListResponseEventWorktreeReady].
+// [EventListResponseEventWorktreeReady],
+// [EventListResponseEventIntegrationUpdated],
+// [EventListResponseEventIntegrationConnectionUpdated],
+// [EventListResponseEventCatalogUpdated],
+// [EventListResponseEventPermissionV2Asked],
+// [EventListResponseEventPermissionV2Replied],
+// [EventListResponseEventReferenceUpdated],
+// [EventListResponseEventQuestionV2Asked],
+// [EventListResponseEventQuestionV2Replied],
+// [EventListResponseEventQuestionV2Rejected],
+// [EventListResponseEventSessionNextMoved],
+// [EventListResponseEventSessionNextRevertStaged],
+// [EventListResponseEventSessionNextRevertCleared],
+// [EventListResponseEventSessionNextRevertCommitted].
 type EventListResponseUnion interface {
 	implementsEventListResponse()
 }
@@ -638,6 +677,58 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventPluginAdded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventIntegrationUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventIntegrationConnectionUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCatalogUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Asked{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Replied{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventReferenceUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Asked{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Replied{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Rejected{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextMoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertStaged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCleared{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCommitted{}),
 		},
 	)
 }
@@ -3812,6 +3903,19 @@ const (
 	EventListResponseTypeWorkspaceStatus              EventListResponseType = "workspace.status"
 	EventListResponseTypeWorktreeFailed               EventListResponseType = "worktree.failed"
 	EventListResponseTypeWorktreeReady                EventListResponseType = "worktree.ready"
+	EventListResponseTypeIntegrationUpdated           EventListResponseType = "integration.updated"
+	EventListResponseTypeIntegrationConnectionUpdated EventListResponseType = "integration.connection.updated"
+	EventListResponseTypeCatalogUpdated               EventListResponseType = "catalog.updated"
+	EventListResponseTypePermissionV2Asked            EventListResponseType = "permission.v2.asked"
+	EventListResponseTypePermissionV2Replied          EventListResponseType = "permission.v2.replied"
+	EventListResponseTypeReferenceUpdated             EventListResponseType = "reference.updated"
+	EventListResponseTypeQuestionV2Asked              EventListResponseType = "question.v2.asked"
+	EventListResponseTypeQuestionV2Replied            EventListResponseType = "question.v2.replied"
+	EventListResponseTypeQuestionV2Rejected           EventListResponseType = "question.v2.rejected"
+	EventListResponseTypeSessionNextMoved             EventListResponseType = "session.next.moved"
+	EventListResponseTypeSessionNextRevertStaged      EventListResponseType = "session.next.revert.staged"
+	EventListResponseTypeSessionNextRevertCleared     EventListResponseType = "session.next.revert.cleared"
+	EventListResponseTypeSessionNextRevertCommitted   EventListResponseType = "session.next.revert.committed"
 )
 
 func (r EventListResponseType) IsKnown() bool {
@@ -3893,7 +3997,20 @@ func (r EventListResponseType) IsKnown() bool {
 		EventListResponseTypeWorkspaceReady,
 		EventListResponseTypeWorkspaceStatus,
 		EventListResponseTypeWorktreeFailed,
-		EventListResponseTypeWorktreeReady:
+		EventListResponseTypeWorktreeReady,
+		EventListResponseTypeIntegrationUpdated,
+		EventListResponseTypeIntegrationConnectionUpdated,
+		EventListResponseTypeCatalogUpdated,
+		EventListResponseTypePermissionV2Asked,
+		EventListResponseTypePermissionV2Replied,
+		EventListResponseTypeReferenceUpdated,
+		EventListResponseTypeQuestionV2Asked,
+		EventListResponseTypeQuestionV2Replied,
+		EventListResponseTypeQuestionV2Rejected,
+		EventListResponseTypeSessionNextMoved,
+		EventListResponseTypeSessionNextRevertStaged,
+		EventListResponseTypeSessionNextRevertCleared,
+		EventListResponseTypeSessionNextRevertCommitted:
 		return true
 	}
 	return false

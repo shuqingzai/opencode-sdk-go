@@ -1711,3 +1711,199 @@ func (r syncEventSessionUpdatedDataInfoRevertJSON) RawJSON() string { return r.r
 func (r *SyncEventSessionUpdatedDataInfoRevert) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+// =============================================================================
+// SyncEventSessionNextMoved
+// =============================================================================
+
+type SyncEventSessionNextMovedType string
+
+const (
+	SyncEventSessionNextMovedTypeSessionNextMoved1 SyncEventSessionNextMovedType = "session.next.moved.1"
+)
+
+func (r SyncEventSessionNextMovedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextMovedTypeSessionNextMoved1:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextMoved struct {
+	Type        SyncEventSessionNextMovedType                    `json:"type,required"`
+	Name        string                                           `json:"name,required"`
+	ID          string                                           `json:"id,required"`
+	Seq         int64                                            `json:"seq,required"`
+	AggregateID string                                           `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextMovedProperties `json:"data,required"`
+	JSON        syncEventSessionNextMovedJSON                    `json:"-"`
+}
+
+type syncEventSessionNextMovedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextMovedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextMoved) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextMoved) implementsSyncEventResponseSyncEventDataUnion() {}
+
+// =============================================================================
+// SyncEventSessionNextRevertStaged
+// =============================================================================
+
+type SyncEventSessionNextRevertStagedType string
+
+const (
+	SyncEventSessionNextRevertStagedTypeSessionNextRevertStaged1 SyncEventSessionNextRevertStagedType = "session.next.revert.staged.1"
+)
+
+func (r SyncEventSessionNextRevertStagedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextRevertStagedTypeSessionNextRevertStaged1:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextRevertStaged struct {
+	Type        SyncEventSessionNextRevertStagedType                    `json:"type,required"`
+	Name        string                                                  `json:"name,required"`
+	ID          string                                                  `json:"id,required"`
+	Seq         int64                                                   `json:"seq,required"`
+	AggregateID string                                                  `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextRevertStagedProperties `json:"data,required"`
+	JSON        syncEventSessionNextRevertStagedJSON                    `json:"-"`
+}
+
+type syncEventSessionNextRevertStagedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextRevertStagedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextRevertStaged) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextRevertStaged) implementsSyncEventResponseSyncEventDataUnion() {}
+
+// =============================================================================
+// SyncEventSessionNextRevertCleared
+// =============================================================================
+
+type SyncEventSessionNextRevertClearedType string
+
+const (
+	SyncEventSessionNextRevertClearedTypeSessionNextRevertCleared1 SyncEventSessionNextRevertClearedType = "session.next.revert.cleared.1"
+)
+
+func (r SyncEventSessionNextRevertClearedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextRevertClearedTypeSessionNextRevertCleared1:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextRevertCleared struct {
+	Type        SyncEventSessionNextRevertClearedType                    `json:"type,required"`
+	Name        string                                                   `json:"name,required"`
+	ID          string                                                   `json:"id,required"`
+	Seq         int64                                                    `json:"seq,required"`
+	AggregateID string                                                   `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextRevertClearedProperties `json:"data,required"`
+	JSON        syncEventSessionNextRevertClearedJSON                    `json:"-"`
+}
+
+type syncEventSessionNextRevertClearedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextRevertClearedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextRevertCleared) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextRevertCleared) implementsSyncEventResponseSyncEventDataUnion() {}
+
+// =============================================================================
+// SyncEventSessionNextRevertCommitted
+// =============================================================================
+
+type SyncEventSessionNextRevertCommittedType string
+
+const (
+	SyncEventSessionNextRevertCommittedTypeSessionNextRevertCommitted1 SyncEventSessionNextRevertCommittedType = "session.next.revert.committed.1"
+)
+
+func (r SyncEventSessionNextRevertCommittedType) IsKnown() bool {
+	switch r {
+	case SyncEventSessionNextRevertCommittedTypeSessionNextRevertCommitted1:
+		return true
+	}
+	return false
+}
+
+type SyncEventSessionNextRevertCommitted struct {
+	Type        SyncEventSessionNextRevertCommittedType                    `json:"type,required"`
+	Name        string                                                     `json:"name,required"`
+	ID          string                                                     `json:"id,required"`
+	Seq         int64                                                      `json:"seq,required"`
+	AggregateID string                                                     `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextRevertCommittedProperties `json:"data,required"`
+	JSON        syncEventSessionNextRevertCommittedJSON                    `json:"-"`
+}
+
+type syncEventSessionNextRevertCommittedJSON struct {
+	Type        apijson.Field
+	Name        apijson.Field
+	ID          apijson.Field
+	Seq         apijson.Field
+	AggregateID apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r syncEventSessionNextRevertCommittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SyncEventSessionNextRevertCommitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r SyncEventSessionNextRevertCommitted) implementsSyncEventResponseSyncEventDataUnion() {}

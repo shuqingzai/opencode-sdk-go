@@ -128,6 +128,54 @@ func (r *ExperimentalService) SessionList(ctx context.Context, query Experimenta
 	return
 }
 
+// Get experimental capabilities
+//
+// Get experimental features enabled on the OpenCode server.
+func (r *ExperimentalService) CapabilitiesGet(ctx context.Context, query ExperimentalCapabilitiesGetParams, opts ...option.RequestOption) (res *ExperimentalCapabilities, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/capabilities"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Move session
+//
+// Move a session to another project directory, optionally transferring local changes.
+func (r *ExperimentalService) ControlPlaneMoveSession(ctx context.Context, body ExperimentalControlPlaneMoveSessionParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "experimental/control-plane/move-session"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	return
+}
+
+// Generate project copy name
+//
+// Generate a short name for a project copy from task context.
+func (r *ExperimentalService) ProjectCopyGenerateName(ctx context.Context, projectID string, params ExperimentalProjectCopyGenerateNameParams, opts ...option.RequestOption) (res *ProjectCopyGenerateNameResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if projectID == "" {
+		err = errors.New("missing required projectID parameter")
+		return
+	}
+	path := fmt.Sprintf("experimental/project/%s/copy/generate-name", projectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Background subagents
+//
+// Detach any synchronous subagents currently blocking the session and continue them in the background.
+func (r *ExperimentalService) SessionBackground(ctx context.Context, sessionID string, query ExperimentalSessionBackgroundParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("experimental/session/%s/background", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
+	return
+}
+
 // List MCP resources
 func (r *ExperimentalService) ResourceList(ctx context.Context, query ExperimentalResourceListParams, opts ...option.RequestOption) (res *map[string]McpResource, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -769,6 +817,124 @@ type ExperimentalWorkspaceSyncListParams struct {
 
 // URLQuery serializes [ExperimentalWorkspaceSyncListParams]'s query parameters as `url.Values`.
 func (r ExperimentalWorkspaceSyncListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// ExperimentalCapabilities represents the experimental capabilities response.
+type ExperimentalCapabilities struct {
+	BackgroundSubagents bool                         `json:"backgroundSubagents,required"`
+	JSON                experimentalCapabilitiesJSON `json:"-"`
+}
+
+// experimentalCapabilitiesJSON contains the JSON metadata for the struct [ExperimentalCapabilities]
+type experimentalCapabilitiesJSON struct {
+	BackgroundSubagents apijson.Field
+	raw                 string
+	ExtraFields         map[string]apijson.Field
+}
+
+func (r *ExperimentalCapabilities) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r experimentalCapabilitiesJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalCapabilitiesGetParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalCapabilitiesGetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// MoveSessionDestination represents the destination for a session move.
+type MoveSessionDestination struct {
+	Directory string `json:"directory,required"`
+}
+
+type ExperimentalControlPlaneMoveSessionParams struct {
+	SessionID   param.Field[string]                             `json:"sessionID,required"`
+	Destination param.Field[MoveSessionDestination]             `json:"destination,required"`
+	MoveChanges param.Field[bool]                               `json:"moveChanges"`
+	JSON        experimentalControlPlaneMoveSessionParamsJSON   `json:"-"`
+}
+
+// experimentalControlPlaneMoveSessionParamsJSON contains the JSON metadata for the struct
+// [ExperimentalControlPlaneMoveSessionParams]
+type experimentalControlPlaneMoveSessionParamsJSON struct {
+	SessionID   apijson.Field
+	Destination apijson.Field
+	MoveChanges apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ExperimentalControlPlaneMoveSessionParams) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ExperimentalControlPlaneMoveSessionParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r experimentalControlPlaneMoveSessionParamsJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProjectCopyGenerateNameResponse represents the response from generating a project copy name.
+type ProjectCopyGenerateNameResponse struct {
+	Name string                                 `json:"name,required"`
+	JSON projectCopyGenerateNameResponseJSON    `json:"-"`
+}
+
+// projectCopyGenerateNameResponseJSON contains the JSON metadata for the struct
+// [ProjectCopyGenerateNameResponse]
+type projectCopyGenerateNameResponseJSON struct {
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectCopyGenerateNameResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectCopyGenerateNameResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type ExperimentalProjectCopyGenerateNameParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Context   param.Field[string] `json:"context"`
+}
+
+func (r ExperimentalProjectCopyGenerateNameParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ExperimentalProjectCopyGenerateNameParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ExperimentalSessionBackgroundParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+func (r ExperimentalSessionBackgroundParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

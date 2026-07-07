@@ -273,6 +273,20 @@ type GlobalEvent struct {
 	// [EventListResponseEventWorktreeFailed],
 	// [EventListResponseEventWorktreeReady],
 	//
+	// [EventListResponseEventIntegrationUpdated],
+	// [EventListResponseEventIntegrationConnectionUpdated],
+	// [EventListResponseEventCatalogUpdated],
+	// [EventListResponseEventPermissionV2Asked],
+	// [EventListResponseEventPermissionV2Replied],
+	// [EventListResponseEventReferenceUpdated],
+	// [EventListResponseEventQuestionV2Asked],
+	// [EventListResponseEventQuestionV2Replied],
+	// [EventListResponseEventQuestionV2Rejected],
+	// [EventListResponseEventSessionNextMoved],
+	// [EventListResponseEventSessionNextRevertStaged],
+	// [EventListResponseEventSessionNextRevertCleared],
+	// [EventListResponseEventSessionNextRevertCommitted],
+	//
 	// [SyncEventResponse] (V1 SyncEvent).
 	Payload   interface{}            `json:"payload,required"`
 	Project   string                 `json:"project"`
@@ -562,6 +576,59 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventIntegrationUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventIntegrationConnectionUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventCatalogUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Asked{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Replied{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventReferenceUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Asked{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Replied{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Rejected{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextMoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertStaged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCleared{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCommitted{}),
+		},
+		// V1 SyncEvent types
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(EventListResponseEventWorktreeFailed{}),
 		},
 		apijson.UnionVariant{
@@ -825,6 +892,22 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextCompactionEnded{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextMoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextRevertStaged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextRevertCleared{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SyncEventSessionNextRevertCommitted{}),
+		},
 	)
 }
 
@@ -955,6 +1038,19 @@ const (
 	GlobalEventResponseTypeWorktreeReady             GlobalEventResponseType = "worktree.ready"
 	// SyncEventResponse type — all V1 SyncEvents use "sync" as the type value.
 	GlobalEventResponseTypeSync                      GlobalEventResponseType = "sync"
+	GlobalEventResponseTypeIntegrationUpdated           GlobalEventResponseType = "integration.updated"
+	GlobalEventResponseTypeIntegrationConnectionUpdated GlobalEventResponseType = "integration.connection.updated"
+	GlobalEventResponseTypeCatalogUpdated               GlobalEventResponseType = "catalog.updated"
+	GlobalEventResponseTypePermissionV2Asked            GlobalEventResponseType = "permission.v2.asked"
+	GlobalEventResponseTypePermissionV2Replied          GlobalEventResponseType = "permission.v2.replied"
+	GlobalEventResponseTypeReferenceUpdated             GlobalEventResponseType = "reference.updated"
+	GlobalEventResponseTypeQuestionV2Asked              GlobalEventResponseType = "question.v2.asked"
+	GlobalEventResponseTypeQuestionV2Replied            GlobalEventResponseType = "question.v2.replied"
+	GlobalEventResponseTypeQuestionV2Rejected           GlobalEventResponseType = "question.v2.rejected"
+	GlobalEventResponseTypeSessionNextMoved             GlobalEventResponseType = "session.next.moved"
+	GlobalEventResponseTypeSessionNextRevertStaged      GlobalEventResponseType = "session.next.revert.staged"
+	GlobalEventResponseTypeSessionNextRevertCleared     GlobalEventResponseType = "session.next.revert.cleared"
+	GlobalEventResponseTypeSessionNextRevertCommitted   GlobalEventResponseType = "session.next.revert.committed"
 )
 
 func (r GlobalEventResponseType) IsKnown() bool {
@@ -1037,7 +1133,20 @@ func (r GlobalEventResponseType) IsKnown() bool {
 		GlobalEventResponseTypeWorkspaceStatus,
 		GlobalEventResponseTypeWorktreeFailed,
 		GlobalEventResponseTypeWorktreeReady,
-		GlobalEventResponseTypeSync:
+		GlobalEventResponseTypeSync,
+		GlobalEventResponseTypeIntegrationUpdated,
+		GlobalEventResponseTypeIntegrationConnectionUpdated,
+		GlobalEventResponseTypeCatalogUpdated,
+		GlobalEventResponseTypePermissionV2Asked,
+		GlobalEventResponseTypePermissionV2Replied,
+		GlobalEventResponseTypeReferenceUpdated,
+		GlobalEventResponseTypeQuestionV2Asked,
+		GlobalEventResponseTypeQuestionV2Replied,
+		GlobalEventResponseTypeQuestionV2Rejected,
+		GlobalEventResponseTypeSessionNextMoved,
+		GlobalEventResponseTypeSessionNextRevertStaged,
+		GlobalEventResponseTypeSessionNextRevertCleared,
+		GlobalEventResponseTypeSessionNextRevertCommitted:
 		return true
 	}
 	return false
@@ -1080,6 +1189,10 @@ const (
 	SyncEventResponseSyncEventTypeSessionNextCompactionStarted1 SyncEventResponseSyncEventType = "session.next.compaction.started.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionDelta1   SyncEventResponseSyncEventType = "session.next.compaction.delta.1"
 	SyncEventResponseSyncEventTypeSessionNextCompactionEnded1   SyncEventResponseSyncEventType = "session.next.compaction.ended.1"
+	SyncEventResponseSyncEventTypeSessionNextMoved1             SyncEventResponseSyncEventType = "session.next.moved.1"
+	SyncEventResponseSyncEventTypeSessionNextRevertStaged1      SyncEventResponseSyncEventType = "session.next.revert.staged.1"
+	SyncEventResponseSyncEventTypeSessionNextRevertCleared1     SyncEventResponseSyncEventType = "session.next.revert.cleared.1"
+	SyncEventResponseSyncEventTypeSessionNextRevertCommitted1   SyncEventResponseSyncEventType = "session.next.revert.committed.1"
 )
 
 func (r SyncEventResponseSyncEventType) IsKnown() bool {
@@ -1116,7 +1229,11 @@ func (r SyncEventResponseSyncEventType) IsKnown() bool {
 		SyncEventResponseSyncEventTypeSessionNextRetried1,
 		SyncEventResponseSyncEventTypeSessionNextCompactionStarted1,
 		SyncEventResponseSyncEventTypeSessionNextCompactionDelta1,
-		SyncEventResponseSyncEventTypeSessionNextCompactionEnded1:
+		SyncEventResponseSyncEventTypeSessionNextCompactionEnded1,
+		SyncEventResponseSyncEventTypeSessionNextMoved1,
+		SyncEventResponseSyncEventTypeSessionNextRevertStaged1,
+		SyncEventResponseSyncEventTypeSessionNextRevertCleared1,
+		SyncEventResponseSyncEventTypeSessionNextRevertCommitted1:
 		return true
 	}
 	return false
@@ -1171,6 +1288,10 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventSessionNextCompactionStartedProperties],
 	// [EventListResponseEventSessionNextCompactionDeltaProperties],
 	// [EventListResponseEventSessionNextCompactionEndedProperties].
+	// [EventListResponseEventSessionNextMovedProperties],
+	// [EventListResponseEventSessionNextRevertStagedProperties],
+	// [EventListResponseEventSessionNextRevertClearedProperties],
+	// [EventListResponseEventSessionNextRevertCommittedProperties].
 	Data        interface{}                          `json:"data,required"`
 	JSON        syncEventResponseSyncEventJSON       `json:"-"`
 	union       SyncEventResponseSyncEventDataUnion

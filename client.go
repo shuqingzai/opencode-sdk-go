@@ -41,11 +41,25 @@ type Client struct {
 	Lsp          *LspService
 	Formatter    *FormatterService
 	Sync         *SyncService
+	V2Agent      *V2AgentService
 	V2Session    *V2SessionService
-	V2Model      *V2ModelService
+	V2Health      *V2HealthService
+	V2Integration *V2IntegrationService
+	V2Model       *V2ModelService
 	V2Provider   *V2ProviderService
-	Tool         *ToolService
-	Part         *PartService
+	V2Location   *V2LocationService
+	V2Command    *V2CommandService
+	V2Credential *V2CredentialService
+	V2Skill      *V2SkillService
+	V2Reference  *V2ReferenceService
+	V2Question    *V2QuestionService
+	V2ProjectCopy *V2ProjectCopyService
+	Tool          *ToolService
+	Part          *PartService
+	V2Permission *V2PermissionService
+	V2Pty        *V2PtyService
+	V2Event      *V2EventService
+	V2Fs         *V2FsService
 }
 
 // DefaultClientOptions read from the environment (OPENCODE_BASE_URL). This should
@@ -91,11 +105,25 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Lsp = NewLspService(opts...)
 	r.Formatter = NewFormatterService(opts...)
 	r.Sync = NewSyncService(opts...)
+	r.V2Agent = NewV2AgentService(opts...)
 	r.V2Session = NewV2SessionService(opts...)
+	r.V2Health = NewV2HealthService(opts...)
+	r.V2Integration = NewV2IntegrationService(opts...)
 	r.V2Model = NewV2ModelService(opts...)
 	r.V2Provider = NewV2ProviderService(opts...)
+	r.V2Location = NewV2LocationService(opts...)
+	r.V2Command = NewV2CommandService(opts...)
+	r.V2Credential = NewV2CredentialService(opts...)
+	r.V2Skill = NewV2SkillService(opts...)
+	r.V2Reference = NewV2ReferenceService(opts...)
+	r.V2Question = NewV2QuestionService(opts...)
+	r.V2ProjectCopy = NewV2ProjectCopyService(opts...)
 	r.Tool = NewToolService(opts...)
 	r.Part = NewPartService(opts...)
+	r.V2Pty = NewV2PtyService(opts...)
+	r.V2Event = NewV2EventService(opts...)
+	r.V2Fs = NewV2FsService(opts...)
+	r.V2Permission = NewV2PermissionService(opts...)
 
 	return
 }

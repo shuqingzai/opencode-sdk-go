@@ -199,6 +199,49 @@ type ProjectCommands struct {
 	Start string `json:"start"`
 }
 
+// List known local absolute directories for a project.
+func (r *ProjectService) Directories(ctx context.Context, projectID string, query ProjectDirectoriesParams, opts ...option.RequestOption) (res *[]ProjectDirectoryEntry, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := fmt.Sprintf("project/%s/directories", projectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+type ProjectDirectoryEntry struct {
+	Directory string                   `json:"directory,required"`
+	Strategy  string                   `json:"strategy"`
+	JSON      projectDirectoryEntryJSON `json:"-"`
+}
+
+// projectDirectoryEntryJSON contains the JSON metadata for the struct [ProjectDirectoryEntry]
+type projectDirectoryEntryJSON struct {
+	Directory  apijson.Field
+	Strategy   apijson.Field
+	raw        string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectDirectoryEntry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectDirectoryEntryJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProjectDirectoriesParams struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
+// URLQuery serializes [ProjectDirectoriesParams]'s query parameters as `url.Values`.
+func (r ProjectDirectoriesParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 type ProjectInitGitParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`

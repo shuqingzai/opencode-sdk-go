@@ -16,6 +16,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/ssestream"
 	"github.com/tidwall/gjson"
 )
 
@@ -26,7 +27,10 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewV2SessionService] method instead.
 type V2SessionService struct {
-	Options []option.RequestOption
+	Options     []option.RequestOption
+	Revert      *V2SessionRevertService
+	Permissions *V2SessionPermissionService
+	Questions   *V2SessionQuestionService
 }
 
 // NewV2SessionService generates a new service that applies the given options to
@@ -35,6 +39,9 @@ type V2SessionService struct {
 func NewV2SessionService(opts ...option.RequestOption) (r *V2SessionService) {
 	r = &V2SessionService{}
 	r.Options = opts
+	r.Revert = NewV2SessionRevertService(opts...)
+	r.Permissions = NewV2SessionPermissionService(opts...)
+	r.Questions = NewV2SessionQuestionService(opts...)
 	return
 }
 
@@ -122,6 +129,136 @@ func (r *V2SessionService) Messages(ctx context.Context, sessionID string, query
 	return
 }
 
+// Create v2 session
+//
+// Create a session at the requested location.
+func (r *V2SessionService) Create(ctx context.Context, params V2SessionCreateParams, opts ...option.RequestOption) (res *V2SessionCreateResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "api/session"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Get active sessions
+//
+// Retrieve foreground Session drains currently owned by this OpenCode process.
+// Sessions absent from the result are inactive.
+func (r *V2SessionService) Active(ctx context.Context, opts ...option.RequestOption) (res *V2SessionActiveResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "api/session/active"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// Get v2 session
+//
+// Retrieve a session by ID.
+func (r *V2SessionService) Get(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *V2SessionGetResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
+// Switch session agent
+//
+// Switch the agent used by subsequent provider turns.
+func (r *V2SessionService) SwitchAgent(ctx context.Context, sessionID string, params V2SessionSwitchAgentParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s/agent", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Switch session model
+//
+// Switch the model used by subsequent provider turns.
+func (r *V2SessionService) SwitchModel(ctx context.Context, sessionID string, params V2SessionSwitchModelParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s/model", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return
+}
+
+// Subscribe to session events
+//
+// Replay durable events after an aggregate sequence, then continue with new
+// durable events.
+func (r *V2SessionService) Events(ctx context.Context, sessionID string, query V2SessionEventsParams, opts ...option.RequestOption) (stream *ssestream.Stream[V2SessionEventResponse]) {
+	var (
+		raw *http.Response
+		err error
+	)
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
+	if sessionID == "" {
+		return ssestream.NewStream[V2SessionEventResponse](ssestream.NewDecoder(nil), errors.New("missing required sessionID parameter"))
+	}
+	path := fmt.Sprintf("api/session/%s/event", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
+	return ssestream.NewStream[V2SessionEventResponse](ssestream.NewDecoder(raw), err)
+}
+
+// Get session history
+//
+// Read one finite page of public durable Session events after an exclusive
+// aggregate sequence. Newly committed events may appear on later pages.
+func (r *V2SessionService) History(ctx context.Context, sessionID string, query V2SessionHistoryParams, opts ...option.RequestOption) (res *V2SessionHistoryResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s/history", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Interrupt session execution
+//
+// Interrupt active execution owned by this OpenCode process. Idle interruption is
+// a no-op.
+func (r *V2SessionService) Interrupt(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s/interrupt", sessionID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	return
+}
+
+// Get session message
+//
+// Retrieve one projected message owned by the Session.
+func (r *V2SessionService) Message(ctx context.Context, sessionID string, messageID string, opts ...option.RequestOption) (res *V2SessionMessage, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if sessionID == "" {
+		err = errors.New("missing required sessionID parameter")
+		return
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return
+	}
+	path := fmt.Sprintf("api/session/%s/message/%s", sessionID, messageID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return
+}
+
 // ===== Response Types =====
 
 type V2SessionsResponse struct {
@@ -146,18 +283,19 @@ func (r v2SessionsResponseJSON) RawJSON() string {
 }
 
 type V2SessionInfo struct {
-	ID          string               `json:"id,required"`
-	ProjectID   string               `json:"projectID,required"`
-	Cost        float64              `json:"cost,required"`
-	Time        V2SessionInfoTime    `json:"time,required"`
-	Title       string               `json:"title,required"`
-	Tokens      V2SessionInfoTokens  `json:"tokens,required"`
-	ParentID    string               `json:"parentID"`
-	WorkspaceID string               `json:"workspaceID"`
-	Path        string               `json:"path"`
-	Agent       string               `json:"agent"`
-	Model       V2SessionInfoModel   `json:"model"`
-	JSON        v2SessionInfoJSON    `json:"-"`
+	ID        string               `json:"id,required"`
+	ProjectID string               `json:"projectID,required"`
+	Cost      float64              `json:"cost,required"`
+	Time      V2SessionInfoTime    `json:"time,required"`
+	Title     string               `json:"title,required"`
+	Tokens    V2SessionInfoTokens  `json:"tokens,required"`
+	ParentID  string               `json:"parentID"`
+	Location  LocationRef          `json:"location,required"`
+	Subpath   string               `json:"subpath"`
+	Agent     string               `json:"agent"`
+	Model     ModelRef             `json:"model"`
+	Revert    RevertState          `json:"revert"`
+	JSON      v2SessionInfoJSON    `json:"-"`
 }
 
 type v2SessionInfoJSON struct {
@@ -168,10 +306,11 @@ type v2SessionInfoJSON struct {
 	Title       apijson.Field
 	Tokens      apijson.Field
 	ParentID    apijson.Field
-	WorkspaceID apijson.Field
-	Path        apijson.Field
+	Location    apijson.Field
+	Subpath     apijson.Field
 	Agent       apijson.Field
 	Model       apijson.Field
+	Revert      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -204,29 +343,6 @@ func (r *V2SessionInfoTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionInfoTimeJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2SessionInfoModel struct {
-	ID         string              `json:"id,required"`
-	ProviderID string              `json:"providerID,required"`
-	Variant    string              `json:"variant"`
-	JSON       v2SessionInfoModelJSON `json:"-"`
-}
-
-type v2SessionInfoModelJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionInfoModel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2SessionInfoModelJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -320,8 +436,8 @@ func (r v2SessionMessagesResponseJSON) RawJSON() string {
 
 // V2SessionMessage is a union type that can be one of the following concrete
 // types: V2SessionMessageAgentSwitched, V2SessionMessageModelSwitched,
-// V2SessionMessageUser, V2SessionMessageSynthetic, V2SessionMessageShell,
-// V2SessionMessageAssistant, V2SessionMessageCompaction.
+// V2SessionMessageUser, V2SessionMessageSynthetic, V2SessionMessageSystem,
+// V2SessionMessageShell, V2SessionMessageAssistant, V2SessionMessageCompaction.
 type V2SessionMessage interface {
 	implementsV2SessionMessage()
 }
@@ -1377,6 +1493,10 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(V2SessionMessageCompaction{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageSystem{}),
+		},
 	)
 }
 
@@ -1402,9 +1522,8 @@ type V2SessionListParams struct {
 	Workspace param.Field[string]        `query:"workspace"`
 	Limit     param.Field[int64]         `query:"limit"`
 	Order     param.Field[V2SessionOrder] `query:"order"`
-	Path      param.Field[string]        `query:"path"`
-	Roots     param.Field[bool]          `query:"roots"`
-	Start     param.Field[int64]         `query:"start"`
+	Project   param.Field[string]        `query:"project"`
+	Subpath   param.Field[string]        `query:"subpath"`
 	Search    param.Field[string]        `query:"search"`
 	Cursor    param.Field[string]        `query:"cursor"`
 }
@@ -1564,4 +1683,267 @@ func (r V2SessionMessagesParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// ===== LocationRef & RevertState =====
+
+// LocationRef represents a reference to a location in a workspace.
+type LocationRef struct {
+	Directory   string          `json:"directory,required"`
+	WorkspaceID string          `json:"workspaceID"`
+	JSON        locationRefJSON `json:"-"`
+}
+
+// locationRefJSON contains the JSON metadata for the struct [LocationRef]
+type locationRefJSON struct {
+	Directory   apijson.Field
+	WorkspaceID apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LocationRef) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r locationRefJSON) RawJSON() string {
+	return r.raw
+}
+
+// RevertState represents a revert state.
+type RevertState struct {
+	MessageID string          `json:"messageID,required"`
+	PartID    string          `json:"partID"`
+	Snapshot  string          `json:"snapshot"`
+	Diff      string          `json:"diff"`
+	Files     []VcsFileDiff   `json:"files"`
+	JSON      revertStateJSON `json:"-"`
+}
+
+// revertStateJSON contains the JSON metadata for the struct [RevertState]
+type revertStateJSON struct {
+	MessageID   apijson.Field
+	PartID      apijson.Field
+	Snapshot    apijson.Field
+	Diff        apijson.Field
+	Files       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *RevertState) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r revertStateJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2SessionCreateParams =====
+
+type V2SessionCreateParams struct {
+	ID       param.Field[string]        `json:"id"`
+	Agent    param.Field[string]        `json:"agent"`
+	Model    param.Field[ModelRef]      `json:"model"`
+	Location param.Field[LocationRef]   `json:"location"`
+}
+
+func (r V2SessionCreateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ===== V2SessionSwitchAgentParams =====
+
+type V2SessionSwitchAgentParams struct {
+	Agent param.Field[string] `json:"agent,required"`
+}
+
+func (r V2SessionSwitchAgentParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ===== V2SessionSwitchModelParams =====
+
+type V2SessionSwitchModelParams struct {
+	Model param.Field[ModelRef] `json:"model,required"`
+}
+
+func (r V2SessionSwitchModelParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ===== V2SessionEventsParams =====
+
+type V2SessionEventsParams struct {
+	After param.Field[string] `query:"after"`
+}
+
+func (r V2SessionEventsParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// ===== V2SessionHistoryParams =====
+
+type V2SessionHistoryParams struct {
+	Limit param.Field[int64]  `query:"limit"`
+	After param.Field[int64]  `query:"after"`
+}
+
+func (r V2SessionHistoryParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// ===== V2SessionCreateResponse =====
+
+type V2SessionCreateResponse struct {
+	Data V2SessionInfo                  `json:"data,required"`
+	JSON v2SessionCreateResponseJSON   `json:"-"`
+}
+
+type v2SessionCreateResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionCreateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionCreateResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2SessionGetResponse =====
+
+// V2SessionGetResponse is returned by the Get method.
+type V2SessionGetResponse struct {
+	Data V2SessionInfo                  `json:"data,required"`
+	JSON v2SessionGetResponseJSON      `json:"-"`
+}
+
+type v2SessionGetResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionGetResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionGetResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2SessionEventResponse (SSE) =====
+
+// V2SessionEventResponse represents an SSE event from the session event stream.
+type V2SessionEventResponse struct {
+	ID    string                       `json:"id,required"`
+	Event string                       `json:"event,required"`
+	Data  string                       `json:"data,required"`
+	JSON  v2SessionEventResponseJSON   `json:"-"`
+}
+
+type v2SessionEventResponseJSON struct {
+	ID          apijson.Field
+	Event       apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionEventResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionEventResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2SessionHistoryResponse =====
+
+// V2SessionHistoryResponse is returned by the History method.
+type V2SessionHistoryResponse struct {
+	Data    []interface{}                   `json:"data,required"`
+	HasMore bool                            `json:"hasMore,required"`
+	JSON    v2SessionHistoryResponseJSON    `json:"-"`
+}
+
+type v2SessionHistoryResponseJSON struct {
+	Data        apijson.Field
+	HasMore     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionHistoryResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionHistoryResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== V2SessionMessageSystem =====
+
+// V2SessionMessageSystem represents a system message in the V2 session.
+type V2SessionMessageSystem struct {
+	ID       string                        `json:"id,required"`
+	Time     V2SessionMessageTime          `json:"time,required"`
+	Type     string                        `json:"type,required"`
+	Text     string                        `json:"text,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                   `json:"metadata"`
+	JSON     v2SessionMessageSystemJSON    `json:"-"`
+}
+
+type v2SessionMessageSystemJSON struct {
+	ID          apijson.Field
+	Time        apijson.Field
+	Type        apijson.Field
+	Text        apijson.Field
+	Metadata    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageSystem) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageSystemJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionMessageSystem) implementsV2SessionMessage() {}
+
+// ===== V2SessionActiveResponse =====
+
+// V2SessionActiveResponse is returned by the Active method. It contains a map of
+// session IDs to their active state.
+type V2SessionActiveResponse struct {
+	Data map[string]interface{}              `json:"data,required"`
+	JSON v2SessionActiveResponseJSON         `json:"-"`
+}
+
+type v2SessionActiveResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionActiveResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionActiveResponseJSON) RawJSON() string {
+	return r.raw
 }
