@@ -22,15 +22,13 @@ import (
 
 // SessionService contains methods and other services that help with interacting
 // with the opencode API. This includes session CRUD operations, message management
-// (prompt, messages, commands, shell), and part-level operations
-// ([SessionService.Part]).
+// (prompt, messages, commands, shell).
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewSessionService] method instead.
 type SessionService struct {
 	Options []option.RequestOption
-	Part    *PartService
 }
 
 // NewSessionService generates a new service that applies the given options to each
@@ -39,7 +37,6 @@ type SessionService struct {
 func NewSessionService(opts ...option.RequestOption) (r *SessionService) {
 	r = &SessionService{}
 	r.Options = opts
-	r.Part = NewPartService(opts...)
 	return
 }
 
@@ -784,6 +781,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(shared.StructuredOutputError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.ContentFilterError{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,

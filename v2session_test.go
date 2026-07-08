@@ -38,7 +38,7 @@ func TestV2SessionPromptParams(t *testing.T) {
 	params := V2SessionPromptParams{
 		Directory: String("/tmp"),
 		Body: V2SessionPromptParamsBody{
-			Prompt: F(V2Prompt{
+			Prompt: F(V2PromptInputParam{
 				Text: String("hello"),
 			}),
 			Delivery: F(SessionDeliveryImmediate),

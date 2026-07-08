@@ -1516,3 +1516,336 @@ func (r EffectHttpApiErrorInternalServerErrorTag) IsKnown() bool {
 	}
 	return false
 }
+
+type ConflictError struct {
+	Tag     ConflictErrorTag  `json:"_tag,required"`
+	Message string            `json:"message,required"`
+	Resource string           `json:"resource"`
+	JSON    conflictErrorJSON `json:"-"`
+}
+
+type conflictErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	Resource    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConflictError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r conflictErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConflictErrorTag string
+
+const (
+	ConflictErrorTagConflictError ConflictErrorTag = "ConflictError"
+)
+
+func (r ConflictErrorTag) IsKnown() bool {
+	switch r {
+	case ConflictErrorTagConflictError:
+		return true
+	}
+	return false
+}
+
+type ContentFilterError struct {
+	Data ContentFilterErrorData `json:"data,required"`
+	Name ContentFilterErrorName `json:"name,required"`
+	JSON contentFilterErrorJSON `json:"-"`
+}
+
+type contentFilterErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ContentFilterError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r contentFilterErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ContentFilterError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r ContentFilterError) ImplementsAssistantMessageError() {}
+
+type ContentFilterErrorData struct {
+	Message string                      `json:"message,required"`
+	JSON    contentFilterErrorDataJSON `json:"-"`
+}
+
+type contentFilterErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ContentFilterErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r contentFilterErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type ContentFilterErrorName string
+
+const (
+	ContentFilterErrorNameContentFilterError ContentFilterErrorName = "ContentFilterError"
+)
+
+func (r ContentFilterErrorName) IsKnown() bool {
+	switch r {
+	case ContentFilterErrorNameContentFilterError:
+		return true
+	}
+	return false
+}
+
+type ForbiddenError struct {
+	Tag     ForbiddenErrorTag  `json:"_tag,required"`
+	Message string             `json:"message,required"`
+	JSON    forbiddenErrorJSON `json:"-"`
+}
+
+type forbiddenErrorJSON struct {
+	Tag         apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ForbiddenError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r forbiddenErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ForbiddenErrorTag string
+
+const (
+	ForbiddenErrorTagForbiddenError ForbiddenErrorTag = "ForbiddenError"
+)
+
+func (r ForbiddenErrorTag) IsKnown() bool {
+	switch r {
+	case ForbiddenErrorTagForbiddenError:
+		return true
+	}
+	return false
+}
+
+type MessageNotFoundError struct {
+	Tag       MessageNotFoundErrorTag  `json:"_tag,required"`
+	SessionID string                   `json:"sessionID,required"`
+	MessageID string                   `json:"messageID,required"`
+	Message   string                   `json:"message,required"`
+	JSON      messageNotFoundErrorJSON `json:"-"`
+}
+
+type messageNotFoundErrorJSON struct {
+	Tag         apijson.Field
+	SessionID   apijson.Field
+	MessageID   apijson.Field
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MessageNotFoundError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r messageNotFoundErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type MessageNotFoundErrorTag string
+
+const (
+	MessageNotFoundErrorTagMessageNotFoundError MessageNotFoundErrorTag = "MessageNotFoundError"
+)
+
+func (r MessageNotFoundErrorTag) IsKnown() bool {
+	switch r {
+	case MessageNotFoundErrorTagMessageNotFoundError:
+		return true
+	}
+	return false
+}
+
+type MoveSessionError struct {
+	Data MoveSessionErrorData `json:"data,required"`
+	Name MoveSessionErrorName `json:"name,required"`
+	JSON moveSessionErrorJSON `json:"-"`
+}
+
+type moveSessionErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MoveSessionError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r moveSessionErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type MoveSessionErrorData struct {
+	Message string                   `json:"message,required"`
+	JSON    moveSessionErrorDataJSON `json:"-"`
+}
+
+type moveSessionErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MoveSessionErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r moveSessionErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type MoveSessionErrorName string
+
+const (
+	MoveSessionErrorNameMoveSessionError MoveSessionErrorName = "MoveSessionError"
+)
+
+func (r MoveSessionErrorName) IsKnown() bool {
+	switch r {
+	case MoveSessionErrorNameMoveSessionError:
+		return true
+	}
+	return false
+}
+
+type ProjectCopyError struct {
+	Data ProjectCopyErrorData `json:"data,required"`
+	Name ProjectCopyErrorName `json:"name,required"`
+	JSON projectCopyErrorJSON `json:"-"`
+}
+
+type projectCopyErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectCopyError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectCopyErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProjectCopyErrorData struct {
+	Message       string                     `json:"message,required"`
+	ForceRequired *bool                      `json:"forceRequired"`
+	JSON          projectCopyErrorDataJSON   `json:"-"`
+}
+
+type projectCopyErrorDataJSON struct {
+	Message       apijson.Field
+	ForceRequired apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *ProjectCopyErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectCopyErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type ProjectCopyErrorName string
+
+const (
+	ProjectCopyErrorNameProjectCopyError ProjectCopyErrorName = "ProjectCopyError"
+)
+
+func (r ProjectCopyErrorName) IsKnown() bool {
+	switch r {
+	case ProjectCopyErrorNameProjectCopyError:
+		return true
+	}
+	return false
+}
+
+type SessionMessageToolStateError struct {
+	Data SessionMessageToolStateErrorData `json:"data,required"`
+	Name SessionMessageToolStateErrorName `json:"name,required"`
+	JSON sessionMessageToolStateErrorJSON `json:"-"`
+}
+
+type sessionMessageToolStateErrorJSON struct {
+	Data        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionMessageToolStateError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionMessageToolStateErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionMessageToolStateErrorData struct {
+	Message string                              `json:"message,required"`
+	JSON    sessionMessageToolStateErrorDataJSON `json:"-"`
+}
+
+type sessionMessageToolStateErrorDataJSON struct {
+	Message     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionMessageToolStateErrorData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionMessageToolStateErrorDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionMessageToolStateErrorName string
+
+const (
+	SessionMessageToolStateErrorNameSessionMessageToolStateError SessionMessageToolStateErrorName = "SessionMessageToolStateError"
+)
+
+func (r SessionMessageToolStateErrorName) IsKnown() bool {
+	switch r {
+	case SessionMessageToolStateErrorNameSessionMessageToolStateError:
+		return true
+	}
+	return false
+}

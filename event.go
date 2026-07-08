@@ -1345,6 +1345,10 @@ func init() {
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(shared.ContentFilterError{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(shared.ContextOverflowError{}),
 		},
 		apijson.UnionVariant{

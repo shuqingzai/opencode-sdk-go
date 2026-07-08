@@ -390,3 +390,78 @@ type SessionBusyErrorTag = shared.SessionBusyErrorTag
 
 // This is an alias to an internal value.
 const SessionBusyErrorTagSessionBusyError = shared.SessionBusyErrorTagSessionBusyError
+
+// This is an alias to an internal type.
+type ConflictError = shared.ConflictError
+
+// This is an alias to an internal type.
+type ConflictErrorTag = shared.ConflictErrorTag
+
+// This is an alias to an internal value.
+const ConflictErrorTagConflictError = shared.ConflictErrorTagConflictError
+
+// This is an alias to an internal type.
+type ContentFilterError = shared.ContentFilterError
+
+// This is an alias to an internal type.
+type ContentFilterErrorData = shared.ContentFilterErrorData
+
+// This is an alias to an internal type.
+type ContentFilterErrorName = shared.ContentFilterErrorName
+
+// This is an alias to an internal value.
+const ContentFilterErrorNameContentFilterError = shared.ContentFilterErrorNameContentFilterError
+
+// This is an alias to an internal type.
+type ForbiddenError = shared.ForbiddenError
+
+// This is an alias to an internal type.
+type ForbiddenErrorTag = shared.ForbiddenErrorTag
+
+// This is an alias to an internal value.
+const ForbiddenErrorTagForbiddenError = shared.ForbiddenErrorTagForbiddenError
+
+// This is an alias to an internal type.
+type MessageNotFoundError = shared.MessageNotFoundError
+
+// This is an alias to an internal type.
+type MessageNotFoundErrorTag = shared.MessageNotFoundErrorTag
+
+// This is an alias to an internal value.
+const MessageNotFoundErrorTagMessageNotFoundError = shared.MessageNotFoundErrorTagMessageNotFoundError
+
+// This is an alias to an internal type.
+type MoveSessionError = shared.MoveSessionError
+
+// This is an alias to an internal type.
+type MoveSessionErrorData = shared.MoveSessionErrorData
+
+// This is an alias to an internal type.
+type MoveSessionErrorName = shared.MoveSessionErrorName
+
+// This is an alias to an internal value.
+const MoveSessionErrorNameMoveSessionError = shared.MoveSessionErrorNameMoveSessionError
+
+// This is an alias to an internal type.
+type ProjectCopyError = shared.ProjectCopyError
+
+// This is an alias to an internal type.
+type ProjectCopyErrorData = shared.ProjectCopyErrorData
+
+// This is an alias to an internal type.
+type ProjectCopyErrorName = shared.ProjectCopyErrorName
+
+// This is an alias to an internal value.
+const ProjectCopyErrorNameProjectCopyError = shared.ProjectCopyErrorNameProjectCopyError
+
+// This is an alias to an internal type.
+type SessionMessageToolStateError = shared.SessionMessageToolStateError
+
+// This is an alias to an internal type.
+type SessionMessageToolStateErrorData = shared.SessionMessageToolStateErrorData
+
+// This is an alias to an internal type.
+type SessionMessageToolStateErrorName = shared.SessionMessageToolStateErrorName
+
+// This is an alias to an internal value.
+const SessionMessageToolStateErrorNameSessionMessageToolStateError = shared.SessionMessageToolStateErrorNameSessionMessageToolStateError
