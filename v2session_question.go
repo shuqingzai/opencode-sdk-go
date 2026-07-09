@@ -104,7 +104,7 @@ func (r QuestionV2Answer) MarshalJSON() (data []byte, err error) {
 
 // ===== Response Types =====
 
-// V2SessionQuestionListResponse is returned by the Questions.List method.
+// V2SessionQuestionListResponse is returned by the Question.List method.
 type V2SessionQuestionListResponse struct {
 	Data []QuestionV2Request               `json:"data,required"`
 	JSON v2SessionQuestionListResponseJSON `json:"-"`

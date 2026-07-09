@@ -144,7 +144,7 @@ func (r PermissionV2Reply) IsKnown() bool {
 
 // ===== Response Types =====
 
-// V2SessionPermissionCreateResponse is returned by the Permissions.Create method.
+// V2SessionPermissionCreateResponse is returned by the Permission.Create method.
 type V2SessionPermissionCreateResponse struct {
 	Data V2SessionPermissionCreateData         `json:"data,required"`
 	JSON v2SessionPermissionCreateResponseJSON `json:"-"`
@@ -185,7 +185,7 @@ func (r v2SessionPermissionCreateDataJSON) RawJSON() string {
 	return r.raw
 }
 
-// V2SessionPermissionListResponse is returned by the Permissions.List method.
+// V2SessionPermissionListResponse is returned by the Permission.List method.
 type V2SessionPermissionListResponse struct {
 	Data []PermissionV2Request               `json:"data,required"`
 	JSON v2SessionPermissionListResponseJSON `json:"-"`
@@ -205,7 +205,7 @@ func (r v2SessionPermissionListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// V2SessionPermissionGetResponse is returned by the Permissions.Get method.
+// V2SessionPermissionGetResponse is returned by the Permission.Get method.
 type V2SessionPermissionGetResponse struct {
 	Data PermissionV2Request                `json:"data,required"`
 	JSON v2SessionPermissionGetResponseJSON `json:"-"`

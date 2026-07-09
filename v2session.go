@@ -27,10 +27,10 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewV2SessionService] method instead.
 type V2SessionService struct {
-	Options     []option.RequestOption
-	Revert      *V2SessionRevertService
-	Permissions *V2SessionPermissionService
-	Questions   *V2SessionQuestionService
+	Options    []option.RequestOption
+	Revert     *V2SessionRevertService
+	Permission *V2SessionPermissionService
+	Question   *V2SessionQuestionService
 }
 
 // NewV2SessionService generates a new service that applies the given options to
@@ -40,8 +40,8 @@ func NewV2SessionService(opts ...option.RequestOption) (r *V2SessionService) {
 	r = &V2SessionService{}
 	r.Options = opts
 	r.Revert = NewV2SessionRevertService(opts...)
-	r.Permissions = NewV2SessionPermissionService(opts...)
-	r.Questions = NewV2SessionQuestionService(opts...)
+	r.Permission = NewV2SessionPermissionService(opts...)
+	r.Question = NewV2SessionQuestionService(opts...)
 	return
 }
 
@@ -1682,17 +1682,6 @@ func (r V2SessionPromptParamsBody) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type V2Prompt struct {
-	Text       param.Field[string]                             `json:"text,required"`
-	Files      param.Field[[]V2PromptFileAttachmentParam]      `json:"files"`
-	Agents     param.Field[[]V2PromptAgentAttachmentParam]     `json:"agents"`
-	References param.Field[[]V2PromptReferenceAttachmentParam] `json:"references"`
-}
-
-func (r V2Prompt) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
 // V2PromptInputParam represents the prompt input for the v2.session.prompt
 // request body.
 type V2PromptInputParam struct {
@@ -1715,18 +1704,6 @@ type V2PromptInputFileAttachmentParam struct {
 }
 
 func (r V2PromptInputFileAttachmentParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-type V2PromptFileAttachmentParam struct {
-	URI         param.Field[string]              `json:"uri,required"`
-	Mime        param.Field[string]              `json:"mime,required"`
-	Name        param.Field[string]              `json:"name"`
-	Description param.Field[string]              `json:"description"`
-	Source      param.Field[V2PromptSourceParam] `json:"source"`
-}
-
-func (r V2PromptFileAttachmentParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

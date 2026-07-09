@@ -15,6 +15,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/ssestream"
 )
 
 // PtyService contains methods and other services that help with interacting with
@@ -97,15 +98,20 @@ func (r *PtyService) Remove(ctx context.Context, ptyID string, query PtyRemovePa
 }
 
 // Connect to a PTY
-func (r *PtyService) Connect(ctx context.Context, ptyID string, query PtyConnectParams, opts ...option.RequestOption) (res *bool, err error) {
+//
+// Establish a WebSocket connection streaming PTY output and accepting terminal input.
+func (r *PtyService) Connect(ctx context.Context, ptyID string, query PtyConnectParams, opts ...option.RequestOption) (stream *ssestream.Stream[PtyEvent]) {
+	var (
+		raw *http.Response
+		err error
+	)
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
-		err = errors.New("missing required ptyID parameter")
-		return
+		return ssestream.NewStream[PtyEvent](ssestream.NewDecoder(raw), errors.New("missing required ptyID parameter"))
 	}
 	path := fmt.Sprintf("pty/%s/connect", ptyID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
+	return ssestream.NewStream[PtyEvent](ssestream.NewDecoder(raw), err)
 }
 
 // Get a connect token for a PTY
