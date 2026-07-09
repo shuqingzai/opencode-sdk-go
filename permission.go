@@ -46,6 +46,10 @@ func (r *PermissionService) List(ctx context.Context, query PermissionListParams
 // Reply to a permission request
 func (r *PermissionService) Reply(ctx context.Context, requestID string, params PermissionReplyParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
+	if requestID == "" {
+		err = errors.New("missing required requestID parameter")
+		return
+	}
 	path := "permission/" + requestID + "/reply"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return

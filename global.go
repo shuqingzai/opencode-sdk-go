@@ -1116,7 +1116,10 @@ func (r GlobalEventResponseType) IsKnown() bool {
 		GlobalEventResponseTypeSessionNextMoved,
 		GlobalEventResponseTypeSessionNextRevertStaged,
 		GlobalEventResponseTypeSessionNextRevertCleared,
-		GlobalEventResponseTypeSessionNextRevertCommitted:
+		GlobalEventResponseTypeSessionNextRevertCommitted,
+		GlobalEventResponseTypeSessionNextPromptAdmitted,
+		GlobalEventResponseTypeSessionNextContextUpdated,
+		GlobalEventResponseTypeProjectDirectoriesUpdated:
 		return true
 	}
 	return false
