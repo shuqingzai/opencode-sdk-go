@@ -416,12 +416,14 @@ type McpAddBodyConfigLocal struct {
 	Type McpLocalConfigType `json:"type,required"`
 	// Command and arguments to run the MCP server
 	Command []string `json:"command,required"`
+	// Cwd is the working directory for the MCP server process.
+	Cwd string `json:"cwd"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
 	// Environment variables to set when running the MCP server
 	Environment map[string]string `json:"environment"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout int                       `json:"timeout"`
+	Timeout int64                     `json:"timeout"`
 	JSON    mcpAddBodyConfigLocalJSON `json:"-"`
 }
 
@@ -429,6 +431,7 @@ type McpAddBodyConfigLocal struct {
 type mcpAddBodyConfigLocalJSON struct {
 	Type        apijson.Field
 	Command     apijson.Field
+	Cwd         apijson.Field
 	Enabled     apijson.Field
 	Environment apijson.Field
 	Timeout     apijson.Field
@@ -461,7 +464,7 @@ type McpAddBodyConfigRemote struct {
 	// When OAuth is disabled, this field is `false` (a JSON boolean).
 	OAuth interface{} `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout int                        `json:"timeout"`
+	Timeout int64                      `json:"timeout"`
 	JSON    mcpAddBodyConfigRemoteJSON `json:"-"`
 }
 

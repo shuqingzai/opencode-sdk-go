@@ -105,14 +105,14 @@ func (r providerListResponseJSON) RawJSON() string {
 
 // ProviderInfo represents information about a provider.
 type ProviderInfo struct {
-	ID      string                       `json:"id,required"`
-	Name    string                       `json:"name,required"`
-	Source  string                       `json:"source,required"`
-	Env     []string                     `json:"env,required"`
-	Key     string                       `json:"key"`
-	Options map[string]interface{}       `json:"options,required"`
-	Models  map[string]ProviderModelInfo `json:"models,required"`
-	JSON    providerInfoJSON             `json:"-"`
+	ID      string                   `json:"id,required"`
+	Name    string                   `json:"name,required"`
+	Source  ProviderInfoSource       `json:"source,required"`
+	Env     []string                 `json:"env,required"`
+	Key     string                   `json:"key"`
+	Options map[string]interface{}   `json:"options,required"`
+	Models  map[string]ProviderModel `json:"models,required"`
+	JSON    providerInfoJSON         `json:"-"`
 }
 
 // providerInfoJSON contains the JSON metadata for the struct [ProviderInfo]
@@ -136,71 +136,79 @@ func (r providerInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-// ProviderModelInfo represents information about a model provided by a provider.
-type ProviderModelInfo struct {
-	ID           string                          `json:"id,required"`
-	Name         string                          `json:"name,required"`
-	Family       string                          `json:"family"`
-	ReleaseDate  string                          `json:"release_date,required"`
-	Attachment   bool                            `json:"attachment,required"`
-	Reasoning    bool                            `json:"reasoning,required"`
-	Temperature  bool                            `json:"temperature,required"`
-	ToolCall     bool                            `json:"toolcall,required"`
-	Cost         ProviderModelCost               `json:"cost"`
-	Limit        ProviderModelLimit              `json:"limit,required"`
-	Modalities   ProviderModelModalities         `json:"modalities"`
-	Experimental bool                            `json:"experimental"`
-	Status       string                          `json:"status"`
-	Options      map[string]interface{}          `json:"options,required"`
-	Headers      map[string]string               `json:"headers"`
-	API          ProviderModelInfoAPI            `json:"api"`
-	Provider     ProviderModelProvider           `json:"provider"`
-	Variants     map[string]ProviderModelVariant `json:"variants"`
-	JSON         providerModelInfoJSON           `json:"-"`
+// ProviderInfoSource represents the source of a provider configuration.
+type ProviderInfoSource string
+
+const (
+	ProviderInfoSourceEnv    ProviderInfoSource = "env"
+	ProviderInfoSourceConfig ProviderInfoSource = "config"
+	ProviderInfoSourceCustom ProviderInfoSource = "custom"
+	ProviderInfoSourceApi    ProviderInfoSource = "api"
+)
+
+func (r ProviderInfoSource) IsKnown() bool {
+	switch r {
+	case ProviderInfoSourceEnv, ProviderInfoSourceConfig, ProviderInfoSourceCustom, ProviderInfoSourceApi:
+		return true
+	}
+	return false
 }
 
-// providerModelInfoJSON contains the JSON metadata for the struct [ProviderModelInfo]
-type providerModelInfoJSON struct {
+// ProviderModel represents information about a model provided by a provider.
+type ProviderModel struct {
+	ID           string                    `json:"id,required"`
+	ProviderID   string                    `json:"providerID,required"`
+	API          ProviderModelAPI          `json:"api,required"`
+	Name         string                    `json:"name,required"`
+	Family       string                    `json:"family"`
+	Capabilities ProviderModelCapabilities `json:"capabilities,required"`
+	Cost         ProviderModelCost         `json:"cost,required"`
+	Limit        ProviderModelLimit        `json:"limit,required"`
+	Status       ProviderModelStatus       `json:"status,required"`
+	Options      map[string]interface{}    `json:"options,required"`
+	Headers      map[string]string         `json:"headers,required"`
+	ReleaseDate  string                    `json:"release_date,required"`
+	Variants     map[string]interface{}    `json:"variants"`
+	JSON         providerModelJSON         `json:"-"`
+}
+
+// providerModelJSON contains the JSON metadata for the struct [ProviderModel]
+type providerModelJSON struct {
 	ID           apijson.Field
+	ProviderID   apijson.Field
+	API          apijson.Field
 	Name         apijson.Field
 	Family       apijson.Field
-	ReleaseDate  apijson.Field
-	Attachment   apijson.Field
-	Reasoning    apijson.Field
-	Temperature  apijson.Field
-	ToolCall     apijson.Field
+	Capabilities apijson.Field
 	Cost         apijson.Field
 	Limit        apijson.Field
-	Modalities   apijson.Field
-	Experimental apijson.Field
 	Status       apijson.Field
 	Options      apijson.Field
 	Headers      apijson.Field
-	API          apijson.Field
-	Provider     apijson.Field
+	ReleaseDate  apijson.Field
 	Variants     apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
 
-func (r *ProviderModelInfo) UnmarshalJSON(data []byte) (err error) {
+func (r *ProviderModel) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r providerModelInfoJSON) RawJSON() string {
+func (r providerModelJSON) RawJSON() string {
 	return r.raw
 }
 
-// ProviderModelInfoAPI represents API information for a model.
-type ProviderModelInfoAPI struct {
-	ID   string                   `json:"id"`
-	URL  string                   `json:"url"`
-	NPM  string                   `json:"npm"`
-	JSON providerModelInfoAPIJSON `json:"-"`
+// ProviderModelAPI represents API information for a model.
+type ProviderModelAPI struct {
+	ID   string               `json:"id,required"`
+	URL  string               `json:"url,required"`
+	NPM  string               `json:"npm,required"`
+	JSON providerModelAPIJSON `json:"-"`
 }
 
-// providerModelInfoAPIJSON contains the JSON metadata for the struct [ProviderModelInfoAPI]
-type providerModelInfoAPIJSON struct {
+// providerModelAPIJSON contains the JSON metadata for the struct [ProviderModelAPI]
+type providerModelAPIJSON struct {
 	ID          apijson.Field
 	URL         apijson.Field
 	NPM         apijson.Field
@@ -208,33 +216,159 @@ type providerModelInfoAPIJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *ProviderModelInfoAPI) UnmarshalJSON(data []byte) (err error) {
+func (r *ProviderModelAPI) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r providerModelInfoAPIJSON) RawJSON() string {
+func (r providerModelAPIJSON) RawJSON() string {
 	return r.raw
+}
+
+// ProviderModelStatus represents the status of a model.
+type ProviderModelStatus string
+
+const (
+	ProviderModelStatusAlpha      ProviderModelStatus = "alpha"
+	ProviderModelStatusBeta       ProviderModelStatus = "beta"
+	ProviderModelStatusDeprecated ProviderModelStatus = "deprecated"
+	ProviderModelStatusActive     ProviderModelStatus = "active"
+)
+
+func (r ProviderModelStatus) IsKnown() bool {
+	switch r {
+	case ProviderModelStatusAlpha, ProviderModelStatusBeta, ProviderModelStatusDeprecated, ProviderModelStatusActive:
+		return true
+	}
+	return false
+}
+
+// ProviderModelCapabilities represents the capabilities of a model.
+type ProviderModelCapabilities struct {
+	Temperature bool                                `json:"temperature,required"`
+	Reasoning   bool                                `json:"reasoning,required"`
+	Attachment  bool                                `json:"attachment,required"`
+	ToolCall    bool                                `json:"toolcall,required"`
+	Input       ProviderModelCapabilitiesModalities `json:"input,required"`
+	Output      ProviderModelCapabilitiesModalities `json:"output,required"`
+	// This field can have the runtime type of [bool], [ProviderModelCapabilitiesInterleavedField].
+	Interleaved interface{}                   `json:"interleaved,required"`
+	JSON        providerModelCapabilitiesJSON `json:"-"`
+}
+
+// providerModelCapabilitiesJSON contains the JSON metadata for the struct
+// [ProviderModelCapabilities]
+type providerModelCapabilitiesJSON struct {
+	Temperature apijson.Field
+	Reasoning   apijson.Field
+	Attachment  apijson.Field
+	ToolCall    apijson.Field
+	Input       apijson.Field
+	Output      apijson.Field
+	Interleaved apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCapabilities) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCapabilitiesJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCapabilitiesModalities represents input/output modality support for a model.
+type ProviderModelCapabilitiesModalities struct {
+	Text  bool                                    `json:"text,required"`
+	Audio bool                                    `json:"audio,required"`
+	Image bool                                    `json:"image,required"`
+	Video bool                                    `json:"video,required"`
+	PDF   bool                                    `json:"pdf,required"`
+	JSON  providerModelCapabilitiesModalitiesJSON `json:"-"`
+}
+
+// providerModelCapabilitiesModalitiesJSON contains the JSON metadata for the struct
+// [ProviderModelCapabilitiesModalities]
+type providerModelCapabilitiesModalitiesJSON struct {
+	Text        apijson.Field
+	Audio       apijson.Field
+	Image       apijson.Field
+	Video       apijson.Field
+	PDF         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCapabilitiesModalities) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCapabilitiesModalitiesJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCapabilitiesInterleavedField represents the field name used for interleaved
+// reasoning content.
+type ProviderModelCapabilitiesInterleavedField struct {
+	Field ProviderModelCapabilitiesInterleavedFieldField `json:"field,required"`
+	JSON  providerModelCapabilitiesInterleavedFieldJSON  `json:"-"`
+}
+
+// providerModelCapabilitiesInterleavedFieldJSON contains the JSON metadata for the struct
+// [ProviderModelCapabilitiesInterleavedField]
+type providerModelCapabilitiesInterleavedFieldJSON struct {
+	Field       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCapabilitiesInterleavedField) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCapabilitiesInterleavedFieldJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCapabilitiesInterleavedFieldField represents the field name where interleaved
+// reasoning content is located.
+type ProviderModelCapabilitiesInterleavedFieldField string
+
+const (
+	ProviderModelCapabilitiesInterleavedFieldFieldReasoning        ProviderModelCapabilitiesInterleavedFieldField = "reasoning"
+	ProviderModelCapabilitiesInterleavedFieldFieldReasoningContent ProviderModelCapabilitiesInterleavedFieldField = "reasoning_content"
+	ProviderModelCapabilitiesInterleavedFieldFieldReasoningDetails ProviderModelCapabilitiesInterleavedFieldField = "reasoning_details"
+)
+
+func (r ProviderModelCapabilitiesInterleavedFieldField) IsKnown() bool {
+	switch r {
+	case ProviderModelCapabilitiesInterleavedFieldFieldReasoning,
+		ProviderModelCapabilitiesInterleavedFieldFieldReasoningContent,
+		ProviderModelCapabilitiesInterleavedFieldFieldReasoningDetails:
+		return true
+	}
+	return false
 }
 
 // ProviderModelCost represents the cost structure for a model.
 type ProviderModelCost struct {
-	Input           float64                          `json:"input,required"`
-	Output          float64                          `json:"output,required"`
-	CacheRead       float64                          `json:"cache_read"`
-	CacheWrite      float64                          `json:"cache_write"`
-	ContextOver200k ProviderModelCostContextOver200k `json:"experimentalOver200K"`
-	JSON            providerModelCostJSON            `json:"-"`
+	Input                float64                               `json:"input,required"`
+	Output               float64                               `json:"output,required"`
+	Cache                ProviderModelCostCache                `json:"cache,required"`
+	Tiers                []ProviderModelCostTier               `json:"tiers"`
+	ExperimentalOver200K ProviderModelCostExperimentalOver200K `json:"experimentalOver200K"`
+	JSON                 providerModelCostJSON                 `json:"-"`
 }
 
 // providerModelCostJSON contains the JSON metadata for the struct [ProviderModelCost]
 type providerModelCostJSON struct {
-	Input           apijson.Field
-	Output          apijson.Field
-	CacheRead       apijson.Field
-	CacheWrite      apijson.Field
-	ContextOver200k apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
+	Input                apijson.Field
+	Output               apijson.Field
+	Cache                apijson.Field
+	Tiers                apijson.Field
+	ExperimentalOver200K apijson.Field
+	raw                  string
+	ExtraFields          map[string]apijson.Field
 }
 
 func (r *ProviderModelCost) UnmarshalJSON(data []byte) (err error) {
@@ -245,39 +379,128 @@ func (r providerModelCostJSON) RawJSON() string {
 	return r.raw
 }
 
-// ProviderModelCostContextOver200k represents cost structure for context over 200k tokens.
-type ProviderModelCostContextOver200k struct {
-	Input      float64                              `json:"input,required"`
-	Output     float64                              `json:"output,required"`
-	CacheRead  float64                              `json:"cache_read"`
-	CacheWrite float64                              `json:"cache_write"`
-	JSON       providerModelCostContextOver200kJSON `json:"-"`
+// ProviderModelCostCache represents the cache cost structure for a model.
+type ProviderModelCostCache struct {
+	Read  float64                    `json:"read,required"`
+	Write float64                    `json:"write,required"`
+	JSON  providerModelCostCacheJSON `json:"-"`
 }
 
-// providerModelCostContextOver200kJSON contains the JSON metadata for the struct
-// [ProviderModelCostContextOver200k]
-type providerModelCostContextOver200kJSON struct {
-	Input       apijson.Field
-	Output      apijson.Field
-	CacheRead   apijson.Field
-	CacheWrite  apijson.Field
+// providerModelCostCacheJSON contains the JSON metadata for the struct
+// [ProviderModelCostCache]
+type providerModelCostCacheJSON struct {
+	Read        apijson.Field
+	Write       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *ProviderModelCostContextOver200k) UnmarshalJSON(data []byte) (err error) {
+func (r *ProviderModelCostCache) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r providerModelCostContextOver200kJSON) RawJSON() string {
+func (r providerModelCostCacheJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCostTier represents a single cost tier for a model.
+type ProviderModelCostTier struct {
+	Input  float64                      `json:"input,required"`
+	Output float64                      `json:"output,required"`
+	Cache  ProviderModelCostCache       `json:"cache,required"`
+	Tier   ProviderModelCostTierContext `json:"tier,required"`
+	JSON   providerModelCostTierJSON    `json:"-"`
+}
+
+// providerModelCostTierJSON contains the JSON metadata for the struct
+// [ProviderModelCostTier]
+type providerModelCostTierJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	Cache       apijson.Field
+	Tier        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCostTier) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCostTierJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCostTierContext represents the tier context threshold for a cost tier.
+type ProviderModelCostTierContext struct {
+	Type ProviderModelCostTierContextType `json:"type,required"`
+	Size float64                          `json:"size,required"`
+	JSON providerModelCostTierContextJSON `json:"-"`
+}
+
+// providerModelCostTierContextJSON contains the JSON metadata for the struct
+// [ProviderModelCostTierContext]
+type providerModelCostTierContextJSON struct {
+	Type        apijson.Field
+	Size        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCostTierContext) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCostTierContextJSON) RawJSON() string {
+	return r.raw
+}
+
+// ProviderModelCostTierContextType represents the type of cost tier.
+type ProviderModelCostTierContextType string
+
+const (
+	ProviderModelCostTierContextTypeContext ProviderModelCostTierContextType = "context"
+)
+
+func (r ProviderModelCostTierContextType) IsKnown() bool {
+	switch r {
+	case ProviderModelCostTierContextTypeContext:
+		return true
+	}
+	return false
+}
+
+// ProviderModelCostExperimentalOver200K represents cost structure for context over 200k tokens.
+type ProviderModelCostExperimentalOver200K struct {
+	Input  float64                                   `json:"input,required"`
+	Output float64                                   `json:"output,required"`
+	Cache  ProviderModelCostCache                    `json:"cache,required"`
+	JSON   providerModelCostExperimentalOver200KJSON `json:"-"`
+}
+
+// providerModelCostExperimentalOver200KJSON contains the JSON metadata for the struct
+// [ProviderModelCostExperimentalOver200K]
+type providerModelCostExperimentalOver200KJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	Cache       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderModelCostExperimentalOver200K) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerModelCostExperimentalOver200KJSON) RawJSON() string {
 	return r.raw
 }
 
 // ProviderModelLimit represents limits for a model.
 type ProviderModelLimit struct {
-	Context int64                  `json:"context,required"`
-	Input   int64                  `json:"input"`
-	Output  int64                  `json:"output,required"`
+	Context float64                `json:"context,required"`
+	Input   float64                `json:"input"`
+	Output  float64                `json:"output,required"`
 	JSON    providerModelLimitJSON `json:"-"`
 }
 
@@ -298,79 +521,9 @@ func (r providerModelLimitJSON) RawJSON() string {
 	return r.raw
 }
 
-// ProviderModelModalities represents input and output modalities for a model.
-type ProviderModelModalities struct {
-	Input  []string                    `json:"input"`
-	Output []string                    `json:"output"`
-	JSON   providerModelModalitiesJSON `json:"-"`
-}
-
-// providerModelModalitiesJSON contains the JSON metadata for the struct
-// [ProviderModelModalities]
-type providerModelModalitiesJSON struct {
-	Input       apijson.Field
-	Output      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderModelModalities) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerModelModalitiesJSON) RawJSON() string {
-	return r.raw
-}
-
-// ProviderModelProvider represents provider information for a model.
-type ProviderModelProvider struct {
-	NPM  string                    `json:"npm"`
-	API  string                    `json:"api"`
-	JSON providerModelProviderJSON `json:"-"`
-}
-
-// providerModelProviderJSON contains the JSON metadata for the struct
-// [ProviderModelProvider]
-type providerModelProviderJSON struct {
-	NPM         apijson.Field
-	API         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderModelProvider) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerModelProviderJSON) RawJSON() string {
-	return r.raw
-}
-
-// ProviderModelVariant represents a variant of a model.
-type ProviderModelVariant struct {
-	Disabled bool                     `json:"disabled"`
-	JSON     providerModelVariantJSON `json:"-"`
-}
-
-// providerModelVariantJSON contains the JSON metadata for the struct
-// [ProviderModelVariant]
-type providerModelVariantJSON struct {
-	Disabled    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderModelVariant) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerModelVariantJSON) RawJSON() string {
-	return r.raw
-}
-
 // ProviderAuthMethod represents an authentication method for a provider.
 type ProviderAuthMethod struct {
-	Type    string                     `json:"type,required"`
+	Type    ProviderAuthMethodType     `json:"type,required"`
 	Label   string                     `json:"label,required"`
 	Prompts []ProviderAuthMethodPrompt `json:"prompts"`
 	JSON    providerAuthMethodJSON     `json:"-"`
@@ -393,6 +546,22 @@ func (r providerAuthMethodJSON) RawJSON() string {
 	return r.raw
 }
 
+// ProviderAuthMethodType represents the type of an authentication method.
+type ProviderAuthMethodType string
+
+const (
+	ProviderAuthMethodTypeOauth ProviderAuthMethodType = "oauth"
+	ProviderAuthMethodTypeApi   ProviderAuthMethodType = "api"
+)
+
+func (r ProviderAuthMethodType) IsKnown() bool {
+	switch r {
+	case ProviderAuthMethodTypeOauth, ProviderAuthMethodTypeApi:
+		return true
+	}
+	return false
+}
+
 // ProviderAuthMethodPrompt represents a prompt in an authentication method.
 // It can be either a text prompt or a select prompt.
 type ProviderAuthMethodPrompt interface {
@@ -404,10 +573,12 @@ func init() {
 		reflect.TypeOf((*ProviderAuthMethodPrompt)(nil)).Elem(),
 		"type",
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(ProviderAuthMethodPromptText{}),
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeOf(ProviderAuthMethodPromptText{}),
 		},
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
+			DiscriminatorValue: "select",
+			Type:               reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
 		},
 	)
 }

@@ -3249,8 +3249,8 @@ type SessionNewParams struct {
 }
 
 type SessionNewParamsModel struct {
-	ID         param.Field[string] `json:"id"`
-	ProviderID param.Field[string] `json:"providerID"`
+	ID         param.Field[string] `json:"id,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
 	Variant    param.Field[string] `json:"variant"`
 }
 
@@ -3665,14 +3665,12 @@ func (r SessionShareParams) URLQuery() (v url.Values) {
 }
 
 type SessionShellParams struct {
-	Directory param.Field[string]                         `query:"directory"`
-	Workspace param.Field[string]                         `query:"workspace"`
-	Agent     param.Field[string]                         `json:"agent,required"`
-	Command   param.Field[string]                         `json:"command,required"`
-	MessageID param.Field[string]                         `json:"messageID"`
-	Model     param.Field[SessionPromptParamsModel]       `json:"model"`
-	Variant   param.Field[string]                         `json:"variant"`
-	Parts     param.Field[[]SessionPromptParamsPartUnion] `json:"parts"`
+	Directory param.Field[string]                   `query:"directory"`
+	Workspace param.Field[string]                   `query:"workspace"`
+	Agent     param.Field[string]                   `json:"agent,required"`
+	Command   param.Field[string]                   `json:"command,required"`
+	MessageID param.Field[string]                   `json:"messageID"`
+	Model     param.Field[SessionPromptParamsModel] `json:"model"`
 }
 
 func (r SessionShellParams) MarshalJSON() (data []byte, err error) {

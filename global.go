@@ -160,7 +160,6 @@ type GlobalConfigUpdateParams struct {
 	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
 	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
 	Instructions      param.Field[[]string]                   `json:"instructions"`
-	Keybinds          param.Field[KeybindsConfig]             `json:"keybinds"`
 	Layout            param.Field[ConfigLayout]               `json:"layout"`
 	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
 	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
@@ -171,16 +170,15 @@ type GlobalConfigUpdateParams struct {
 	Plugin            param.Field[[]string]                   `json:"plugin"`
 	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
 	Reference         param.Field[ReferenceConfig]            `json:"reference"`
+	References        param.Field[map[string]interface{}]     `json:"references"`
 	Share             param.Field[ConfigShare]                `json:"share"`
 	Shell             param.Field[string]                     `json:"shell"`
 	Server            param.Field[ServerConfig]               `json:"server"`
 	Skills            param.Field[ConfigSkills]               `json:"skills"`
 	SmallModel        param.Field[string]                     `json:"small_model"`
 	Snapshot          param.Field[bool]                       `json:"snapshot"`
-	Theme             param.Field[string]                     `json:"theme"`
 	ToolOutput        param.Field[ConfigToolOutput]           `json:"tool_output"`
 	Tools             param.Field[map[string]bool]            `json:"tools"`
-	Tui               param.Field[ConfigTui]                  `json:"tui"`
 	Username          param.Field[string]                     `json:"username"`
 	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
 	DefaultAgent      param.Field[string]                     `json:"default_agent"`
@@ -1146,7 +1144,7 @@ const (
 	SyncEventResponseSyncEventTypeSessionNextStepStarted1       SyncEventResponseSyncEventType = "session.next.step.started.1"
 	SyncEventResponseSyncEventTypeSessionNextStepEnded2         SyncEventResponseSyncEventType = "session.next.step.ended.2"
 	SyncEventResponseSyncEventTypeSessionNextStepFailed2        SyncEventResponseSyncEventType = "session.next.step.failed.2"
-	SyncEventResponseSyncEventTypeSessionNextTextStarted1      SyncEventResponseSyncEventType = "session.next.text.started.1"
+	SyncEventResponseSyncEventTypeSessionNextTextStarted1       SyncEventResponseSyncEventType = "session.next.text.started.1"
 	SyncEventResponseSyncEventTypeSessionNextTextEnded1         SyncEventResponseSyncEventType = "session.next.text.ended.1"
 	SyncEventResponseSyncEventTypeSessionNextReasoningStarted1  SyncEventResponseSyncEventType = "session.next.reasoning.started.1"
 	SyncEventResponseSyncEventTypeSessionNextReasoningEnded1    SyncEventResponseSyncEventType = "session.next.reasoning.ended.1"

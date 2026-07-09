@@ -50,7 +50,7 @@ func TestQuestionReply(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Question.Reply(context.TODO(), "requestID", opencode.QuestionReplyParams{
-		Answers: opencode.F([]string{"answer1"}),
+		Answers: opencode.F([][]string{{"answer1"}}),
 	})
 	if err != nil {
 		var apierr *opencode.Error

@@ -57,9 +57,9 @@ type V2Event struct {
 	Location *LocationRef    `json:"location"`
 	Metadata interface{}     `json:"metadata"`
 	// This field can have the runtime type of one of the [V2EventPayloadUnion] variants.
-	Data    interface{}         `json:"data,required"`
-	JSON    v2EventJSON         `json:"-"`
-	union   V2EventPayloadUnion
+	Data  interface{} `json:"data,required"`
+	JSON  v2EventJSON `json:"-"`
+	union V2EventPayloadUnion
 }
 
 // V2EventDurable contains the durable sequencing information for a V2Event.
@@ -120,186 +120,186 @@ func (r V2Event) AsUnion() V2EventPayloadUnion {
 type V2EventType string
 
 const (
-	V2EventTypeCatalogUpdated V2EventType = "catalog.updated"
-	V2EventTypeCommandExecuted V2EventType = "command.executed"
-	V2EventTypeFileEdited V2EventType = "file.edited"
-	V2EventTypeFileWatcherUpdated V2EventType = "file.watcher.updated"
-	V2EventTypeGlobalDisposed V2EventType = "global.disposed"
-	V2EventTypeInstallationUpdateAvailable V2EventType = "installation.update-available"
-	V2EventTypeInstallationUpdated V2EventType = "installation.updated"
+	V2EventTypeCatalogUpdated               V2EventType = "catalog.updated"
+	V2EventTypeCommandExecuted              V2EventType = "command.executed"
+	V2EventTypeFileEdited                   V2EventType = "file.edited"
+	V2EventTypeFileWatcherUpdated           V2EventType = "file.watcher.updated"
+	V2EventTypeGlobalDisposed               V2EventType = "global.disposed"
+	V2EventTypeInstallationUpdateAvailable  V2EventType = "installation.update-available"
+	V2EventTypeInstallationUpdated          V2EventType = "installation.updated"
 	V2EventTypeIntegrationConnectionUpdated V2EventType = "integration.connection.updated"
-	V2EventTypeIntegrationUpdated V2EventType = "integration.updated"
-	V2EventTypeLspUpdated V2EventType = "lsp.updated"
-	V2EventTypeMcpBrowserOpenFailed V2EventType = "mcp.browser.open.failed"
-	V2EventTypeMcpToolsChanged V2EventType = "mcp.tools.changed"
-	V2EventTypeMessagePartDelta V2EventType = "message.part.delta"
-	V2EventTypeMessagePartRemoved V2EventType = "message.part.removed"
-	V2EventTypeMessagePartUpdated V2EventType = "message.part.updated"
-	V2EventTypeMessageRemoved V2EventType = "message.removed"
-	V2EventTypeMessageUpdated V2EventType = "message.updated"
-	V2EventTypeModelsDevRefreshed V2EventType = "models-dev.refreshed"
-	V2EventTypePermissionAsked V2EventType = "permission.asked"
-	V2EventTypePermissionReplied V2EventType = "permission.replied"
-	V2EventTypePermissionV2Asked V2EventType = "permission.v2.asked"
-	V2EventTypePermissionV2Replied V2EventType = "permission.v2.replied"
-	V2EventTypePluginAdded V2EventType = "plugin.added"
-	V2EventTypeProjectDirectoriesUpdated V2EventType = "project.directories.updated"
-	V2EventTypeProjectUpdated V2EventType = "project.updated"
-	V2EventTypePtyCreated V2EventType = "pty.created"
-	V2EventTypePtyDeleted V2EventType = "pty.deleted"
-	V2EventTypePtyExited V2EventType = "pty.exited"
-	V2EventTypePtyUpdated V2EventType = "pty.updated"
-	V2EventTypeQuestionAsked V2EventType = "question.asked"
-	V2EventTypeQuestionRejected V2EventType = "question.rejected"
-	V2EventTypeQuestionReplied V2EventType = "question.replied"
-	V2EventTypeQuestionV2Asked V2EventType = "question.v2.asked"
-	V2EventTypeQuestionV2Rejected V2EventType = "question.v2.rejected"
-	V2EventTypeQuestionV2Replied V2EventType = "question.v2.replied"
-	V2EventTypeReferenceUpdated V2EventType = "reference.updated"
-	V2EventTypeServerConnected V2EventType = "server.connected"
-	V2EventTypeSessionCompacted V2EventType = "session.compacted"
-	V2EventTypeSessionCreated V2EventType = "session.created"
-	V2EventTypeSessionDeleted V2EventType = "session.deleted"
-	V2EventTypeSessionDiff V2EventType = "session.diff"
-	V2EventTypeSessionError V2EventType = "session.error"
-	V2EventTypeSessionIdle V2EventType = "session.idle"
-	V2EventTypeSessionNextAgentSwitched V2EventType = "session.next.agent.switched"
-	V2EventTypeSessionNextCompactionDelta V2EventType = "session.next.compaction.delta"
-	V2EventTypeSessionNextCompactionEnded V2EventType = "session.next.compaction.ended"
+	V2EventTypeIntegrationUpdated           V2EventType = "integration.updated"
+	V2EventTypeLspUpdated                   V2EventType = "lsp.updated"
+	V2EventTypeMcpBrowserOpenFailed         V2EventType = "mcp.browser.open.failed"
+	V2EventTypeMcpToolsChanged              V2EventType = "mcp.tools.changed"
+	V2EventTypeMessagePartDelta             V2EventType = "message.part.delta"
+	V2EventTypeMessagePartRemoved           V2EventType = "message.part.removed"
+	V2EventTypeMessagePartUpdated           V2EventType = "message.part.updated"
+	V2EventTypeMessageRemoved               V2EventType = "message.removed"
+	V2EventTypeMessageUpdated               V2EventType = "message.updated"
+	V2EventTypeModelsDevRefreshed           V2EventType = "models-dev.refreshed"
+	V2EventTypePermissionAsked              V2EventType = "permission.asked"
+	V2EventTypePermissionReplied            V2EventType = "permission.replied"
+	V2EventTypePermissionV2Asked            V2EventType = "permission.v2.asked"
+	V2EventTypePermissionV2Replied          V2EventType = "permission.v2.replied"
+	V2EventTypePluginAdded                  V2EventType = "plugin.added"
+	V2EventTypeProjectDirectoriesUpdated    V2EventType = "project.directories.updated"
+	V2EventTypeProjectUpdated               V2EventType = "project.updated"
+	V2EventTypePtyCreated                   V2EventType = "pty.created"
+	V2EventTypePtyDeleted                   V2EventType = "pty.deleted"
+	V2EventTypePtyExited                    V2EventType = "pty.exited"
+	V2EventTypePtyUpdated                   V2EventType = "pty.updated"
+	V2EventTypeQuestionAsked                V2EventType = "question.asked"
+	V2EventTypeQuestionRejected             V2EventType = "question.rejected"
+	V2EventTypeQuestionReplied              V2EventType = "question.replied"
+	V2EventTypeQuestionV2Asked              V2EventType = "question.v2.asked"
+	V2EventTypeQuestionV2Rejected           V2EventType = "question.v2.rejected"
+	V2EventTypeQuestionV2Replied            V2EventType = "question.v2.replied"
+	V2EventTypeReferenceUpdated             V2EventType = "reference.updated"
+	V2EventTypeServerConnected              V2EventType = "server.connected"
+	V2EventTypeSessionCompacted             V2EventType = "session.compacted"
+	V2EventTypeSessionCreated               V2EventType = "session.created"
+	V2EventTypeSessionDeleted               V2EventType = "session.deleted"
+	V2EventTypeSessionDiff                  V2EventType = "session.diff"
+	V2EventTypeSessionError                 V2EventType = "session.error"
+	V2EventTypeSessionIdle                  V2EventType = "session.idle"
+	V2EventTypeSessionNextAgentSwitched     V2EventType = "session.next.agent.switched"
+	V2EventTypeSessionNextCompactionDelta   V2EventType = "session.next.compaction.delta"
+	V2EventTypeSessionNextCompactionEnded   V2EventType = "session.next.compaction.ended"
 	V2EventTypeSessionNextCompactionStarted V2EventType = "session.next.compaction.started"
-	V2EventTypeSessionNextContextUpdated V2EventType = "session.next.context.updated"
-	V2EventTypeSessionNextModelSwitched V2EventType = "session.next.model.switched"
-	V2EventTypeSessionNextMoved V2EventType = "session.next.moved"
-	V2EventTypeSessionNextPromptAdmitted V2EventType = "session.next.prompt.admitted"
-	V2EventTypeSessionNextPrompted V2EventType = "session.next.prompted"
-	V2EventTypeSessionNextReasoningDelta V2EventType = "session.next.reasoning.delta"
-	V2EventTypeSessionNextReasoningEnded V2EventType = "session.next.reasoning.ended"
-	V2EventTypeSessionNextReasoningStarted V2EventType = "session.next.reasoning.started"
-	V2EventTypeSessionNextRetried V2EventType = "session.next.retried"
-	V2EventTypeSessionNextRevertCleared V2EventType = "session.next.revert.cleared"
-	V2EventTypeSessionNextRevertCommitted V2EventType = "session.next.revert.committed"
-	V2EventTypeSessionNextRevertStaged V2EventType = "session.next.revert.staged"
-	V2EventTypeSessionNextShellEnded V2EventType = "session.next.shell.ended"
-	V2EventTypeSessionNextShellStarted V2EventType = "session.next.shell.started"
-	V2EventTypeSessionNextStepEnded V2EventType = "session.next.step.ended"
-	V2EventTypeSessionNextStepFailed V2EventType = "session.next.step.failed"
-	V2EventTypeSessionNextStepStarted V2EventType = "session.next.step.started"
-	V2EventTypeSessionNextSynthetic V2EventType = "session.next.synthetic"
-	V2EventTypeSessionNextTextDelta V2EventType = "session.next.text.delta"
-	V2EventTypeSessionNextTextEnded V2EventType = "session.next.text.ended"
-	V2EventTypeSessionNextTextStarted V2EventType = "session.next.text.started"
-	V2EventTypeSessionNextToolCalled V2EventType = "session.next.tool.called"
-	V2EventTypeSessionNextToolFailed V2EventType = "session.next.tool.failed"
-	V2EventTypeSessionNextToolInputDelta V2EventType = "session.next.tool.input.delta"
-	V2EventTypeSessionNextToolInputEnded V2EventType = "session.next.tool.input.ended"
-	V2EventTypeSessionNextToolInputStarted V2EventType = "session.next.tool.input.started"
-	V2EventTypeSessionNextToolProgress V2EventType = "session.next.tool.progress"
-	V2EventTypeSessionNextToolSuccess V2EventType = "session.next.tool.success"
-	V2EventTypeSessionStatus V2EventType = "session.status"
-	V2EventTypeSessionUpdated V2EventType = "session.updated"
-	V2EventTypeTodoUpdated V2EventType = "todo.updated"
-	V2EventTypeTuiCommandExecute V2EventType = "tui.command.execute"
-	V2EventTypeTuiPromptAppend V2EventType = "tui.prompt.append"
-	V2EventTypeTuiSessionSelect V2EventType = "tui.session.select"
-	V2EventTypeTuiToastShow V2EventType = "tui.toast.show"
-	V2EventTypeVcsBranchUpdated V2EventType = "vcs.branch.updated"
-	V2EventTypeWorkspaceFailed V2EventType = "workspace.failed"
-	V2EventTypeWorkspaceReady V2EventType = "workspace.ready"
-	V2EventTypeWorkspaceStatus V2EventType = "workspace.status"
-	V2EventTypeWorktreeFailed V2EventType = "worktree.failed"
-	V2EventTypeWorktreeReady V2EventType = "worktree.ready"
+	V2EventTypeSessionNextContextUpdated    V2EventType = "session.next.context.updated"
+	V2EventTypeSessionNextModelSwitched     V2EventType = "session.next.model.switched"
+	V2EventTypeSessionNextMoved             V2EventType = "session.next.moved"
+	V2EventTypeSessionNextPromptAdmitted    V2EventType = "session.next.prompt.admitted"
+	V2EventTypeSessionNextPrompted          V2EventType = "session.next.prompted"
+	V2EventTypeSessionNextReasoningDelta    V2EventType = "session.next.reasoning.delta"
+	V2EventTypeSessionNextReasoningEnded    V2EventType = "session.next.reasoning.ended"
+	V2EventTypeSessionNextReasoningStarted  V2EventType = "session.next.reasoning.started"
+	V2EventTypeSessionNextRetried           V2EventType = "session.next.retried"
+	V2EventTypeSessionNextRevertCleared     V2EventType = "session.next.revert.cleared"
+	V2EventTypeSessionNextRevertCommitted   V2EventType = "session.next.revert.committed"
+	V2EventTypeSessionNextRevertStaged      V2EventType = "session.next.revert.staged"
+	V2EventTypeSessionNextShellEnded        V2EventType = "session.next.shell.ended"
+	V2EventTypeSessionNextShellStarted      V2EventType = "session.next.shell.started"
+	V2EventTypeSessionNextStepEnded         V2EventType = "session.next.step.ended"
+	V2EventTypeSessionNextStepFailed        V2EventType = "session.next.step.failed"
+	V2EventTypeSessionNextStepStarted       V2EventType = "session.next.step.started"
+	V2EventTypeSessionNextSynthetic         V2EventType = "session.next.synthetic"
+	V2EventTypeSessionNextTextDelta         V2EventType = "session.next.text.delta"
+	V2EventTypeSessionNextTextEnded         V2EventType = "session.next.text.ended"
+	V2EventTypeSessionNextTextStarted       V2EventType = "session.next.text.started"
+	V2EventTypeSessionNextToolCalled        V2EventType = "session.next.tool.called"
+	V2EventTypeSessionNextToolFailed        V2EventType = "session.next.tool.failed"
+	V2EventTypeSessionNextToolInputDelta    V2EventType = "session.next.tool.input.delta"
+	V2EventTypeSessionNextToolInputEnded    V2EventType = "session.next.tool.input.ended"
+	V2EventTypeSessionNextToolInputStarted  V2EventType = "session.next.tool.input.started"
+	V2EventTypeSessionNextToolProgress      V2EventType = "session.next.tool.progress"
+	V2EventTypeSessionNextToolSuccess       V2EventType = "session.next.tool.success"
+	V2EventTypeSessionStatus                V2EventType = "session.status"
+	V2EventTypeSessionUpdated               V2EventType = "session.updated"
+	V2EventTypeTodoUpdated                  V2EventType = "todo.updated"
+	V2EventTypeTuiCommandExecute            V2EventType = "tui.command.execute"
+	V2EventTypeTuiPromptAppend              V2EventType = "tui.prompt.append"
+	V2EventTypeTuiSessionSelect             V2EventType = "tui.session.select"
+	V2EventTypeTuiToastShow                 V2EventType = "tui.toast.show"
+	V2EventTypeVcsBranchUpdated             V2EventType = "vcs.branch.updated"
+	V2EventTypeWorkspaceFailed              V2EventType = "workspace.failed"
+	V2EventTypeWorkspaceReady               V2EventType = "workspace.ready"
+	V2EventTypeWorkspaceStatus              V2EventType = "workspace.status"
+	V2EventTypeWorktreeFailed               V2EventType = "worktree.failed"
+	V2EventTypeWorktreeReady                V2EventType = "worktree.ready"
 )
 
 func (r V2EventType) IsKnown() bool {
 	switch r {
-	case V2EventTypeCatalogUpdated:
-	case V2EventTypeCommandExecuted:
-	case V2EventTypeFileEdited:
-	case V2EventTypeFileWatcherUpdated:
-	case V2EventTypeGlobalDisposed:
-	case V2EventTypeInstallationUpdateAvailable:
-	case V2EventTypeInstallationUpdated:
-	case V2EventTypeIntegrationConnectionUpdated:
-	case V2EventTypeIntegrationUpdated:
-	case V2EventTypeLspUpdated:
-	case V2EventTypeMcpBrowserOpenFailed:
-	case V2EventTypeMcpToolsChanged:
-	case V2EventTypeMessagePartDelta:
-	case V2EventTypeMessagePartRemoved:
-	case V2EventTypeMessagePartUpdated:
-	case V2EventTypeMessageRemoved:
-	case V2EventTypeMessageUpdated:
-	case V2EventTypeModelsDevRefreshed:
-	case V2EventTypePermissionAsked:
-	case V2EventTypePermissionReplied:
-	case V2EventTypePermissionV2Asked:
-	case V2EventTypePermissionV2Replied:
-	case V2EventTypePluginAdded:
-	case V2EventTypeProjectDirectoriesUpdated:
-	case V2EventTypeProjectUpdated:
-	case V2EventTypePtyCreated:
-	case V2EventTypePtyDeleted:
-	case V2EventTypePtyExited:
-	case V2EventTypePtyUpdated:
-	case V2EventTypeQuestionAsked:
-	case V2EventTypeQuestionRejected:
-	case V2EventTypeQuestionReplied:
-	case V2EventTypeQuestionV2Asked:
-	case V2EventTypeQuestionV2Rejected:
-	case V2EventTypeQuestionV2Replied:
-	case V2EventTypeReferenceUpdated:
-	case V2EventTypeServerConnected:
-	case V2EventTypeSessionCompacted:
-	case V2EventTypeSessionCreated:
-	case V2EventTypeSessionDeleted:
-	case V2EventTypeSessionDiff:
-	case V2EventTypeSessionError:
-	case V2EventTypeSessionIdle:
-	case V2EventTypeSessionNextAgentSwitched:
-	case V2EventTypeSessionNextCompactionDelta:
-	case V2EventTypeSessionNextCompactionEnded:
-	case V2EventTypeSessionNextCompactionStarted:
-	case V2EventTypeSessionNextContextUpdated:
-	case V2EventTypeSessionNextModelSwitched:
-	case V2EventTypeSessionNextMoved:
-	case V2EventTypeSessionNextPromptAdmitted:
-	case V2EventTypeSessionNextPrompted:
-	case V2EventTypeSessionNextReasoningDelta:
-	case V2EventTypeSessionNextReasoningEnded:
-	case V2EventTypeSessionNextReasoningStarted:
-	case V2EventTypeSessionNextRetried:
-	case V2EventTypeSessionNextRevertCleared:
-	case V2EventTypeSessionNextRevertCommitted:
-	case V2EventTypeSessionNextRevertStaged:
-	case V2EventTypeSessionNextShellEnded:
-	case V2EventTypeSessionNextShellStarted:
-	case V2EventTypeSessionNextStepEnded:
-	case V2EventTypeSessionNextStepFailed:
-	case V2EventTypeSessionNextStepStarted:
-	case V2EventTypeSessionNextSynthetic:
-	case V2EventTypeSessionNextTextDelta:
-	case V2EventTypeSessionNextTextEnded:
-	case V2EventTypeSessionNextTextStarted:
-	case V2EventTypeSessionNextToolCalled:
-	case V2EventTypeSessionNextToolFailed:
-	case V2EventTypeSessionNextToolInputDelta:
-	case V2EventTypeSessionNextToolInputEnded:
-	case V2EventTypeSessionNextToolInputStarted:
-	case V2EventTypeSessionNextToolProgress:
-	case V2EventTypeSessionNextToolSuccess:
-	case V2EventTypeSessionStatus:
-	case V2EventTypeSessionUpdated:
-	case V2EventTypeTodoUpdated:
-	case V2EventTypeTuiCommandExecute:
-	case V2EventTypeTuiPromptAppend:
-	case V2EventTypeTuiSessionSelect:
-	case V2EventTypeTuiToastShow:
-	case V2EventTypeVcsBranchUpdated:
-	case V2EventTypeWorkspaceFailed:
-	case V2EventTypeWorkspaceReady:
-	case V2EventTypeWorkspaceStatus:
-	case V2EventTypeWorktreeFailed:
-	case V2EventTypeWorktreeReady:
+	case V2EventTypeCatalogUpdated,
+		V2EventTypeCommandExecuted,
+		V2EventTypeFileEdited,
+		V2EventTypeFileWatcherUpdated,
+		V2EventTypeGlobalDisposed,
+		V2EventTypeInstallationUpdateAvailable,
+		V2EventTypeInstallationUpdated,
+		V2EventTypeIntegrationConnectionUpdated,
+		V2EventTypeIntegrationUpdated,
+		V2EventTypeLspUpdated,
+		V2EventTypeMcpBrowserOpenFailed,
+		V2EventTypeMcpToolsChanged,
+		V2EventTypeMessagePartDelta,
+		V2EventTypeMessagePartRemoved,
+		V2EventTypeMessagePartUpdated,
+		V2EventTypeMessageRemoved,
+		V2EventTypeMessageUpdated,
+		V2EventTypeModelsDevRefreshed,
+		V2EventTypePermissionAsked,
+		V2EventTypePermissionReplied,
+		V2EventTypePermissionV2Asked,
+		V2EventTypePermissionV2Replied,
+		V2EventTypePluginAdded,
+		V2EventTypeProjectDirectoriesUpdated,
+		V2EventTypeProjectUpdated,
+		V2EventTypePtyCreated,
+		V2EventTypePtyDeleted,
+		V2EventTypePtyExited,
+		V2EventTypePtyUpdated,
+		V2EventTypeQuestionAsked,
+		V2EventTypeQuestionRejected,
+		V2EventTypeQuestionReplied,
+		V2EventTypeQuestionV2Asked,
+		V2EventTypeQuestionV2Rejected,
+		V2EventTypeQuestionV2Replied,
+		V2EventTypeReferenceUpdated,
+		V2EventTypeServerConnected,
+		V2EventTypeSessionCompacted,
+		V2EventTypeSessionCreated,
+		V2EventTypeSessionDeleted,
+		V2EventTypeSessionDiff,
+		V2EventTypeSessionError,
+		V2EventTypeSessionIdle,
+		V2EventTypeSessionNextAgentSwitched,
+		V2EventTypeSessionNextCompactionDelta,
+		V2EventTypeSessionNextCompactionEnded,
+		V2EventTypeSessionNextCompactionStarted,
+		V2EventTypeSessionNextContextUpdated,
+		V2EventTypeSessionNextModelSwitched,
+		V2EventTypeSessionNextMoved,
+		V2EventTypeSessionNextPromptAdmitted,
+		V2EventTypeSessionNextPrompted,
+		V2EventTypeSessionNextReasoningDelta,
+		V2EventTypeSessionNextReasoningEnded,
+		V2EventTypeSessionNextReasoningStarted,
+		V2EventTypeSessionNextRetried,
+		V2EventTypeSessionNextRevertCleared,
+		V2EventTypeSessionNextRevertCommitted,
+		V2EventTypeSessionNextRevertStaged,
+		V2EventTypeSessionNextShellEnded,
+		V2EventTypeSessionNextShellStarted,
+		V2EventTypeSessionNextStepEnded,
+		V2EventTypeSessionNextStepFailed,
+		V2EventTypeSessionNextStepStarted,
+		V2EventTypeSessionNextSynthetic,
+		V2EventTypeSessionNextTextDelta,
+		V2EventTypeSessionNextTextEnded,
+		V2EventTypeSessionNextTextStarted,
+		V2EventTypeSessionNextToolCalled,
+		V2EventTypeSessionNextToolFailed,
+		V2EventTypeSessionNextToolInputDelta,
+		V2EventTypeSessionNextToolInputEnded,
+		V2EventTypeSessionNextToolInputStarted,
+		V2EventTypeSessionNextToolProgress,
+		V2EventTypeSessionNextToolSuccess,
+		V2EventTypeSessionStatus,
+		V2EventTypeSessionUpdated,
+		V2EventTypeTodoUpdated,
+		V2EventTypeTuiCommandExecute,
+		V2EventTypeTuiPromptAppend,
+		V2EventTypeTuiSessionSelect,
+		V2EventTypeTuiToastShow,
+		V2EventTypeVcsBranchUpdated,
+		V2EventTypeWorkspaceFailed,
+		V2EventTypeWorkspaceReady,
+		V2EventTypeWorkspaceStatus,
+		V2EventTypeWorktreeFailed,
+		V2EventTypeWorktreeReady:
 		return true
 	}
 	return false
@@ -402,18 +402,18 @@ func (r V2EventCommandExecutedType) IsKnown() bool {
 }
 
 type V2EventCommandExecutedData struct {
-	Arguments string `json:"arguments,required"`
-	MessageID string `json:"messageID,required"`
-	Name string `json:"name,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventCommandExecutedDataJSON `json:"-"`
+	Arguments string                         `json:"arguments,required"`
+	MessageID string                         `json:"messageID,required"`
+	Name      string                         `json:"name,required"`
+	SessionID string                         `json:"sessionID,required"`
+	JSON      v2EventCommandExecutedDataJSON `json:"-"`
 }
 
 type v2EventCommandExecutedDataJSON struct {
-	Arguments apijson.Field
-	MessageID apijson.Field
-	Name apijson.Field
-	SessionID apijson.Field
+	Arguments   apijson.Field
+	MessageID   apijson.Field
+	Name        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -464,12 +464,12 @@ func (r V2EventFileEditedType) IsKnown() bool {
 }
 
 type V2EventFileEditedData struct {
-	File string `json:"file,required"`
+	File string                    `json:"file,required"`
 	JSON v2EventFileEditedDataJSON `json:"-"`
 }
 
 type v2EventFileEditedDataJSON struct {
-	File apijson.Field
+	File        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -485,16 +485,16 @@ func (r v2EventFileEditedDataJSON) RawJSON() string {
 type V2EventFileWatcherUpdatedEvent string
 
 const (
-	V2EventFileWatcherUpdatedEventAdd V2EventFileWatcherUpdatedEvent = "add"
+	V2EventFileWatcherUpdatedEventAdd    V2EventFileWatcherUpdatedEvent = "add"
 	V2EventFileWatcherUpdatedEventChange V2EventFileWatcherUpdatedEvent = "change"
 	V2EventFileWatcherUpdatedEventUnlink V2EventFileWatcherUpdatedEvent = "unlink"
 )
 
 func (r V2EventFileWatcherUpdatedEvent) IsKnown() bool {
 	switch r {
-	case V2EventFileWatcherUpdatedEventAdd:
-	case V2EventFileWatcherUpdatedEventChange:
-	case V2EventFileWatcherUpdatedEventUnlink:
+	case V2EventFileWatcherUpdatedEventAdd,
+		V2EventFileWatcherUpdatedEventChange,
+		V2EventFileWatcherUpdatedEventUnlink:
 		return true
 	}
 	return false
@@ -538,14 +538,14 @@ func (r V2EventFileWatcherUpdatedType) IsKnown() bool {
 }
 
 type V2EventFileWatcherUpdatedData struct {
-	Event V2EventFileWatcherUpdatedEvent `json:"event,required"`
-	File string `json:"file,required"`
-	JSON v2EventFileWatcherUpdatedDataJSON `json:"-"`
+	Event V2EventFileWatcherUpdatedEvent    `json:"event,required"`
+	File  string                            `json:"file,required"`
+	JSON  v2EventFileWatcherUpdatedDataJSON `json:"-"`
 }
 
 type v2EventFileWatcherUpdatedDataJSON struct {
-	Event apijson.Field
-	File apijson.Field
+	Event       apijson.Field
+	File        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -650,12 +650,12 @@ func (r V2EventInstallationUpdateAvailableType) IsKnown() bool {
 }
 
 type V2EventInstallationUpdateAvailableData struct {
-	Version string `json:"version,required"`
-	JSON v2EventInstallationUpdateAvailableDataJSON `json:"-"`
+	Version string                                     `json:"version,required"`
+	JSON    v2EventInstallationUpdateAvailableDataJSON `json:"-"`
 }
 
 type v2EventInstallationUpdateAvailableDataJSON struct {
-	Version apijson.Field
+	Version     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -706,12 +706,12 @@ func (r V2EventInstallationUpdatedType) IsKnown() bool {
 }
 
 type V2EventInstallationUpdatedData struct {
-	Version string `json:"version,required"`
-	JSON v2EventInstallationUpdatedDataJSON `json:"-"`
+	Version string                             `json:"version,required"`
+	JSON    v2EventInstallationUpdatedDataJSON `json:"-"`
 }
 
 type v2EventInstallationUpdatedDataJSON struct {
-	Version apijson.Field
+	Version     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -762,14 +762,14 @@ func (r V2EventIntegrationConnectionUpdatedType) IsKnown() bool {
 }
 
 type V2EventIntegrationConnectionUpdatedData struct {
-	IntegrationID string `json:"integrationID,required"`
-	JSON v2EventIntegrationConnectionUpdatedDataJSON `json:"-"`
+	IntegrationID string                                      `json:"integrationID,required"`
+	JSON          v2EventIntegrationConnectionUpdatedDataJSON `json:"-"`
 }
 
 type v2EventIntegrationConnectionUpdatedDataJSON struct {
 	IntegrationID apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *V2EventIntegrationConnectionUpdatedData) UnmarshalJSON(data []byte) (err error) {
@@ -926,14 +926,14 @@ func (r V2EventMcpBrowserOpenFailedType) IsKnown() bool {
 }
 
 type V2EventMcpBrowserOpenFailedData struct {
-	McpName string `json:"mcpName,required"`
-	Url string `json:"url,required"`
-	JSON v2EventMcpBrowserOpenFailedDataJSON `json:"-"`
+	McpName string                              `json:"mcpName,required"`
+	Url     string                              `json:"url,required"`
+	JSON    v2EventMcpBrowserOpenFailedDataJSON `json:"-"`
 }
 
 type v2EventMcpBrowserOpenFailedDataJSON struct {
-	McpName apijson.Field
-	Url apijson.Field
+	McpName     apijson.Field
+	Url         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -984,12 +984,12 @@ func (r V2EventMcpToolsChangedType) IsKnown() bool {
 }
 
 type V2EventMcpToolsChangedData struct {
-	Server string `json:"server,required"`
-	JSON v2EventMcpToolsChangedDataJSON `json:"-"`
+	Server string                         `json:"server,required"`
+	JSON   v2EventMcpToolsChangedDataJSON `json:"-"`
 }
 
 type v2EventMcpToolsChangedDataJSON struct {
-	Server apijson.Field
+	Server      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1040,20 +1040,20 @@ func (r V2EventMessagePartDeltaType) IsKnown() bool {
 }
 
 type V2EventMessagePartDeltaData struct {
-	Delta string `json:"delta,required"`
-	Field string `json:"field,required"`
-	MessageID string `json:"messageID,required"`
-	PartID string `json:"partID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventMessagePartDeltaDataJSON `json:"-"`
+	Delta     string                          `json:"delta,required"`
+	Field     string                          `json:"field,required"`
+	MessageID string                          `json:"messageID,required"`
+	PartID    string                          `json:"partID,required"`
+	SessionID string                          `json:"sessionID,required"`
+	JSON      v2EventMessagePartDeltaDataJSON `json:"-"`
 }
 
 type v2EventMessagePartDeltaDataJSON struct {
-	Delta apijson.Field
-	Field apijson.Field
-	MessageID apijson.Field
-	PartID apijson.Field
-	SessionID apijson.Field
+	Delta       apijson.Field
+	Field       apijson.Field
+	MessageID   apijson.Field
+	PartID      apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1104,16 +1104,16 @@ func (r V2EventMessagePartRemovedType) IsKnown() bool {
 }
 
 type V2EventMessagePartRemovedData struct {
-	MessageID string `json:"messageID,required"`
-	PartID string `json:"partID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventMessagePartRemovedDataJSON `json:"-"`
+	MessageID string                            `json:"messageID,required"`
+	PartID    string                            `json:"partID,required"`
+	SessionID string                            `json:"sessionID,required"`
+	JSON      v2EventMessagePartRemovedDataJSON `json:"-"`
 }
 
 type v2EventMessagePartRemovedDataJSON struct {
-	MessageID apijson.Field
-	PartID apijson.Field
-	SessionID apijson.Field
+	MessageID   apijson.Field
+	PartID      apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1164,16 +1164,16 @@ func (r V2EventMessagePartUpdatedType) IsKnown() bool {
 }
 
 type V2EventMessagePartUpdatedData struct {
-	Part Part `json:"part,required"`
-	SessionID string `json:"sessionID,required"`
-	Time int64 `json:"time,required"`
-	JSON v2EventMessagePartUpdatedDataJSON `json:"-"`
+	Part      Part                              `json:"part,required"`
+	SessionID string                            `json:"sessionID,required"`
+	Time      int64                             `json:"time,required"`
+	JSON      v2EventMessagePartUpdatedDataJSON `json:"-"`
 }
 
 type v2EventMessagePartUpdatedDataJSON struct {
-	Part apijson.Field
-	SessionID apijson.Field
-	Time apijson.Field
+	Part        apijson.Field
+	SessionID   apijson.Field
+	Time        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1224,14 +1224,14 @@ func (r V2EventMessageRemovedType) IsKnown() bool {
 }
 
 type V2EventMessageRemovedData struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventMessageRemovedDataJSON `json:"-"`
+	MessageID string                        `json:"messageID,required"`
+	SessionID string                        `json:"sessionID,required"`
+	JSON      v2EventMessageRemovedDataJSON `json:"-"`
 }
 
 type v2EventMessageRemovedDataJSON struct {
-	MessageID apijson.Field
-	SessionID apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1282,14 +1282,14 @@ func (r V2EventMessageUpdatedType) IsKnown() bool {
 }
 
 type V2EventMessageUpdatedData struct {
-	Info Message `json:"info,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventMessageUpdatedDataJSON `json:"-"`
+	Info      Message                       `json:"info,required"`
+	SessionID string                        `json:"sessionID,required"`
+	JSON      v2EventMessageUpdatedDataJSON `json:"-"`
 }
 
 type v2EventMessageUpdatedDataJSON struct {
-	Info apijson.Field
-	SessionID apijson.Field
+	Info        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1394,24 +1394,24 @@ func (r V2EventPermissionAskedType) IsKnown() bool {
 }
 
 type V2EventPermissionAskedData struct {
-	Always []string `json:"always,required"`
-	Id string `json:"id,required"`
-	Metadata interface{} `json:"metadata,required"`
-	Patterns []string `json:"patterns,required"`
-	Permission string `json:"permission,required"`
-	SessionID string `json:"sessionID,required"`
-	Tool V2EventPermissionAskedDataTool `json:"tool"`
-	JSON v2EventPermissionAskedDataJSON `json:"-"`
+	Always     []string                       `json:"always,required"`
+	Id         string                         `json:"id,required"`
+	Metadata   interface{}                    `json:"metadata,required"`
+	Patterns   []string                       `json:"patterns,required"`
+	Permission string                         `json:"permission,required"`
+	SessionID  string                         `json:"sessionID,required"`
+	Tool       V2EventPermissionAskedDataTool `json:"tool"`
+	JSON       v2EventPermissionAskedDataJSON `json:"-"`
 }
 
 type v2EventPermissionAskedDataJSON struct {
-	Always apijson.Field
-	Id apijson.Field
-	Metadata apijson.Field
-	Patterns apijson.Field
-	Permission apijson.Field
-	SessionID apijson.Field
-	Tool apijson.Field
+	Always      apijson.Field
+	Id          apijson.Field
+	Metadata    apijson.Field
+	Patterns    apijson.Field
+	Permission  apijson.Field
+	SessionID   apijson.Field
+	Tool        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1425,14 +1425,14 @@ func (r v2EventPermissionAskedDataJSON) RawJSON() string {
 }
 
 type V2EventPermissionAskedDataTool struct {
-	CallID string `json:"callID,required"`
-	MessageID string `json:"messageID,required"`
-	JSON V2EventPermissionAskedDataToolJSON `json:"-"`
+	CallID    string                             `json:"callID,required"`
+	MessageID string                             `json:"messageID,required"`
+	JSON      V2EventPermissionAskedDataToolJSON `json:"-"`
 }
 
 type V2EventPermissionAskedDataToolJSON struct {
-	CallID apijson.Field
-	MessageID apijson.Field
+	CallID      apijson.Field
+	MessageID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1448,16 +1448,16 @@ func (r V2EventPermissionAskedDataToolJSON) RawJSON() string {
 type V2EventPermissionRepliedReply string
 
 const (
-	V2EventPermissionRepliedReplyOnce V2EventPermissionRepliedReply = "once"
+	V2EventPermissionRepliedReplyOnce   V2EventPermissionRepliedReply = "once"
 	V2EventPermissionRepliedReplyAlways V2EventPermissionRepliedReply = "always"
 	V2EventPermissionRepliedReplyReject V2EventPermissionRepliedReply = "reject"
 )
 
 func (r V2EventPermissionRepliedReply) IsKnown() bool {
 	switch r {
-	case V2EventPermissionRepliedReplyOnce:
-	case V2EventPermissionRepliedReplyAlways:
-	case V2EventPermissionRepliedReplyReject:
+	case V2EventPermissionRepliedReplyOnce,
+		V2EventPermissionRepliedReplyAlways,
+		V2EventPermissionRepliedReplyReject:
 		return true
 	}
 	return false
@@ -1501,16 +1501,16 @@ func (r V2EventPermissionRepliedType) IsKnown() bool {
 }
 
 type V2EventPermissionRepliedData struct {
-	Reply V2EventPermissionRepliedReply `json:"reply,required"`
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventPermissionRepliedDataJSON `json:"-"`
+	Reply     V2EventPermissionRepliedReply    `json:"reply,required"`
+	RequestID string                           `json:"requestID,required"`
+	SessionID string                           `json:"sessionID,required"`
+	JSON      v2EventPermissionRepliedDataJSON `json:"-"`
 }
 
 type v2EventPermissionRepliedDataJSON struct {
-	Reply apijson.Field
-	RequestID apijson.Field
-	SessionID apijson.Field
+	Reply       apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1561,24 +1561,24 @@ func (r V2EventPermissionV2AskedType) IsKnown() bool {
 }
 
 type V2EventPermissionV2AskedData struct {
-	Action string `json:"action,required"`
-	Id string `json:"id,required"`
-	Metadata interface{} `json:"metadata"`
-	Resources []string `json:"resources,required"`
-	Save []string `json:"save"`
-	SessionID string `json:"sessionID,required"`
-	Source PermissionV2Source `json:"source"`
-	JSON v2EventPermissionV2AskedDataJSON `json:"-"`
+	Action    string                           `json:"action,required"`
+	Id        string                           `json:"id,required"`
+	Metadata  interface{}                      `json:"metadata"`
+	Resources []string                         `json:"resources,required"`
+	Save      []string                         `json:"save"`
+	SessionID string                           `json:"sessionID,required"`
+	Source    PermissionV2Source               `json:"source"`
+	JSON      v2EventPermissionV2AskedDataJSON `json:"-"`
 }
 
 type v2EventPermissionV2AskedDataJSON struct {
-	Action apijson.Field
-	Id apijson.Field
-	Metadata apijson.Field
-	Resources apijson.Field
-	Save apijson.Field
-	SessionID apijson.Field
-	Source apijson.Field
+	Action      apijson.Field
+	Id          apijson.Field
+	Metadata    apijson.Field
+	Resources   apijson.Field
+	Save        apijson.Field
+	SessionID   apijson.Field
+	Source      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1629,16 +1629,16 @@ func (r V2EventPermissionV2RepliedType) IsKnown() bool {
 }
 
 type V2EventPermissionV2RepliedData struct {
-	Reply PermissionV2Reply `json:"reply,required"`
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventPermissionV2RepliedDataJSON `json:"-"`
+	Reply     PermissionV2Reply                  `json:"reply,required"`
+	RequestID string                             `json:"requestID,required"`
+	SessionID string                             `json:"sessionID,required"`
+	JSON      v2EventPermissionV2RepliedDataJSON `json:"-"`
 }
 
 type v2EventPermissionV2RepliedDataJSON struct {
-	Reply apijson.Field
-	RequestID apijson.Field
-	SessionID apijson.Field
+	Reply       apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1689,12 +1689,12 @@ func (r V2EventPluginAddedType) IsKnown() bool {
 }
 
 type V2EventPluginAddedData struct {
-	Id string `json:"id,required"`
+	Id   string                     `json:"id,required"`
 	JSON v2EventPluginAddedDataJSON `json:"-"`
 }
 
 type v2EventPluginAddedDataJSON struct {
-	Id apijson.Field
+	Id          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1745,12 +1745,12 @@ func (r V2EventProjectDirectoriesUpdatedType) IsKnown() bool {
 }
 
 type V2EventProjectDirectoriesUpdatedData struct {
-	ProjectID string `json:"projectID,required"`
-	JSON v2EventProjectDirectoriesUpdatedDataJSON `json:"-"`
+	ProjectID string                                   `json:"projectID,required"`
+	JSON      v2EventProjectDirectoriesUpdatedDataJSON `json:"-"`
 }
 
 type v2EventProjectDirectoriesUpdatedDataJSON struct {
-	ProjectID apijson.Field
+	ProjectID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1801,26 +1801,26 @@ func (r V2EventProjectUpdatedType) IsKnown() bool {
 }
 
 type V2EventProjectUpdatedData struct {
-	Commands ProjectCommands `json:"commands"`
-	Icon ProjectIcon `json:"icon"`
-	Id string `json:"id,required"`
-	Name string `json:"name"`
-	Sandboxes []string `json:"sandboxes,required"`
-	Time ProjectTime `json:"time,required"`
-	Vcs ProjectVcs `json:"vcs"`
-	Worktree string `json:"worktree,required"`
-	JSON v2EventProjectUpdatedDataJSON `json:"-"`
+	Commands  ProjectCommands               `json:"commands"`
+	Icon      ProjectIcon                   `json:"icon"`
+	Id        string                        `json:"id,required"`
+	Name      string                        `json:"name"`
+	Sandboxes []string                      `json:"sandboxes,required"`
+	Time      ProjectTime                   `json:"time,required"`
+	Vcs       ProjectVcs                    `json:"vcs"`
+	Worktree  string                        `json:"worktree,required"`
+	JSON      v2EventProjectUpdatedDataJSON `json:"-"`
 }
 
 type v2EventProjectUpdatedDataJSON struct {
-	Commands apijson.Field
-	Icon apijson.Field
-	Id apijson.Field
-	Name apijson.Field
-	Sandboxes apijson.Field
-	Time apijson.Field
-	Vcs apijson.Field
-	Worktree apijson.Field
+	Commands    apijson.Field
+	Icon        apijson.Field
+	Id          apijson.Field
+	Name        apijson.Field
+	Sandboxes   apijson.Field
+	Time        apijson.Field
+	Vcs         apijson.Field
+	Worktree    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1871,12 +1871,12 @@ func (r V2EventPtyCreatedType) IsKnown() bool {
 }
 
 type V2EventPtyCreatedData struct {
-	Info Pty `json:"info,required"`
+	Info Pty                       `json:"info,required"`
 	JSON v2EventPtyCreatedDataJSON `json:"-"`
 }
 
 type v2EventPtyCreatedDataJSON struct {
-	Info apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1927,12 +1927,12 @@ func (r V2EventPtyDeletedType) IsKnown() bool {
 }
 
 type V2EventPtyDeletedData struct {
-	Id string `json:"id,required"`
+	Id   string                    `json:"id,required"`
 	JSON v2EventPtyDeletedDataJSON `json:"-"`
 }
 
 type v2EventPtyDeletedDataJSON struct {
-	Id apijson.Field
+	Id          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1983,14 +1983,14 @@ func (r V2EventPtyExitedType) IsKnown() bool {
 }
 
 type V2EventPtyExitedData struct {
-	ExitCode int64 `json:"exitCode,required"`
-	Id string `json:"id,required"`
-	JSON v2EventPtyExitedDataJSON `json:"-"`
+	ExitCode int64                    `json:"exitCode,required"`
+	Id       string                   `json:"id,required"`
+	JSON     v2EventPtyExitedDataJSON `json:"-"`
 }
 
 type v2EventPtyExitedDataJSON struct {
-	ExitCode apijson.Field
-	Id apijson.Field
+	ExitCode    apijson.Field
+	Id          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2041,12 +2041,12 @@ func (r V2EventPtyUpdatedType) IsKnown() bool {
 }
 
 type V2EventPtyUpdatedData struct {
-	Info Pty `json:"info,required"`
+	Info Pty                       `json:"info,required"`
 	JSON v2EventPtyUpdatedDataJSON `json:"-"`
 }
 
 type v2EventPtyUpdatedDataJSON struct {
-	Info apijson.Field
+	Info        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2097,18 +2097,18 @@ func (r V2EventQuestionAskedType) IsKnown() bool {
 }
 
 type V2EventQuestionAskedData struct {
-	Id string `json:"id,required"`
-	Questions []QuestionInfo `json:"questions,required"`
-	SessionID string `json:"sessionID,required"`
-	Tool interface{} `json:"tool"`
-	JSON v2EventQuestionAskedDataJSON `json:"-"`
+	Id        string                       `json:"id,required"`
+	Questions []QuestionInfo               `json:"questions,required"`
+	SessionID string                       `json:"sessionID,required"`
+	Tool      interface{}                  `json:"tool"`
+	JSON      v2EventQuestionAskedDataJSON `json:"-"`
 }
 
 type v2EventQuestionAskedDataJSON struct {
-	Id apijson.Field
-	Questions apijson.Field
-	SessionID apijson.Field
-	Tool apijson.Field
+	Id          apijson.Field
+	Questions   apijson.Field
+	SessionID   apijson.Field
+	Tool        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2159,14 +2159,14 @@ func (r V2EventQuestionRejectedType) IsKnown() bool {
 }
 
 type V2EventQuestionRejectedData struct {
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventQuestionRejectedDataJSON `json:"-"`
+	RequestID string                          `json:"requestID,required"`
+	SessionID string                          `json:"sessionID,required"`
+	JSON      v2EventQuestionRejectedDataJSON `json:"-"`
 }
 
 type v2EventQuestionRejectedDataJSON struct {
-	RequestID apijson.Field
-	SessionID apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2217,16 +2217,16 @@ func (r V2EventQuestionRepliedType) IsKnown() bool {
 }
 
 type V2EventQuestionRepliedData struct {
-	Answers []QuestionAnswer `json:"answers,required"`
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventQuestionRepliedDataJSON `json:"-"`
+	Answers   []QuestionAnswer               `json:"answers,required"`
+	RequestID string                         `json:"requestID,required"`
+	SessionID string                         `json:"sessionID,required"`
+	JSON      v2EventQuestionRepliedDataJSON `json:"-"`
 }
 
 type v2EventQuestionRepliedDataJSON struct {
-	Answers apijson.Field
-	RequestID apijson.Field
-	SessionID apijson.Field
+	Answers     apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2277,18 +2277,18 @@ func (r V2EventQuestionV2AskedType) IsKnown() bool {
 }
 
 type V2EventQuestionV2AskedData struct {
-	Id string `json:"id,required"`
-	Questions []QuestionV2Info `json:"questions,required"`
-	SessionID string `json:"sessionID,required"`
-	Tool QuestionV2Tool `json:"tool"`
-	JSON v2EventQuestionV2AskedDataJSON `json:"-"`
+	Id        string                         `json:"id,required"`
+	Questions []QuestionV2Info               `json:"questions,required"`
+	SessionID string                         `json:"sessionID,required"`
+	Tool      QuestionV2Tool                 `json:"tool"`
+	JSON      v2EventQuestionV2AskedDataJSON `json:"-"`
 }
 
 type v2EventQuestionV2AskedDataJSON struct {
-	Id apijson.Field
-	Questions apijson.Field
-	SessionID apijson.Field
-	Tool apijson.Field
+	Id          apijson.Field
+	Questions   apijson.Field
+	SessionID   apijson.Field
+	Tool        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2339,14 +2339,14 @@ func (r V2EventQuestionV2RejectedType) IsKnown() bool {
 }
 
 type V2EventQuestionV2RejectedData struct {
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventQuestionV2RejectedDataJSON `json:"-"`
+	RequestID string                            `json:"requestID,required"`
+	SessionID string                            `json:"sessionID,required"`
+	JSON      v2EventQuestionV2RejectedDataJSON `json:"-"`
 }
 
 type v2EventQuestionV2RejectedDataJSON struct {
-	RequestID apijson.Field
-	SessionID apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2397,16 +2397,16 @@ func (r V2EventQuestionV2RepliedType) IsKnown() bool {
 }
 
 type V2EventQuestionV2RepliedData struct {
-	Answers []QuestionV2Answer `json:"answers,required"`
-	RequestID string `json:"requestID,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventQuestionV2RepliedDataJSON `json:"-"`
+	Answers   []QuestionV2Answer               `json:"answers,required"`
+	RequestID string                           `json:"requestID,required"`
+	SessionID string                           `json:"sessionID,required"`
+	JSON      v2EventQuestionV2RepliedDataJSON `json:"-"`
 }
 
 type v2EventQuestionV2RepliedDataJSON struct {
-	Answers apijson.Field
-	RequestID apijson.Field
-	SessionID apijson.Field
+	Answers     apijson.Field
+	RequestID   apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2565,12 +2565,12 @@ func (r V2EventSessionCompactedType) IsKnown() bool {
 }
 
 type V2EventSessionCompactedData struct {
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionCompactedDataJSON `json:"-"`
+	SessionID string                          `json:"sessionID,required"`
+	JSON      v2EventSessionCompactedDataJSON `json:"-"`
 }
 
 type v2EventSessionCompactedDataJSON struct {
-	SessionID apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2621,14 +2621,14 @@ func (r V2EventSessionCreatedType) IsKnown() bool {
 }
 
 type V2EventSessionCreatedData struct {
-	Info Session `json:"info,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionCreatedDataJSON `json:"-"`
+	Info      Session                       `json:"info,required"`
+	SessionID string                        `json:"sessionID,required"`
+	JSON      v2EventSessionCreatedDataJSON `json:"-"`
 }
 
 type v2EventSessionCreatedDataJSON struct {
-	Info apijson.Field
-	SessionID apijson.Field
+	Info        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2679,14 +2679,14 @@ func (r V2EventSessionDeletedType) IsKnown() bool {
 }
 
 type V2EventSessionDeletedData struct {
-	Info Session `json:"info,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionDeletedDataJSON `json:"-"`
+	Info      Session                       `json:"info,required"`
+	SessionID string                        `json:"sessionID,required"`
+	JSON      v2EventSessionDeletedDataJSON `json:"-"`
 }
 
 type v2EventSessionDeletedDataJSON struct {
-	Info apijson.Field
-	SessionID apijson.Field
+	Info        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2737,14 +2737,14 @@ func (r V2EventSessionDiffType) IsKnown() bool {
 }
 
 type V2EventSessionDiffData struct {
-	Diff []SnapshotFileDiff `json:"diff,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionDiffDataJSON `json:"-"`
+	Diff      []SnapshotFileDiff         `json:"diff,required"`
+	SessionID string                     `json:"sessionID,required"`
+	JSON      v2EventSessionDiffDataJSON `json:"-"`
 }
 
 type v2EventSessionDiffDataJSON struct {
-	Diff apijson.Field
-	SessionID apijson.Field
+	Diff        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2795,14 +2795,14 @@ func (r V2EventSessionErrorType) IsKnown() bool {
 }
 
 type V2EventSessionErrorData struct {
-	Error interface{} `json:"error"`
-	SessionID string `json:"sessionID"`
-	JSON v2EventSessionErrorDataJSON `json:"-"`
+	Error     interface{}                 `json:"error"`
+	SessionID string                      `json:"sessionID"`
+	JSON      v2EventSessionErrorDataJSON `json:"-"`
 }
 
 type v2EventSessionErrorDataJSON struct {
-	Error apijson.Field
-	SessionID apijson.Field
+	Error       apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2853,12 +2853,12 @@ func (r V2EventSessionIdleType) IsKnown() bool {
 }
 
 type V2EventSessionIdleData struct {
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionIdleDataJSON `json:"-"`
+	SessionID string                     `json:"sessionID,required"`
+	JSON      v2EventSessionIdleDataJSON `json:"-"`
 }
 
 type v2EventSessionIdleDataJSON struct {
-	SessionID apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2909,18 +2909,18 @@ func (r V2EventSessionNextAgentSwitchedType) IsKnown() bool {
 }
 
 type V2EventSessionNextAgentSwitchedData struct {
-	Agent string `json:"agent,required"`
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextAgentSwitchedDataJSON `json:"-"`
+	Agent     string                                  `json:"agent,required"`
+	MessageID string                                  `json:"messageID,required"`
+	SessionID string                                  `json:"sessionID,required"`
+	Timestamp int64                                   `json:"timestamp,required"`
+	JSON      v2EventSessionNextAgentSwitchedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextAgentSwitchedDataJSON struct {
-	Agent apijson.Field
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	Agent       apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2971,18 +2971,18 @@ func (r V2EventSessionNextCompactionDeltaType) IsKnown() bool {
 }
 
 type V2EventSessionNextCompactionDeltaData struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextCompactionDeltaDataJSON `json:"-"`
+	MessageID string                                    `json:"messageID,required"`
+	SessionID string                                    `json:"sessionID,required"`
+	Text      string                                    `json:"text,required"`
+	Timestamp int64                                     `json:"timestamp,required"`
+	JSON      v2EventSessionNextCompactionDeltaDataJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionDeltaDataJSON struct {
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Text        apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2998,7 +2998,7 @@ func (r v2EventSessionNextCompactionDeltaDataJSON) RawJSON() string {
 type V2EventSessionNextCompactionEndedReason string
 
 const (
-	V2EventSessionNextCompactionEndedReasonAuto V2EventSessionNextCompactionEndedReason = "auto"
+	V2EventSessionNextCompactionEndedReasonAuto   V2EventSessionNextCompactionEndedReason = "auto"
 	V2EventSessionNextCompactionEndedReasonManual V2EventSessionNextCompactionEndedReason = "manual"
 )
 
@@ -3049,22 +3049,22 @@ func (r V2EventSessionNextCompactionEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextCompactionEndedData struct {
-	MessageID string `json:"messageID,required"`
-	Reason V2EventSessionNextCompactionEndedReason `json:"reason,required"`
-	Recent string `json:"recent,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextCompactionEndedDataJSON `json:"-"`
+	MessageID string                                    `json:"messageID,required"`
+	Reason    V2EventSessionNextCompactionEndedReason   `json:"reason,required"`
+	Recent    string                                    `json:"recent,required"`
+	SessionID string                                    `json:"sessionID,required"`
+	Text      string                                    `json:"text,required"`
+	Timestamp int64                                     `json:"timestamp,required"`
+	JSON      v2EventSessionNextCompactionEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionEndedDataJSON struct {
-	MessageID apijson.Field
-	Reason apijson.Field
-	Recent apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	Reason      apijson.Field
+	Recent      apijson.Field
+	SessionID   apijson.Field
+	Text        apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3080,7 +3080,7 @@ func (r v2EventSessionNextCompactionEndedDataJSON) RawJSON() string {
 type V2EventSessionNextCompactionStartedReason string
 
 const (
-	V2EventSessionNextCompactionStartedReasonAuto V2EventSessionNextCompactionStartedReason = "auto"
+	V2EventSessionNextCompactionStartedReasonAuto   V2EventSessionNextCompactionStartedReason = "auto"
 	V2EventSessionNextCompactionStartedReasonManual V2EventSessionNextCompactionStartedReason = "manual"
 )
 
@@ -3131,18 +3131,18 @@ func (r V2EventSessionNextCompactionStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextCompactionStartedData struct {
-	MessageID string `json:"messageID,required"`
-	Reason V2EventSessionNextCompactionStartedReason `json:"reason,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextCompactionStartedDataJSON `json:"-"`
+	MessageID string                                      `json:"messageID,required"`
+	Reason    V2EventSessionNextCompactionStartedReason   `json:"reason,required"`
+	SessionID string                                      `json:"sessionID,required"`
+	Timestamp int64                                       `json:"timestamp,required"`
+	JSON      v2EventSessionNextCompactionStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionStartedDataJSON struct {
-	MessageID apijson.Field
-	Reason apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	Reason      apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3193,18 +3193,18 @@ func (r V2EventSessionNextContextUpdatedType) IsKnown() bool {
 }
 
 type V2EventSessionNextContextUpdatedData struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextContextUpdatedDataJSON `json:"-"`
+	MessageID string                                   `json:"messageID,required"`
+	SessionID string                                   `json:"sessionID,required"`
+	Text      string                                   `json:"text,required"`
+	Timestamp int64                                    `json:"timestamp,required"`
+	JSON      v2EventSessionNextContextUpdatedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextContextUpdatedDataJSON struct {
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Text        apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3255,18 +3255,18 @@ func (r V2EventSessionNextModelSwitchedType) IsKnown() bool {
 }
 
 type V2EventSessionNextModelSwitchedData struct {
-	MessageID string `json:"messageID,required"`
-	Model ModelRef `json:"model,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextModelSwitchedDataJSON `json:"-"`
+	MessageID string                                  `json:"messageID,required"`
+	Model     ModelRef                                `json:"model,required"`
+	SessionID string                                  `json:"sessionID,required"`
+	Timestamp int64                                   `json:"timestamp,required"`
+	JSON      v2EventSessionNextModelSwitchedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextModelSwitchedDataJSON struct {
-	MessageID apijson.Field
-	Model apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	Model       apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3317,20 +3317,20 @@ func (r V2EventSessionNextMovedType) IsKnown() bool {
 }
 
 type V2EventSessionNextMovedData struct {
-	Location LocationRef `json:"location,required"`
-	SessionID string `json:"sessionID,required"`
-	Subdirectory string `json:"subdirectory"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextMovedDataJSON `json:"-"`
+	Location     LocationRef                     `json:"location,required"`
+	SessionID    string                          `json:"sessionID,required"`
+	Subdirectory string                          `json:"subdirectory"`
+	Timestamp    int64                           `json:"timestamp,required"`
+	JSON         v2EventSessionNextMovedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextMovedDataJSON struct {
-	Location apijson.Field
-	SessionID apijson.Field
+	Location     apijson.Field
+	SessionID    apijson.Field
 	Subdirectory apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Timestamp    apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextMovedData) UnmarshalJSON(data []byte) (err error) {
@@ -3395,20 +3395,20 @@ func (r V2EventSessionNextPromptAdmittedType) IsKnown() bool {
 }
 
 type V2EventSessionNextPromptAdmittedData struct {
-	Delivery V2EventSessionNextPromptAdmittedDelivery `json:"delivery,required"`
-	MessageID string `json:"messageID,required"`
-	Prompt interface{} `json:"prompt,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextPromptAdmittedDataJSON `json:"-"`
+	Delivery  V2EventSessionNextPromptAdmittedDelivery `json:"delivery,required"`
+	MessageID string                                   `json:"messageID,required"`
+	Prompt    interface{}                              `json:"prompt,required"`
+	SessionID string                                   `json:"sessionID,required"`
+	Timestamp int64                                    `json:"timestamp,required"`
+	JSON      v2EventSessionNextPromptAdmittedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextPromptAdmittedDataJSON struct {
-	Delivery apijson.Field
-	MessageID apijson.Field
-	Prompt apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	Delivery    apijson.Field
+	MessageID   apijson.Field
+	Prompt      apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3475,20 +3475,20 @@ func (r V2EventSessionNextPromptedType) IsKnown() bool {
 }
 
 type V2EventSessionNextPromptedData struct {
-	Delivery V2EventSessionNextPromptedDelivery `json:"delivery,required"`
-	MessageID string `json:"messageID,required"`
-	Prompt interface{} `json:"prompt,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextPromptedDataJSON `json:"-"`
+	Delivery  V2EventSessionNextPromptedDelivery `json:"delivery,required"`
+	MessageID string                             `json:"messageID,required"`
+	Prompt    interface{}                        `json:"prompt,required"`
+	SessionID string                             `json:"sessionID,required"`
+	Timestamp int64                              `json:"timestamp,required"`
+	JSON      v2EventSessionNextPromptedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextPromptedDataJSON struct {
-	Delivery apijson.Field
-	MessageID apijson.Field
-	Prompt apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	Delivery    apijson.Field
+	MessageID   apijson.Field
+	Prompt      apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3539,22 +3539,22 @@ func (r V2EventSessionNextReasoningDeltaType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningDeltaData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	Delta string `json:"delta,required"`
-	ReasoningID string `json:"reasoningID,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextReasoningDeltaDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	Delta              string                                   `json:"delta,required"`
+	ReasoningID        string                                   `json:"reasoningID,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextReasoningDeltaDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningDeltaDataJSON struct {
 	AssistantMessageID apijson.Field
-	Delta apijson.Field
-	ReasoningID apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Delta              apijson.Field
+	ReasoningID        apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextReasoningDeltaData) UnmarshalJSON(data []byte) (err error) {
@@ -3603,24 +3603,24 @@ func (r V2EventSessionNextReasoningEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningEndedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	ProviderMetadata interface{} `json:"providerMetadata"`
-	ReasoningID string `json:"reasoningID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextReasoningEndedDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	ProviderMetadata   interface{}                              `json:"providerMetadata"`
+	ReasoningID        string                                   `json:"reasoningID,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Text               string                                   `json:"text,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextReasoningEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningEndedDataJSON struct {
 	AssistantMessageID apijson.Field
-	ProviderMetadata apijson.Field
-	ReasoningID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ProviderMetadata   apijson.Field
+	ReasoningID        apijson.Field
+	SessionID          apijson.Field
+	Text               apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextReasoningEndedData) UnmarshalJSON(data []byte) (err error) {
@@ -3669,22 +3669,22 @@ func (r V2EventSessionNextReasoningStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningStartedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	ProviderMetadata interface{} `json:"providerMetadata"`
-	ReasoningID string `json:"reasoningID,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextReasoningStartedDataJSON `json:"-"`
+	AssistantMessageID string                                     `json:"assistantMessageID,required"`
+	ProviderMetadata   interface{}                                `json:"providerMetadata"`
+	ReasoningID        string                                     `json:"reasoningID,required"`
+	SessionID          string                                     `json:"sessionID,required"`
+	Timestamp          int64                                      `json:"timestamp,required"`
+	JSON               v2EventSessionNextReasoningStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningStartedDataJSON struct {
 	AssistantMessageID apijson.Field
-	ProviderMetadata apijson.Field
-	ReasoningID apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ProviderMetadata   apijson.Field
+	ReasoningID        apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextReasoningStartedData) UnmarshalJSON(data []byte) (err error) {
@@ -3733,18 +3733,18 @@ func (r V2EventSessionNextRetriedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRetriedData struct {
-	Attempt int64 `json:"attempt,required"`
-	Error interface{} `json:"error,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextRetriedDataJSON `json:"-"`
+	Attempt   int64                             `json:"attempt,required"`
+	Error     interface{}                       `json:"error,required"`
+	SessionID string                            `json:"sessionID,required"`
+	Timestamp int64                             `json:"timestamp,required"`
+	JSON      v2EventSessionNextRetriedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextRetriedDataJSON struct {
-	Attempt apijson.Field
-	Error apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	Attempt     apijson.Field
+	Error       apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3795,14 +3795,14 @@ func (r V2EventSessionNextRevertClearedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRevertClearedData struct {
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextRevertClearedDataJSON `json:"-"`
+	SessionID string                                  `json:"sessionID,required"`
+	Timestamp int64                                   `json:"timestamp,required"`
+	JSON      v2EventSessionNextRevertClearedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertClearedDataJSON struct {
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3853,16 +3853,16 @@ func (r V2EventSessionNextRevertCommittedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRevertCommittedData struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextRevertCommittedDataJSON `json:"-"`
+	MessageID string                                    `json:"messageID,required"`
+	SessionID string                                    `json:"sessionID,required"`
+	Timestamp int64                                     `json:"timestamp,required"`
+	JSON      v2EventSessionNextRevertCommittedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertCommittedDataJSON struct {
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3913,16 +3913,16 @@ func (r V2EventSessionNextRevertStagedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRevertStagedData struct {
-	Revert RevertState `json:"revert,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextRevertStagedDataJSON `json:"-"`
+	Revert    RevertState                            `json:"revert,required"`
+	SessionID string                                 `json:"sessionID,required"`
+	Timestamp int64                                  `json:"timestamp,required"`
+	JSON      v2EventSessionNextRevertStagedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertStagedDataJSON struct {
-	Revert apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	Revert      apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3973,18 +3973,18 @@ func (r V2EventSessionNextShellEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextShellEndedData struct {
-	CallID string `json:"callID,required"`
-	Output string `json:"output,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextShellEndedDataJSON `json:"-"`
+	CallID    string                               `json:"callID,required"`
+	Output    string                               `json:"output,required"`
+	SessionID string                               `json:"sessionID,required"`
+	Timestamp int64                                `json:"timestamp,required"`
+	JSON      v2EventSessionNextShellEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextShellEndedDataJSON struct {
-	CallID apijson.Field
-	Output apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	CallID      apijson.Field
+	Output      apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4035,20 +4035,20 @@ func (r V2EventSessionNextShellStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextShellStartedData struct {
-	CallID string `json:"callID,required"`
-	Command string `json:"command,required"`
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextShellStartedDataJSON `json:"-"`
+	CallID    string                                 `json:"callID,required"`
+	Command   string                                 `json:"command,required"`
+	MessageID string                                 `json:"messageID,required"`
+	SessionID string                                 `json:"sessionID,required"`
+	Timestamp int64                                  `json:"timestamp,required"`
+	JSON      v2EventSessionNextShellStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextShellStartedDataJSON struct {
-	CallID apijson.Field
-	Command apijson.Field
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
+	CallID      apijson.Field
+	Command     apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4099,28 +4099,28 @@ func (r V2EventSessionNextStepEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextStepEndedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	Cost int64 `json:"cost,required"`
-	Files []string `json:"files"`
-	Finish string `json:"finish,required"`
-	SessionID string `json:"sessionID,required"`
-	Snapshot string `json:"snapshot"`
-	Timestamp int64 `json:"timestamp,required"`
-	Tokens V2EventSessionNextStepEndedDataTokens `json:"tokens,required"`
-	JSON v2EventSessionNextStepEndedDataJSON `json:"-"`
+	AssistantMessageID string                                `json:"assistantMessageID,required"`
+	Cost               int64                                 `json:"cost,required"`
+	Files              []string                              `json:"files"`
+	Finish             string                                `json:"finish,required"`
+	SessionID          string                                `json:"sessionID,required"`
+	Snapshot           string                                `json:"snapshot"`
+	Timestamp          int64                                 `json:"timestamp,required"`
+	Tokens             V2EventSessionNextStepEndedDataTokens `json:"tokens,required"`
+	JSON               v2EventSessionNextStepEndedDataJSON   `json:"-"`
 }
 
 type v2EventSessionNextStepEndedDataJSON struct {
 	AssistantMessageID apijson.Field
-	Cost apijson.Field
-	Files apijson.Field
-	Finish apijson.Field
-	SessionID apijson.Field
-	Snapshot apijson.Field
-	Timestamp apijson.Field
-	Tokens apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Cost               apijson.Field
+	Files              apijson.Field
+	Finish             apijson.Field
+	SessionID          apijson.Field
+	Snapshot           apijson.Field
+	Timestamp          apijson.Field
+	Tokens             apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextStepEndedData) UnmarshalJSON(data []byte) (err error) {
@@ -4132,18 +4132,18 @@ func (r v2EventSessionNextStepEndedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextStepEndedDataTokens struct {
-	Cache V2EventSessionNextStepEndedDataTokensCache `json:"cache,required"`
-	Input int64 `json:"input,required"`
-	Output int64 `json:"output,required"`
-	Reasoning int64 `json:"reasoning,required"`
-	JSON V2EventSessionNextStepEndedDataTokensJSON `json:"-"`
+	Cache     V2EventSessionNextStepEndedDataTokensCache `json:"cache,required"`
+	Input     int64                                      `json:"input,required"`
+	Output    int64                                      `json:"output,required"`
+	Reasoning int64                                      `json:"reasoning,required"`
+	JSON      V2EventSessionNextStepEndedDataTokensJSON  `json:"-"`
 }
 
 type V2EventSessionNextStepEndedDataTokensJSON struct {
-	Cache apijson.Field
-	Input apijson.Field
-	Output apijson.Field
-	Reasoning apijson.Field
+	Cache       apijson.Field
+	Input       apijson.Field
+	Output      apijson.Field
+	Reasoning   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4157,14 +4157,14 @@ func (r V2EventSessionNextStepEndedDataTokensJSON) RawJSON() string {
 }
 
 type V2EventSessionNextStepEndedDataTokensCache struct {
-	Read int64 `json:"read,required"`
-	Write int64 `json:"write,required"`
-	JSON V2EventSessionNextStepEndedDataTokensCacheJSON `json:"-"`
+	Read  int64                                          `json:"read,required"`
+	Write int64                                          `json:"write,required"`
+	JSON  V2EventSessionNextStepEndedDataTokensCacheJSON `json:"-"`
 }
 
 type V2EventSessionNextStepEndedDataTokensCacheJSON struct {
-	Read apijson.Field
-	Write apijson.Field
+	Read        apijson.Field
+	Write       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4215,20 +4215,20 @@ func (r V2EventSessionNextStepFailedType) IsKnown() bool {
 }
 
 type V2EventSessionNextStepFailedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	Error SessionErrorUnknown `json:"error,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextStepFailedDataJSON `json:"-"`
+	AssistantMessageID string                               `json:"assistantMessageID,required"`
+	Error              SessionErrorUnknown                  `json:"error,required"`
+	SessionID          string                               `json:"sessionID,required"`
+	Timestamp          int64                                `json:"timestamp,required"`
+	JSON               v2EventSessionNextStepFailedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextStepFailedDataJSON struct {
 	AssistantMessageID apijson.Field
-	Error apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Error              apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextStepFailedData) UnmarshalJSON(data []byte) (err error) {
@@ -4277,24 +4277,24 @@ func (r V2EventSessionNextStepStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextStepStartedData struct {
-	Agent string `json:"agent,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	Model ModelRef `json:"model,required"`
-	SessionID string `json:"sessionID,required"`
-	Snapshot string `json:"snapshot"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextStepStartedDataJSON `json:"-"`
+	Agent              string                                `json:"agent,required"`
+	AssistantMessageID string                                `json:"assistantMessageID,required"`
+	Model              ModelRef                              `json:"model,required"`
+	SessionID          string                                `json:"sessionID,required"`
+	Snapshot           string                                `json:"snapshot"`
+	Timestamp          int64                                 `json:"timestamp,required"`
+	JSON               v2EventSessionNextStepStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextStepStartedDataJSON struct {
-	Agent apijson.Field
+	Agent              apijson.Field
 	AssistantMessageID apijson.Field
-	Model apijson.Field
-	SessionID apijson.Field
-	Snapshot apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Model              apijson.Field
+	SessionID          apijson.Field
+	Snapshot           apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextStepStartedData) UnmarshalJSON(data []byte) (err error) {
@@ -4343,18 +4343,18 @@ func (r V2EventSessionNextSyntheticType) IsKnown() bool {
 }
 
 type V2EventSessionNextSyntheticData struct {
-	MessageID string `json:"messageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextSyntheticDataJSON `json:"-"`
+	MessageID string                              `json:"messageID,required"`
+	SessionID string                              `json:"sessionID,required"`
+	Text      string                              `json:"text,required"`
+	Timestamp int64                               `json:"timestamp,required"`
+	JSON      v2EventSessionNextSyntheticDataJSON `json:"-"`
 }
 
 type v2EventSessionNextSyntheticDataJSON struct {
-	MessageID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
+	MessageID   apijson.Field
+	SessionID   apijson.Field
+	Text        apijson.Field
+	Timestamp   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4405,22 +4405,22 @@ func (r V2EventSessionNextTextDeltaType) IsKnown() bool {
 }
 
 type V2EventSessionNextTextDeltaData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	Delta string `json:"delta,required"`
-	SessionID string `json:"sessionID,required"`
-	TextID string `json:"textID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextTextDeltaDataJSON `json:"-"`
+	AssistantMessageID string                              `json:"assistantMessageID,required"`
+	Delta              string                              `json:"delta,required"`
+	SessionID          string                              `json:"sessionID,required"`
+	TextID             string                              `json:"textID,required"`
+	Timestamp          int64                               `json:"timestamp,required"`
+	JSON               v2EventSessionNextTextDeltaDataJSON `json:"-"`
 }
 
 type v2EventSessionNextTextDeltaDataJSON struct {
 	AssistantMessageID apijson.Field
-	Delta apijson.Field
-	SessionID apijson.Field
-	TextID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Delta              apijson.Field
+	SessionID          apijson.Field
+	TextID             apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextTextDeltaData) UnmarshalJSON(data []byte) (err error) {
@@ -4469,22 +4469,22 @@ func (r V2EventSessionNextTextEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextTextEndedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	TextID string `json:"textID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextTextEndedDataJSON `json:"-"`
+	AssistantMessageID string                              `json:"assistantMessageID,required"`
+	SessionID          string                              `json:"sessionID,required"`
+	Text               string                              `json:"text,required"`
+	TextID             string                              `json:"textID,required"`
+	Timestamp          int64                               `json:"timestamp,required"`
+	JSON               v2EventSessionNextTextEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextTextEndedDataJSON struct {
 	AssistantMessageID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	TextID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	SessionID          apijson.Field
+	Text               apijson.Field
+	TextID             apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextTextEndedData) UnmarshalJSON(data []byte) (err error) {
@@ -4533,20 +4533,20 @@ func (r V2EventSessionNextTextStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextTextStartedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID string `json:"sessionID,required"`
-	TextID string `json:"textID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextTextStartedDataJSON `json:"-"`
+	AssistantMessageID string                                `json:"assistantMessageID,required"`
+	SessionID          string                                `json:"sessionID,required"`
+	TextID             string                                `json:"textID,required"`
+	Timestamp          int64                                 `json:"timestamp,required"`
+	JSON               v2EventSessionNextTextStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextTextStartedDataJSON struct {
 	AssistantMessageID apijson.Field
-	SessionID apijson.Field
-	TextID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	SessionID          apijson.Field
+	TextID             apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextTextStartedData) UnmarshalJSON(data []byte) (err error) {
@@ -4595,26 +4595,26 @@ func (r V2EventSessionNextToolCalledType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolCalledData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Input interface{} `json:"input,required"`
-	Provider V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	Tool string `json:"tool,required"`
-	JSON v2EventSessionNextToolCalledDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	CallID             string                                   `json:"callID,required"`
+	Input              interface{}                              `json:"input,required"`
+	Provider           V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	Tool               string                                   `json:"tool,required"`
+	JSON               v2EventSessionNextToolCalledDataJSON     `json:"-"`
 }
 
 type v2EventSessionNextToolCalledDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Input apijson.Field
-	Provider apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	Tool apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Input              apijson.Field
+	Provider           apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	Tool               apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolCalledData) UnmarshalJSON(data []byte) (err error) {
@@ -4626,14 +4626,14 @@ func (r v2EventSessionNextToolCalledDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolCalledDataProvider struct {
-	Executed bool `json:"executed,required"`
-	Metadata interface{} `json:"metadata"`
-	JSON V2EventSessionNextToolCalledDataProviderJSON `json:"-"`
+	Executed bool                                         `json:"executed,required"`
+	Metadata interface{}                                  `json:"metadata"`
+	JSON     V2EventSessionNextToolCalledDataProviderJSON `json:"-"`
 }
 
 type V2EventSessionNextToolCalledDataProviderJSON struct {
-	Executed apijson.Field
-	Metadata apijson.Field
+	Executed    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4684,26 +4684,26 @@ func (r V2EventSessionNextToolFailedType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolFailedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Error SessionErrorUnknown `json:"error,required"`
-	Provider V2EventSessionNextToolFailedDataProvider `json:"provider,required"`
-	Result interface{} `json:"result"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolFailedDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	CallID             string                                   `json:"callID,required"`
+	Error              SessionErrorUnknown                      `json:"error,required"`
+	Provider           V2EventSessionNextToolFailedDataProvider `json:"provider,required"`
+	Result             interface{}                              `json:"result"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolFailedDataJSON     `json:"-"`
 }
 
 type v2EventSessionNextToolFailedDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Error apijson.Field
-	Provider apijson.Field
-	Result apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Error              apijson.Field
+	Provider           apijson.Field
+	Result             apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolFailedData) UnmarshalJSON(data []byte) (err error) {
@@ -4715,14 +4715,14 @@ func (r v2EventSessionNextToolFailedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolFailedDataProvider struct {
-	Executed bool `json:"executed,required"`
-	Metadata interface{} `json:"metadata"`
-	JSON V2EventSessionNextToolFailedDataProviderJSON `json:"-"`
+	Executed bool                                         `json:"executed,required"`
+	Metadata interface{}                                  `json:"metadata"`
+	JSON     V2EventSessionNextToolFailedDataProviderJSON `json:"-"`
 }
 
 type V2EventSessionNextToolFailedDataProviderJSON struct {
-	Executed apijson.Field
-	Metadata apijson.Field
+	Executed    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4773,22 +4773,22 @@ func (r V2EventSessionNextToolInputDeltaType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolInputDeltaData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Delta string `json:"delta,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolInputDeltaDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	CallID             string                                   `json:"callID,required"`
+	Delta              string                                   `json:"delta,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolInputDeltaDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputDeltaDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Delta apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Delta              apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolInputDeltaData) UnmarshalJSON(data []byte) (err error) {
@@ -4837,22 +4837,22 @@ func (r V2EventSessionNextToolInputEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolInputEndedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	SessionID string `json:"sessionID,required"`
-	Text string `json:"text,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolInputEndedDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	CallID             string                                   `json:"callID,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Text               string                                   `json:"text,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolInputEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputEndedDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	SessionID apijson.Field
-	Text apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	SessionID          apijson.Field
+	Text               apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolInputEndedData) UnmarshalJSON(data []byte) (err error) {
@@ -4901,22 +4901,22 @@ func (r V2EventSessionNextToolInputStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolInputStartedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Name string `json:"name,required"`
-	SessionID string `json:"sessionID,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolInputStartedDataJSON `json:"-"`
+	AssistantMessageID string                                     `json:"assistantMessageID,required"`
+	CallID             string                                     `json:"callID,required"`
+	Name               string                                     `json:"name,required"`
+	SessionID          string                                     `json:"sessionID,required"`
+	Timestamp          int64                                      `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolInputStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputStartedDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Name apijson.Field
-	SessionID apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Name               apijson.Field
+	SessionID          apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolInputStartedData) UnmarshalJSON(data []byte) (err error) {
@@ -4965,24 +4965,24 @@ func (r V2EventSessionNextToolProgressType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolProgressData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Content []interface{} `json:"content,required"`
-	SessionID string `json:"sessionID,required"`
-	Structured interface{} `json:"structured,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolProgressDataJSON `json:"-"`
+	AssistantMessageID string                                 `json:"assistantMessageID,required"`
+	CallID             string                                 `json:"callID,required"`
+	Content            []interface{}                          `json:"content,required"`
+	SessionID          string                                 `json:"sessionID,required"`
+	Structured         interface{}                            `json:"structured,required"`
+	Timestamp          int64                                  `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolProgressDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolProgressDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Content apijson.Field
-	SessionID apijson.Field
-	Structured apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Content            apijson.Field
+	SessionID          apijson.Field
+	Structured         apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolProgressData) UnmarshalJSON(data []byte) (err error) {
@@ -5031,30 +5031,30 @@ func (r V2EventSessionNextToolSuccessType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolSuccessData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID string `json:"callID,required"`
-	Content []interface{} `json:"content,required"`
-	OutputPaths []string `json:"outputPaths"`
-	Provider V2EventSessionNextToolSuccessDataProvider `json:"provider,required"`
-	Result interface{} `json:"result"`
-	SessionID string `json:"sessionID,required"`
-	Structured interface{} `json:"structured,required"`
-	Timestamp int64 `json:"timestamp,required"`
-	JSON v2EventSessionNextToolSuccessDataJSON `json:"-"`
+	AssistantMessageID string                                    `json:"assistantMessageID,required"`
+	CallID             string                                    `json:"callID,required"`
+	Content            []interface{}                             `json:"content,required"`
+	OutputPaths        []string                                  `json:"outputPaths"`
+	Provider           V2EventSessionNextToolSuccessDataProvider `json:"provider,required"`
+	Result             interface{}                               `json:"result"`
+	SessionID          string                                    `json:"sessionID,required"`
+	Structured         interface{}                               `json:"structured,required"`
+	Timestamp          int64                                     `json:"timestamp,required"`
+	JSON               v2EventSessionNextToolSuccessDataJSON     `json:"-"`
 }
 
 type v2EventSessionNextToolSuccessDataJSON struct {
 	AssistantMessageID apijson.Field
-	CallID apijson.Field
-	Content apijson.Field
-	OutputPaths apijson.Field
-	Provider apijson.Field
-	Result apijson.Field
-	SessionID apijson.Field
-	Structured apijson.Field
-	Timestamp apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	CallID             apijson.Field
+	Content            apijson.Field
+	OutputPaths        apijson.Field
+	Provider           apijson.Field
+	Result             apijson.Field
+	SessionID          apijson.Field
+	Structured         apijson.Field
+	Timestamp          apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *V2EventSessionNextToolSuccessData) UnmarshalJSON(data []byte) (err error) {
@@ -5066,14 +5066,14 @@ func (r v2EventSessionNextToolSuccessDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolSuccessDataProvider struct {
-	Executed bool `json:"executed,required"`
-	Metadata interface{} `json:"metadata"`
-	JSON V2EventSessionNextToolSuccessDataProviderJSON `json:"-"`
+	Executed bool                                          `json:"executed,required"`
+	Metadata interface{}                                   `json:"metadata"`
+	JSON     V2EventSessionNextToolSuccessDataProviderJSON `json:"-"`
 }
 
 type V2EventSessionNextToolSuccessDataProviderJSON struct {
-	Executed apijson.Field
-	Metadata apijson.Field
+	Executed    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5124,14 +5124,14 @@ func (r V2EventSessionStatusType) IsKnown() bool {
 }
 
 type V2EventSessionStatusData struct {
-	SessionID string `json:"sessionID,required"`
-	Status SessionStatus `json:"status,required"`
-	JSON v2EventSessionStatusDataJSON `json:"-"`
+	SessionID string                       `json:"sessionID,required"`
+	Status    SessionStatus                `json:"status,required"`
+	JSON      v2EventSessionStatusDataJSON `json:"-"`
 }
 
 type v2EventSessionStatusDataJSON struct {
-	SessionID apijson.Field
-	Status apijson.Field
+	SessionID   apijson.Field
+	Status      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5182,14 +5182,14 @@ func (r V2EventSessionUpdatedType) IsKnown() bool {
 }
 
 type V2EventSessionUpdatedData struct {
-	Info Session `json:"info,required"`
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventSessionUpdatedDataJSON `json:"-"`
+	Info      Session                       `json:"info,required"`
+	SessionID string                        `json:"sessionID,required"`
+	JSON      v2EventSessionUpdatedDataJSON `json:"-"`
 }
 
 type v2EventSessionUpdatedDataJSON struct {
-	Info apijson.Field
-	SessionID apijson.Field
+	Info        apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5240,14 +5240,14 @@ func (r V2EventTodoUpdatedType) IsKnown() bool {
 }
 
 type V2EventTodoUpdatedData struct {
-	SessionID string `json:"sessionID,required"`
-	Todos []Todo `json:"todos,required"`
-	JSON v2EventTodoUpdatedDataJSON `json:"-"`
+	SessionID string                     `json:"sessionID,required"`
+	Todos     []Todo                     `json:"todos,required"`
+	JSON      v2EventTodoUpdatedDataJSON `json:"-"`
 }
 
 type v2EventTodoUpdatedDataJSON struct {
-	SessionID apijson.Field
-	Todos apijson.Field
+	SessionID   apijson.Field
+	Todos       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5298,12 +5298,12 @@ func (r V2EventTuiCommandExecuteType) IsKnown() bool {
 }
 
 type V2EventTuiCommandExecuteData struct {
-	Command interface{} `json:"command,required"`
-	JSON v2EventTuiCommandExecuteDataJSON `json:"-"`
+	Command interface{}                      `json:"command,required"`
+	JSON    v2EventTuiCommandExecuteDataJSON `json:"-"`
 }
 
 type v2EventTuiCommandExecuteDataJSON struct {
-	Command apijson.Field
+	Command     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5354,12 +5354,12 @@ func (r V2EventTuiPromptAppendType) IsKnown() bool {
 }
 
 type V2EventTuiPromptAppendData struct {
-	Text string `json:"text,required"`
+	Text string                         `json:"text,required"`
 	JSON v2EventTuiPromptAppendDataJSON `json:"-"`
 }
 
 type v2EventTuiPromptAppendDataJSON struct {
-	Text apijson.Field
+	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5410,12 +5410,12 @@ func (r V2EventTuiSessionSelectType) IsKnown() bool {
 }
 
 type V2EventTuiSessionSelectData struct {
-	SessionID string `json:"sessionID,required"`
-	JSON v2EventTuiSessionSelectDataJSON `json:"-"`
+	SessionID string                          `json:"sessionID,required"`
+	JSON      v2EventTuiSessionSelectDataJSON `json:"-"`
 }
 
 type v2EventTuiSessionSelectDataJSON struct {
-	SessionID apijson.Field
+	SessionID   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5431,10 +5431,10 @@ func (r v2EventTuiSessionSelectDataJSON) RawJSON() string {
 type V2EventTuiToastShowVariant string
 
 const (
-	V2EventTuiToastShowVariantInfo V2EventTuiToastShowVariant = "info"
+	V2EventTuiToastShowVariantInfo    V2EventTuiToastShowVariant = "info"
 	V2EventTuiToastShowVariantSuccess V2EventTuiToastShowVariant = "success"
 	V2EventTuiToastShowVariantWarning V2EventTuiToastShowVariant = "warning"
-	V2EventTuiToastShowVariantError V2EventTuiToastShowVariant = "error"
+	V2EventTuiToastShowVariantError   V2EventTuiToastShowVariant = "error"
 )
 
 func (r V2EventTuiToastShowVariant) IsKnown() bool {
@@ -5486,18 +5486,18 @@ func (r V2EventTuiToastShowType) IsKnown() bool {
 }
 
 type V2EventTuiToastShowData struct {
-	Duration int64 `json:"duration"`
-	Message string `json:"message,required"`
-	Title string `json:"title"`
-	Variant V2EventTuiToastShowVariant `json:"variant,required"`
-	JSON v2EventTuiToastShowDataJSON `json:"-"`
+	Duration int64                       `json:"duration"`
+	Message  string                      `json:"message,required"`
+	Title    string                      `json:"title"`
+	Variant  V2EventTuiToastShowVariant  `json:"variant,required"`
+	JSON     v2EventTuiToastShowDataJSON `json:"-"`
 }
 
 type v2EventTuiToastShowDataJSON struct {
-	Duration apijson.Field
-	Message apijson.Field
-	Title apijson.Field
-	Variant apijson.Field
+	Duration    apijson.Field
+	Message     apijson.Field
+	Title       apijson.Field
+	Variant     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5548,12 +5548,12 @@ func (r V2EventVcsBranchUpdatedType) IsKnown() bool {
 }
 
 type V2EventVcsBranchUpdatedData struct {
-	Branch string `json:"branch"`
-	JSON v2EventVcsBranchUpdatedDataJSON `json:"-"`
+	Branch string                          `json:"branch"`
+	JSON   v2EventVcsBranchUpdatedDataJSON `json:"-"`
 }
 
 type v2EventVcsBranchUpdatedDataJSON struct {
-	Branch apijson.Field
+	Branch      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5604,12 +5604,12 @@ func (r V2EventWorkspaceFailedType) IsKnown() bool {
 }
 
 type V2EventWorkspaceFailedData struct {
-	Message string `json:"message,required"`
-	JSON v2EventWorkspaceFailedDataJSON `json:"-"`
+	Message string                         `json:"message,required"`
+	JSON    v2EventWorkspaceFailedDataJSON `json:"-"`
 }
 
 type v2EventWorkspaceFailedDataJSON struct {
-	Message apijson.Field
+	Message     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5660,12 +5660,12 @@ func (r V2EventWorkspaceReadyType) IsKnown() bool {
 }
 
 type V2EventWorkspaceReadyData struct {
-	Name string `json:"name,required"`
+	Name string                        `json:"name,required"`
 	JSON v2EventWorkspaceReadyDataJSON `json:"-"`
 }
 
 type v2EventWorkspaceReadyDataJSON struct {
-	Name apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5681,10 +5681,10 @@ func (r v2EventWorkspaceReadyDataJSON) RawJSON() string {
 type V2EventWorkspaceStatusStatus string
 
 const (
-	V2EventWorkspaceStatusStatusConnected V2EventWorkspaceStatusStatus = "connected"
-	V2EventWorkspaceStatusStatusConnecting V2EventWorkspaceStatusStatus = "connecting"
+	V2EventWorkspaceStatusStatusConnected    V2EventWorkspaceStatusStatus = "connected"
+	V2EventWorkspaceStatusStatusConnecting   V2EventWorkspaceStatusStatus = "connecting"
 	V2EventWorkspaceStatusStatusDisconnected V2EventWorkspaceStatusStatus = "disconnected"
-	V2EventWorkspaceStatusStatusError V2EventWorkspaceStatusStatus = "error"
+	V2EventWorkspaceStatusStatusError        V2EventWorkspaceStatusStatus = "error"
 )
 
 func (r V2EventWorkspaceStatusStatus) IsKnown() bool {
@@ -5736,13 +5736,13 @@ func (r V2EventWorkspaceStatusType) IsKnown() bool {
 }
 
 type V2EventWorkspaceStatusData struct {
-	Status V2EventWorkspaceStatusStatus `json:"status,required"`
-	WorkspaceID string `json:"workspaceID,required"`
-	JSON v2EventWorkspaceStatusDataJSON `json:"-"`
+	Status      V2EventWorkspaceStatusStatus   `json:"status,required"`
+	WorkspaceID string                         `json:"workspaceID,required"`
+	JSON        v2EventWorkspaceStatusDataJSON `json:"-"`
 }
 
 type v2EventWorkspaceStatusDataJSON struct {
-	Status apijson.Field
+	Status      apijson.Field
 	WorkspaceID apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -5794,12 +5794,12 @@ func (r V2EventWorktreeFailedType) IsKnown() bool {
 }
 
 type V2EventWorktreeFailedData struct {
-	Message string `json:"message,required"`
-	JSON v2EventWorktreeFailedDataJSON `json:"-"`
+	Message string                        `json:"message,required"`
+	JSON    v2EventWorktreeFailedDataJSON `json:"-"`
 }
 
 type v2EventWorktreeFailedDataJSON struct {
-	Message apijson.Field
+	Message     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5850,14 +5850,14 @@ func (r V2EventWorktreeReadyType) IsKnown() bool {
 }
 
 type V2EventWorktreeReadyData struct {
-	Branch string `json:"branch"`
-	Name string `json:"name,required"`
-	JSON v2EventWorktreeReadyDataJSON `json:"-"`
+	Branch string                       `json:"branch"`
+	Name   string                       `json:"name,required"`
+	JSON   v2EventWorktreeReadyDataJSON `json:"-"`
 }
 
 type v2EventWorktreeReadyDataJSON struct {
-	Branch apijson.Field
-	Name apijson.Field
+	Branch      apijson.Field
+	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5873,22 +5873,22 @@ func (r v2EventWorktreeReadyDataJSON) RawJSON() string {
 type V2EventTuiCommandExecuteCommand string
 
 const (
-	V2EventTuiCommandExecuteCommandCommandSessionList V2EventTuiCommandExecuteCommand = "session.list"
-	V2EventTuiCommandExecuteCommandCommandSessionNew V2EventTuiCommandExecuteCommand = "session.new"
-	V2EventTuiCommandExecuteCommandCommandSessionShare V2EventTuiCommandExecuteCommand = "session.share"
-	V2EventTuiCommandExecuteCommandCommandSessionInterrupt V2EventTuiCommandExecuteCommand = "session.interrupt"
-	V2EventTuiCommandExecuteCommandCommandSessionCompact V2EventTuiCommandExecuteCommand = "session.compact"
-	V2EventTuiCommandExecuteCommandCommandSessionPageUp V2EventTuiCommandExecuteCommand = "session.page.up"
-	V2EventTuiCommandExecuteCommandCommandSessionPageDown V2EventTuiCommandExecuteCommand = "session.page.down"
-	V2EventTuiCommandExecuteCommandCommandSessionLineUp V2EventTuiCommandExecuteCommand = "session.line.up"
-	V2EventTuiCommandExecuteCommandCommandSessionLineDown V2EventTuiCommandExecuteCommand = "session.line.down"
-	V2EventTuiCommandExecuteCommandCommandSessionHalfPageUp V2EventTuiCommandExecuteCommand = "session.half.page.up"
+	V2EventTuiCommandExecuteCommandCommandSessionList         V2EventTuiCommandExecuteCommand = "session.list"
+	V2EventTuiCommandExecuteCommandCommandSessionNew          V2EventTuiCommandExecuteCommand = "session.new"
+	V2EventTuiCommandExecuteCommandCommandSessionShare        V2EventTuiCommandExecuteCommand = "session.share"
+	V2EventTuiCommandExecuteCommandCommandSessionInterrupt    V2EventTuiCommandExecuteCommand = "session.interrupt"
+	V2EventTuiCommandExecuteCommandCommandSessionCompact      V2EventTuiCommandExecuteCommand = "session.compact"
+	V2EventTuiCommandExecuteCommandCommandSessionPageUp       V2EventTuiCommandExecuteCommand = "session.page.up"
+	V2EventTuiCommandExecuteCommandCommandSessionPageDown     V2EventTuiCommandExecuteCommand = "session.page.down"
+	V2EventTuiCommandExecuteCommandCommandSessionLineUp       V2EventTuiCommandExecuteCommand = "session.line.up"
+	V2EventTuiCommandExecuteCommandCommandSessionLineDown     V2EventTuiCommandExecuteCommand = "session.line.down"
+	V2EventTuiCommandExecuteCommandCommandSessionHalfPageUp   V2EventTuiCommandExecuteCommand = "session.half.page.up"
 	V2EventTuiCommandExecuteCommandCommandSessionHalfPageDown V2EventTuiCommandExecuteCommand = "session.half.page.down"
-	V2EventTuiCommandExecuteCommandCommandSessionFirst V2EventTuiCommandExecuteCommand = "session.first"
-	V2EventTuiCommandExecuteCommandCommandSessionLast V2EventTuiCommandExecuteCommand = "session.last"
-	V2EventTuiCommandExecuteCommandCommandPromptClear V2EventTuiCommandExecuteCommand = "prompt.clear"
-	V2EventTuiCommandExecuteCommandCommandPromptSubmit V2EventTuiCommandExecuteCommand = "prompt.submit"
-	V2EventTuiCommandExecuteCommandCommandAgentCycle V2EventTuiCommandExecuteCommand = "agent.cycle"
+	V2EventTuiCommandExecuteCommandCommandSessionFirst        V2EventTuiCommandExecuteCommand = "session.first"
+	V2EventTuiCommandExecuteCommandCommandSessionLast         V2EventTuiCommandExecuteCommand = "session.last"
+	V2EventTuiCommandExecuteCommandCommandPromptClear         V2EventTuiCommandExecuteCommand = "prompt.clear"
+	V2EventTuiCommandExecuteCommandCommandPromptSubmit        V2EventTuiCommandExecuteCommand = "prompt.submit"
+	V2EventTuiCommandExecuteCommandCommandAgentCycle          V2EventTuiCommandExecuteCommand = "agent.cycle"
 )
 
 func (r V2EventTuiCommandExecuteCommand) IsKnown() bool {

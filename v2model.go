@@ -46,36 +46,32 @@ func (r *V2ModelService) List(ctx context.Context, query V2ModelListParams, opts
 
 type V2ModelInfo struct {
 	ID         string `json:"id,required"`
-	ApiID      string `json:"apiID,required"`
 	ProviderID string `json:"providerID,required"`
 	Family     string `json:"family"`
 	Name       string `json:"name,required"`
-	// This field can have the runtime type of [V2ModelInfoEndpointUnknown],
-	// [V2ModelInfoEndpointOpenAIResponses], [V2ModelInfoEndpointOpenAICompletions],
-	// [V2ModelInfoEndpointAnthropicMessages], [V2ModelInfoEndpointAisdk].
-	Endpoint      interface{}             `json:"endpoint,required"`
-	Capabilities  V2ModelInfoCapabilities `json:"capabilities,required"`
-	Options       V2ModelInfoOptions      `json:"options,required"`
-	Variants      []V2ModelInfoVariant    `json:"variants,required"`
-	Time          V2ModelInfoTime         `json:"time,required"`
-	Cost          []V2ModelInfoCostItem   `json:"cost,required"`
-	Status        V2ModelInfoStatus       `json:"status,required"`
-	Enabled       bool                    `json:"enabled,required"`
-	Limit         V2ModelInfoLimit        `json:"limit,required"`
-	JSON          v2ModelInfoJSON         `json:"-"`
-	endpointUnion V2ModelInfoEndpointUnion
+	// This field can have the runtime type of [V2ModelInfoApiAisdk], [V2ModelInfoApiNative].
+	Api          interface{}             `json:"api,required"`
+	Capabilities V2ModelInfoCapabilities `json:"capabilities,required"`
+	Request      V2ModelInfoRequest      `json:"request,required"`
+	Variants     []V2ModelInfoVariant    `json:"variants,required"`
+	Time         V2ModelInfoTime         `json:"time,required"`
+	Cost         []V2ModelInfoCostItem   `json:"cost,required"`
+	Status       V2ModelInfoStatus       `json:"status,required"`
+	Enabled      bool                    `json:"enabled,required"`
+	Limit        V2ModelInfoLimit        `json:"limit,required"`
+	JSON         v2ModelInfoJSON         `json:"-"`
+	apiUnion     V2ModelInfoApiUnion
 }
 
 // v2ModelInfoJSON contains the JSON metadata for the struct [V2ModelInfo]
 type v2ModelInfoJSON struct {
 	ID           apijson.Field
-	ApiID        apijson.Field
 	ProviderID   apijson.Field
 	Family       apijson.Field
 	Name         apijson.Field
-	Endpoint     apijson.Field
+	Api          apijson.Field
 	Capabilities apijson.Field
-	Options      apijson.Field
+	Request      apijson.Field
 	Variants     apijson.Field
 	Time         apijson.Field
 	Cost         apijson.Field
@@ -88,20 +84,171 @@ type v2ModelInfoJSON struct {
 
 func (r *V2ModelInfo) UnmarshalJSON(data []byte) (err error) {
 	*r = V2ModelInfo{}
-	err = apijson.UnmarshalRoot(data, &r.endpointUnion)
+	err = apijson.UnmarshalRoot(data, r)
 	if err != nil {
 		return err
 	}
-	return apijson.Port(r.endpointUnion, r)
+	apiData := gjson.GetBytes(data, "api").Raw
+	if apiData != "" {
+		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r v2ModelInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-// AsEndpointUnion returns the endpoint field as a typed union.
-func (r *V2ModelInfo) AsEndpointUnion() V2ModelInfoEndpointUnion {
-	return r.endpointUnion
+// AsApiUnion returns the api field as a typed union.
+func (r *V2ModelInfo) AsApiUnion() V2ModelInfoApiUnion {
+	return r.apiUnion
+}
+
+// V2ModelInfoApiUnion represents the api configuration of a model.
+// Possible runtime types are [V2ModelInfoApiAisdk], [V2ModelInfoApiNative].
+type V2ModelInfoApiUnion interface {
+	implementsV2ModelInfoApiUnion()
+}
+
+type V2ModelInfoApiAisdk struct {
+	ID      string             `json:"id,required"`
+	Type    V2ModelInfoApiType `json:"type,required"`
+	Package string             `json:"package,required"`
+	URL     string             `json:"url"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Settings interface{}             `json:"settings"`
+	JSON     v2ModelInfoApiAisdkJSON `json:"-"`
+}
+
+type v2ModelInfoApiAisdkJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Package     apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ModelInfoApiAisdk) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ModelInfoApiAisdkJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2ModelInfoApiAisdk) implementsV2ModelInfoApiUnion() {}
+
+type V2ModelInfoApiNative struct {
+	ID   string             `json:"id,required"`
+	Type V2ModelInfoApiType `json:"type,required"`
+	URL  string             `json:"url"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Settings interface{}              `json:"settings,required"`
+	JSON     v2ModelInfoApiNativeJSON `json:"-"`
+}
+
+type v2ModelInfoApiNativeJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ModelInfoApiNative) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ModelInfoApiNativeJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r V2ModelInfoApiNative) implementsV2ModelInfoApiUnion() {}
+
+type V2ModelInfoApiType string
+
+const (
+	V2ModelInfoApiTypeAisdk  V2ModelInfoApiType = "aisdk"
+	V2ModelInfoApiTypeNative V2ModelInfoApiType = "native"
+)
+
+func (r V2ModelInfoApiType) IsKnown() bool {
+	switch r {
+	case V2ModelInfoApiTypeAisdk, V2ModelInfoApiTypeNative:
+		return true
+	}
+	return false
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2ModelInfoApiUnion)(nil)).Elem(),
+		"type",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "aisdk",
+			Type:               reflect.TypeOf(V2ModelInfoApiAisdk{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "native",
+			Type:               reflect.TypeOf(V2ModelInfoApiNative{}),
+		},
+	)
+}
+
+type V2ModelInfoRequest struct {
+	Headers map[string]string `json:"headers,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Body    map[string]interface{} `json:"body,required"`
+	Variant string                 `json:"variant"`
+	JSON    v2ModelInfoRequestJSON `json:"-"`
+}
+
+type v2ModelInfoRequestJSON struct {
+	Headers     apijson.Field
+	Body        apijson.Field
+	Variant     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ModelInfoRequest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ModelInfoRequestJSON) RawJSON() string {
+	return r.raw
+}
+
+type V2ModelInfoVariant struct {
+	ID      string            `json:"id,required"`
+	Headers map[string]string `json:"headers,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Body map[string]interface{} `json:"body,required"`
+	JSON v2ModelInfoVariantJSON `json:"-"`
+}
+
+type v2ModelInfoVariantJSON struct {
+	ID          apijson.Field
+	Headers     apijson.Field
+	Body        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ModelInfoVariant) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ModelInfoVariantJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2ModelInfoStatus string
@@ -119,266 +266,6 @@ func (r V2ModelInfoStatus) IsKnown() bool {
 		return true
 	}
 	return false
-}
-
-type V2ModelInfoEndpointUnion interface {
-	implementsV2ModelInfoEndpointUnion()
-}
-
-type V2ModelInfoEndpointUnknown struct {
-	Type V2ModelInfoEndpointType        `json:"type,required"`
-	JSON v2ModelInfoEndpointUnknownJSON `json:"-"`
-}
-
-type V2ModelInfoEndpointType string
-
-const (
-	V2ModelInfoEndpointTypeUnknown           V2ModelInfoEndpointType = "unknown"
-	V2ModelInfoEndpointTypeOpenAIResponses   V2ModelInfoEndpointType = "openai/responses"
-	V2ModelInfoEndpointTypeOpenAICompletions V2ModelInfoEndpointType = "openai/completions"
-	V2ModelInfoEndpointTypeAnthropicMessages V2ModelInfoEndpointType = "anthropic/messages"
-	V2ModelInfoEndpointTypeAisdk             V2ModelInfoEndpointType = "aisdk"
-)
-
-func (r V2ModelInfoEndpointType) IsKnown() bool {
-	switch r {
-	case V2ModelInfoEndpointTypeUnknown, V2ModelInfoEndpointTypeOpenAIResponses,
-		V2ModelInfoEndpointTypeOpenAICompletions, V2ModelInfoEndpointTypeAnthropicMessages,
-		V2ModelInfoEndpointTypeAisdk:
-		return true
-	}
-	return false
-}
-
-// v2ModelInfoEndpointUnknownJSON contains the JSON metadata
-type v2ModelInfoEndpointUnknownJSON struct {
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointUnknown) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointUnknownJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointUnknown) implementsV2ModelInfoEndpointUnion() {}
-
-type V2ModelInfoEndpointOpenAIResponses struct {
-	Type      V2ModelInfoEndpointType                `json:"type,required"`
-	URL       string                                 `json:"url,required"`
-	Websocket bool                                   `json:"websocket"`
-	JSON      v2ModelInfoEndpointOpenAIResponsesJSON `json:"-"`
-}
-
-type v2ModelInfoEndpointOpenAIResponsesJSON struct {
-	Type        apijson.Field
-	URL         apijson.Field
-	Websocket   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointOpenAIResponses) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointOpenAIResponsesJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointOpenAIResponses) implementsV2ModelInfoEndpointUnion() {}
-
-type V2ModelInfoEndpointOpenAICompletions struct {
-	Type V2ModelInfoEndpointType `json:"type,required"`
-	URL  string                  `json:"url,required"`
-	// This field can have the runtime type of [V2ModelInfoEndpointReasoningContent],
-	// [V2ModelInfoEndpointReasoningDetails].
-	Reasoning      interface{}                              `json:"reasoning"`
-	JSON           v2ModelInfoEndpointOpenAICompletionsJSON `json:"-"`
-	reasoningUnion V2ModelInfoEndpointReasoningUnion
-}
-
-type v2ModelInfoEndpointOpenAICompletionsJSON struct {
-	Type        apijson.Field
-	URL         apijson.Field
-	Reasoning   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointOpenAICompletions) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ModelInfoEndpointOpenAICompletions{}
-	err = apijson.UnmarshalRoot(data, &r.reasoningUnion)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.reasoningUnion, r)
-}
-
-func (r v2ModelInfoEndpointOpenAICompletionsJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsReasoningUnion returns the reasoning field as a typed union.
-func (r *V2ModelInfoEndpointOpenAICompletions) AsReasoningUnion() V2ModelInfoEndpointReasoningUnion {
-	return r.reasoningUnion
-}
-
-func (r V2ModelInfoEndpointOpenAICompletions) implementsV2ModelInfoEndpointUnion() {}
-
-type V2ModelInfoEndpointReasoningUnion interface {
-	implementsV2ModelInfoEndpointReasoningUnion()
-}
-
-type V2ModelInfoEndpointReasoningContent struct {
-	Type V2ModelInfoEndpointReasoningType        `json:"type,required"`
-	JSON v2ModelInfoEndpointReasoningContentJSON `json:"-"`
-}
-
-type V2ModelInfoEndpointReasoningType string
-
-const (
-	V2ModelInfoEndpointReasoningTypeContent V2ModelInfoEndpointReasoningType = "reasoning_content"
-	V2ModelInfoEndpointReasoningTypeDetails V2ModelInfoEndpointReasoningType = "reasoning_details"
-)
-
-func (r V2ModelInfoEndpointReasoningType) IsKnown() bool {
-	switch r {
-	case V2ModelInfoEndpointReasoningTypeContent, V2ModelInfoEndpointReasoningTypeDetails:
-		return true
-	}
-	return false
-}
-
-type v2ModelInfoEndpointReasoningContentJSON struct {
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointReasoningContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointReasoningContentJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointReasoningContent) implementsV2ModelInfoEndpointReasoningUnion() {}
-
-type V2ModelInfoEndpointReasoningDetails struct {
-	Type V2ModelInfoEndpointReasoningType        `json:"type,required"`
-	JSON v2ModelInfoEndpointReasoningDetailsJSON `json:"-"`
-}
-
-type v2ModelInfoEndpointReasoningDetailsJSON struct {
-	Type        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointReasoningDetails) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointReasoningDetailsJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointReasoningDetails) implementsV2ModelInfoEndpointReasoningUnion() {}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ModelInfoEndpointReasoningUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointReasoningContent{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointReasoningDetails{}),
-		},
-	)
-}
-
-type V2ModelInfoEndpointAnthropicMessages struct {
-	Type V2ModelInfoEndpointType                  `json:"type,required"`
-	URL  string                                   `json:"url,required"`
-	JSON v2ModelInfoEndpointAnthropicMessagesJSON `json:"-"`
-}
-
-type v2ModelInfoEndpointAnthropicMessagesJSON struct {
-	Type        apijson.Field
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointAnthropicMessages) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointAnthropicMessagesJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointAnthropicMessages) implementsV2ModelInfoEndpointUnion() {}
-
-type V2ModelInfoEndpointAisdk struct {
-	Type    V2ModelInfoEndpointType      `json:"type,required"`
-	Package string                       `json:"package,required"`
-	URL     string                       `json:"url"`
-	JSON    v2ModelInfoEndpointAisdkJSON `json:"-"`
-}
-
-type v2ModelInfoEndpointAisdkJSON struct {
-	Type        apijson.Field
-	Package     apijson.Field
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoEndpointAisdk) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoEndpointAisdkJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ModelInfoEndpointAisdk) implementsV2ModelInfoEndpointUnion() {}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ModelInfoEndpointUnion)(nil)).Elem(),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointUnknown{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointOpenAIResponses{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointOpenAICompletions{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointAnthropicMessages{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoEndpointAisdk{}),
-		},
-	)
 }
 
 type V2ModelInfoCapabilities struct {
@@ -401,77 +288,6 @@ func (r *V2ModelInfoCapabilities) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2ModelInfoCapabilitiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2ModelInfoOptions struct {
-	Headers map[string]string       `json:"headers,required"`
-	Body    map[string]interface{}  `json:"body,required"`
-	Aisdk   V2ModelInfoOptionsAisdk `json:"aisdk,required"`
-	Variant string                  `json:"variant"`
-	JSON    v2ModelInfoOptionsJSON  `json:"-"`
-}
-
-type v2ModelInfoOptionsJSON struct {
-	Headers     apijson.Field
-	Body        apijson.Field
-	Aisdk       apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoOptions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoOptionsJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2ModelInfoOptionsAisdk struct {
-	Provider map[string]interface{}      `json:"provider,required"`
-	Request  map[string]interface{}      `json:"request,required"`
-	JSON     v2ModelInfoOptionsAisdkJSON `json:"-"`
-}
-
-type v2ModelInfoOptionsAisdkJSON struct {
-	Provider    apijson.Field
-	Request     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoOptionsAisdk) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoOptionsAisdkJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2ModelInfoVariant struct {
-	ID      string                  `json:"id,required"`
-	Headers map[string]string       `json:"headers,required"`
-	Body    map[string]interface{}  `json:"body,required"`
-	Aisdk   V2ModelInfoOptionsAisdk `json:"aisdk,required"`
-	JSON    v2ModelInfoVariantJSON  `json:"-"`
-}
-
-type v2ModelInfoVariantJSON struct {
-	ID          apijson.Field
-	Headers     apijson.Field
-	Body        apijson.Field
-	Aisdk       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ModelInfoVariant) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ModelInfoVariantJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -498,8 +314,8 @@ func (r v2ModelInfoTimeJSON) RawJSON() string {
 
 type V2ModelInfoCostItem struct {
 	Tier   V2ModelInfoCostTier     `json:"tier"`
-	Input  int64                   `json:"input,required"`
-	Output int64                   `json:"output,required"`
+	Input  float64                 `json:"input,required"`
+	Output float64                 `json:"output,required"`
 	Cache  V2ModelInfoCostCache    `json:"cache,required"`
 	JSON   v2ModelInfoCostItemJSON `json:"-"`
 }
@@ -543,8 +359,8 @@ func (r v2ModelInfoCostTierJSON) RawJSON() string {
 }
 
 type V2ModelInfoCostCache struct {
-	Read  int64                    `json:"read,required"`
-	Write int64                    `json:"write,required"`
+	Read  float64                  `json:"read,required"`
+	Write float64                  `json:"write,required"`
 	JSON  v2ModelInfoCostCacheJSON `json:"-"`
 }
 

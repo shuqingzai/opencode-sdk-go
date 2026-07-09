@@ -59,159 +59,166 @@ func (r *V2ProviderService) Get(ctx context.Context, providerID string, query V2
 }
 
 type V2ProviderInfo struct {
-	ID   string `json:"id,required"`
-	Name string `json:"name,required"`
-	// This field can have the runtime type of [V2ProviderInfoEnabledEnv],
-	// [V2ProviderInfoEnabledAuth], [V2ProviderInfoEnabledCustom].
-	// When the provider is disabled, this field is `false` (a JSON boolean).
-	Enabled interface{} `json:"enabled,required"`
-	Env     []string    `json:"env,required"`
-	// This field can have the runtime type of [V2ModelInfoEndpointUnknown],
-	// [V2ModelInfoEndpointOpenAIResponses], [V2ModelInfoEndpointOpenAICompletions],
-	// [V2ModelInfoEndpointAnthropicMessages], [V2ModelInfoEndpointAisdk].
-	Endpoint      interface{}        `json:"endpoint,required"`
-	Options       V2ModelInfoOptions `json:"options,required"`
-	JSON          v2ProviderInfoJSON `json:"-"`
-	enabledUnion  V2ProviderInfoEnabledUnion
-	endpointUnion V2ModelInfoEndpointUnion
+	ID            string `json:"id,required"`
+	IntegrationID string `json:"integrationID"`
+	Name          string `json:"name,required"`
+	Disabled      bool   `json:"disabled"`
+	// This field can have the runtime type of [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
+	Api      interface{}           `json:"api,required"`
+	Request  V2ProviderInfoRequest `json:"request,required"`
+	JSON     v2ProviderInfoJSON    `json:"-"`
+	apiUnion V2ProviderInfoApiUnion
 }
 
 // v2ProviderInfoJSON contains the JSON metadata for the struct [V2ProviderInfo]
 type v2ProviderInfoJSON struct {
-	ID          apijson.Field
-	Name        apijson.Field
-	Enabled     apijson.Field
-	Env         apijson.Field
-	Endpoint    apijson.Field
-	Options     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ID            apijson.Field
+	IntegrationID apijson.Field
+	Name          apijson.Field
+	Disabled      apijson.Field
+	Api           apijson.Field
+	Request       apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
 }
 
 func (r *V2ProviderInfo) UnmarshalJSON(data []byte) (err error) {
 	*r = V2ProviderInfo{}
-	err = apijson.UnmarshalRoot(data, &r.enabledUnion)
+	err = apijson.UnmarshalRoot(data, r)
 	if err != nil {
 		return err
 	}
-	err = apijson.UnmarshalRoot(data, &r.endpointUnion)
-	if err != nil {
-		return err
+	apiData := gjson.GetBytes(data, "api").Raw
+	if apiData != "" {
+		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
+		if err != nil {
+			return err
+		}
 	}
-	err = apijson.Port(r.enabledUnion, r)
-	if err != nil {
-		return err
-	}
-	return apijson.Port(r.endpointUnion, r)
+	return nil
 }
 
 func (r v2ProviderInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-// AsEnabledUnion returns the enabled field as a typed union.
-func (r *V2ProviderInfo) AsEnabledUnion() V2ProviderInfoEnabledUnion {
-	return r.enabledUnion
+// AsApiUnion returns the api field as a typed union.
+func (r *V2ProviderInfo) AsApiUnion() V2ProviderInfoApiUnion {
+	return r.apiUnion
 }
 
-// AsEndpointUnion returns the endpoint field as a typed union.
-func (r *V2ProviderInfo) AsEndpointUnion() V2ModelInfoEndpointUnion {
-	return r.endpointUnion
+// V2ProviderInfoApiUnion represents the api configuration of a provider.
+// Possible runtime types are [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
+type V2ProviderInfoApiUnion interface {
+	implementsV2ProviderInfoApiUnion()
 }
 
-// V2ProviderInfoEnabledUnion represents the enabled state of a provider.
-// Possible runtime types are [V2ProviderInfoEnabledEnv], [V2ProviderInfoEnabledAuth],
-// [V2ProviderInfoEnabledCustom]. When disabled, the value is `false` (a JSON boolean).
-type V2ProviderInfoEnabledUnion interface {
-	implementsV2ProviderInfoEnabledUnion()
+type V2ProviderInfoApiAisdk struct {
+	Type    V2ProviderInfoApiType `json:"type,required"`
+	Package string                `json:"package,required"`
+	URL     string                `json:"url"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Settings interface{}                `json:"settings"`
+	JSON     v2ProviderInfoApiAisdkJSON `json:"-"`
 }
 
-type V2ProviderInfoEnabledEnv struct {
-	Via  string                       `json:"via,required"`
-	Name string                       `json:"name,required"`
-	JSON v2ProviderInfoEnabledEnvJSON `json:"-"`
-}
-
-type v2ProviderInfoEnabledEnvJSON struct {
-	Via         apijson.Field
-	Name        apijson.Field
+type v2ProviderInfoApiAisdkJSON struct {
+	Type        apijson.Field
+	Package     apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *V2ProviderInfoEnabledEnv) UnmarshalJSON(data []byte) (err error) {
+func (r *V2ProviderInfoApiAisdk) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r v2ProviderInfoEnabledEnvJSON) RawJSON() string {
+func (r v2ProviderInfoApiAisdkJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r V2ProviderInfoEnabledEnv) implementsV2ProviderInfoEnabledUnion() {}
+func (r V2ProviderInfoApiAisdk) implementsV2ProviderInfoApiUnion() {}
 
-type V2ProviderInfoEnabledAuth struct {
-	Via     string                        `json:"via,required"`
-	Service string                        `json:"service,required"`
-	JSON    v2ProviderInfoEnabledAuthJSON `json:"-"`
+type V2ProviderInfoApiNative struct {
+	Type V2ProviderInfoApiType `json:"type,required"`
+	URL  string                `json:"url"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Settings interface{}                 `json:"settings,required"`
+	JSON     v2ProviderInfoApiNativeJSON `json:"-"`
 }
 
-type v2ProviderInfoEnabledAuthJSON struct {
-	Via         apijson.Field
-	Service     apijson.Field
+type v2ProviderInfoApiNativeJSON struct {
+	Type        apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *V2ProviderInfoEnabledAuth) UnmarshalJSON(data []byte) (err error) {
+func (r *V2ProviderInfoApiNative) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r v2ProviderInfoEnabledAuthJSON) RawJSON() string {
+func (r v2ProviderInfoApiNativeJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r V2ProviderInfoEnabledAuth) implementsV2ProviderInfoEnabledUnion() {}
+func (r V2ProviderInfoApiNative) implementsV2ProviderInfoApiUnion() {}
 
-type V2ProviderInfoEnabledCustom struct {
-	Via  string                          `json:"via,required"`
-	Data map[string]interface{}          `json:"data,required"`
-	JSON v2ProviderInfoEnabledCustomJSON `json:"-"`
+type V2ProviderInfoApiType string
+
+const (
+	V2ProviderInfoApiTypeAisdk  V2ProviderInfoApiType = "aisdk"
+	V2ProviderInfoApiTypeNative V2ProviderInfoApiType = "native"
+)
+
+func (r V2ProviderInfoApiType) IsKnown() bool {
+	switch r {
+	case V2ProviderInfoApiTypeAisdk, V2ProviderInfoApiTypeNative:
+		return true
+	}
+	return false
 }
-
-type v2ProviderInfoEnabledCustomJSON struct {
-	Via         apijson.Field
-	Data        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ProviderInfoEnabledCustom) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ProviderInfoEnabledCustomJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r V2ProviderInfoEnabledCustom) implementsV2ProviderInfoEnabledUnion() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ProviderInfoEnabledUnion)(nil)).Elem(),
-		"",
+		reflect.TypeOf((*V2ProviderInfoApiUnion)(nil)).Elem(),
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoEnabledEnv{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "aisdk",
+			Type:               reflect.TypeOf(V2ProviderInfoApiAisdk{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoEnabledAuth{}),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoEnabledCustom{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "native",
+			Type:               reflect.TypeOf(V2ProviderInfoApiNative{}),
 		},
 	)
+}
+
+type V2ProviderInfoRequest struct {
+	Headers map[string]string `json:"headers,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Body map[string]interface{}    `json:"body,required"`
+	JSON v2ProviderInfoRequestJSON `json:"-"`
+}
+
+type v2ProviderInfoRequestJSON struct {
+	Headers     apijson.Field
+	Body        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ProviderInfoRequest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ProviderInfoRequestJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2ProviderListParams struct {

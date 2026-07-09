@@ -88,8 +88,6 @@ type Config struct {
 	Formatter    map[string]ConfigFormatter `json:"formatter"`
 	// Additional instruction files or patterns to include
 	Instructions []string `json:"instructions"`
-	// Custom keybind configurations
-	Keybinds KeybindsConfig `json:"keybinds"`
 	// @deprecated Always uses stretch layout.
 	Layout ConfigLayout `json:"layout"`
 	// Log level for the application
@@ -107,6 +105,11 @@ type Config struct {
 	Provider map[string]ConfigProvider `json:"provider"`
 	// Reference configuration for external documentation
 	Reference ReferenceConfig `json:"reference"`
+	// References from external sources. Keys are reference names, values can be a
+	// plain URL/path string or a structured config (git or local).
+	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
+	// [ConfigV2ReferenceLocal].
+	References map[string]interface{} `json:"references"`
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
 	Share ConfigShare `json:"share"`
@@ -120,13 +123,9 @@ type Config struct {
 	// provider/model
 	SmallModel string `json:"small_model"`
 	Snapshot   bool   `json:"snapshot"`
-	// Theme name to use for the interface
-	Theme string `json:"theme"`
 	// Tool output configuration
 	ToolOutput ConfigToolOutput `json:"tool_output"`
 	Tools      map[string]bool  `json:"tools"`
-	// TUI specific settings
-	Tui ConfigTui `json:"tui"`
 	// Custom username to display in conversations instead of system username
 	Username string        `json:"username"`
 	Watcher  ConfigWatcher `json:"watcher"`
@@ -150,7 +149,6 @@ type configJSON struct {
 	Experimental      apijson.Field
 	Formatter         apijson.Field
 	Instructions      apijson.Field
-	Keybinds          apijson.Field
 	Layout            apijson.Field
 	LogLevel          apijson.Field
 	Lsp               apijson.Field
@@ -161,16 +159,15 @@ type configJSON struct {
 	Plugin            apijson.Field
 	Provider          apijson.Field
 	Reference         apijson.Field
+	References        apijson.Field
 	Share             apijson.Field
 	Shell             apijson.Field
 	Server            apijson.Field
 	Skills            apijson.Field
 	SmallModel        apijson.Field
 	Snapshot          apijson.Field
-	Theme             apijson.Field
 	ToolOutput        apijson.Field
 	Tools             apijson.Field
-	Tui               apijson.Field
 	Username          apijson.Field
 	Watcher           apijson.Field
 	DefaultAgent      apijson.Field
@@ -400,10 +397,10 @@ func (r ConfigAgentBuildMode) IsKnown() bool {
 
 type ConfigAgentBuildPermission struct {
 	// This field can have the runtime type of [ConfigAgentBuildPermissionBashString], [ConfigAgentBuildPermissionBashMap].
-	Bash     interface{}                         `json:"bash"`
-	Edit     ConfigAgentBuildPermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentBuildPermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentBuildPermissionJSON      `json:"-"`
+	Bash     interface{}                        `json:"bash"`
+	Edit     ConfigAgentBuildPermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentBuildPermissionWebfetch `json:"webfetch"`
+	JSON     configAgentBuildPermissionJSON     `json:"-"`
 }
 
 // configAgentBuildPermissionJSON contains the JSON metadata for the struct
@@ -584,10 +581,10 @@ func (r ConfigAgentGeneralMode) IsKnown() bool {
 
 type ConfigAgentGeneralPermission struct {
 	// This field can have the runtime type of [ConfigAgentGeneralPermissionBashString], [ConfigAgentGeneralPermissionBashMap].
-	Bash     interface{}                            `json:"bash"`
-	Edit     ConfigAgentGeneralPermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentGeneralPermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentGeneralPermissionJSON      `json:"-"`
+	Bash     interface{}                          `json:"bash"`
+	Edit     ConfigAgentGeneralPermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentGeneralPermissionWebfetch `json:"webfetch"`
+	JSON     configAgentGeneralPermissionJSON     `json:"-"`
 }
 
 // configAgentGeneralPermissionJSON contains the JSON metadata for the struct
@@ -767,10 +764,10 @@ func (r ConfigAgentPlanMode) IsKnown() bool {
 
 type ConfigAgentPlanPermission struct {
 	// This field can have the runtime type of [ConfigAgentPlanPermissionBashString], [ConfigAgentPlanPermissionBashMap].
-	Bash     interface{}                         `json:"bash"`
-	Edit     ConfigAgentPlanPermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentPlanPermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentPlanPermissionJSON      `json:"-"`
+	Bash     interface{}                       `json:"bash"`
+	Edit     ConfigAgentPlanPermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentPlanPermissionWebfetch `json:"webfetch"`
+	JSON     configAgentPlanPermissionJSON     `json:"-"`
 }
 
 // configAgentPlanPermissionJSON contains the JSON metadata for the struct
@@ -950,10 +947,10 @@ func (r ConfigAgentExploreMode) IsKnown() bool {
 
 type ConfigAgentExplorePermission struct {
 	// This field can have the runtime type of [ConfigAgentExplorePermissionBashString], [ConfigAgentExplorePermissionBashMap].
-	Bash     interface{}                            `json:"bash"`
-	Edit     ConfigAgentExplorePermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentExplorePermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentExplorePermissionJSON      `json:"-"`
+	Bash     interface{}                          `json:"bash"`
+	Edit     ConfigAgentExplorePermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentExplorePermissionWebfetch `json:"webfetch"`
+	JSON     configAgentExplorePermissionJSON     `json:"-"`
 }
 
 // configAgentExplorePermissionJSON contains the JSON metadata for the struct
@@ -1132,10 +1129,10 @@ func (r ConfigAgentTitleMode) IsKnown() bool {
 
 type ConfigAgentTitlePermission struct {
 	// This field can have the runtime type of [ConfigAgentTitlePermissionBashString], [ConfigAgentTitlePermissionBashMap].
-	Bash     interface{}                         `json:"bash"`
-	Edit     ConfigAgentTitlePermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentTitlePermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentTitlePermissionJSON      `json:"-"`
+	Bash     interface{}                        `json:"bash"`
+	Edit     ConfigAgentTitlePermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentTitlePermissionWebfetch `json:"webfetch"`
+	JSON     configAgentTitlePermissionJSON     `json:"-"`
 }
 
 // configAgentTitlePermissionJSON contains the JSON metadata for the struct
@@ -1314,10 +1311,10 @@ func (r ConfigAgentSummaryMode) IsKnown() bool {
 
 type ConfigAgentSummaryPermission struct {
 	// This field can have the runtime type of [ConfigAgentSummaryPermissionBashString], [ConfigAgentSummaryPermissionBashMap].
-	Bash     interface{}                            `json:"bash"`
-	Edit     ConfigAgentSummaryPermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentSummaryPermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentSummaryPermissionJSON      `json:"-"`
+	Bash     interface{}                          `json:"bash"`
+	Edit     ConfigAgentSummaryPermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentSummaryPermissionWebfetch `json:"webfetch"`
+	JSON     configAgentSummaryPermissionJSON     `json:"-"`
 }
 
 // configAgentSummaryPermissionJSON contains the JSON metadata for the struct
@@ -1497,10 +1494,10 @@ func (r ConfigAgentCompactionMode) IsKnown() bool {
 
 type ConfigAgentCompactionPermission struct {
 	// This field can have the runtime type of [ConfigAgentCompactionPermissionBashString], [ConfigAgentCompactionPermissionBashMap].
-	Bash     interface{}                               `json:"bash"`
-	Edit     ConfigAgentCompactionPermissionEdit      `json:"edit"`
-	Webfetch ConfigAgentCompactionPermissionWebfetch  `json:"webfetch"`
-	JSON     configAgentCompactionPermissionJSON      `json:"-"`
+	Bash     interface{}                             `json:"bash"`
+	Edit     ConfigAgentCompactionPermissionEdit     `json:"edit"`
+	Webfetch ConfigAgentCompactionPermissionWebfetch `json:"webfetch"`
+	JSON     configAgentCompactionPermissionJSON     `json:"-"`
 }
 
 // configAgentCompactionPermissionJSON contains the JSON metadata for the struct
@@ -2070,10 +2067,10 @@ func (r ConfigModeBuildMode) IsKnown() bool {
 
 type ConfigModeBuildPermission struct {
 	// This field can have the runtime type of [ConfigModeBuildPermissionBashString], [ConfigModeBuildPermissionBashMap].
-	Bash     interface{}                         `json:"bash"`
-	Edit     ConfigModeBuildPermissionEdit      `json:"edit"`
-	Webfetch ConfigModeBuildPermissionWebfetch  `json:"webfetch"`
-	JSON     configModeBuildPermissionJSON      `json:"-"`
+	Bash     interface{}                       `json:"bash"`
+	Edit     ConfigModeBuildPermissionEdit     `json:"edit"`
+	Webfetch ConfigModeBuildPermissionWebfetch `json:"webfetch"`
+	JSON     configModeBuildPermissionJSON     `json:"-"`
 }
 
 // configModeBuildPermissionJSON contains the JSON metadata for the struct
@@ -2241,10 +2238,10 @@ func (r ConfigModePlanMode) IsKnown() bool {
 
 type ConfigModePlanPermission struct {
 	// This field can have the runtime type of [ConfigModePlanPermissionBashString], [ConfigModePlanPermissionBashMap].
-	Bash     interface{}                         `json:"bash"`
-	Edit     ConfigModePlanPermissionEdit      `json:"edit"`
-	Webfetch ConfigModePlanPermissionWebfetch  `json:"webfetch"`
-	JSON     configModePlanPermissionJSON      `json:"-"`
+	Bash     interface{}                      `json:"bash"`
+	Edit     ConfigModePlanPermissionEdit     `json:"edit"`
+	Webfetch ConfigModePlanPermissionWebfetch `json:"webfetch"`
+	JSON     configModePlanPermissionJSON     `json:"-"`
 }
 
 // configModePlanPermissionJSON contains the JSON metadata for the struct
@@ -2358,9 +2355,9 @@ func (r ConfigModePlanPermissionWebfetch) IsKnown() bool {
 
 type ConfigPermission struct {
 	// This field can have the runtime type of [ConfigPermissionBashString], [ConfigPermissionBashMap].
-	Bash     interface{}            `json:"bash"`
-	Edit     ConfigPermissionEdit   `json:"edit"`
-	Webfetch ConfigPermissionWebfetch  `json:"webfetch"`
+	Bash     interface{}              `json:"bash"`
+	Edit     ConfigPermissionEdit     `json:"edit"`
+	Webfetch ConfigPermissionWebfetch `json:"webfetch"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
 	Read interface{} `json:"read"`
 	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
@@ -2865,9 +2862,9 @@ type ConfigProviderOptions struct {
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
 	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	HeaderTimeout interface{} `json:"headerTimeout"`
-	ExtraFields   map[string]interface{} `json:"-,extras"`
-	JSON          configProviderOptionsJSON      `json:"-"`
+	HeaderTimeout interface{}               `json:"headerTimeout"`
+	ExtraFields   map[string]interface{}    `json:"-,extras"`
+	JSON          configProviderOptionsJSON `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
@@ -2935,28 +2932,6 @@ func (r ConfigShare) IsKnown() bool {
 	return false
 }
 
-// TUI specific settings
-type ConfigTui struct {
-	// TUI scroll speed
-	ScrollSpeed float64       `json:"scroll_speed"`
-	JSON        configTuiJSON `json:"-"`
-}
-
-// configTuiJSON contains the JSON metadata for the struct [ConfigTui]
-type configTuiJSON struct {
-	ScrollSpeed apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigTui) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configTuiJSON) RawJSON() string {
-	return r.raw
-}
-
 type ConfigWatcher struct {
 	Ignore []string          `json:"ignore"`
 	JSON   configWatcherJSON `json:"-"`
@@ -2974,172 +2949,6 @@ func (r *ConfigWatcher) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r configWatcherJSON) RawJSON() string {
-	return r.raw
-}
-
-// Custom keybind configurations
-type KeybindsConfig struct {
-	// Next agent
-	AgentCycle string `json:"agent_cycle"`
-	// Previous agent
-	AgentCycleReverse string `json:"agent_cycle_reverse"`
-	// List agents
-	AgentList string `json:"agent_list"`
-	// Exit the application
-	AppExit string `json:"app_exit"`
-	// Show help dialog
-	AppHelp string `json:"app_help"`
-	// Open external editor
-	EditorOpen string `json:"editor_open"`
-	// @deprecated Close file
-	FileClose string `json:"file_close"`
-	// @deprecated Split/unified diff
-	FileDiffToggle string `json:"file_diff_toggle"`
-	// @deprecated Currently not available. List files
-	FileList string `json:"file_list"`
-	// @deprecated Search file
-	FileSearch string `json:"file_search"`
-	// Clear input field
-	InputClear string `json:"input_clear"`
-	// Insert newline in input
-	InputNewline string `json:"input_newline"`
-	// Paste from clipboard
-	InputPaste string `json:"input_paste"`
-	// Submit input
-	InputSubmit string `json:"input_submit"`
-	// Leader key for keybind combinations
-	Leader string `json:"leader"`
-	// Copy message
-	MessagesCopy string `json:"messages_copy"`
-	// Navigate to first message
-	MessagesFirst string `json:"messages_first"`
-	// Scroll messages down by half page
-	MessagesHalfPageDown string `json:"messages_half_page_down"`
-	// Scroll messages up by half page
-	MessagesHalfPageUp string `json:"messages_half_page_up"`
-	// Navigate to last message
-	MessagesLast string `json:"messages_last"`
-	// @deprecated Toggle layout
-	MessagesLayoutToggle string `json:"messages_layout_toggle"`
-	// @deprecated Navigate to next message
-	MessagesNext string `json:"messages_next"`
-	// Scroll messages down by one page
-	MessagesPageDown string `json:"messages_page_down"`
-	// Scroll messages up by one page
-	MessagesPageUp string `json:"messages_page_up"`
-	// @deprecated Navigate to previous message
-	MessagesPrevious string `json:"messages_previous"`
-	// Redo message
-	MessagesRedo string `json:"messages_redo"`
-	// @deprecated use messages_undo. Revert message
-	MessagesRevert string `json:"messages_revert"`
-	// Undo message
-	MessagesUndo string `json:"messages_undo"`
-	// Next recent model
-	ModelCycleRecent string `json:"model_cycle_recent"`
-	// Previous recent model
-	ModelCycleRecentReverse string `json:"model_cycle_recent_reverse"`
-	// List available models
-	ModelList string `json:"model_list"`
-	// Create/update AGENTS.md
-	ProjectInit string `json:"project_init"`
-	// Cycle to next child session
-	SessionChildCycle string `json:"session_child_cycle"`
-	// Cycle to previous child session
-	SessionChildCycleReverse string `json:"session_child_cycle_reverse"`
-	// Compact the session
-	SessionCompact string `json:"session_compact"`
-	// Export session to editor
-	SessionExport string `json:"session_export"`
-	// Interrupt current session
-	SessionInterrupt string `json:"session_interrupt"`
-	// List all sessions
-	SessionList string `json:"session_list"`
-	// Create a new session
-	SessionNew string `json:"session_new"`
-	// Share current session
-	SessionShare string `json:"session_share"`
-	// Show session timeline
-	SessionTimeline string `json:"session_timeline"`
-	// Unshare current session
-	SessionUnshare string `json:"session_unshare"`
-	// @deprecated use agent_cycle. Next agent
-	SwitchAgent string `json:"switch_agent"`
-	// @deprecated use agent_cycle_reverse. Previous agent
-	SwitchAgentReverse string `json:"switch_agent_reverse"`
-	// @deprecated use agent_cycle. Next mode
-	SwitchMode string `json:"switch_mode"`
-	// @deprecated use agent_cycle_reverse. Previous mode
-	SwitchModeReverse string `json:"switch_mode_reverse"`
-	// List available themes
-	ThemeList string `json:"theme_list"`
-	// Toggle thinking blocks
-	ThinkingBlocks string `json:"thinking_blocks"`
-	// Toggle tool details
-	ToolDetails string             `json:"tool_details"`
-	JSON        keybindsConfigJSON `json:"-"`
-}
-
-// keybindsConfigJSON contains the JSON metadata for the struct [KeybindsConfig]
-type keybindsConfigJSON struct {
-	AgentCycle               apijson.Field
-	AgentCycleReverse        apijson.Field
-	AgentList                apijson.Field
-	AppExit                  apijson.Field
-	AppHelp                  apijson.Field
-	EditorOpen               apijson.Field
-	FileClose                apijson.Field
-	FileDiffToggle           apijson.Field
-	FileList                 apijson.Field
-	FileSearch               apijson.Field
-	InputClear               apijson.Field
-	InputNewline             apijson.Field
-	InputPaste               apijson.Field
-	InputSubmit              apijson.Field
-	Leader                   apijson.Field
-	MessagesCopy             apijson.Field
-	MessagesFirst            apijson.Field
-	MessagesHalfPageDown     apijson.Field
-	MessagesHalfPageUp       apijson.Field
-	MessagesLast             apijson.Field
-	MessagesLayoutToggle     apijson.Field
-	MessagesNext             apijson.Field
-	MessagesPageDown         apijson.Field
-	MessagesPageUp           apijson.Field
-	MessagesPrevious         apijson.Field
-	MessagesRedo             apijson.Field
-	MessagesRevert           apijson.Field
-	MessagesUndo             apijson.Field
-	ModelCycleRecent         apijson.Field
-	ModelCycleRecentReverse  apijson.Field
-	ModelList                apijson.Field
-	ProjectInit              apijson.Field
-	SessionChildCycle        apijson.Field
-	SessionChildCycleReverse apijson.Field
-	SessionCompact           apijson.Field
-	SessionExport            apijson.Field
-	SessionInterrupt         apijson.Field
-	SessionList              apijson.Field
-	SessionNew               apijson.Field
-	SessionShare             apijson.Field
-	SessionTimeline          apijson.Field
-	SessionUnshare           apijson.Field
-	SwitchAgent              apijson.Field
-	SwitchAgentReverse       apijson.Field
-	SwitchMode               apijson.Field
-	SwitchModeReverse        apijson.Field
-	ThemeList                apijson.Field
-	ThinkingBlocks           apijson.Field
-	ToolDetails              apijson.Field
-	raw                      string
-	ExtraFields              map[string]apijson.Field
-}
-
-func (r *KeybindsConfig) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r keybindsConfigJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -3278,7 +3087,6 @@ type ConfigUpdateParams struct {
 	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
 	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
 	Instructions      param.Field[[]string]                   `json:"instructions"`
-	Keybinds          param.Field[KeybindsConfig]             `json:"keybinds"`
 	Layout            param.Field[ConfigLayout]               `json:"layout"`
 	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
 	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
@@ -3289,16 +3097,15 @@ type ConfigUpdateParams struct {
 	Plugin            param.Field[[]string]                   `json:"plugin"`
 	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
 	Reference         param.Field[ReferenceConfig]            `json:"reference"`
+	References        param.Field[map[string]interface{}]     `json:"references"`
 	Share             param.Field[ConfigShare]                `json:"share"`
 	Shell             param.Field[string]                     `json:"shell"`
 	Server            param.Field[ServerConfig]               `json:"server"`
 	Skills            param.Field[ConfigSkills]               `json:"skills"`
 	SmallModel        param.Field[string]                     `json:"small_model"`
 	Snapshot          param.Field[bool]                       `json:"snapshot"`
-	Theme             param.Field[string]                     `json:"theme"`
 	ToolOutput        param.Field[ConfigToolOutput]           `json:"tool_output"`
 	Tools             param.Field[map[string]bool]            `json:"tools"`
-	Tui               param.Field[ConfigTui]                  `json:"tui"`
 	Username          param.Field[string]                     `json:"username"`
 	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
 	DefaultAgent      param.Field[string]                     `json:"default_agent"`
@@ -3455,6 +3262,63 @@ func (r *ReferenceConfigEntryPath) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r referenceConfigEntryPathJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigV2ReferenceGit struct {
+	// Git repository URL, host/path reference, or GitHub owner/repo shorthand
+	Repository string `json:"repository,required"`
+	// Branch to reference
+	Branch string `json:"branch"`
+	// Human-readable description of the reference
+	Description string `json:"description"`
+	// Whether to hide this reference from listings
+	Hidden bool                     `json:"hidden"`
+	JSON   configV2ReferenceGitJSON `json:"-"`
+}
+
+// configV2ReferenceGitJSON contains the JSON metadata for the struct [ConfigV2ReferenceGit]
+type configV2ReferenceGitJSON struct {
+	Repository  apijson.Field
+	Branch      apijson.Field
+	Description apijson.Field
+	Hidden      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigV2ReferenceGit) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configV2ReferenceGitJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConfigV2ReferenceLocal struct {
+	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
+	Path string `json:"path,required"`
+	// Human-readable description of the reference
+	Description string `json:"description"`
+	// Whether to hide this reference from listings
+	Hidden bool                       `json:"hidden"`
+	JSON   configV2ReferenceLocalJSON `json:"-"`
+}
+
+// configV2ReferenceLocalJSON contains the JSON metadata for the struct [ConfigV2ReferenceLocal]
+type configV2ReferenceLocalJSON struct {
+	Path        apijson.Field
+	Description apijson.Field
+	Hidden      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigV2ReferenceLocal) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configV2ReferenceLocalJSON) RawJSON() string {
 	return r.raw
 }
 

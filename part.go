@@ -91,11 +91,17 @@ func (r PartDeleteParams) URLQuery() (v url.Values) {
 type PartUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
-	Part      param.Field[Part]   `json:"part"`
+	// Part is the request body — the patch body itself is a Part object
+	// (OpenAPI: $ref: Part), so this field's value is serialized as the body root.
+	// When Part is not set, an empty object is sent (JS SDK treats `part` as optional).
+	Part param.Field[Part] `json:"part"`
 }
 
 func (r PartUpdateParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	if r.Part.Present {
+		return apijson.MarshalRoot(r.Part)
+	}
+	return []byte("{}"), nil
 }
 
 func (r PartUpdateParams) URLQuery() (v url.Values) {

@@ -35,7 +35,7 @@ func NewWorktreeService(opts ...option.RequestOption) (r *WorktreeService) {
 }
 
 // List worktrees
-func (r *WorktreeService) List(ctx context.Context, query WorktreeListParams, opts ...option.RequestOption) (res *[]Worktree, err error) {
+func (r *WorktreeService) List(ctx context.Context, query WorktreeListParams, opts ...option.RequestOption) (res *[]string, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/worktree"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)

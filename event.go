@@ -3375,20 +3375,23 @@ func (r EventListResponseEventWorktreeFailedType) IsKnown() bool {
 }
 
 type Pty struct {
-	Args    []string  `json:"args,required"`
-	Command string    `json:"command,required"`
-	Cwd     string    `json:"cwd,required"`
-	ID      string    `json:"id,required"`
-	Pid     int64     `json:"pid,required"`
-	Status  PtyStatus `json:"status,required"`
-	Title   string    `json:"title,required"`
-	JSON    ptyJSON   `json:"-"`
+	Args    []string `json:"args,required"`
+	Command string   `json:"command,required"`
+	Cwd     string   `json:"cwd,required"`
+	// ExitCode is the exit code of the PTY process if it has exited.
+	ExitCode int64     `json:"exitCode"`
+	ID       string    `json:"id,required"`
+	Pid      int64     `json:"pid,required"`
+	Status   PtyStatus `json:"status,required"`
+	Title    string    `json:"title,required"`
+	JSON     ptyJSON   `json:"-"`
 }
 
 type ptyJSON struct {
 	Args        apijson.Field
 	Command     apijson.Field
 	Cwd         apijson.Field
+	ExitCode    apijson.Field
 	ID          apijson.Field
 	Pid         apijson.Field
 	Status      apijson.Field
