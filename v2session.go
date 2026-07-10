@@ -1666,13 +1666,13 @@ type V2SessionPromptParamsBody struct {
 type SessionDelivery string
 
 const (
-	SessionDeliveryImmediate SessionDelivery = "immediate"
-	SessionDeliveryDeferred  SessionDelivery = "deferred"
+	SessionDeliverySteer SessionDelivery = "steer"
+	SessionDeliveryQueue SessionDelivery = "queue"
 )
 
 func (r SessionDelivery) IsKnown() bool {
 	switch r {
-	case SessionDeliveryImmediate, SessionDeliveryDeferred:
+	case SessionDeliverySteer, SessionDeliveryQueue:
 		return true
 	}
 	return false

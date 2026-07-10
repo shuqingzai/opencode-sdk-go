@@ -200,6 +200,7 @@ func (r ProviderAuthError1Name) IsKnown() bool {
 	return false
 }
 
+
 type UnknownError struct {
 	Data UnknownErrorData `json:"data,required"`
 	Name UnknownErrorName `json:"name,required"`

@@ -1445,24 +1445,6 @@ func (r V2EventPermissionAskedDataToolJSON) RawJSON() string {
 	return r.raw
 }
 
-type V2EventPermissionRepliedReply string
-
-const (
-	V2EventPermissionRepliedReplyOnce   V2EventPermissionRepliedReply = "once"
-	V2EventPermissionRepliedReplyAlways V2EventPermissionRepliedReply = "always"
-	V2EventPermissionRepliedReplyReject V2EventPermissionRepliedReply = "reject"
-)
-
-func (r V2EventPermissionRepliedReply) IsKnown() bool {
-	switch r {
-	case V2EventPermissionRepliedReplyOnce,
-		V2EventPermissionRepliedReplyAlways,
-		V2EventPermissionRepliedReplyReject:
-		return true
-	}
-	return false
-}
-
 type V2EventPermissionReplied struct {
 	Data V2EventPermissionRepliedData `json:"data,required"`
 	Type V2EventPermissionRepliedType `json:"type,required"`
@@ -1501,10 +1483,10 @@ func (r V2EventPermissionRepliedType) IsKnown() bool {
 }
 
 type V2EventPermissionRepliedData struct {
-	Reply     V2EventPermissionRepliedReply    `json:"reply,required"`
-	RequestID string                           `json:"requestID,required"`
-	SessionID string                           `json:"sessionID,required"`
-	JSON      v2EventPermissionRepliedDataJSON `json:"-"`
+	Reply     PermissionV2Reply                  `json:"reply,required"`
+	RequestID string                             `json:"requestID,required"`
+	SessionID string                             `json:"sessionID,required"`
+	JSON      v2EventPermissionRepliedDataJSON   `json:"-"`
 }
 
 type v2EventPermissionRepliedDataJSON struct {

@@ -38,7 +38,7 @@ func NewV2PtyService(opts ...option.RequestOption) (r *V2PtyService) {
 }
 
 // List v2 PTYs
-func (r *V2PtyService) List(ctx context.Context, query V2PtyListParams, opts ...option.RequestOption) (res *[]V2PtyInfo, err error) {
+func (r *V2PtyService) List(ctx context.Context, query V2PtyListParams, opts ...option.RequestOption) (res *V2PtyListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/pty"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -46,7 +46,7 @@ func (r *V2PtyService) List(ctx context.Context, query V2PtyListParams, opts ...
 }
 
 // Create a v2 PTY
-func (r *V2PtyService) Create(ctx context.Context, params V2PtyCreateParams, opts ...option.RequestOption) (res *V2PtyInfo, err error) {
+func (r *V2PtyService) Create(ctx context.Context, params V2PtyCreateParams, opts ...option.RequestOption) (res *V2PtyCreateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/pty"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
@@ -54,7 +54,7 @@ func (r *V2PtyService) Create(ctx context.Context, params V2PtyCreateParams, opt
 }
 
 // Get a v2 PTY
-func (r *V2PtyService) Get(ctx context.Context, ptyID string, query V2PtyGetParams, opts ...option.RequestOption) (res *V2PtyInfo, err error) {
+func (r *V2PtyService) Get(ctx context.Context, ptyID string, query V2PtyGetParams, opts ...option.RequestOption) (res *V2PtyGetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
 		err = errors.New("missing required ptyID parameter")
@@ -66,7 +66,7 @@ func (r *V2PtyService) Get(ctx context.Context, ptyID string, query V2PtyGetPara
 }
 
 // Update a v2 PTY
-func (r *V2PtyService) Update(ctx context.Context, ptyID string, params V2PtyUpdateParams, opts ...option.RequestOption) (res *V2PtyInfo, err error) {
+func (r *V2PtyService) Update(ctx context.Context, ptyID string, params V2PtyUpdateParams, opts ...option.RequestOption) (res *V2PtyUpdateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
 		err = errors.New("missing required ptyID parameter")
@@ -78,14 +78,14 @@ func (r *V2PtyService) Update(ctx context.Context, ptyID string, params V2PtyUpd
 }
 
 // Remove a v2 PTY
-func (r *V2PtyService) Remove(ctx context.Context, ptyID string, query V2PtyRemoveParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2PtyService) Remove(ctx context.Context, ptyID string, query V2PtyRemoveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
 		err = errors.New("missing required ptyID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/pty/%s", ptyID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, nil, opts...)
 	return
 }
 
@@ -107,7 +107,7 @@ func (r *V2PtyService) Connect(ctx context.Context, ptyID string, query V2PtyCon
 }
 
 // Create a short-lived ticket for opening a PTY WebSocket connection.
-func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2PtyConnectTokenParams, opts ...option.RequestOption) (res *PtyConnectToken, err error) {
+func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2PtyConnectTokenParams, opts ...option.RequestOption) (res *V2PtyConnectTokenResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
 		err = errors.New("missing required ptyID parameter")
@@ -121,6 +121,12 @@ func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2P
 // ===== Response Types =====
 
 // V2PtyInfo represents a PTY session.
+//
+// Deprecated: Use [Pty] from the response wrappers ([V2PtyListResponse], [V2PtyCreateResponse],
+// [V2PtyGetResponse], [V2PtyUpdateResponse]) instead. The v2 PTY methods now return the
+// OpenAPI {location, data} envelope types.
+//
+// @deprecated
 type V2PtyInfo struct {
 	ID       string        `json:"id,required"`
 	Title    string        `json:"title,required"`
@@ -156,6 +162,8 @@ func (r v2PtyInfoJSON) RawJSON() string {
 }
 
 // V2PtyStatus represents the status of a PTY session.
+//
+// @deprecated
 type V2PtyStatus string
 
 const (
@@ -273,6 +281,128 @@ func (r *PtyLocation) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r ptyLocationJSON) RawJSON() string {
+	return r.raw
+}
+
+// ===== Response Wrappers =====
+
+// V2PtyListResponse is returned by the List method. It wraps PTY sessions in the
+// OpenAPI {location, data} envelope.
+type V2PtyListResponse struct {
+	Location LocationInfo            `json:"location,required"`
+	Data     []Pty                   `json:"data,required"`
+	JSON     v2PtyListResponseJSON   `json:"-"`
+}
+
+// v2PtyListResponseJSON contains the JSON metadata for the struct [V2PtyListResponse]
+type v2PtyListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2PtyListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2PtyListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2PtyCreateResponse is returned by the Create method. It wraps a PTY session in
+// the OpenAPI {location, data} envelope.
+type V2PtyCreateResponse struct {
+	Location LocationInfo              `json:"location,required"`
+	Data     Pty                       `json:"data,required"`
+	JSON     v2PtyCreateResponseJSON   `json:"-"`
+}
+
+// v2PtyCreateResponseJSON contains the JSON metadata for the struct [V2PtyCreateResponse]
+type v2PtyCreateResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2PtyCreateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2PtyCreateResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2PtyGetResponse is returned by the Get method. It wraps a PTY session in the
+// OpenAPI {location, data} envelope.
+type V2PtyGetResponse struct {
+	Location LocationInfo           `json:"location,required"`
+	Data     Pty                    `json:"data,required"`
+	JSON     v2PtyGetResponseJSON   `json:"-"`
+}
+
+// v2PtyGetResponseJSON contains the JSON metadata for the struct [V2PtyGetResponse]
+type v2PtyGetResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2PtyGetResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2PtyGetResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2PtyUpdateResponse is returned by the Update method. It wraps a PTY session in
+// the OpenAPI {location, data} envelope.
+type V2PtyUpdateResponse struct {
+	Location LocationInfo              `json:"location,required"`
+	Data     Pty                       `json:"data,required"`
+	JSON     v2PtyUpdateResponseJSON   `json:"-"`
+}
+
+// v2PtyUpdateResponseJSON contains the JSON metadata for the struct [V2PtyUpdateResponse]
+type v2PtyUpdateResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2PtyUpdateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2PtyUpdateResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2PtyConnectTokenResponse is returned by the ConnectToken method. It wraps the
+// connect token in the OpenAPI {location, data} envelope.
+type V2PtyConnectTokenResponse struct {
+	Location LocationInfo                   `json:"location,required"`
+	Data     PtyConnectToken                `json:"data,required"`
+	JSON     v2PtyConnectTokenResponseJSON   `json:"-"`
+}
+
+// v2PtyConnectTokenResponseJSON contains the JSON metadata for the struct [V2PtyConnectTokenResponse]
+type v2PtyConnectTokenResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2PtyConnectTokenResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2PtyConnectTokenResponseJSON) RawJSON() string {
 	return r.raw
 }
 
