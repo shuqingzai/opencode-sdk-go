@@ -1731,10 +1731,10 @@ func (r SyncEventSessionNextRevertCommitted) implementsSyncEventResponseSyncEven
 // SyncEventPrompt represents a prompt input, matching OpenAPI's Prompt schema
 // used by SyncEventSessionNextPromptAdmitted.
 type SyncEventPrompt struct {
-	Text   string                              `json:"text,required"`
-	Files  []V2PromptFileAttachment            `json:"files"`
-	Agents []V2PromptAgentAttachment           `json:"agents"`
-	JSON   syncEventPromptJSON                 `json:"-"`
+	Text   string                    `json:"text,required"`
+	Files  []V2PromptFileAttachment  `json:"files"`
+	Agents []V2PromptAgentAttachment `json:"agents"`
+	JSON   syncEventPromptJSON       `json:"-"`
 }
 
 type syncEventPromptJSON struct {
@@ -1768,11 +1768,11 @@ func (r SyncEventSessionNextContextUpdatedType) IsKnown() bool {
 }
 
 type SyncEventSessionNextContextUpdatedProperties struct {
-	Timestamp int64                                              `json:"timestamp,required"`
-	SessionID string                                             `json:"sessionID,required"`
-	MessageID string                                             `json:"messageID,required"`
-	Text      string                                             `json:"text,required"`
-	JSON      syncEventSessionNextContextUpdatedPropertiesJSON    `json:"-"`
+	Timestamp int64                                            `json:"timestamp,required"`
+	SessionID string                                           `json:"sessionID,required"`
+	MessageID string                                           `json:"messageID,required"`
+	Text      string                                           `json:"text,required"`
+	JSON      syncEventSessionNextContextUpdatedPropertiesJSON `json:"-"`
 }
 
 type syncEventSessionNextContextUpdatedPropertiesJSON struct {
@@ -1793,13 +1793,13 @@ func (r *SyncEventSessionNextContextUpdatedProperties) UnmarshalJSON(data []byte
 }
 
 type SyncEventSessionNextContextUpdated struct {
-	Type        SyncEventSessionNextContextUpdatedType             `json:"type,required"`
-	Name        string                                            `json:"name,required"`
-	ID          string                                            `json:"id,required"`
-	Seq         int64                                             `json:"seq,required"`
-	AggregateID string                                            `json:"aggregateID,required"`
-	Data        SyncEventSessionNextContextUpdatedProperties      `json:"data,required"`
-	JSON        syncEventSessionNextContextUpdatedJSON             `json:"-"`
+	Type        SyncEventSessionNextContextUpdatedType       `json:"type,required"`
+	Name        string                                       `json:"name,required"`
+	ID          string                                       `json:"id,required"`
+	Seq         int64                                        `json:"seq,required"`
+	AggregateID string                                       `json:"aggregateID,required"`
+	Data        SyncEventSessionNextContextUpdatedProperties `json:"data,required"`
+	JSON        syncEventSessionNextContextUpdatedJSON       `json:"-"`
 }
 
 type syncEventSessionNextContextUpdatedJSON struct {
@@ -1854,11 +1854,11 @@ func (r SyncEventSessionNextPromptAdmittedDelivery) IsKnown() bool {
 }
 
 type SyncEventSessionNextPromptAdmittedProperties struct {
-	Timestamp int64                                       `json:"timestamp,required"`
-	SessionID string                                      `json:"sessionID,required"`
-	MessageID string                                      `json:"messageID,required"`
-	Prompt    SyncEventPrompt                             `json:"prompt,required"`
-	Delivery  SyncEventSessionNextPromptAdmittedDelivery  `json:"delivery,required"`
+	Timestamp int64                                            `json:"timestamp,required"`
+	SessionID string                                           `json:"sessionID,required"`
+	MessageID string                                           `json:"messageID,required"`
+	Prompt    SyncEventPrompt                                  `json:"prompt,required"`
+	Delivery  SyncEventSessionNextPromptAdmittedDelivery       `json:"delivery,required"`
 	JSON      syncEventSessionNextPromptAdmittedPropertiesJSON `json:"-"`
 }
 
@@ -1881,13 +1881,13 @@ func (r *SyncEventSessionNextPromptAdmittedProperties) UnmarshalJSON(data []byte
 }
 
 type SyncEventSessionNextPromptAdmitted struct {
-	Type        SyncEventSessionNextPromptAdmittedType         `json:"type,required"`
-	Name        string                                        `json:"name,required"`
-	ID          string                                        `json:"id,required"`
-	Seq         int64                                         `json:"seq,required"`
-	AggregateID string                                        `json:"aggregateID,required"`
-	Data        SyncEventSessionNextPromptAdmittedProperties  `json:"data,required"`
-	JSON        syncEventSessionNextPromptAdmittedJSON         `json:"-"`
+	Type        SyncEventSessionNextPromptAdmittedType       `json:"type,required"`
+	Name        string                                       `json:"name,required"`
+	ID          string                                       `json:"id,required"`
+	Seq         int64                                        `json:"seq,required"`
+	AggregateID string                                       `json:"aggregateID,required"`
+	Data        SyncEventSessionNextPromptAdmittedProperties `json:"data,required"`
+	JSON        syncEventSessionNextPromptAdmittedJSON       `json:"-"`
 }
 
 type syncEventSessionNextPromptAdmittedJSON struct {

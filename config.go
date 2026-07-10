@@ -2698,18 +2698,38 @@ func (r configProviderModelJSON) RawJSON() string {
 
 type ConfigProviderModelsCost struct {
 	Input           float64                                 `json:"input,required"`
-	Output          int64                                   `json:"output,required"`
+	Output          float64                                 `json:"output,required"`
 	CacheRead       float64                                 `json:"cache_read"`
 	CacheWrite      float64                                 `json:"cache_write"`
-	ContextOver200k ConfigProviderModelsCostContextOver200k `json:"contextOver200k"`
+	ContextOver200k ConfigProviderModelsCostContextOver200k `json:"context_over_200k"`
 	JSON            configProviderModelsCostJSON            `json:"-"`
 }
 
 type ConfigProviderModelsCostContextOver200k struct {
-	Read   int64 `json:"read"`
-	Write  int64 `json:"write"`
-	Input  int64 `json:"input"`
-	Output int64 `json:"output"`
+	Input      float64                                     `json:"input,required"`
+	Output     float64                                     `json:"output,required"`
+	CacheRead  float64                                     `json:"cache_read"`
+	CacheWrite float64                                     `json:"cache_write"`
+	JSON       configProviderModelsCostContextOver200kJSON `json:"-"`
+}
+
+// configProviderModelsCostContextOver200kJSON contains the JSON metadata for the struct
+// [ConfigProviderModelsCostContextOver200k]
+type configProviderModelsCostContextOver200kJSON struct {
+	Input       apijson.Field
+	Output      apijson.Field
+	CacheRead   apijson.Field
+	CacheWrite  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigProviderModelsCostContextOver200k) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configProviderModelsCostContextOver200kJSON) RawJSON() string {
+	return r.raw
 }
 
 // configProviderModelsCostJSON contains the JSON metadata for the struct
@@ -2733,8 +2753,9 @@ func (r configProviderModelsCostJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsLimit struct {
-	Context int64                         `json:"context,required"`
-	Output  int64                         `json:"output,required"`
+	Context float64                       `json:"context,required"`
+	Input   float64                       `json:"input"`
+	Output  float64                       `json:"output,required"`
 	JSON    configProviderModelsLimitJSON `json:"-"`
 }
 
@@ -2742,6 +2763,7 @@ type ConfigProviderModelsLimit struct {
 // [ConfigProviderModelsLimit]
 type configProviderModelsLimitJSON struct {
 	Context     apijson.Field
+	Input       apijson.Field
 	Output      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -3138,7 +3160,7 @@ func (r ConfigProvidersParams) URLQuery() (v url.Values) {
 
 type ConfigProvidersResponse struct {
 	Default   map[string]string           `json:"default,required"`
-	Providers []Provider                  `json:"providers,required"`
+	Providers []ProviderInfo              `json:"providers,required"`
 	JSON      configProvidersResponseJSON `json:"-"`
 }
 

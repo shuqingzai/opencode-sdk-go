@@ -43,7 +43,7 @@ func (r *FileService) List(ctx context.Context, query FileListParams, opts ...op
 }
 
 // Read a file
-func (r *FileService) Read(ctx context.Context, query FileReadParams, opts ...option.RequestOption) (res *FileReadResponse, err error) {
+func (r *FileService) Read(ctx context.Context, query FileReadParams, opts ...option.RequestOption) (res *FileContent, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "file/content"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -143,19 +143,19 @@ func (r FileNodeType) IsKnown() bool {
 	return false
 }
 
-type FileReadResponse struct {
-	Content  string                   `json:"content,required"`
-	Type     FileReadResponseType     `json:"type,required"`
-	Diff     string                   `json:"diff"`
-	Encoding FileReadResponseEncoding `json:"encoding"`
-	MIMEType string                   `json:"mimeType"`
-	Patch    FileReadResponsePatch    `json:"patch"`
-	JSON     fileReadResponseJSON     `json:"-"`
+type FileContent struct {
+	Content  string              `json:"content,required"`
+	Type     FileContentType     `json:"type,required"`
+	Diff     string              `json:"diff"`
+	Encoding FileContentEncoding `json:"encoding"`
+	MIMEType string              `json:"mimeType"`
+	Patch    FileContentPatch    `json:"patch"`
+	JSON     fileContentJSON     `json:"-"`
 }
 
-// fileReadResponseJSON contains the JSON metadata for the struct
-// [FileReadResponse]
-type fileReadResponseJSON struct {
+// fileContentJSON contains the JSON metadata for the struct
+// [FileContent]
+type fileContentJSON struct {
 	Content     apijson.Field
 	Type        apijson.Field
 	Diff        apijson.Field
@@ -166,56 +166,56 @@ type fileReadResponseJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *FileReadResponse) UnmarshalJSON(data []byte) (err error) {
+func (r *FileContent) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r fileReadResponseJSON) RawJSON() string {
+func (r fileContentJSON) RawJSON() string {
 	return r.raw
 }
 
-type FileReadResponseType string
+type FileContentType string
 
 const (
-	FileReadResponseTypeText   FileReadResponseType = "text"
-	FileReadResponseTypeBinary FileReadResponseType = "binary"
+	FileContentTypeText   FileContentType = "text"
+	FileContentTypeBinary FileContentType = "binary"
 )
 
-func (r FileReadResponseType) IsKnown() bool {
+func (r FileContentType) IsKnown() bool {
 	switch r {
-	case FileReadResponseTypeText, FileReadResponseTypeBinary:
+	case FileContentTypeText, FileContentTypeBinary:
 		return true
 	}
 	return false
 }
 
-type FileReadResponseEncoding string
+type FileContentEncoding string
 
 const (
-	FileReadResponseEncodingBase64 FileReadResponseEncoding = "base64"
+	FileContentEncodingBase64 FileContentEncoding = "base64"
 )
 
-func (r FileReadResponseEncoding) IsKnown() bool {
+func (r FileContentEncoding) IsKnown() bool {
 	switch r {
-	case FileReadResponseEncodingBase64:
+	case FileContentEncodingBase64:
 		return true
 	}
 	return false
 }
 
-type FileReadResponsePatch struct {
-	Hunks       []FileReadResponsePatchHunk `json:"hunks,required"`
-	NewFileName string                      `json:"newFileName,required"`
-	OldFileName string                      `json:"oldFileName,required"`
-	Index       string                      `json:"index"`
-	NewHeader   string                      `json:"newHeader"`
-	OldHeader   string                      `json:"oldHeader"`
-	JSON        fileReadResponsePatchJSON   `json:"-"`
+type FileContentPatch struct {
+	Hunks       []FileContentPatchHunk `json:"hunks,required"`
+	NewFileName string                 `json:"newFileName,required"`
+	OldFileName string                 `json:"oldFileName,required"`
+	Index       string                 `json:"index"`
+	NewHeader   string                 `json:"newHeader"`
+	OldHeader   string                 `json:"oldHeader"`
+	JSON        fileContentPatchJSON   `json:"-"`
 }
 
-// fileReadResponsePatchJSON contains the JSON metadata for the struct
-// [FileReadResponsePatch]
-type fileReadResponsePatchJSON struct {
+// fileContentPatchJSON contains the JSON metadata for the struct
+// [FileContentPatch]
+type fileContentPatchJSON struct {
 	Hunks       apijson.Field
 	NewFileName apijson.Field
 	OldFileName apijson.Field
@@ -226,26 +226,26 @@ type fileReadResponsePatchJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *FileReadResponsePatch) UnmarshalJSON(data []byte) (err error) {
+func (r *FileContentPatch) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r fileReadResponsePatchJSON) RawJSON() string {
+func (r fileContentPatchJSON) RawJSON() string {
 	return r.raw
 }
 
-type FileReadResponsePatchHunk struct {
-	Lines    []string                      `json:"lines,required"`
-	NewLines int64                         `json:"newLines,required"`
-	NewStart int64                         `json:"newStart,required"`
-	OldLines int64                         `json:"oldLines,required"`
-	OldStart int64                         `json:"oldStart,required"`
-	JSON     fileReadResponsePatchHunkJSON `json:"-"`
+type FileContentPatchHunk struct {
+	Lines    []string                 `json:"lines,required"`
+	NewLines int64                    `json:"newLines,required"`
+	NewStart int64                    `json:"newStart,required"`
+	OldLines int64                    `json:"oldLines,required"`
+	OldStart int64                    `json:"oldStart,required"`
+	JSON     fileContentPatchHunkJSON `json:"-"`
 }
 
-// fileReadResponsePatchHunkJSON contains the JSON metadata for the struct
-// [FileReadResponsePatchHunk]
-type fileReadResponsePatchHunkJSON struct {
+// fileContentPatchHunkJSON contains the JSON metadata for the struct
+// [FileContentPatchHunk]
+type fileContentPatchHunkJSON struct {
 	Lines       apijson.Field
 	NewLines    apijson.Field
 	NewStart    apijson.Field
@@ -255,11 +255,11 @@ type fileReadResponsePatchHunkJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *FileReadResponsePatchHunk) UnmarshalJSON(data []byte) (err error) {
+func (r *FileContentPatchHunk) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r fileReadResponsePatchHunkJSON) RawJSON() string {
+func (r fileContentPatchHunkJSON) RawJSON() string {
 	return r.raw
 }
 

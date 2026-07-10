@@ -1200,13 +1200,13 @@ func (r v2SessionMessageAssistantTextContentJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantReasoningContent struct {
-	Type     string        `json:"type,required"`
-	ID       string        `json:"id,required"`
-	Text     string        `json:"text,required"`
+	Type string `json:"type,required"`
+	ID   string `json:"id,required"`
+	Text string `json:"text,required"`
 	// This field can have the runtime type of [map[string]interface{}].
 	ProviderMetadata interface{} `json:"providerMetadata"`
 	// This field can have the runtime type of [V2SessionMessageAssistantReasoningContentTime].
-	Time interface{}                                  `json:"time"`
+	Time interface{}                                   `json:"time"`
 	JSON v2SessionMessageAssistantReasoningContentJSON `json:"-"`
 }
 
@@ -1657,10 +1657,10 @@ func (r V2SessionPromptParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionPromptParamsBody struct {
-	ID       param.Field[string]                   `json:"id"`
-	Prompt   param.Field[V2PromptInputParam]       `json:"prompt,required"`
-	Delivery param.Field[SessionDelivery]          `json:"delivery"`
-	Resume   param.Field[bool]                     `json:"resume"`
+	ID       param.Field[string]             `json:"id"`
+	Prompt   param.Field[V2PromptInputParam] `json:"prompt,required"`
+	Delivery param.Field[SessionDelivery]    `json:"delivery"`
+	Resume   param.Field[bool]               `json:"resume"`
 }
 
 type SessionDelivery string
@@ -1685,9 +1685,9 @@ func (r V2SessionPromptParamsBody) MarshalJSON() (data []byte, err error) {
 // V2PromptInputParam represents the prompt input for the v2.session.prompt
 // request body.
 type V2PromptInputParam struct {
-	Text   param.Field[string]                            `json:"text,required"`
+	Text   param.Field[string]                             `json:"text,required"`
 	Files  param.Field[[]V2PromptInputFileAttachmentParam] `json:"files"`
-	Agents param.Field[[]V2PromptAgentAttachmentParam]    `json:"agents"`
+	Agents param.Field[[]V2PromptAgentAttachmentParam]     `json:"agents"`
 }
 
 func (r V2PromptInputParam) MarshalJSON() (data []byte, err error) {
@@ -1798,8 +1798,8 @@ func (r V2SessionMessagesParams) URLQuery() (v url.Values) {
 // V2SessionMessageAssistantReasoningContentTime contains the start and end
 // timestamps of an assistant reasoning content block.
 type V2SessionMessageAssistantReasoningContentTime struct {
-	Created   int64                                           `json:"created,required"`
-	Completed int64                                           `json:"completed"`
+	Created   int64                                             `json:"created,required"`
+	Completed int64                                             `json:"completed"`
 	JSON      v2SessionMessageAssistantReasoningContentTimeJSON `json:"-"`
 }
 
@@ -1876,12 +1876,12 @@ func (r revertStateJSON) RawJSON() string {
 
 // FileDiff represents a diff for a file.
 type FileDiff struct {
-	Path      string             `json:"path,required"`
-	Status    FileDiffStatus     `json:"status,required"`
-	Additions int64              `json:"additions,required"`
-	Deletions int64              `json:"deletions,required"`
-	Patch     string             `json:"patch,required"`
-	JSON      fileDiffJSON       `json:"-"`
+	Path      string         `json:"path,required"`
+	Status    FileDiffStatus `json:"status,required"`
+	Additions int64          `json:"additions,required"`
+	Deletions int64          `json:"deletions,required"`
+	Patch     string         `json:"patch,required"`
+	JSON      fileDiffJSON   `json:"-"`
 }
 
 // fileDiffJSON contains the JSON metadata for the struct [FileDiff]

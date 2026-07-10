@@ -118,7 +118,7 @@ func (r modelJSON) RawJSON() string {
 }
 
 type ModelCost struct {
-	Input      int64   `json:"input,required"`
+	Input      float64 `json:"input,required"`
 	Output     float64 `json:"output,required"`
 	CacheRead  float64 `json:"cache_read"`
 	CacheWrite float64 `json:"cache_write"`
@@ -147,14 +147,16 @@ func (r modelCostJSON) RawJSON() string {
 }
 
 type ModelLimit struct {
-	Context int64          `json:"context,required"`
-	Output  int64          `json:"output,required"`
+	Context float64        `json:"context,required"`
+	Input   float64        `json:"input"`
+	Output  float64        `json:"output,required"`
 	JSON    modelLimitJSON `json:"-"`
 }
 
 // modelLimitJSON contains the JSON metadata for the struct [ModelLimit]
 type modelLimitJSON struct {
 	Context     apijson.Field
+	Input       apijson.Field
 	Output      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -304,60 +306,6 @@ func (r ModelStatus) IsKnown() bool {
 		return true
 	}
 	return false
-}
-
-type ProviderSource string
-
-const (
-	ProviderSourceEnv    ProviderSource = "env"
-	ProviderSourceConfig ProviderSource = "config"
-	ProviderSourceCustom ProviderSource = "custom"
-	ProviderSourceAPI    ProviderSource = "api"
-)
-
-func (r ProviderSource) IsKnown() bool {
-	switch r {
-	case ProviderSourceEnv, ProviderSourceConfig, ProviderSourceCustom, ProviderSourceAPI:
-		return true
-	}
-	return false
-}
-
-type Provider struct {
-	ID     string           `json:"id,required"`
-	Env    []string         `json:"env,required"`
-	Models map[string]Model `json:"models,required"`
-	Name   string           `json:"name,required"`
-	API    string           `json:"api"`
-	NPM    string           `json:"npm"`
-	Source ProviderSource   `json:"source"`
-	Key    string           `json:"key"`
-	// This field can have the runtime type of object.
-	Options interface{}  `json:"options"`
-	JSON    providerJSON `json:"-"`
-}
-
-// providerJSON contains the JSON metadata for the struct [Provider]
-type providerJSON struct {
-	ID          apijson.Field
-	Env         apijson.Field
-	Models      apijson.Field
-	Name        apijson.Field
-	API         apijson.Field
-	NPM         apijson.Field
-	Source      apijson.Field
-	Key         apijson.Field
-	Options     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *Provider) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerJSON) RawJSON() string {
-	return r.raw
 }
 
 type AppLogParams struct {

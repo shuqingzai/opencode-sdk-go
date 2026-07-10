@@ -27,6 +27,7 @@ import (
 // the [NewMcpService] method instead.
 type McpService struct {
 	Options []option.RequestOption
+	Auth    *McpAuthService
 }
 
 // NewMcpService generates a new service that applies the given options to each
@@ -34,6 +35,26 @@ type McpService struct {
 // is one), and before any request-specific options.
 func NewMcpService(opts ...option.RequestOption) (r *McpService) {
 	r = &McpService{}
+	r.Options = opts
+	r.Auth = NewMcpAuthService(opts...)
+	return
+}
+
+// McpAuthService contains methods and other services that help with interacting
+// with the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewMcpAuthService] method instead.
+type McpAuthService struct {
+	Options []option.RequestOption
+}
+
+// NewMcpAuthService generates a new service that applies the given options to
+// each request. These options are applied after the parent client's options (if
+// there is one), and before any request-specific options.
+func NewMcpAuthService(opts ...option.RequestOption) (r *McpAuthService) {
+	r = &McpAuthService{}
 	r.Options = opts
 	return
 }
@@ -79,7 +100,7 @@ func (r *McpService) Disconnect(ctx context.Context, name string, query McpDisco
 }
 
 // Start MCP OAuth authentication flow
-func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthStartParams, opts ...option.RequestOption) (res *McpAuthStartResponse, err error) {
+func (r *McpAuthService) Start(ctx context.Context, name string, query McpAuthStartParams, opts ...option.RequestOption) (res *McpAuthStartResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -90,8 +111,13 @@ func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthSt
 	return
 }
 
+// Deprecated: Use Auth.Start instead.
+func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthStartParams, opts ...option.RequestOption) (res *McpAuthStartResponse, err error) {
+	return r.Auth.Start(ctx, name, query, opts...)
+}
+
 // OAuth callback
-func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
+func (r *McpAuthService) Callback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -102,8 +128,13 @@ func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAu
 	return
 }
 
+// Deprecated: Use Auth.Callback instead.
+func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
+	return r.Auth.Callback(ctx, name, params, opts...)
+}
+
 // Authenticate with MCP server
-func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
+func (r *McpAuthService) Authenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -114,8 +145,13 @@ func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query Mc
 	return
 }
 
+// Deprecated: Use Auth.Authenticate instead.
+func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
+	return r.Auth.Authenticate(ctx, name, query, opts...)
+}
+
 // Remove MCP server authentication
-func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
+func (r *McpAuthService) Remove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
@@ -124,6 +160,11 @@ func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthR
 	path := fmt.Sprintf("mcp/%s/auth", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
 	return
+}
+
+// Deprecated: Use Auth.Remove instead.
+func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
+	return r.Auth.Remove(ctx, name, query, opts...)
 }
 
 // McpStatus represents the status of an MCP server connection.

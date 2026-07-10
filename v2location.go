@@ -43,6 +43,12 @@ func (r *V2LocationService) Get(ctx context.Context, query V2LocationGetParams, 
 	return
 }
 
+// V2LocationParam contains the query parameters for location.
+type V2LocationParam struct {
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+}
+
 // V2LocationGetParams contains the query parameters for getting location.
 type V2LocationGetParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`

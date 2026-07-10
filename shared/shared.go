@@ -200,7 +200,6 @@ func (r ProviderAuthError1Name) IsKnown() bool {
 	return false
 }
 
-
 type UnknownError struct {
 	Data UnknownErrorData `json:"data,required"`
 	Name UnknownErrorName `json:"name,required"`
@@ -1519,10 +1518,10 @@ func (r EffectHttpApiErrorInternalServerErrorTag) IsKnown() bool {
 }
 
 type ConflictError struct {
-	Tag     ConflictErrorTag  `json:"_tag,required"`
-	Message string            `json:"message,required"`
-	Resource string           `json:"resource"`
-	JSON    conflictErrorJSON `json:"-"`
+	Tag      ConflictErrorTag  `json:"_tag,required"`
+	Message  string            `json:"message,required"`
+	Resource string            `json:"resource"`
+	JSON     conflictErrorJSON `json:"-"`
 }
 
 type conflictErrorJSON struct {
@@ -1581,7 +1580,7 @@ func (r ContentFilterError) ImplementsEventListResponseEventSessionErrorProperti
 func (r ContentFilterError) ImplementsAssistantMessageError() {}
 
 type ContentFilterErrorData struct {
-	Message string                      `json:"message,required"`
+	Message string                     `json:"message,required"`
 	JSON    contentFilterErrorDataJSON `json:"-"`
 }
 
@@ -1763,9 +1762,9 @@ func (r projectCopyErrorJSON) RawJSON() string {
 }
 
 type ProjectCopyErrorData struct {
-	Message       string                     `json:"message,required"`
-	ForceRequired *bool                      `json:"forceRequired"`
-	JSON          projectCopyErrorDataJSON   `json:"-"`
+	Message       string                   `json:"message,required"`
+	ForceRequired *bool                    `json:"forceRequired"`
+	JSON          projectCopyErrorDataJSON `json:"-"`
 }
 
 type projectCopyErrorDataJSON struct {
@@ -1819,7 +1818,7 @@ func (r sessionMessageToolStateErrorJSON) RawJSON() string {
 }
 
 type SessionMessageToolStateErrorData struct {
-	Message string                              `json:"message,required"`
+	Message string                               `json:"message,required"`
 	JSON    sessionMessageToolStateErrorDataJSON `json:"-"`
 }
 

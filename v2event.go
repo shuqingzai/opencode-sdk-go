@@ -1483,10 +1483,10 @@ func (r V2EventPermissionRepliedType) IsKnown() bool {
 }
 
 type V2EventPermissionRepliedData struct {
-	Reply     PermissionV2Reply                  `json:"reply,required"`
-	RequestID string                             `json:"requestID,required"`
-	SessionID string                             `json:"sessionID,required"`
-	JSON      v2EventPermissionRepliedDataJSON   `json:"-"`
+	Reply     PermissionV2Reply                `json:"reply,required"`
+	RequestID string                           `json:"requestID,required"`
+	SessionID string                           `json:"sessionID,required"`
+	JSON      v2EventPermissionRepliedDataJSON `json:"-"`
 }
 
 type v2EventPermissionRepliedDataJSON struct {

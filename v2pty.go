@@ -289,9 +289,9 @@ func (r ptyLocationJSON) RawJSON() string {
 // V2PtyListResponse is returned by the List method. It wraps PTY sessions in the
 // OpenAPI {location, data} envelope.
 type V2PtyListResponse struct {
-	Location LocationInfo            `json:"location,required"`
-	Data     []Pty                   `json:"data,required"`
-	JSON     v2PtyListResponseJSON   `json:"-"`
+	Location LocationInfo          `json:"location,required"`
+	Data     []Pty                 `json:"data,required"`
+	JSON     v2PtyListResponseJSON `json:"-"`
 }
 
 // v2PtyListResponseJSON contains the JSON metadata for the struct [V2PtyListResponse]
@@ -313,9 +313,9 @@ func (r v2PtyListResponseJSON) RawJSON() string {
 // V2PtyCreateResponse is returned by the Create method. It wraps a PTY session in
 // the OpenAPI {location, data} envelope.
 type V2PtyCreateResponse struct {
-	Location LocationInfo              `json:"location,required"`
-	Data     Pty                       `json:"data,required"`
-	JSON     v2PtyCreateResponseJSON   `json:"-"`
+	Location LocationInfo            `json:"location,required"`
+	Data     Pty                     `json:"data,required"`
+	JSON     v2PtyCreateResponseJSON `json:"-"`
 }
 
 // v2PtyCreateResponseJSON contains the JSON metadata for the struct [V2PtyCreateResponse]
@@ -337,9 +337,9 @@ func (r v2PtyCreateResponseJSON) RawJSON() string {
 // V2PtyGetResponse is returned by the Get method. It wraps a PTY session in the
 // OpenAPI {location, data} envelope.
 type V2PtyGetResponse struct {
-	Location LocationInfo           `json:"location,required"`
-	Data     Pty                    `json:"data,required"`
-	JSON     v2PtyGetResponseJSON   `json:"-"`
+	Location LocationInfo         `json:"location,required"`
+	Data     Pty                  `json:"data,required"`
+	JSON     v2PtyGetResponseJSON `json:"-"`
 }
 
 // v2PtyGetResponseJSON contains the JSON metadata for the struct [V2PtyGetResponse]
@@ -361,9 +361,9 @@ func (r v2PtyGetResponseJSON) RawJSON() string {
 // V2PtyUpdateResponse is returned by the Update method. It wraps a PTY session in
 // the OpenAPI {location, data} envelope.
 type V2PtyUpdateResponse struct {
-	Location LocationInfo              `json:"location,required"`
-	Data     Pty                       `json:"data,required"`
-	JSON     v2PtyUpdateResponseJSON   `json:"-"`
+	Location LocationInfo            `json:"location,required"`
+	Data     Pty                     `json:"data,required"`
+	JSON     v2PtyUpdateResponseJSON `json:"-"`
 }
 
 // v2PtyUpdateResponseJSON contains the JSON metadata for the struct [V2PtyUpdateResponse]
@@ -385,9 +385,9 @@ func (r v2PtyUpdateResponseJSON) RawJSON() string {
 // V2PtyConnectTokenResponse is returned by the ConnectToken method. It wraps the
 // connect token in the OpenAPI {location, data} envelope.
 type V2PtyConnectTokenResponse struct {
-	Location LocationInfo                   `json:"location,required"`
-	Data     PtyConnectToken                `json:"data,required"`
-	JSON     v2PtyConnectTokenResponseJSON   `json:"-"`
+	Location LocationInfo                  `json:"location,required"`
+	Data     PtyConnectToken               `json:"data,required"`
+	JSON     v2PtyConnectTokenResponseJSON `json:"-"`
 }
 
 // v2PtyConnectTokenResponseJSON contains the JSON metadata for the struct [V2PtyConnectTokenResponse]
