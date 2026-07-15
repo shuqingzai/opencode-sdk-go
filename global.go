@@ -191,7 +191,7 @@ func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
 type GlobalEvent struct {
 	Directory string `json:"directory,required"`
 	// This field can have the runtime type of
-	// [EventListResponseEventXxx] (77 V2 Event types):
+	// [EventListResponseEventXxx] (88 V2 Event types):
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
 	// [EventListResponseEventFileWatcherUpdated],
@@ -1228,7 +1228,7 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventMessagePartUpdatedProperties],
 	// [EventListResponseEventMessagePartRemovedProperties],
 	// [EventListResponseEventSessionCreatedProperties],
-	// [SyncEventSessionUpdatedData] (custom — V1 is partial, V2 is full),
+	// [EventListResponseEventSessionUpdatedProperties],
 	// [EventListResponseEventSessionDeletedProperties],
 	// [EventListResponseEventSessionNextAgentSwitchedProperties],
 	// [EventListResponseEventSessionNextModelSwitchedProperties],

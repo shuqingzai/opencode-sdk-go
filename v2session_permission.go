@@ -84,7 +84,7 @@ func (r *V2SessionPermissionService) Get(ctx context.Context, sessionID string, 
 // Reply to pending permission request
 //
 // Respond to a pending permission request owned by a session.
-func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string, requestID string, body V2SessionPermissionReplyParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string, requestID string, body V2SessionPermissionReplyParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -95,7 +95,7 @@ func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/permission/%s/reply", sessionID, requestID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 

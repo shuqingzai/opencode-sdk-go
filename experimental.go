@@ -45,7 +45,7 @@ func (r *ExperimentalService) WorkspaceList(ctx context.Context, query Experimen
 }
 
 // Create a workspace
-func (r *ExperimentalService) WorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateInput, opts ...option.RequestOption) (res *Workspace, err error) {
+func (r *ExperimentalService) WorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateParams, opts ...option.RequestOption) (res *Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/workspace"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -113,7 +113,7 @@ func (r *ExperimentalService) ConsoleListOrgs(ctx context.Context, query Experim
 }
 
 // Switch active Console org
-func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ConsoleSwitchOrgInput, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/console/switch"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -232,6 +232,39 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// ExperimentalWorkspaceCreateParams contains the request parameters for creating a workspace.
+type ExperimentalWorkspaceCreateParams struct {
+	Directory param.Field[string]                   `query:"directory"`
+	Workspace param.Field[string]                   `query:"workspace"`
+	Body      ExperimentalWorkspaceCreateInput      `json:"-"`
+	JSON      experimentalWorkspaceCreateParamsJSON `json:"-"`
+}
+
+func (r ExperimentalWorkspaceCreateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+// URLQuery serializes [ExperimentalWorkspaceCreateParams]'s query parameters as `url.Values`.
+func (r ExperimentalWorkspaceCreateParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// experimentalWorkspaceCreateParamsJSON contains the JSON metadata for the struct
+// [ExperimentalWorkspaceCreateParams]
+type experimentalWorkspaceCreateParamsJSON struct {
+	Directory   apijson.Field
+	Workspace   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r experimentalWorkspaceCreateParamsJSON) RawJSON() string {
+	return r.raw
 }
 
 type ExperimentalWorkspaceCreateInput struct {
@@ -475,6 +508,37 @@ func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// ConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
+type ConsoleSwitchOrgParams struct {
+	Directory param.Field[string]        `query:"directory"`
+	Workspace param.Field[string]        `query:"workspace"`
+	Body      ConsoleSwitchOrgInput      `json:"-"`
+	JSON      consoleSwitchOrgParamsJSON `json:"-"`
+}
+
+func (r ConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+// URLQuery serializes [ConsoleSwitchOrgParams]'s query parameters as `url.Values`.
+func (r ConsoleSwitchOrgParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type consoleSwitchOrgParamsJSON struct {
+	Directory   apijson.Field
+	Workspace   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r consoleSwitchOrgParamsJSON) RawJSON() string {
+	return r.raw
 }
 
 type ConsoleSwitchOrgInput struct {

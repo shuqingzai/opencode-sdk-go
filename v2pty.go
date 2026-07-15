@@ -91,7 +91,12 @@ func (r *V2PtyService) Remove(ctx context.Context, ptyID string, query V2PtyRemo
 
 // Connect to a v2 PTY session
 //
-// Establish a WebSocket connection streaming PTY output and accepting terminal input.
+// Establish a connection streaming PTY output and accepting terminal input.
+//
+// Note: OpenAPI marks this endpoint with `x-websocket: true` (WebSocket upgrade),
+// and the JSON response schema is `boolean`. This matches the behavior of the
+// legacy `PtyService.Connect`. The SDK exposes it as an SSE-style stream; consumers
+// should be aware that the underlying transport is WebSocket.
 func (r *V2PtyService) Connect(ctx context.Context, ptyID string, query V2PtyConnectParams, opts ...option.RequestOption) (stream *ssestream.Stream[PtyEvent]) {
 	var (
 		raw *http.Response

@@ -39,7 +39,7 @@ func NewV2ProviderService(opts ...option.RequestOption) (r *V2ProviderService) {
 }
 
 // List v2 providers
-func (r *V2ProviderService) List(ctx context.Context, query V2ProviderListParams, opts ...option.RequestOption) (res *[]V2ProviderInfo, err error) {
+func (r *V2ProviderService) List(ctx context.Context, query V2ProviderListParams, opts ...option.RequestOption) (res *V2ProviderListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/provider"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -47,7 +47,7 @@ func (r *V2ProviderService) List(ctx context.Context, query V2ProviderListParams
 }
 
 // Get v2 provider
-func (r *V2ProviderService) Get(ctx context.Context, providerID string, query V2ProviderGetParams, opts ...option.RequestOption) (res *V2ProviderInfo, err error) {
+func (r *V2ProviderService) Get(ctx context.Context, providerID string, query V2ProviderGetParams, opts ...option.RequestOption) (res *V2ProviderGetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
@@ -56,6 +56,54 @@ func (r *V2ProviderService) Get(ctx context.Context, providerID string, query V2
 	path := fmt.Sprintf("api/provider/%s", providerID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// V2ProviderListResponse is returned by the Provider.List method. It wraps a list of
+// providers alongside the active location metadata.
+type V2ProviderListResponse struct {
+	Location LocationInfo               `json:"location,required"`
+	Data     []V2ProviderInfo           `json:"data,required"`
+	JSON     v2ProviderListResponseJSON `json:"-"`
+}
+
+// v2ProviderListResponseJSON contains the JSON metadata for the struct [V2ProviderListResponse]
+type v2ProviderListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ProviderListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ProviderListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// V2ProviderGetResponse is returned by the Provider.Get method. It wraps the requested
+// provider alongside the active location metadata.
+type V2ProviderGetResponse struct {
+	Location LocationInfo              `json:"location,required"`
+	Data     V2ProviderInfo            `json:"data,required"`
+	JSON     v2ProviderGetResponseJSON `json:"-"`
+}
+
+// v2ProviderGetResponseJSON contains the JSON metadata for the struct [V2ProviderGetResponse]
+type v2ProviderGetResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ProviderGetResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ProviderGetResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2ProviderInfo struct {

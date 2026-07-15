@@ -538,6 +538,76 @@ func (r AgentPartInputSourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Satisfied by [OutputFormatText], [OutputFormatJsonSchema].
+type OutputFormatUnion interface {
+	implementsOutputFormatUnion()
+}
+
+type OutputFormatText struct {
+	Type param.Field[OutputFormatTextType] `json:"type,required"`
+}
+
+func (r OutputFormatText) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r OutputFormatText) implementsOutputFormatUnion() {}
+
+type OutputFormatTextType string
+
+const (
+	OutputFormatTextTypeText OutputFormatTextType = "text"
+)
+
+func (r OutputFormatTextType) IsKnown() bool {
+	switch r {
+	case OutputFormatTextTypeText:
+		return true
+	}
+	return false
+}
+
+type OutputFormatJsonSchema struct {
+	Type       param.Field[OutputFormatJsonSchemaType] `json:"type,required"`
+	Schema     param.Field[interface{}]                `json:"schema,required"`
+	RetryCount param.Field[int64]                      `json:"retryCount"`
+}
+
+func (r OutputFormatJsonSchema) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r OutputFormatJsonSchema) implementsOutputFormatUnion() {}
+
+type OutputFormatJsonSchemaType string
+
+const (
+	OutputFormatJsonSchemaTypeJsonSchema OutputFormatJsonSchemaType = "json_schema"
+)
+
+func (r OutputFormatJsonSchemaType) IsKnown() bool {
+	switch r {
+	case OutputFormatJsonSchemaTypeJsonSchema:
+		return true
+	}
+	return false
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*OutputFormatUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(OutputFormatText{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(OutputFormatJsonSchema{}),
+		},
+	)
+}
+
 type AssistantMessage struct {
 	ID         string                 `json:"id,required"`
 	Agent      string                 `json:"agent,required"`
@@ -915,11 +985,12 @@ const (
 	AssistantMessageErrorNameStructuredOutputError    AssistantMessageErrorName = "StructuredOutputError"
 	AssistantMessageErrorNameContextOverflowError     AssistantMessageErrorName = "ContextOverflowError"
 	AssistantMessageErrorNameAPIError                 AssistantMessageErrorName = "APIError"
+	AssistantMessageErrorNameContentFilterError       AssistantMessageErrorName = "ContentFilterError"
 )
 
 func (r AssistantMessageErrorName) IsKnown() bool {
 	switch r {
-	case AssistantMessageErrorNameProviderAuthError, AssistantMessageErrorNameUnknownError, AssistantMessageErrorNameMessageOutputLengthError, AssistantMessageErrorNameMessageAbortedError, AssistantMessageErrorNameStructuredOutputError, AssistantMessageErrorNameContextOverflowError, AssistantMessageErrorNameAPIError:
+	case AssistantMessageErrorNameProviderAuthError, AssistantMessageErrorNameUnknownError, AssistantMessageErrorNameMessageOutputLengthError, AssistantMessageErrorNameMessageAbortedError, AssistantMessageErrorNameStructuredOutputError, AssistantMessageErrorNameContextOverflowError, AssistantMessageErrorNameAPIError, AssistantMessageErrorNameContentFilterError:
 		return true
 	}
 	return false

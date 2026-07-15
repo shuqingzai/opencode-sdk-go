@@ -212,10 +212,25 @@ func (r permissionV2RequestJSON) RawJSON() string {
 
 // PermissionV2Source represents the source tool of a permission v2 request.
 type PermissionV2Source struct {
-	Type      string                 `json:"type,required"`
+	Type      PermissionV2SourceType `json:"type,required"`
 	MessageID string                 `json:"messageID,required"`
 	CallID    string                 `json:"callID,required"`
 	JSON      permissionV2SourceJSON `json:"-"`
+}
+
+// PermissionV2SourceType represents the discriminator of a permission v2 source.
+type PermissionV2SourceType string
+
+const (
+	PermissionV2SourceTypeTool PermissionV2SourceType = "tool"
+)
+
+func (r PermissionV2SourceType) IsKnown() bool {
+	switch r {
+	case PermissionV2SourceTypeTool:
+		return true
+	}
+	return false
 }
 
 // permissionV2SourceJSON contains the JSON metadata for the struct [PermissionV2Source]

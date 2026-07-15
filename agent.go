@@ -111,7 +111,7 @@ func (r AgentListParams) URLQuery() (v url.Values) {
 
 type Skill struct {
 	Name        string    `json:"name,required"`
-	Description string    `json:"description,required"`
+	Description string    `json:"description"`
 	Location    string    `json:"location,required"`
 	Content     string    `json:"content,required"`
 	JSON        skillJSON `json:"-"`

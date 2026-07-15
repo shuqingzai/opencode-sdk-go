@@ -49,9 +49,11 @@ func TestExperimentalWorkspaceCreate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.WorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateInput{
-		Type:   opencode.F("type"),
-		Branch: opencode.F("main"),
+	_, err := client.Experimental.WorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateParams{
+		Body: opencode.ExperimentalWorkspaceCreateInput{
+			Type:   opencode.F("type"),
+			Branch: opencode.F("main"),
+		},
 	})
 	if err != nil {
 		var apierr *opencode.Error

@@ -100,7 +100,8 @@ type Config struct {
 	// Model to use in the format of provider/model, eg anthropic/claude-2
 	Model      string           `json:"model"`
 	Permission ConfigPermission `json:"permission"`
-	Plugin     []string         `json:"plugin"`
+	// This field can have the runtime type of [string] or [][2]interface{}{string, object}.
+	Plugin []interface{} `json:"plugin"`
 	// Custom provider configurations and model overrides
 	Provider map[string]ConfigProvider `json:"provider"`
 	// Reference configuration for external documentation
@@ -2604,14 +2605,14 @@ func (r ConfigProviderSource) IsKnown() bool {
 }
 
 type ConfigProvider struct {
-	ID      string                         `json:"id"`
+	ID      string                         `json:"id,required"`
 	API     string                         `json:"api"`
-	Env     []string                       `json:"env"`
-	Models  map[string]ConfigProviderModel `json:"models"`
-	Name    string                         `json:"name"`
+	Env     []string                       `json:"env,required"`
+	Models  map[string]ConfigProviderModel `json:"models,required"`
+	Name    string                         `json:"name,required"`
 	NPM     string                         `json:"npm"`
-	Options ConfigProviderOptions          `json:"options"`
-	Source  ConfigProviderSource           `json:"source"`
+	Options ConfigProviderOptions          `json:"options,required"`
+	Source  ConfigProviderSource           `json:"source,required"`
 	Key     string                         `json:"key"`
 	JSON    configProviderJSON             `json:"-"`
 }
@@ -3116,7 +3117,7 @@ type ConfigUpdateParams struct {
 	Mode              param.Field[ConfigMode]                 `json:"mode"`
 	Model             param.Field[string]                     `json:"model"`
 	Permission        param.Field[ConfigPermission]           `json:"permission"`
-	Plugin            param.Field[[]string]                   `json:"plugin"`
+	Plugin            param.Field[[]interface{}]              `json:"plugin"`
 	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
 	Reference         param.Field[ReferenceConfig]            `json:"reference"`
 	References        param.Field[map[string]interface{}]     `json:"references"`

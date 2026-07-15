@@ -37,11 +37,35 @@ func NewV2ModelService(opts ...option.RequestOption) (r *V2ModelService) {
 }
 
 // List v2 models
-func (r *V2ModelService) List(ctx context.Context, query V2ModelListParams, opts ...option.RequestOption) (res *[]V2ModelInfo, err error) {
+func (r *V2ModelService) List(ctx context.Context, query V2ModelListParams, opts ...option.RequestOption) (res *V2ModelListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/model"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// V2ModelListResponse is returned by the Model.List method. It wraps a list of models
+// alongside the active location metadata.
+type V2ModelListResponse struct {
+	Location LocationInfo            `json:"location,required"`
+	Data     []V2ModelInfo           `json:"data,required"`
+	JSON     v2ModelListResponseJSON `json:"-"`
+}
+
+// v2ModelListResponseJSON contains the JSON metadata for the struct [V2ModelListResponse]
+type v2ModelListResponseJSON struct {
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2ModelListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2ModelListResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2ModelInfo struct {
@@ -384,8 +408,6 @@ type V2ModelInfoLimit struct {
 	Input   int64                `json:"input"`
 	Output  int64                `json:"output,required"`
 	JSON    v2ModelInfoLimitJSON `json:"-"`
-	// ExtraFields contains additional fields that may be present.
-	ExtraFields map[string]interface{} `json:"-"`
 }
 
 type v2ModelInfoLimitJSON struct {

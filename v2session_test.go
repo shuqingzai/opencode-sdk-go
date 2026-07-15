@@ -24,16 +24,6 @@ func TestV2SessionListParams(t *testing.T) {
 	}
 }
 
-func TestV2SessionCompactParams(t *testing.T) {
-	params := V2SessionCompactParams{
-		Directory: String("/tmp"),
-	}
-	v := params.URLQuery()
-	if v.Get("directory") != "/tmp" {
-		t.Errorf("expected directory=/tmp, got %q", v.Get("directory"))
-	}
-}
-
 func TestV2SessionPromptParams(t *testing.T) {
 	params := V2SessionPromptParams{
 		Directory: String("/tmp"),
@@ -113,17 +103,17 @@ func TestV2SessionServiceRequiresSessionID(t *testing.T) {
 		t.Error("expected error for empty sessionID")
 	}
 
-	err = s.Compact(ctx, "", V2SessionCompactParams{})
+	err = s.Compact(ctx, "")
 	if err == nil {
 		t.Error("expected error for empty sessionID")
 	}
 
-	err = s.Wait(ctx, "", V2SessionWaitParams{})
+	err = s.Wait(ctx, "")
 	if err == nil {
 		t.Error("expected error for empty sessionID")
 	}
 
-	_, err = s.Context(ctx, "", V2SessionContextParams{})
+	_, err = s.Context(ctx, "")
 	if err == nil {
 		t.Error("expected error for empty sessionID")
 	}

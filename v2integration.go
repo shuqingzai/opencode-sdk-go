@@ -945,9 +945,9 @@ func (r V2IntegrationConnectOauthParams) URLQuery() (v url.Values) {
 
 // V2IntegrationConnectOauthParamsBody contains the body fields for the oauth connect request.
 type V2IntegrationConnectOauthParamsBody struct {
-	MethodID string              `json:"methodID,required"`
-	Inputs   map[string]string   `json:"inputs,required"`
-	Label    param.Field[string] `json:"label"`
+	MethodID param.Field[string]            `json:"methodID,required"`
+	Inputs   param.Field[map[string]string] `json:"inputs,required"`
+	Label    param.Field[string]            `json:"label"`
 }
 
 func (r V2IntegrationConnectOauthParamsBody) MarshalJSON() (data []byte, err error) {
@@ -986,7 +986,19 @@ func (r V2IntegrationAttemptCompleteParams) URLQuery() (v url.Values) {
 
 // V2IntegrationAttemptCompleteParamsBody contains the body fields for completing an attempt.
 type V2IntegrationAttemptCompleteParamsBody struct {
-	Code param.Field[string] `json:"code"`
+	Code param.Field[string]                        `json:"code"`
+	JSON v2IntegrationAttemptCompleteParamsBodyJSON `json:"-"`
+}
+
+// v2IntegrationAttemptCompleteParamsBodyJSON contains the JSON metadata for the struct [V2IntegrationAttemptCompleteParamsBody]
+type v2IntegrationAttemptCompleteParamsBodyJSON struct {
+	Code        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2IntegrationAttemptCompleteParamsBodyJSON) RawJSON() string {
+	return r.raw
 }
 
 func (r V2IntegrationAttemptCompleteParamsBody) MarshalJSON() (data []byte, err error) {

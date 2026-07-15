@@ -73,28 +73,28 @@ func (r *V2SessionService) Prompt(ctx context.Context, sessionID string, params 
 // Compact v2 session
 //
 // Compact a v2 session conversation.
-func (r *V2SessionService) Compact(ctx context.Context, sessionID string, query V2SessionCompactParams, opts ...option.RequestOption) (err error) {
+func (r *V2SessionService) Compact(ctx context.Context, sessionID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/compact", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
 // Wait for v2 session
 //
 // Wait for a v2 session agent loop to become idle.
-func (r *V2SessionService) Wait(ctx context.Context, sessionID string, query V2SessionWaitParams, opts ...option.RequestOption) (err error) {
+func (r *V2SessionService) Wait(ctx context.Context, sessionID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/wait", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
 	return
 }
 
@@ -102,14 +102,14 @@ func (r *V2SessionService) Wait(ctx context.Context, sessionID string, query V2S
 //
 // Retrieve the active context messages for a v2 session (all messages after the
 // last compaction).
-func (r *V2SessionService) Context(ctx context.Context, sessionID string, query V2SessionContextParams, opts ...option.RequestOption) (res *V2SessionContextResponse, err error) {
+func (r *V2SessionService) Context(ctx context.Context, sessionID string, opts ...option.RequestOption) (res *V2SessionContextResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
 		return
 	}
 	path := fmt.Sprintf("api/session/%s/context", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
@@ -414,7 +414,8 @@ func (r v2CursorJSON) RawJSON() string {
 }
 
 type V2SessionMessagesResponse struct {
-	Data   []V2SessionMessage            `json:"data,required"`
+	// This field can have the runtime type of [V2SessionMessage].
+	Data   []interface{}                 `json:"data,required"`
 	Cursor V2Cursor                      `json:"cursor,required"`
 	JSON   v2SessionMessagesResponseJSON `json:"-"`
 }
@@ -437,7 +438,8 @@ func (r v2SessionMessagesResponseJSON) RawJSON() string {
 // V2SessionContextResponse is returned by the Context method. It wraps messages
 // in a data field.
 type V2SessionContextResponse struct {
-	Data []V2SessionMessage           `json:"data,required"`
+	// This field can have the runtime type of [V2SessionMessage].
+	Data []interface{}                `json:"data,required"`
 	JSON v2SessionContextResponseJSON `json:"-"`
 }
 
@@ -455,21 +457,65 @@ func (r v2SessionContextResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// V2SessionMessage is a union type that can be one of the following concrete
-// types: V2SessionMessageAgentSwitched, V2SessionMessageModelSwitched,
-// V2SessionMessageUser, V2SessionMessageSynthetic, V2SessionMessageSystem,
-// V2SessionMessageShell, V2SessionMessageAssistant, V2SessionMessageCompaction.
-type V2SessionMessage interface {
-	implementsV2SessionMessage()
+// V2SessionMessage represents the discriminated union of v2 session message
+// types. Possible runtime types of the union are
+// [V2SessionMessageAgentSwitched], [V2SessionMessageModelSwitched],
+// [V2SessionMessageUser], [V2SessionMessageSynthetic], [V2SessionMessageSystem],
+// [V2SessionMessageShell], [V2SessionMessageAssistant],
+// [V2SessionMessageCompaction].
+type V2SessionMessage struct {
+	JSON  v2SessionMessageJSON `json:"-"`
+	union V2SessionMessageUnion
 }
 
-func (V2SessionMessageAgentSwitched) implementsV2SessionMessage() {}
-func (V2SessionMessageModelSwitched) implementsV2SessionMessage() {}
-func (V2SessionMessageUser) implementsV2SessionMessage()          {}
-func (V2SessionMessageSynthetic) implementsV2SessionMessage()     {}
-func (V2SessionMessageShell) implementsV2SessionMessage()         {}
-func (V2SessionMessageAssistant) implementsV2SessionMessage()     {}
-func (V2SessionMessageCompaction) implementsV2SessionMessage()    {}
+// v2SessionMessageJSON contains the JSON metadata for the struct
+// [V2SessionMessage]
+type v2SessionMessageJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2SessionMessageJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *V2SessionMessage) UnmarshalJSON(data []byte) (err error) {
+	*r = V2SessionMessage{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2SessionMessageUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [V2SessionMessageAgentSwitched],
+// [V2SessionMessageModelSwitched], [V2SessionMessageUser],
+// [V2SessionMessageSynthetic], [V2SessionMessageSystem],
+// [V2SessionMessageShell], [V2SessionMessageAssistant],
+// [V2SessionMessageCompaction].
+func (r V2SessionMessage) AsUnion() V2SessionMessageUnion {
+	return r.union
+}
+
+// Union satisfied by [V2SessionMessageAgentSwitched],
+// [V2SessionMessageModelSwitched], [V2SessionMessageUser],
+// [V2SessionMessageSynthetic], [V2SessionMessageSystem],
+// [V2SessionMessageShell], [V2SessionMessageAssistant] or
+// [V2SessionMessageCompaction].
+type V2SessionMessageUnion interface {
+	implementsV2SessionMessageUnion()
+}
+
+func (V2SessionMessageAgentSwitched) implementsV2SessionMessageUnion() {}
+func (V2SessionMessageModelSwitched) implementsV2SessionMessageUnion() {}
+func (V2SessionMessageUser) implementsV2SessionMessageUnion()          {}
+func (V2SessionMessageSynthetic) implementsV2SessionMessageUnion()     {}
+func (V2SessionMessageShell) implementsV2SessionMessageUnion()         {}
+func (V2SessionMessageAssistant) implementsV2SessionMessageUnion()     {}
+func (V2SessionMessageCompaction) implementsV2SessionMessageUnion()    {}
 
 type V2SessionMessageAgentSwitched struct {
 	ID    string               `json:"id,required"`
@@ -528,15 +574,14 @@ func (r v2SessionMessageModelSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageUser struct {
-	ID         string                        `json:"id,required"`
-	Time       V2SessionMessageTime          `json:"time,required"`
-	Text       string                        `json:"text,required"`
-	Type       string                        `json:"type,required"`
-	Files      []V2PromptFileAttachment      `json:"files"`
-	Agents     []V2PromptAgentAttachment     `json:"agents"`
-	References []V2PromptReferenceAttachment `json:"references"`
-	Metadata   interface{}                   `json:"metadata"`
-	JSON       v2SessionMessageUserJSON      `json:"-"`
+	ID       string                    `json:"id,required"`
+	Time     V2SessionMessageTime      `json:"time,required"`
+	Text     string                    `json:"text,required"`
+	Type     string                    `json:"type,required"`
+	Files    []V2PromptFileAttachment  `json:"files"`
+	Agents   []V2PromptAgentAttachment `json:"agents"`
+	Metadata interface{}               `json:"metadata"`
+	JSON     v2SessionMessageUserJSON  `json:"-"`
 }
 
 type v2SessionMessageUserJSON struct {
@@ -546,7 +591,6 @@ type v2SessionMessageUserJSON struct {
 	Type        apijson.Field
 	Files       apijson.Field
 	Agents      apijson.Field
-	References  apijson.Field
 	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1028,18 +1072,16 @@ func (r v2SessionPromptResponseJSON) RawJSON() string {
 }
 
 type V2SessionInputPrompt struct {
-	Text       string                        `json:"text,required"`
-	Files      []V2PromptFileAttachment      `json:"files"`
-	Agents     []V2PromptAgentAttachment     `json:"agents"`
-	References []V2PromptReferenceAttachment `json:"references"`
-	JSON       v2SessionInputPromptJSON      `json:"-"`
+	Text   string                    `json:"text,required"`
+	Files  []V2PromptFileAttachment  `json:"files"`
+	Agents []V2PromptAgentAttachment `json:"agents"`
+	JSON   v2SessionInputPromptJSON  `json:"-"`
 }
 
 type v2SessionInputPromptJSON struct {
 	Text        apijson.Field
 	Files       apijson.Field
 	Agents      apijson.Field
-	References  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1567,7 +1609,7 @@ func init() {
 		},
 	)
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2SessionMessage)(nil)).Elem(),
+		reflect.TypeOf((*V2SessionMessageUnion)(nil)).Elem(),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -1716,22 +1758,6 @@ func (r V2PromptAgentAttachmentParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type V2PromptReferenceAttachmentParam struct {
-	Name       param.Field[string]              `json:"name,required"`
-	Kind       param.Field[string]              `json:"kind,required"`
-	URI        param.Field[string]              `json:"uri"`
-	Repository param.Field[string]              `json:"repository"`
-	Branch     param.Field[string]              `json:"branch"`
-	Target     param.Field[string]              `json:"target"`
-	TargetURI  param.Field[string]              `json:"targetUri"`
-	Problem    param.Field[string]              `json:"problem"`
-	Source     param.Field[V2PromptSourceParam] `json:"source"`
-}
-
-func (r V2PromptReferenceAttachmentParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
 type V2PromptSourceParam struct {
 	Start param.Field[int64]  `json:"start,required"`
 	End   param.Field[int64]  `json:"end,required"`
@@ -1742,48 +1768,10 @@ func (r V2PromptSourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type V2SessionCompactParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r V2SessionCompactParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type V2SessionWaitParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r V2SessionWaitParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type V2SessionContextParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r V2SessionContextParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
 type V2SessionMessagesParams struct {
-	Directory param.Field[string]         `query:"directory"`
-	Workspace param.Field[string]         `query:"workspace"`
-	Limit     param.Field[int64]          `query:"limit"`
-	Order     param.Field[V2SessionOrder] `query:"order"`
-	Cursor    param.Field[string]         `query:"cursor"`
+	Limit  param.Field[int64]          `query:"limit"`
+	Order  param.Field[V2SessionOrder] `query:"order"`
+	Cursor param.Field[string]         `query:"cursor"`
 }
 
 func (r V2SessionMessagesParams) URLQuery() (v url.Values) {
@@ -2104,7 +2092,7 @@ func (r v2SessionMessageSystemJSON) RawJSON() string {
 	return r.raw
 }
 
-func (V2SessionMessageSystem) implementsV2SessionMessage() {}
+func (V2SessionMessageSystem) implementsV2SessionMessageUnion() {}
 
 // ===== V2SessionActiveResponse =====
 

@@ -1268,7 +1268,7 @@ type EventListResponseEventSessionErrorPropertiesError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
 	// [shared.UnknownErrorData], [interface{}], [shared.MessageAbortedErrorData],
 	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
-	// [shared.APIErrorData].
+	// [shared.APIErrorData], [shared.ContentFilterErrorData].
 	Data  interface{}                                           `json:"data,required"`
 	Name  EventListResponseEventSessionErrorPropertiesErrorName `json:"name,required"`
 	JSON  eventListResponseEventSessionErrorPropertiesErrorJSON `json:"-"`
@@ -1304,6 +1304,7 @@ func (r *EventListResponseEventSessionErrorPropertiesError) UnmarshalJSON(data [
 // [shared.UnknownError],
 // [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContentFilterError],
 // [shared.ContextOverflowError],
 // [shared.APIError].
 func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListResponseEventSessionErrorPropertiesErrorUnion {
@@ -1368,11 +1369,12 @@ const (
 	EventListResponseEventSessionErrorPropertiesErrorNameStructuredOutputError    EventListResponseEventSessionErrorPropertiesErrorName = "StructuredOutputError"
 	EventListResponseEventSessionErrorPropertiesErrorNameContextOverflowError     EventListResponseEventSessionErrorPropertiesErrorName = "ContextOverflowError"
 	EventListResponseEventSessionErrorPropertiesErrorNameAPIError                 EventListResponseEventSessionErrorPropertiesErrorName = "APIError"
+	EventListResponseEventSessionErrorPropertiesErrorNameContentFilterError       EventListResponseEventSessionErrorPropertiesErrorName = "ContentFilterError"
 )
 
 func (r EventListResponseEventSessionErrorPropertiesErrorName) IsKnown() bool {
 	switch r {
-	case EventListResponseEventSessionErrorPropertiesErrorNameProviderAuthError, EventListResponseEventSessionErrorPropertiesErrorNameUnknownError, EventListResponseEventSessionErrorPropertiesErrorNameMessageOutputLengthError, EventListResponseEventSessionErrorPropertiesErrorNameMessageAbortedError, EventListResponseEventSessionErrorPropertiesErrorNameStructuredOutputError, EventListResponseEventSessionErrorPropertiesErrorNameContextOverflowError, EventListResponseEventSessionErrorPropertiesErrorNameAPIError:
+	case EventListResponseEventSessionErrorPropertiesErrorNameProviderAuthError, EventListResponseEventSessionErrorPropertiesErrorNameUnknownError, EventListResponseEventSessionErrorPropertiesErrorNameMessageOutputLengthError, EventListResponseEventSessionErrorPropertiesErrorNameMessageAbortedError, EventListResponseEventSessionErrorPropertiesErrorNameStructuredOutputError, EventListResponseEventSessionErrorPropertiesErrorNameContextOverflowError, EventListResponseEventSessionErrorPropertiesErrorNameAPIError, EventListResponseEventSessionErrorPropertiesErrorNameContentFilterError:
 		return true
 	}
 	return false
