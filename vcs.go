@@ -15,13 +15,59 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
+// VcsService contains methods and other services that help with interacting with
+// the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewVcsService] method instead.
 type VcsService struct {
 	Options []option.RequestOption
+	Diff    *VcsDiffService
 }
 
+// NewVcsService generates a new service that applies the given options to each
+// request. These options are applied after the parent client's options (if there
+// is one), and before any request-specific options.
 func NewVcsService(opts ...option.RequestOption) (r *VcsService) {
 	r = &VcsService{}
 	r.Options = opts
+	r.Diff = NewVcsDiffService(opts...)
+	return
+}
+
+// VcsDiffService contains methods and other services that help with interacting
+// with the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewVcsDiffService] method instead.
+type VcsDiffService struct {
+	Options []option.RequestOption
+}
+
+// NewVcsDiffService generates a new service that applies the given options to each
+// request. These options are applied after the parent client's options (if there
+// is one), and before any request-specific options.
+func NewVcsDiffService(opts ...option.RequestOption) (r *VcsDiffService) {
+	r = &VcsDiffService{}
+	r.Options = opts
+	return
+}
+
+// Get diff between branches
+func (r *VcsDiffService) Get(ctx context.Context, query VcsDiffParams, opts ...option.RequestOption) (res *[]VcsFileDiff, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "vcs/diff"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// Get raw diff
+func (r *VcsDiffService) Raw(ctx context.Context, query VcsDiffRawParams, opts ...option.RequestOption) (res *string, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "vcs/diff/raw"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
 
@@ -63,13 +109,6 @@ func (r VcsGetParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-func (r *VcsService) Diff(ctx context.Context, query VcsDiffParams, opts ...option.RequestOption) (res *[]VcsFileDiff, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "vcs/diff"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
 }
 
 type VcsDiffParams struct {
@@ -188,11 +227,9 @@ func (r VcsStatusParams) URLQuery() (v url.Values) {
 	})
 }
 
+// Deprecated: Use Diff.Raw instead.
 func (r *VcsService) DiffRaw(ctx context.Context, query VcsDiffRawParams, opts ...option.RequestOption) (res *string, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "vcs/diff/raw"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Diff.Raw(ctx, query, opts...)
 }
 
 type VcsDiffRawParams struct {

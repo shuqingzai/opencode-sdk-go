@@ -405,131 +405,72 @@ func (r mcpOAuthConfigJSON) RawJSON() string {
 	return r.raw
 }
 
-// McpAddBody represents the body for adding an MCP server.
-type McpAddBody struct {
-	// Name of the MCP server
-	Name string `json:"name,required"`
-	// Configuration for the MCP server
-	// This field can have the runtime type of [McpAddBodyConfigLocal], [McpAddBodyConfigRemote].
-	Config interface{}    `json:"config,required"`
-	JSON   mcpAddBodyJSON `json:"-"`
-}
-
-// mcpAddBodyJSON contains the JSON metadata for the struct [McpAddBody]
-type mcpAddBodyJSON struct {
-	Name        apijson.Field
-	Config      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *McpAddBody) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r mcpAddBodyJSON) RawJSON() string {
-	return r.raw
-}
-
-// McpAddBodyConfigUnion is a union type for MCP server configuration.
-type McpAddBodyConfigUnion interface {
-	implementsMcpAddBodyConfigUnion()
+// Satisfied by [McpAddParamsConfigLocal], [McpAddParamsConfigRemote].
+type McpAddParamsConfigUnion interface {
+	implementsMcpAddParamsConfigUnion()
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*McpAddBodyConfigUnion)(nil)).Elem(),
+		reflect.TypeOf((*McpAddParamsConfigUnion)(nil)).Elem(),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddBodyConfigLocal{}),
+			Type:       reflect.TypeOf(McpAddParamsConfigLocal{}),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddBodyConfigRemote{}),
+			Type:       reflect.TypeOf(McpAddParamsConfigRemote{}),
 		},
 	)
 }
 
-// McpAddBodyConfigLocal represents local MCP server configuration.
-type McpAddBodyConfigLocal struct {
+// McpAddParamsConfigLocal represents local MCP server configuration in a
+// request to add an MCP server.
+type McpAddParamsConfigLocal struct {
 	// Type of MCP server connection
-	Type McpLocalConfigType `json:"type,required"`
+	Type param.Field[McpLocalConfigType] `json:"type,required"`
 	// Command and arguments to run the MCP server
-	Command []string `json:"command,required"`
+	Command param.Field[[]string] `json:"command,required"`
 	// Cwd is the working directory for the MCP server process.
-	Cwd string `json:"cwd"`
+	Cwd param.Field[string] `json:"cwd"`
 	// Enable or disable the MCP server on startup
-	Enabled bool `json:"enabled"`
+	Enabled param.Field[bool] `json:"enabled"`
 	// Environment variables to set when running the MCP server
-	Environment map[string]string `json:"environment"`
+	Environment param.Field[map[string]string] `json:"environment"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout int64                     `json:"timeout"`
-	JSON    mcpAddBodyConfigLocalJSON `json:"-"`
+	Timeout param.Field[int64] `json:"timeout"`
 }
 
-// mcpAddBodyConfigLocalJSON contains the JSON metadata for the struct [McpAddBodyConfigLocal]
-type mcpAddBodyConfigLocalJSON struct {
-	Type        apijson.Field
-	Command     apijson.Field
-	Cwd         apijson.Field
-	Enabled     apijson.Field
-	Environment apijson.Field
-	Timeout     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+func (r McpAddParamsConfigLocal) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
-func (r *McpAddBodyConfigLocal) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
+func (r McpAddParamsConfigLocal) implementsMcpAddParamsConfigUnion() {}
 
-func (r mcpAddBodyConfigLocalJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r McpAddBodyConfigLocal) implementsMcpAddBodyConfigUnion() {}
-
-// McpAddBodyConfigRemote represents remote MCP server configuration.
-type McpAddBodyConfigRemote struct {
+// McpAddParamsConfigRemote represents remote MCP server configuration in a
+// request to add an MCP server.
+type McpAddParamsConfigRemote struct {
 	// Type of MCP server connection
-	Type McpRemoteConfigType `json:"type,required"`
+	Type param.Field[McpRemoteConfigType] `json:"type,required"`
 	// URL of the remote MCP server
-	URL string `json:"url,required"`
+	URL param.Field[string] `json:"url,required"`
 	// Enable or disable the MCP server on startup
-	Enabled bool `json:"enabled"`
+	Enabled param.Field[bool] `json:"enabled"`
 	// Headers to send with the request
-	Headers map[string]string `json:"headers"`
-	// OAuth authentication configuration for the MCP server. Set to false to disable OAuth auto-detection.
-	// This field can have the runtime type of [McpOAuthConfig].
-	// When OAuth is disabled, this field is `false` (a JSON boolean).
-	OAuth interface{} `json:"oauth"`
+	Headers param.Field[map[string]string] `json:"headers"`
+	// OAuth authentication configuration for the MCP server. Set to `false` to
+	// disable OAuth auto-detection.
+	OAuth param.Field[interface{}] `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout int64                      `json:"timeout"`
-	JSON    mcpAddBodyConfigRemoteJSON `json:"-"`
+	Timeout param.Field[int64] `json:"timeout"`
 }
 
-// mcpAddBodyConfigRemoteJSON contains the JSON metadata for the struct [McpAddBodyConfigRemote]
-type mcpAddBodyConfigRemoteJSON struct {
-	Type        apijson.Field
-	URL         apijson.Field
-	Enabled     apijson.Field
-	Headers     apijson.Field
-	OAuth       apijson.Field
-	Timeout     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+func (r McpAddParamsConfigRemote) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
-func (r *McpAddBodyConfigRemote) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r mcpAddBodyConfigRemoteJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r McpAddBodyConfigRemote) implementsMcpAddBodyConfigUnion() {}
+func (r McpAddParamsConfigRemote) implementsMcpAddParamsConfigUnion() {}
 
 // McpAuthCallbackBody represents the body for the OAuth callback.
 type McpAuthCallbackBody struct {
@@ -612,11 +553,10 @@ func (r McpStatusParams) URLQuery() (v url.Values) {
 
 // McpAddParams contains the parameters for adding an MCP server.
 type McpAddParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Name      param.Field[string] `json:"name,required"`
-	// This field can have the runtime type of [McpAddBodyConfigLocal], [McpAddBodyConfigRemote].
-	Config interface{} `json:"config,required"`
+	Directory param.Field[string]                  `query:"directory"`
+	Workspace param.Field[string]                  `query:"workspace"`
+	Name      param.Field[string]                  `json:"name,required"`
+	Config    param.Field[McpAddParamsConfigUnion] `json:"config,required"`
 }
 
 // MarshalJSON serializes [McpAddParams] omitting query parameters.

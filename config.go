@@ -3154,22 +3154,24 @@ type ConfigUpdateParams struct {
 	Mode              param.Field[ConfigMode]                 `json:"mode"`
 	Model             param.Field[string]                     `json:"model"`
 	Permission        param.Field[ConfigPermission]           `json:"permission"`
-	Plugin            param.Field[[]interface{}]              `json:"plugin"`
-	Provider          param.Field[map[string]ConfigProvider]  `json:"provider"`
-	Reference         param.Field[ReferenceConfig]            `json:"reference"`
-	References        param.Field[map[string]interface{}]     `json:"references"`
-	Share             param.Field[ConfigShare]                `json:"share"`
-	Shell             param.Field[string]                     `json:"shell"`
-	Server            param.Field[ServerConfig]               `json:"server"`
-	Skills            param.Field[ConfigSkills]               `json:"skills"`
-	SmallModel        param.Field[string]                     `json:"small_model"`
-	Snapshot          param.Field[bool]                       `json:"snapshot"`
-	ToolOutput        param.Field[ConfigToolOutput]           `json:"tool_output"`
-	Tools             param.Field[map[string]bool]            `json:"tools"`
-	Username          param.Field[string]                     `json:"username"`
-	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
-	DefaultAgent      param.Field[string]                     `json:"default_agent"`
-	SubagentDepth     param.Field[int64]                      `json:"subagent_depth"`
+	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
+	// of [pluginName, configObject] (where configObject is a map[string]any).
+	Plugin        param.Field[[]interface{}]             `json:"plugin"`
+	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
+	Reference     param.Field[ReferenceConfig]           `json:"reference"`
+	References    param.Field[map[string]interface{}]    `json:"references"`
+	Share         param.Field[ConfigShare]               `json:"share"`
+	Shell         param.Field[string]                    `json:"shell"`
+	Server        param.Field[ServerConfig]              `json:"server"`
+	Skills        param.Field[ConfigSkills]              `json:"skills"`
+	SmallModel    param.Field[string]                    `json:"small_model"`
+	Snapshot      param.Field[bool]                      `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutput]          `json:"tool_output"`
+	Tools         param.Field[map[string]bool]           `json:"tools"`
+	Username      param.Field[string]                    `json:"username"`
+	Watcher       param.Field[ConfigWatcher]             `json:"watcher"`
+	DefaultAgent  param.Field[string]                    `json:"default_agent"`
+	SubagentDepth param.Field[int64]                     `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {

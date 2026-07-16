@@ -26,6 +26,7 @@ import (
 // the [NewProviderService] method instead.
 type ProviderService struct {
 	Options []option.RequestOption
+	Oauth   *ProviderOauthService
 }
 
 // NewProviderService generates a new service that applies the given options to each
@@ -33,6 +34,26 @@ type ProviderService struct {
 // is one), and before any request-specific options.
 func NewProviderService(opts ...option.RequestOption) (r *ProviderService) {
 	r = &ProviderService{}
+	r.Options = opts
+	r.Oauth = NewProviderOauthService(opts...)
+	return
+}
+
+// ProviderOauthService contains methods and other services that help with interacting
+// with the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewProviderOauthService] method instead.
+type ProviderOauthService struct {
+	Options []option.RequestOption
+}
+
+// NewProviderOauthService generates a new service that applies the given options to
+// each request. These options are applied after the parent client's options (if
+// there is one), and before any request-specific options.
+func NewProviderOauthService(opts ...option.RequestOption) (r *ProviderOauthService) {
+	r = &ProviderOauthService{}
 	r.Options = opts
 	return
 }
@@ -54,7 +75,7 @@ func (r *ProviderService) Auth(ctx context.Context, query ProviderAuthParams, op
 }
 
 // Start OAuth authorization flow
-func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
+func (r *ProviderOauthService) Authorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
@@ -65,8 +86,13 @@ func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string,
 	return
 }
 
+// Deprecated: Use Oauth.Authorize instead.
+func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
+	return r.Oauth.Authorize(ctx, providerID, params, opts...)
+}
+
 // OAuth callback
-func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ProviderOauthService) Callback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
 		err = errors.New("missing required providerID parameter")
@@ -75,6 +101,11 @@ func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, 
 	path := fmt.Sprintf("provider/%s/oauth/callback", providerID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
+}
+
+// Deprecated: Use Oauth.Callback instead.
+func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
+	return r.Oauth.Callback(ctx, providerID, params, opts...)
 }
 
 // ProviderListResponse represents the response from listing providers.
