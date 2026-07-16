@@ -4,16 +4,7 @@ package opencode
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"net/http"
-	"net/url"
-	"slices"
 
-	"github.com/sst/opencode-sdk-go/internal/apijson"
-	"github.com/sst/opencode-sdk-go/internal/apiquery"
-	"github.com/sst/opencode-sdk-go/internal/param"
-	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 )
 
@@ -24,7 +15,14 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewExperimentalService] method instead.
 type ExperimentalService struct {
-	Options []option.RequestOption
+	Options      []option.RequestOption
+	Capabilities *ExperimentalCapabilitiesService
+	Console      *ExperimentalConsoleService
+	ControlPlane *ExperimentalControlPlaneService
+	ProjectCopy  *ExperimentalProjectCopyService
+	Resource     *ExperimentalResourceService
+	Session      *ExperimentalSessionService
+	Workspace    *ExperimentalWorkspaceService
 }
 
 // NewExperimentalService generates a new service that applies the given options to each
@@ -33,975 +31,124 @@ type ExperimentalService struct {
 func NewExperimentalService(opts ...option.RequestOption) (r *ExperimentalService) {
 	r = &ExperimentalService{}
 	r.Options = opts
+	r.Capabilities = NewExperimentalCapabilitiesService(opts...)
+	r.Console = NewExperimentalConsoleService(opts...)
+	r.ControlPlane = NewExperimentalControlPlaneService(opts...)
+	r.ProjectCopy = NewExperimentalProjectCopyService(opts...)
+	r.Resource = NewExperimentalResourceService(opts...)
+	r.Session = NewExperimentalSessionService(opts...)
+	r.Workspace = NewExperimentalWorkspaceService(opts...)
 	return
 }
 
-// List workspaces
+// WorkspaceList lists workspaces in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.List] instead.
 func (r *ExperimentalService) WorkspaceList(ctx context.Context, query ExperimentalWorkspaceListParams, opts ...option.RequestOption) (res *[]Workspace, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Workspace.List(ctx, query, opts...)
 }
 
-// Create a workspace
+// WorkspaceCreate creates a workspace in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Create] instead.
 func (r *ExperimentalService) WorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateParams, opts ...option.RequestOption) (res *Workspace, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return r.Workspace.Create(ctx, body, opts...)
 }
 
-// Remove a workspace
+// WorkspaceRemove removes a workspace in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Remove] instead.
 func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, query ExperimentalWorkspaceRemoveParams, opts ...option.RequestOption) (res *Workspace, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return
-	}
-	path := fmt.Sprintf("experimental/workspace/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
-	return
+	return r.Workspace.Remove(ctx, id, query, opts...)
 }
 
-// List workspace adapters
+// AdapterList lists workspace adapters in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead.
 func (r *ExperimentalService) AdapterList(ctx context.Context, query ExperimentalAdapterListParams, opts ...option.RequestOption) (res *[]WorkspaceAdapter, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace/adapter"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Workspace.Adapter.List(ctx, query, opts...)
 }
 
-// Get workspace status
+// WorkspaceStatus gets the workspace status in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Status] instead.
 func (r *ExperimentalService) WorkspaceStatus(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceStatusItem, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace/status"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Workspace.Status(ctx, query, opts...)
 }
 
-// Warp a workspace
+// Warp warps a workspace in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Warp] instead.
 func (r *ExperimentalService) Warp(ctx context.Context, params ExperimentalWarpParams, opts ...option.RequestOption) (err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace/warp"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
-	return
+	return r.Workspace.Warp(ctx, params, opts...)
 }
 
-// Register missing workspaces returned by workspace adapters.
+// WorkspaceSyncList registers missing workspaces returned by workspace adapters in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.SyncList] instead.
 func (r *ExperimentalService) WorkspaceSyncList(ctx context.Context, query ExperimentalWorkspaceSyncListParams, opts ...option.RequestOption) (err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/workspace/sync-list"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, nil, opts...)
-	return
+	return r.Workspace.SyncList(ctx, query, opts...)
 }
 
-// Get active Console provider metadata
+// ConsoleGet gets the active Console provider metadata in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Console.Get] instead.
 func (r *ExperimentalService) ConsoleGet(ctx context.Context, query ExperimentalConsoleGetParams, opts ...option.RequestOption) (res *ConsoleState, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/console"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Console.Get(ctx, query, opts...)
 }
 
-// List switchable Console orgs
+// ConsoleListOrgs lists switchable Console orgs in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Console.ListOrgs] instead.
 func (r *ExperimentalService) ConsoleListOrgs(ctx context.Context, query ExperimentalConsoleListOrgsParams, opts ...option.RequestOption) (res *ConsoleListOrgsResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/console/orgs"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Console.ListOrgs(ctx, query, opts...)
 }
 
-// Switch active Console org
+// ConsoleSwitchOrg switches the active Console org in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Console.SwitchOrg] instead.
 func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/console/switch"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return r.Console.SwitchOrg(ctx, body, opts...)
 }
 
-// List sessions across projects
+// SessionList lists sessions across projects in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Session.List] instead.
 func (r *ExperimentalService) SessionList(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *[]GlobalSession, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/session"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Session.List(ctx, query, opts...)
 }
 
-// Get experimental capabilities
+// CapabilitiesGet gets the experimental capabilities in the experimental API.
 //
-// Get experimental features enabled on the OpenCode server.
+// Deprecated: Use [ExperimentalService.Capabilities.Get] instead.
 func (r *ExperimentalService) CapabilitiesGet(ctx context.Context, query ExperimentalCapabilitiesGetParams, opts ...option.RequestOption) (res *ExperimentalCapabilities, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/capabilities"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return r.Capabilities.Get(ctx, query, opts...)
 }
 
-// Move session
+// ControlPlaneMoveSession moves a session in the experimental API.
 //
-// Move a session to another project directory, optionally transferring local changes.
+// Deprecated: Use [ExperimentalService.ControlPlane.MoveSession] instead.
 func (r *ExperimentalService) ControlPlaneMoveSession(ctx context.Context, body ExperimentalControlPlaneMoveSessionParams, opts ...option.RequestOption) (err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/control-plane/move-session"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return r.ControlPlane.MoveSession(ctx, body, opts...)
 }
 
-// Generate project copy name
+// ProjectCopyGenerateName generates a project copy name in the experimental API.
 //
-// Generate a short name for a project copy from task context.
+// Deprecated: Use [ExperimentalService.ProjectCopy.GenerateName] instead.
 func (r *ExperimentalService) ProjectCopyGenerateName(ctx context.Context, projectID string, params ExperimentalProjectCopyGenerateNameParams, opts ...option.RequestOption) (res *ProjectCopyGenerateNameResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if projectID == "" {
-		err = errors.New("missing required projectID parameter")
-		return
-	}
-	path := fmt.Sprintf("experimental/project/%s/copy/generate-name", projectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
-	return
+	return r.ProjectCopy.GenerateName(ctx, projectID, params, opts...)
 }
 
-// Background subagents
+// SessionBackground detaches any synchronous subagents currently blocking the session and continues them in the background.
 //
-// Detach any synchronous subagents currently blocking the session and continue them in the background.
+// Deprecated: Use [ExperimentalService.Session.Background] instead.
 func (r *ExperimentalService) SessionBackground(ctx context.Context, sessionID string, query ExperimentalSessionBackgroundParams, opts ...option.RequestOption) (res *bool, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if sessionID == "" {
-		err = errors.New("missing required sessionID parameter")
-		return
-	}
-	path := fmt.Sprintf("experimental/session/%s/background", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
-	return
+	return r.Session.Background(ctx, sessionID, query, opts...)
 }
 
-// List MCP resources
+// ResourceList lists MCP resources in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Resource.List] instead.
 func (r *ExperimentalService) ResourceList(ctx context.Context, query ExperimentalResourceListParams, opts ...option.RequestOption) (res *map[string]McpResource, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "experimental/resource"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
-type Workspace struct {
-	ID        string `json:"id,required"`
-	Type      string `json:"type,required"`
-	Name      string `json:"name,required"`
-	Branch    string `json:"branch"`
-	Directory string `json:"directory"`
-	Extra     any    `json:"extra"`
-	ProjectID string `json:"projectID,required"`
-	// The amount of time in milliseconds that this workspace has been used.
-	// This field can have the runtime type of [float64], [string] (one of "NaN",
-	// "Infinity", "-Infinity").
-	TimeUsed interface{}   `json:"timeUsed,required"`
-	JSON     workspaceJSON `json:"-"`
-}
-
-// workspaceJSON contains the JSON metadata for the struct [Workspace]
-type workspaceJSON struct {
-	ID          apijson.Field
-	Type        apijson.Field
-	Name        apijson.Field
-	Branch      apijson.Field
-	Directory   apijson.Field
-	Extra       apijson.Field
-	ProjectID   apijson.Field
-	TimeUsed    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *Workspace) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workspaceJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalWorkspaceListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ExperimentalWorkspaceListParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-// ExperimentalWorkspaceCreateParams contains the request parameters for creating a workspace.
-type ExperimentalWorkspaceCreateParams struct {
-	Directory param.Field[string]                   `query:"directory"`
-	Workspace param.Field[string]                   `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput      `json:"-"`
-	JSON      experimentalWorkspaceCreateParamsJSON `json:"-"`
-}
-
-func (r ExperimentalWorkspaceCreateParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
-}
-
-// URLQuery serializes [ExperimentalWorkspaceCreateParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceCreateParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-// experimentalWorkspaceCreateParamsJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceCreateParams]
-type experimentalWorkspaceCreateParamsJSON struct {
-	Directory   apijson.Field
-	Workspace   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r experimentalWorkspaceCreateParamsJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalWorkspaceCreateInput struct {
-	ID     param.Field[string]                  `json:"id"`
-	Type   param.Field[string]                  `json:"type,required"`
-	Branch param.Field[string]                  `json:"branch"`
-	Extra  param.Field[any]                     `json:"extra"`
-	JSON   experimentalWorkspaceCreateInputJSON `json:"-"`
-}
-
-// experimentalWorkspaceCreateInputJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceCreateInput]
-type experimentalWorkspaceCreateInputJSON struct {
-	ID          apijson.Field
-	Type        apijson.Field
-	Branch      apijson.Field
-	Extra       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ExperimentalWorkspaceCreateInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ExperimentalWorkspaceCreateInput) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r experimentalWorkspaceCreateInputJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalWorkspaceRemoveParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ExperimentalWorkspaceRemoveParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceRemoveParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type WorkspaceAdapter struct {
-	Type        string               `json:"type,required"`
-	Name        string               `json:"name,required"`
-	Description string               `json:"description,required"`
-	JSON        workspaceAdapterJSON `json:"-"`
-}
-
-type workspaceAdapterJSON struct {
-	Type        apijson.Field
-	Name        apijson.Field
-	Description apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *WorkspaceAdapter) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workspaceAdapterJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalAdapterListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalAdapterListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type WorkspaceStatusItem struct {
-	WorkspaceID string                    `json:"workspaceID,required"`
-	Status      WorkspaceStatusItemStatus `json:"status,required"`
-	JSON        workspaceStatusItemJSON   `json:"-"`
-}
-
-type workspaceStatusItemJSON struct {
-	WorkspaceID apijson.Field
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *WorkspaceStatusItem) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r workspaceStatusItemJSON) RawJSON() string {
-	return r.raw
-}
-
-type WorkspaceStatusItemStatus string
-
-const (
-	WorkspaceStatusItemStatusConnected    WorkspaceStatusItemStatus = "connected"
-	WorkspaceStatusItemStatusConnecting   WorkspaceStatusItemStatus = "connecting"
-	WorkspaceStatusItemStatusDisconnected WorkspaceStatusItemStatus = "disconnected"
-	WorkspaceStatusItemStatusError        WorkspaceStatusItemStatus = "error"
-)
-
-func (r WorkspaceStatusItemStatus) IsKnown() bool {
-	switch r {
-	case WorkspaceStatusItemStatusConnected, WorkspaceStatusItemStatusConnecting, WorkspaceStatusItemStatusDisconnected, WorkspaceStatusItemStatusError:
-		return true
-	}
-	return false
-}
-
-type ExperimentalWorkspaceStatusParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalWorkspaceStatusParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ExperimentalWarpParams struct {
-	Directory   param.Field[string] `query:"directory"`
-	Workspace   param.Field[string] `query:"workspace"`
-	ID          param.Field[string] `json:"id,required"`
-	SessionID   param.Field[string] `json:"sessionID,required"`
-	CopyChanges param.Field[bool]   `json:"copyChanges"`
-}
-
-func (r ExperimentalWarpParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ExperimentalWarpParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ConsoleState struct {
-	ConsoleManagedProviders []string         `json:"consoleManagedProviders,required"`
-	ActiveOrgName           string           `json:"activeOrgName,omitempty"`
-	SwitchableOrgCount      int64            `json:"switchableOrgCount,required"`
-	JSON                    consoleStateJSON `json:"-"`
-}
-
-type consoleStateJSON struct {
-	ConsoleManagedProviders apijson.Field
-	ActiveOrgName           apijson.Field
-	SwitchableOrgCount      apijson.Field
-	raw                     string
-	ExtraFields             map[string]apijson.Field
-}
-
-func (r *ConsoleState) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r consoleStateJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalConsoleGetParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalConsoleGetParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ConsoleOrg struct {
-	AccountID    string         `json:"accountID,required"`
-	AccountEmail string         `json:"accountEmail,required"`
-	AccountURL   string         `json:"accountUrl,required"`
-	OrgID        string         `json:"orgID,required"`
-	OrgName      string         `json:"orgName,required"`
-	Active       bool           `json:"active,required"`
-	JSON         consoleOrgJSON `json:"-"`
-}
-
-type consoleOrgJSON struct {
-	AccountID    apijson.Field
-	AccountEmail apijson.Field
-	AccountURL   apijson.Field
-	OrgID        apijson.Field
-	OrgName      apijson.Field
-	Active       apijson.Field
-	raw          string
-	ExtraFields  map[string]apijson.Field
-}
-
-func (r *ConsoleOrg) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r consoleOrgJSON) RawJSON() string {
-	return r.raw
-}
-
-type ConsoleListOrgsResponse struct {
-	Orgs []ConsoleOrg                `json:"orgs,required"`
-	JSON consoleListOrgsResponseJSON `json:"-"`
-}
-
-type consoleListOrgsResponseJSON struct {
-	Orgs        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConsoleListOrgsResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r consoleListOrgsResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalConsoleListOrgsParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-// ConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
-type ConsoleSwitchOrgParams struct {
-	Directory param.Field[string]        `query:"directory"`
-	Workspace param.Field[string]        `query:"workspace"`
-	Body      ConsoleSwitchOrgInput      `json:"-"`
-	JSON      consoleSwitchOrgParamsJSON `json:"-"`
-}
-
-func (r ConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
-}
-
-// URLQuery serializes [ConsoleSwitchOrgParams]'s query parameters as `url.Values`.
-func (r ConsoleSwitchOrgParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type consoleSwitchOrgParamsJSON struct {
-	Directory   apijson.Field
-	Workspace   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r consoleSwitchOrgParamsJSON) RawJSON() string {
-	return r.raw
-}
-
-type ConsoleSwitchOrgInput struct {
-	AccountID param.Field[string]       `json:"accountID,required"`
-	OrgID     param.Field[string]       `json:"orgID,required"`
-	JSON      consoleSwitchOrgInputJSON `json:"-"`
-}
-
-type consoleSwitchOrgInputJSON struct {
-	AccountID   apijson.Field
-	OrgID       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConsoleSwitchOrgInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r consoleSwitchOrgInputJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalSessionListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Roots     param.Field[bool]   `query:"roots"`
-	Start     param.Field[int64]  `query:"start"`
-	Cursor    param.Field[int64]  `query:"cursor"`
-	Search    param.Field[string] `query:"search"`
-	Limit     param.Field[int64]  `query:"limit"`
-	Archived  param.Field[bool]   `query:"archived"`
-}
-
-func (r ExperimentalSessionListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type GlobalSession struct {
-	ID          string                `json:"id,required"`
-	Slug        string                `json:"slug,required"`
-	ProjectID   string                `json:"projectID,required"`
-	Directory   string                `json:"directory,required"`
-	Title       string                `json:"title,required"`
-	Version     string                `json:"version,required"`
-	Time        GlobalSessionTime     `json:"time,required"`
-	Project     *ProjectSummary       `json:"project,required"`
-	WorkspaceID string                `json:"workspaceID,omitempty"`
-	Path        string                `json:"path,omitempty"`
-	ParentID    string                `json:"parentID,omitempty"`
-	Summary     *GlobalSessionSummary `json:"summary,omitempty"`
-	Cost        float64               `json:"cost,omitempty"`
-	Tokens      *GlobalSessionTokens  `json:"tokens,omitempty"`
-	Share       *GlobalSessionShare   `json:"share,omitempty"`
-	Agent       string                `json:"agent,omitempty"`
-	Model       *GlobalSessionModel   `json:"model,omitempty"`
-	Permission  PermissionRuleset     `json:"permission,omitempty"`
-	Revert      *GlobalSessionRevert  `json:"revert,omitempty"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}       `json:"metadata,omitempty"`
-	JSON     globalSessionJSON `json:"-"`
-}
-
-// globalSessionJSON contains the JSON metadata for the struct [GlobalSession]
-type globalSessionJSON struct {
-	ID          apijson.Field
-	Slug        apijson.Field
-	ProjectID   apijson.Field
-	Directory   apijson.Field
-	Title       apijson.Field
-	Version     apijson.Field
-	Time        apijson.Field
-	Project     apijson.Field
-	WorkspaceID apijson.Field
-	Path        apijson.Field
-	ParentID    apijson.Field
-	Summary     apijson.Field
-	Cost        apijson.Field
-	Tokens      apijson.Field
-	Share       apijson.Field
-	Agent       apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Revert      apijson.Field
-	Metadata    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSession) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionTime struct {
-	Created    int64                 `json:"created,required"`
-	Updated    int64                 `json:"updated,required"`
-	Compacting int64                 `json:"compacting,omitempty"`
-	Archived   int64                 `json:"archived,omitempty"`
-	JSON       globalSessionTimeJSON `json:"-"`
-}
-
-// globalSessionTimeJSON contains the JSON metadata for the struct [GlobalSessionTime]
-type globalSessionTimeJSON struct {
-	Created     apijson.Field
-	Updated     apijson.Field
-	Compacting  apijson.Field
-	Archived    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionTime) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionTimeJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionTokens struct {
-	Input     int64                    `json:"input,required"`
-	Output    int64                    `json:"output,required"`
-	Reasoning int64                    `json:"reasoning,required"`
-	Cache     GlobalSessionTokensCache `json:"cache,required"`
-	JSON      globalSessionTokensJSON  `json:"-"`
-}
-
-// globalSessionTokensJSON contains the JSON metadata for the struct [GlobalSessionTokens]
-type globalSessionTokensJSON struct {
-	Input       apijson.Field
-	Output      apijson.Field
-	Reasoning   apijson.Field
-	Cache       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionTokens) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionTokensJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionTokensCache struct {
-	Read  int64                        `json:"read,required"`
-	Write int64                        `json:"write,required"`
-	JSON  globalSessionTokensCacheJSON `json:"-"`
-}
-
-// globalSessionTokensCacheJSON contains the JSON metadata for the struct [GlobalSessionTokensCache]
-type globalSessionTokensCacheJSON struct {
-	Read        apijson.Field
-	Write       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionTokensCache) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionTokensCacheJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionShare struct {
-	URL  string                 `json:"url,required"`
-	JSON globalSessionShareJSON `json:"-"`
-}
-
-// globalSessionShareJSON contains the JSON metadata for the struct [GlobalSessionShare]
-type globalSessionShareJSON struct {
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionShare) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionShareJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionModel struct {
-	ID         string                 `json:"id,required"`
-	ProviderID string                 `json:"providerID,required"`
-	Variant    string                 `json:"variant,omitempty"`
-	JSON       globalSessionModelJSON `json:"-"`
-}
-
-// globalSessionModelJSON contains the JSON metadata for the struct [GlobalSessionModel]
-type globalSessionModelJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionModel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionModelJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionRevert struct {
-	MessageID string                  `json:"messageID,required"`
-	PartID    string                  `json:"partID,omitempty"`
-	Snapshot  string                  `json:"snapshot,omitempty"`
-	Diff      string                  `json:"diff,omitempty"`
-	JSON      globalSessionRevertJSON `json:"-"`
-}
-
-// globalSessionRevertJSON contains the JSON metadata for the struct [GlobalSessionRevert]
-type globalSessionRevertJSON struct {
-	MessageID   apijson.Field
-	PartID      apijson.Field
-	Snapshot    apijson.Field
-	Diff        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionRevert) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionRevertJSON) RawJSON() string {
-	return r.raw
-}
-
-type GlobalSessionSummary struct {
-	Additions int64                    `json:"additions,required"`
-	Deletions int64                    `json:"deletions,required"`
-	Files     int64                    `json:"files,required"`
-	Diffs     []SnapshotFileDiff       `json:"diffs,omitempty"`
-	JSON      globalSessionSummaryJSON `json:"-"`
-}
-
-type globalSessionSummaryJSON struct {
-	Additions   apijson.Field
-	Deletions   apijson.Field
-	Files       apijson.Field
-	Diffs       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *GlobalSessionSummary) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r globalSessionSummaryJSON) RawJSON() string {
-	return r.raw
-}
-
-type ProjectSummary struct {
-	ID       string             `json:"id,required"`
-	Worktree string             `json:"worktree,required"`
-	Name     string             `json:"name,omitempty"`
-	JSON     projectSummaryJSON `json:"-"`
-}
-
-// projectSummaryJSON contains the JSON metadata for the struct [ProjectSummary]
-type projectSummaryJSON struct {
-	ID          apijson.Field
-	Worktree    apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProjectSummary) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r projectSummaryJSON) RawJSON() string {
-	return r.raw
-}
-
-type McpResource struct {
-	Name        string          `json:"name,required"`
-	URI         string          `json:"uri,required"`
-	Description string          `json:"description,omitempty"`
-	MIMEType    string          `json:"mimeType,omitempty"`
-	Client      string          `json:"client,required"`
-	JSON        mcpResourceJSON `json:"-"`
-}
-
-type mcpResourceJSON struct {
-	Name        apijson.Field
-	URI         apijson.Field
-	Description apijson.Field
-	MIMEType    apijson.Field
-	Client      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *McpResource) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r mcpResourceJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalResourceListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalResourceListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ExperimentalWorkspaceSyncListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [ExperimentalWorkspaceSyncListParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceSyncListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-// ExperimentalCapabilities represents the experimental capabilities response.
-type ExperimentalCapabilities struct {
-	BackgroundSubagents bool                         `json:"backgroundSubagents,required"`
-	JSON                experimentalCapabilitiesJSON `json:"-"`
-}
-
-// experimentalCapabilitiesJSON contains the JSON metadata for the struct [ExperimentalCapabilities]
-type experimentalCapabilitiesJSON struct {
-	BackgroundSubagents apijson.Field
-	raw                 string
-	ExtraFields         map[string]apijson.Field
-}
-
-func (r *ExperimentalCapabilities) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r experimentalCapabilitiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalCapabilitiesGetParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalCapabilitiesGetParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-// MoveSessionDestination represents the destination for a session move.
-type MoveSessionDestination struct {
-	Directory string `json:"directory,required"`
-}
-
-type ExperimentalControlPlaneMoveSessionParams struct {
-	SessionID   param.Field[string]                           `json:"sessionID,required"`
-	Destination param.Field[MoveSessionDestination]           `json:"destination,required"`
-	MoveChanges param.Field[bool]                             `json:"moveChanges"`
-	JSON        experimentalControlPlaneMoveSessionParamsJSON `json:"-"`
-}
-
-// experimentalControlPlaneMoveSessionParamsJSON contains the JSON metadata for the struct
-// [ExperimentalControlPlaneMoveSessionParams]
-type experimentalControlPlaneMoveSessionParamsJSON struct {
-	SessionID   apijson.Field
-	Destination apijson.Field
-	MoveChanges apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ExperimentalControlPlaneMoveSessionParams) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ExperimentalControlPlaneMoveSessionParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r experimentalControlPlaneMoveSessionParamsJSON) RawJSON() string {
-	return r.raw
-}
-
-// ProjectCopyGenerateNameResponse represents the response from generating a project copy name.
-type ProjectCopyGenerateNameResponse struct {
-	Name string                              `json:"name,required"`
-	JSON projectCopyGenerateNameResponseJSON `json:"-"`
-}
-
-// projectCopyGenerateNameResponseJSON contains the JSON metadata for the struct
-// [ProjectCopyGenerateNameResponse]
-type projectCopyGenerateNameResponseJSON struct {
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProjectCopyGenerateNameResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r projectCopyGenerateNameResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type ExperimentalProjectCopyGenerateNameParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Context   param.Field[string] `json:"context"`
-}
-
-func (r ExperimentalProjectCopyGenerateNameParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ExperimentalProjectCopyGenerateNameParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ExperimentalSessionBackgroundParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-func (r ExperimentalSessionBackgroundParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
+	return r.Resource.List(ctx, query, opts...)
 }

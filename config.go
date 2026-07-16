@@ -1947,12 +1947,13 @@ func (r *ConfigMcp) UnmarshalJSON(data []byte) (err error) {
 // AsUnion returns a [ConfigMcpUnion] interface which you can cast to the specific
 // types for more type safety.
 //
-// Possible runtime types of the union are [McpLocalConfig], [McpRemoteConfig].
+// Possible runtime types of the union are [McpLocalConfig], [McpRemoteConfig],
+// [ConfigMcpDisabled].
 func (r ConfigMcp) AsUnion() ConfigMcpUnion {
 	return r.union
 }
 
-// Union satisfied by [McpLocalConfig] or [McpRemoteConfig].
+// Union satisfied by [McpLocalConfig], [McpRemoteConfig] or [ConfigMcpDisabled].
 type ConfigMcpUnion interface {
 	implementsConfigMcp()
 }
@@ -1969,8 +1970,39 @@ func init() {
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(McpRemoteConfig{}),
 		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigMcpDisabled{}),
+		},
 	)
 }
+
+// ConfigMcpDisabled represents a disabled MCP server configuration.
+//
+// This struct maps to the variant `{type: "object", properties: {enabled: boolean}}`
+// in the OpenAPI `Config.mcp.additionalProperties.anyOf`. Use this to mark an MCP
+// server as disabled without providing local or remote configuration.
+type ConfigMcpDisabled struct {
+	Enabled bool                  `json:"enabled,required"`
+	JSON    configMcpDisabledJSON `json:"-"`
+}
+
+// configMcpDisabledJSON contains the JSON metadata for [ConfigMcpDisabled].
+type configMcpDisabledJSON struct {
+	Enabled     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConfigMcpDisabled) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r configMcpDisabledJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r ConfigMcpDisabled) implementsConfigMcp() {}
 
 // Type of MCP server connection
 type ConfigMcpType string
@@ -2978,6 +3010,7 @@ func (r configWatcherJSON) RawJSON() string {
 type McpLocalConfig struct {
 	// Command and arguments to run the MCP server
 	Command []string `json:"command,required"`
+	Cwd     string   `json:"cwd"`
 	// Type of MCP server connection
 	Type McpLocalConfigType `json:"type,required"`
 	// Enable or disable the MCP server on startup
@@ -2992,6 +3025,7 @@ type McpLocalConfig struct {
 // mcpLocalConfigJSON contains the JSON metadata for the struct [McpLocalConfig]
 type mcpLocalConfigJSON struct {
 	Command     apijson.Field
+	Cwd         apijson.Field
 	Type        apijson.Field
 	Enabled     apijson.Field
 	Timeout     apijson.Field

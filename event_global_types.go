@@ -2747,14 +2747,15 @@ func (r EventListResponseEventPermissionV2Asked) implementsEventListResponse()  
 func (r EventListResponseEventPermissionV2Asked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionV2AskedProperties struct {
-	ID        string                                                   `json:"id,required"`
-	SessionID string                                                   `json:"sessionID,required"`
-	Action    string                                                   `json:"action,required"`
-	Resources []string                                                 `json:"resources,required"`
-	Save      []string                                                 `json:"save"`
-	Metadata  map[string]interface{}                                   `json:"metadata"`
-	Source    *EventListResponseEventPermissionV2AskedPropertiesSource `json:"source"`
-	JSON      eventListResponseEventPermissionV2AskedPropertiesJSON    `json:"-"`
+	ID        string                 `json:"id,required"`
+	SessionID string                 `json:"sessionID,required"`
+	Action    string                 `json:"action,required"`
+	Resources []string               `json:"resources,required"`
+	Save      []string               `json:"save"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	// This field can have the runtime type of [EventListResponseEventPermissionV2AskedPropertiesSource].
+	Source interface{}                                           `json:"source"`
+	JSON   eventListResponseEventPermissionV2AskedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventPermissionV2AskedPropertiesJSON struct {
@@ -2947,8 +2948,9 @@ type EventListResponseEventQuestionV2AskedProperties struct {
 	ID        string                                                     `json:"id,required"`
 	SessionID string                                                     `json:"sessionID,required"`
 	Questions []EventListResponseEventQuestionV2AskedPropertiesQuestions `json:"questions,required"`
-	Tool      *EventListResponseEventQuestionV2AskedPropertiesTool       `json:"tool"`
-	JSON      eventListResponseEventQuestionV2AskedPropertiesJSON        `json:"-"`
+	// This field can have the runtime type of [EventListResponseEventQuestionV2AskedPropertiesTool].
+	Tool interface{}                                         `json:"tool"`
+	JSON eventListResponseEventQuestionV2AskedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventQuestionV2AskedPropertiesJSON struct {

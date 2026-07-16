@@ -35,7 +35,7 @@ func NewV2EventService(opts ...option.RequestOption) (r *V2EventService) {
 }
 
 // Subscribe to native event payloads for the server.
-func (r *V2EventService) Subscribe(ctx context.Context, query EventListParams, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
+func (r *V2EventService) Subscribe(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
 	var (
 		raw *http.Response
 		err error
@@ -43,7 +43,7 @@ func (r *V2EventService) Subscribe(ctx context.Context, query EventListParams, o
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
 	path := "api/event"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &raw, opts...)
 	return ssestream.NewStream[V2Event](ssestream.NewDecoder(raw), err)
 }
 
@@ -51,11 +51,14 @@ func (r *V2EventService) Subscribe(ctx context.Context, query EventListParams, o
 // The V2 format differs from V1: it uses "data" instead of "properties", and
 // includes optional "durable", "location", and "metadata" fields.
 type V2Event struct {
-	ID       string          `json:"id,required"`
-	Type     V2EventType     `json:"type,required"`
-	Durable  *V2EventDurable `json:"durable"`
-	Location *LocationRef    `json:"location"`
-	Metadata interface{}     `json:"metadata"`
+	ID   string      `json:"id,required"`
+	Type V2EventType `json:"type,required"`
+	// This field can have the runtime type of [V2EventDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{} `json:"location"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
 	// This field can have the runtime type of one of the [V2EventPayloadUnion] variants.
 	Data  interface{} `json:"data,required"`
 	JSON  v2EventJSON `json:"-"`

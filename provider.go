@@ -585,7 +585,7 @@ func init() {
 
 // ProviderAuthMethodPromptText represents a text input prompt for authentication.
 type ProviderAuthMethodPromptText struct {
-	Type        string                           `json:"type,required"`
+	Type        ProviderAuthMethodPromptTextType `json:"type,required"`
 	Key         string                           `json:"key,required"`
 	Message     string                           `json:"message,required"`
 	Placeholder string                           `json:"placeholder"`
@@ -615,9 +615,24 @@ func (r providerAuthMethodPromptTextJSON) RawJSON() string {
 
 func (r ProviderAuthMethodPromptText) implementsProviderAuthMethodPrompt() {}
 
+// ProviderAuthMethodPromptTextType represents the type of a text prompt.
+type ProviderAuthMethodPromptTextType string
+
+const (
+	ProviderAuthMethodPromptTextTypeText ProviderAuthMethodPromptTextType = "text"
+)
+
+func (r ProviderAuthMethodPromptTextType) IsKnown() bool {
+	switch r {
+	case ProviderAuthMethodPromptTextTypeText:
+		return true
+	}
+	return false
+}
+
 // ProviderAuthMethodPromptSelect represents a select prompt for authentication.
 type ProviderAuthMethodPromptSelect struct {
-	Type    string                                 `json:"type,required"`
+	Type    ProviderAuthMethodPromptSelectType     `json:"type,required"`
 	Key     string                                 `json:"key,required"`
 	Message string                                 `json:"message,required"`
 	Options []ProviderAuthMethodPromptSelectOption `json:"options,required"`
@@ -646,6 +661,21 @@ func (r providerAuthMethodPromptSelectJSON) RawJSON() string {
 }
 
 func (r ProviderAuthMethodPromptSelect) implementsProviderAuthMethodPrompt() {}
+
+// ProviderAuthMethodPromptSelectType represents the type of a select prompt.
+type ProviderAuthMethodPromptSelectType string
+
+const (
+	ProviderAuthMethodPromptSelectTypeSelect ProviderAuthMethodPromptSelectType = "select"
+)
+
+func (r ProviderAuthMethodPromptSelectType) IsKnown() bool {
+	switch r {
+	case ProviderAuthMethodPromptSelectTypeSelect:
+		return true
+	}
+	return false
+}
 
 // ProviderAuthMethodPromptWhen represents condition for showing a prompt.
 type ProviderAuthMethodPromptWhen struct {

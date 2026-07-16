@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
@@ -16,6 +17,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/sst/opencode-sdk-go/packages/ssestream"
+	"github.com/tidwall/gjson"
 )
 
 // V2PtyService contains methods and other services that help with interacting with
@@ -125,65 +127,6 @@ func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2P
 
 // ===== Response Types =====
 
-// V2PtyInfo represents a PTY session.
-//
-// Deprecated: Use [Pty] from the response wrappers ([V2PtyListResponse], [V2PtyCreateResponse],
-// [V2PtyGetResponse], [V2PtyUpdateResponse]) instead. The v2 PTY methods now return the
-// OpenAPI {location, data} envelope types.
-//
-// @deprecated
-type V2PtyInfo struct {
-	ID       string        `json:"id,required"`
-	Title    string        `json:"title,required"`
-	Command  string        `json:"command,required"`
-	Args     []string      `json:"args,required"`
-	Cwd      string        `json:"cwd,required"`
-	Status   V2PtyStatus   `json:"status,required"`
-	Pid      int64         `json:"pid,required"`
-	ExitCode int64         `json:"exitCode"`
-	JSON     v2PtyInfoJSON `json:"-"`
-}
-
-// v2PtyInfoJSON contains the JSON metadata for the struct [V2PtyInfo]
-type v2PtyInfoJSON struct {
-	ID          apijson.Field
-	Title       apijson.Field
-	Command     apijson.Field
-	Args        apijson.Field
-	Cwd         apijson.Field
-	Status      apijson.Field
-	Pid         apijson.Field
-	ExitCode    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2PtyInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2PtyInfoJSON) RawJSON() string {
-	return r.raw
-}
-
-// V2PtyStatus represents the status of a PTY session.
-//
-// @deprecated
-type V2PtyStatus string
-
-const (
-	V2PtyStatusRunning V2PtyStatus = "running"
-	V2PtyStatusExited  V2PtyStatus = "exited"
-)
-
-func (r V2PtyStatus) IsKnown() bool {
-	switch r {
-	case V2PtyStatusRunning, V2PtyStatusExited:
-		return true
-	}
-	return false
-}
-
 // PtyConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
 type PtyConnectToken struct {
 	Ticket    string              `json:"ticket,required"`
@@ -208,17 +151,20 @@ func (r ptyConnectTokenJSON) RawJSON() string {
 }
 
 // PtyEvent represents an event received from a PTY WebSocket connection.
-//
-// This field can have the runtime type of [PtyCreatedEvent], [PtyUpdatedEvent],
-// [PtyExitedEvent], [PtyDeletedEvent].
 type PtyEvent struct {
-	ID       string       `json:"id,required"`
-	Type     string       `json:"type,required"`
-	Metadata interface{}  `json:"metadata"`
-	Durable  PtyDurable   `json:"durable"`
-	Location PtyLocation  `json:"location"`
-	Data     interface{}  `json:"data,required"`
-	JSON     ptyEventJSON `json:"-"`
+	ID   string       `json:"id,required"`
+	Type PtyEventType `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [PtyDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{} `json:"location"`
+	// This field can have the runtime type of [PtyCreatedEventData], [PtyUpdatedEventData],
+	// [PtyExitedEventData], [PtyDeletedEventData].
+	Data  interface{}  `json:"data,required"`
+	JSON  ptyEventJSON `json:"-"`
+	union PtyEventUnion
 }
 
 // ptyEventJSON contains the JSON metadata for the struct [PtyEvent]
@@ -234,11 +180,51 @@ type ptyEventJSON struct {
 }
 
 func (r *PtyEvent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = PtyEvent{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
 }
 
 func (r ptyEventJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsUnion returns a [PtyEventUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [PtyCreatedEvent], [PtyUpdatedEvent],
+// [PtyExitedEvent], [PtyDeletedEvent].
+func (r PtyEvent) AsUnion() PtyEventUnion {
+	return r.union
+}
+
+// PtyEventType enumerates all possible event types for PtyEvent.
+type PtyEventType string
+
+const (
+	PtyEventTypePtyCreated PtyEventType = "pty.created"
+	PtyEventTypePtyUpdated PtyEventType = "pty.updated"
+	PtyEventTypePtyExited  PtyEventType = "pty.exited"
+	PtyEventTypePtyDeleted PtyEventType = "pty.deleted"
+)
+
+func (r PtyEventType) IsKnown() bool {
+	switch r {
+	case PtyEventTypePtyCreated,
+		PtyEventTypePtyUpdated,
+		PtyEventTypePtyExited,
+		PtyEventTypePtyDeleted:
+		return true
+	}
+	return false
+}
+
+// PtyEventUnion is satisfied by all PtyEvent variant types.
+type PtyEventUnion interface {
+	implementsPtyEvent()
 }
 
 // PtyDurable represents the durable identifier metadata for a PTY event.
@@ -287,6 +273,315 @@ func (r *PtyLocation) UnmarshalJSON(data []byte) (err error) {
 
 func (r ptyLocationJSON) RawJSON() string {
 	return r.raw
+}
+
+// PtyCreatedEvent represents a PtyEvent of type "pty.created".
+type PtyCreatedEvent struct {
+	ID   string              `json:"id,required"`
+	Type PtyCreatedEventType `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [PtyDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{}         `json:"location"`
+	Data     PtyCreatedEventData `json:"data,required"`
+	JSON     ptyCreatedEventJSON `json:"-"`
+}
+
+// ptyCreatedEventJSON contains the JSON metadata for the struct [PtyCreatedEvent]
+type ptyCreatedEventJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Metadata    apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyCreatedEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyCreatedEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PtyCreatedEvent) implementsPtyEvent() {}
+
+// PtyCreatedEventType enumerates all possible event types for PtyCreatedEvent.
+type PtyCreatedEventType string
+
+const (
+	PtyCreatedEventTypePtyCreated PtyCreatedEventType = "pty.created"
+)
+
+func (r PtyCreatedEventType) IsKnown() bool {
+	switch r {
+	case PtyCreatedEventTypePtyCreated:
+		return true
+	}
+	return false
+}
+
+type PtyCreatedEventData struct {
+	Info Pty                     `json:"info,required"`
+	JSON ptyCreatedEventDataJSON `json:"-"`
+}
+
+// ptyCreatedEventDataJSON contains the JSON metadata for the struct [PtyCreatedEventData]
+type ptyCreatedEventDataJSON struct {
+	Info        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyCreatedEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyCreatedEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+// PtyUpdatedEvent represents a PtyEvent of type "pty.updated".
+type PtyUpdatedEvent struct {
+	ID   string              `json:"id,required"`
+	Type PtyUpdatedEventType `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [PtyDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{}         `json:"location"`
+	Data     PtyUpdatedEventData `json:"data,required"`
+	JSON     ptyUpdatedEventJSON `json:"-"`
+}
+
+// ptyUpdatedEventJSON contains the JSON metadata for the struct [PtyUpdatedEvent]
+type ptyUpdatedEventJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Metadata    apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyUpdatedEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyUpdatedEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PtyUpdatedEvent) implementsPtyEvent() {}
+
+// PtyUpdatedEventType enumerates all possible event types for PtyUpdatedEvent.
+type PtyUpdatedEventType string
+
+const (
+	PtyUpdatedEventTypePtyUpdated PtyUpdatedEventType = "pty.updated"
+)
+
+func (r PtyUpdatedEventType) IsKnown() bool {
+	switch r {
+	case PtyUpdatedEventTypePtyUpdated:
+		return true
+	}
+	return false
+}
+
+type PtyUpdatedEventData struct {
+	Info Pty                     `json:"info,required"`
+	JSON ptyUpdatedEventDataJSON `json:"-"`
+}
+
+// ptyUpdatedEventDataJSON contains the JSON metadata for the struct [PtyUpdatedEventData]
+type ptyUpdatedEventDataJSON struct {
+	Info        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyUpdatedEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyUpdatedEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+// PtyExitedEvent represents a PtyEvent of type "pty.exited".
+type PtyExitedEvent struct {
+	ID   string             `json:"id,required"`
+	Type PtyExitedEventType `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [PtyDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{}        `json:"location"`
+	Data     PtyExitedEventData `json:"data,required"`
+	JSON     ptyExitedEventJSON `json:"-"`
+}
+
+// ptyExitedEventJSON contains the JSON metadata for the struct [PtyExitedEvent]
+type ptyExitedEventJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Metadata    apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyExitedEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyExitedEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PtyExitedEvent) implementsPtyEvent() {}
+
+// PtyExitedEventType enumerates all possible event types for PtyExitedEvent.
+type PtyExitedEventType string
+
+const (
+	PtyExitedEventTypePtyExited PtyExitedEventType = "pty.exited"
+)
+
+func (r PtyExitedEventType) IsKnown() bool {
+	switch r {
+	case PtyExitedEventTypePtyExited:
+		return true
+	}
+	return false
+}
+
+type PtyExitedEventData struct {
+	ExitCode int64                  `json:"exitCode,required"`
+	ID       string                 `json:"id,required"`
+	JSON     ptyExitedEventDataJSON `json:"-"`
+}
+
+// ptyExitedEventDataJSON contains the JSON metadata for the struct [PtyExitedEventData]
+type ptyExitedEventDataJSON struct {
+	ExitCode    apijson.Field
+	ID          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyExitedEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyExitedEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+// PtyDeletedEvent represents a PtyEvent of type "pty.deleted".
+type PtyDeletedEvent struct {
+	ID   string              `json:"id,required"`
+	Type PtyDeletedEventType `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [PtyDurable].
+	Durable interface{} `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location interface{}         `json:"location"`
+	Data     PtyDeletedEventData `json:"data,required"`
+	JSON     ptyDeletedEventJSON `json:"-"`
+}
+
+// ptyDeletedEventJSON contains the JSON metadata for the struct [PtyDeletedEvent]
+type ptyDeletedEventJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Metadata    apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyDeletedEvent) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyDeletedEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PtyDeletedEvent) implementsPtyEvent() {}
+
+// PtyDeletedEventType enumerates all possible event types for PtyDeletedEvent.
+type PtyDeletedEventType string
+
+const (
+	PtyDeletedEventTypePtyDeleted PtyDeletedEventType = "pty.deleted"
+)
+
+func (r PtyDeletedEventType) IsKnown() bool {
+	switch r {
+	case PtyDeletedEventTypePtyDeleted:
+		return true
+	}
+	return false
+}
+
+type PtyDeletedEventData struct {
+	ID   string                  `json:"id,required"`
+	JSON ptyDeletedEventDataJSON `json:"-"`
+}
+
+// ptyDeletedEventDataJSON contains the JSON metadata for the struct [PtyDeletedEventData]
+type ptyDeletedEventDataJSON struct {
+	ID          apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PtyDeletedEventData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyDeletedEventDataJSON) RawJSON() string {
+	return r.raw
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*PtyEventUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PtyCreatedEvent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PtyUpdatedEvent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PtyExitedEvent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(PtyDeletedEvent{}),
+		},
+	)
 }
 
 // ===== Response Wrappers =====

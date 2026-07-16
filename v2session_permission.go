@@ -48,11 +48,11 @@ func (r *V2SessionPermissionService) List(ctx context.Context, sessionID string,
 	return
 }
 
-// Create permission request
+// New permission request
 //
 // Evaluate and, when approval is required, create a permission request for a
 // session.
-func (r *V2SessionPermissionService) Create(ctx context.Context, sessionID string, body V2SessionPermissionCreateParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
+func (r *V2SessionPermissionService) New(ctx context.Context, sessionID string, body V2SessionPermissionCreateParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -61,6 +61,11 @@ func (r *V2SessionPermissionService) Create(ctx context.Context, sessionID strin
 	path := fmt.Sprintf("api/session/%s/permission", sessionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
+}
+
+// Deprecated: Use [V2SessionPermissionService.New] instead.
+func (r *V2SessionPermissionService) Create(ctx context.Context, sessionID string, body V2SessionPermissionCreateParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
+	return r.New(ctx, sessionID, body, opts...)
 }
 
 // Get permission request
@@ -144,7 +149,7 @@ func (r PermissionV2Reply) IsKnown() bool {
 
 // ===== Response Types =====
 
-// V2SessionPermissionCreateResponse is returned by the Permission.Create method.
+// V2SessionPermissionCreateResponse is returned by the Permission.New method.
 type V2SessionPermissionCreateResponse struct {
 	Data V2SessionPermissionCreateData         `json:"data,required"`
 	JSON v2SessionPermissionCreateResponseJSON `json:"-"`

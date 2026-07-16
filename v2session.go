@@ -244,7 +244,7 @@ func (r *V2SessionService) Interrupt(ctx context.Context, sessionID string, opts
 // Get session message
 //
 // Retrieve one projected message owned by the Session.
-func (r *V2SessionService) Message(ctx context.Context, sessionID string, messageID string, opts ...option.RequestOption) (res *V2SessionMessage, err error) {
+func (r *V2SessionService) Message(ctx context.Context, sessionID string, messageID string, opts ...option.RequestOption) (res *V2SessionMessageResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -414,8 +414,7 @@ func (r v2CursorJSON) RawJSON() string {
 }
 
 type V2SessionMessagesResponse struct {
-	// This field can have the runtime type of [V2SessionMessage].
-	Data   []interface{}                 `json:"data,required"`
+	Data   []V2SessionMessage            `json:"data,required"`
 	Cursor V2Cursor                      `json:"cursor,required"`
 	JSON   v2SessionMessagesResponseJSON `json:"-"`
 }
@@ -438,8 +437,7 @@ func (r v2SessionMessagesResponseJSON) RawJSON() string {
 // V2SessionContextResponse is returned by the Context method. It wraps messages
 // in a data field.
 type V2SessionContextResponse struct {
-	// This field can have the runtime type of [V2SessionMessage].
-	Data []interface{}                `json:"data,required"`
+	Data []V2SessionMessage           `json:"data,required"`
 	JSON v2SessionContextResponseJSON `json:"-"`
 }
 
@@ -498,6 +496,27 @@ func (r *V2SessionMessage) UnmarshalJSON(data []byte) (err error) {
 // [V2SessionMessageCompaction].
 func (r V2SessionMessage) AsUnion() V2SessionMessageUnion {
 	return r.union
+}
+
+// V2SessionMessageResponse is returned by the Message method. The OpenAPI
+// response wraps the projected [V2SessionMessage] in a `data` envelope.
+type V2SessionMessageResponse struct {
+	Data V2SessionMessage             `json:"data,required"`
+	JSON v2SessionMessageResponseJSON `json:"-"`
+}
+
+type v2SessionMessageResponseJSON struct {
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionMessageResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionMessageResponseJSON) RawJSON() string {
+	return r.raw
 }
 
 // Union satisfied by [V2SessionMessageAgentSwitched],
@@ -666,11 +685,15 @@ func (r v2SessionMessageShellJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistant struct {
-	ID       string                             `json:"id,required"`
-	Time     V2SessionMessageAssistantTime      `json:"time,required"`
-	Type     string                             `json:"type,required"`
-	Agent    string                             `json:"agent,required"`
-	Model    V2SessionMessageModel              `json:"model,required"`
+	ID    string                        `json:"id,required"`
+	Time  V2SessionMessageAssistantTime `json:"time,required"`
+	Type  string                        `json:"type,required"`
+	Agent string                        `json:"agent,required"`
+	Model V2SessionMessageModel         `json:"model,required"`
+	// This field can have the runtime type of
+	// [V2SessionMessageAssistantTextContent],
+	// [V2SessionMessageAssistantReasoningContent],
+	// [V2SessionMessageAssistantToolContent].
 	Content  []V2SessionMessageAssistantContent `json:"content,required"`
 	Snapshot V2SessionMessageAssistantSnapshot  `json:"snapshot"`
 	Finish   string                             `json:"finish"`
@@ -907,36 +930,57 @@ func (r v2SessionMessageTokensCacheJSON) RawJSON() string {
 	return r.raw
 }
 
+// V2SessionMessageAssistantContent represents a discriminated union of v2
+// assistant content types. Possible runtime types of the union are
+// [V2SessionMessageAssistantTextContent], [V2SessionMessageAssistantReasoningContent]
+// or [V2SessionMessageAssistantToolContent].
 type V2SessionMessageAssistantContent struct {
-	Type     string                               `json:"type,required"`
-	Text     string                               `json:"text"`
-	ID       string                               `json:"id"`
-	Name     string                               `json:"name"`
-	State    V2SessionMessageToolState            `json:"state"`
-	Provider V2SessionMessageToolProvider         `json:"provider"`
-	Time     V2SessionMessageToolTime             `json:"time"`
-	JSON     v2SessionMessageAssistantContentJSON `json:"-"`
+	JSON  v2SessionMessageAssistantContentJSON `json:"-"`
+	union V2SessionMessageAssistantContentUnion
 }
 
+// v2SessionMessageAssistantContentJSON contains the JSON metadata for the
+// struct [V2SessionMessageAssistantContent]
 type v2SessionMessageAssistantContentJSON struct {
-	Type        apijson.Field
-	Text        apijson.Field
-	ID          apijson.Field
-	Name        apijson.Field
-	State       apijson.Field
-	Provider    apijson.Field
-	Time        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionMessageAssistantContent) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2SessionMessageAssistantContentJSON) RawJSON() string {
 	return r.raw
 }
+
+func (r *V2SessionMessageAssistantContent) UnmarshalJSON(data []byte) (err error) {
+	*r = V2SessionMessageAssistantContent{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2SessionMessageAssistantContentUnion] interface which
+// you can cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are
+// [V2SessionMessageAssistantTextContent],
+// [V2SessionMessageAssistantReasoningContent] or
+// [V2SessionMessageAssistantToolContent].
+func (r V2SessionMessageAssistantContent) AsUnion() V2SessionMessageAssistantContentUnion {
+	return r.union
+}
+
+// V2SessionMessageAssistantContentUnion is satisfied by
+// [V2SessionMessageAssistantTextContent],
+// [V2SessionMessageAssistantReasoningContent] or
+// [V2SessionMessageAssistantToolContent].
+type V2SessionMessageAssistantContentUnion interface {
+	implementsV2SessionMessageAssistantContent()
+}
+
+func (V2SessionMessageAssistantTextContent) implementsV2SessionMessageAssistantContent()      {}
+func (V2SessionMessageAssistantReasoningContent) implementsV2SessionMessageAssistantContent() {}
+func (V2SessionMessageAssistantToolContent) implementsV2SessionMessageAssistantContent()      {}
 
 type V2SessionMessageAssistantSnapshot struct {
 	Start string                                `json:"start"`
@@ -1011,11 +1055,8 @@ func (r v2SessionMessageToolTimeJSON) RawJSON() string {
 // V2SessionMessage assistant content sub-types are discriminated by the "type"
 // field: "text" (V2SessionMessageAssistantTextContent), "reasoning"
 // (V2SessionMessageAssistantReasoningContent), and "tool"
-// (V2SessionMessageAssistantToolContent).
-//
-// The [V2SessionMessageAssistantContent] struct is a fat struct containing all
-// possible fields across content types; the concrete sub-types provide
-// type-safe alternatives.
+// (V2SessionMessageAssistantToolContent). They are exposed through the
+// [V2SessionMessageAssistantContent] union, accessible via [V2SessionMessageAssistantContent.AsUnion].
 
 // V2SessionInputAdmitted is returned by the Prompt method. It represents the
 // server's admission of a prompt input.
@@ -1222,12 +1263,14 @@ func (r v2PromptSourceJSON) RawJSON() string {
 
 type V2SessionMessageAssistantTextContent struct {
 	Type string                                   `json:"type,required"`
+	ID   string                                   `json:"id,required"`
 	Text string                                   `json:"text,required"`
 	JSON v2SessionMessageAssistantTextContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantTextContentJSON struct {
 	Type        apijson.Field
+	ID          apijson.Field
 	Text        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -1504,9 +1547,13 @@ type V2SessionMessageToolStateCompleted struct {
 	Input      map[string]interface{}                   `json:"input,required"`
 	Structured map[string]interface{}                   `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     interface{}                            `json:"content,required"`
-	Attachments []V2PromptFileAttachment               `json:"attachments"`
-	JSON        v2SessionMessageToolStateCompletedJSON `json:"-"`
+	Content     interface{}              `json:"content,required"`
+	Attachments []V2PromptFileAttachment `json:"attachments"`
+	// This field can have the runtime type of [[]string].
+	OutputPaths interface{} `json:"outputPaths"`
+	// This field can have the runtime type of [interface{}].
+	Result interface{}                            `json:"result"`
+	JSON   v2SessionMessageToolStateCompletedJSON `json:"-"`
 }
 
 type V2SessionMessageToolStateCompletedStatus string
@@ -1529,6 +1576,8 @@ type v2SessionMessageToolStateCompletedJSON struct {
 	Structured  apijson.Field
 	Content     apijson.Field
 	Attachments apijson.Field
+	OutputPaths apijson.Field
+	Result      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1548,9 +1597,11 @@ type V2SessionMessageToolStateError struct {
 	Input      map[string]interface{}               `json:"input,required"`
 	Structured map[string]interface{}               `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content interface{}                        `json:"content,required"`
-	Error   SessionErrorUnknown                `json:"error,required"`
-	JSON    v2SessionMessageToolStateErrorJSON `json:"-"`
+	Content interface{}         `json:"content,required"`
+	Error   SessionErrorUnknown `json:"error,required"`
+	// This field can have the runtime type of [interface{}].
+	Result interface{}                        `json:"result"`
+	JSON   v2SessionMessageToolStateErrorJSON `json:"-"`
 }
 
 type V2SessionMessageToolStateErrorStatus string
@@ -1573,6 +1624,7 @@ type v2SessionMessageToolStateErrorJSON struct {
 	Structured  apijson.Field
 	Content     apijson.Field
 	Error       apijson.Field
+	Result      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1586,6 +1638,988 @@ func (r v2SessionMessageToolStateErrorJSON) RawJSON() string {
 }
 
 func (r V2SessionMessageToolStateError) implementsV2SessionMessageToolStateUnion() {}
+
+// ===== V2SessionDurableEvent union =====
+
+// V2SessionDurableEvent represents a discriminated union of durable session
+// events. Possible runtime types of the union are
+// [V2SessionDurableEventAgentSwitched], [V2SessionDurableEventModelSwitched],
+// [V2SessionDurableEventMoved], [V2SessionDurableEventPrompted],
+// [V2SessionDurableEventPromptAdmitted], [V2SessionDurableEventContextUpdated],
+// [V2SessionDurableEventSynthetic], [V2SessionDurableEventShellStarted],
+// [V2SessionDurableEventShellEnded], [V2SessionDurableEventStepStarted],
+// [V2SessionDurableEventStepEnded], [V2SessionDurableEventStepFailed],
+// [V2SessionDurableEventTextStarted], [V2SessionDurableEventTextEnded],
+// [V2SessionDurableEventToolInputStarted], [V2SessionDurableEventToolInputEnded],
+// [V2SessionDurableEventToolCalled], [V2SessionDurableEventToolProgress],
+// [V2SessionDurableEventToolSuccess], [V2SessionDurableEventToolFailed],
+// [V2SessionDurableEventReasoningStarted], [V2SessionDurableEventReasoningEnded],
+// [V2SessionDurableEventRetried], [V2SessionDurableEventCompactionStarted],
+// [V2SessionDurableEventCompactionEnded], [V2SessionDurableEventRevertStaged],
+// [V2SessionDurableEventRevertCleared] or [V2SessionDurableEventRevertCommitted].
+type V2SessionDurableEvent struct {
+	JSON  v2SessionDurableEventJSON `json:"-"`
+	union V2SessionDurableEventUnion
+}
+
+// v2SessionDurableEventJSON contains the JSON metadata for the struct
+// [V2SessionDurableEvent].
+type v2SessionDurableEventJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2SessionDurableEventJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *V2SessionDurableEvent) UnmarshalJSON(data []byte) (err error) {
+	*r = V2SessionDurableEvent{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2SessionDurableEventUnion] interface which you can cast
+// to the specific types for more type safety.
+//
+// Possible runtime types of the union are
+// [V2SessionDurableEventAgentSwitched], [V2SessionDurableEventModelSwitched],
+// [V2SessionDurableEventMoved], [V2SessionDurableEventPrompted],
+// [V2SessionDurableEventPromptAdmitted], [V2SessionDurableEventContextUpdated],
+// [V2SessionDurableEventSynthetic], [V2SessionDurableEventShellStarted],
+// [V2SessionDurableEventShellEnded], [V2SessionDurableEventStepStarted],
+// [V2SessionDurableEventStepEnded], [V2SessionDurableEventStepFailed],
+// [V2SessionDurableEventTextStarted], [V2SessionDurableEventTextEnded],
+// [V2SessionDurableEventToolInputStarted], [V2SessionDurableEventToolInputEnded],
+// [V2SessionDurableEventToolCalled], [V2SessionDurableEventToolProgress],
+// [V2SessionDurableEventToolSuccess], [V2SessionDurableEventToolFailed],
+// [V2SessionDurableEventReasoningStarted], [V2SessionDurableEventReasoningEnded],
+// [V2SessionDurableEventRetried], [V2SessionDurableEventCompactionStarted],
+// [V2SessionDurableEventCompactionEnded], [V2SessionDurableEventRevertStaged],
+// [V2SessionDurableEventRevertCleared] or [V2SessionDurableEventRevertCommitted].
+func (r V2SessionDurableEvent) AsUnion() V2SessionDurableEventUnion {
+	return r.union
+}
+
+// V2SessionDurableEventUnion is satisfied by
+// [V2SessionDurableEventAgentSwitched], [V2SessionDurableEventModelSwitched],
+// [V2SessionDurableEventMoved], [V2SessionDurableEventPrompted],
+// [V2SessionDurableEventPromptAdmitted], [V2SessionDurableEventContextUpdated],
+// [V2SessionDurableEventSynthetic], [V2SessionDurableEventShellStarted],
+// [V2SessionDurableEventShellEnded], [V2SessionDurableEventStepStarted],
+// [V2SessionDurableEventStepEnded], [V2SessionDurableEventStepFailed],
+// [V2SessionDurableEventTextStarted], [V2SessionDurableEventTextEnded],
+// [V2SessionDurableEventToolInputStarted], [V2SessionDurableEventToolInputEnded],
+// [V2SessionDurableEventToolCalled], [V2SessionDurableEventToolProgress],
+// [V2SessionDurableEventToolSuccess], [V2SessionDurableEventToolFailed],
+// [V2SessionDurableEventReasoningStarted], [V2SessionDurableEventReasoningEnded],
+// [V2SessionDurableEventRetried], [V2SessionDurableEventCompactionStarted],
+// [V2SessionDurableEventCompactionEnded], [V2SessionDurableEventRevertStaged],
+// [V2SessionDurableEventRevertCleared] or [V2SessionDurableEventRevertCommitted].
+type V2SessionDurableEventUnion interface {
+	implementsV2SessionDurableEvent()
+}
+
+// ===== V2SessionDurableEvent variants =====
+
+type V2SessionDurableEventAgentSwitched struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                            `json:"metadata"`
+	Type     string                                 `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Data     V2EventSessionNextAgentSwitchedData    `json:"data,required"`
+	JSON     v2SessionDurableEventAgentSwitchedJSON `json:"-"`
+}
+
+type v2SessionDurableEventAgentSwitchedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventAgentSwitched) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventAgentSwitchedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventAgentSwitched) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventModelSwitched struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                            `json:"metadata"`
+	Type     string                                 `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Data     V2EventSessionNextModelSwitchedData    `json:"data,required"`
+	JSON     v2SessionDurableEventModelSwitchedJSON `json:"-"`
+}
+
+type v2SessionDurableEventModelSwitchedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventModelSwitched) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventModelSwitchedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventModelSwitched) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventMoved struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                    `json:"metadata"`
+	Type     string                         `json:"type,required"`
+	Durable  V2EventDurable                 `json:"durable"`
+	Location LocationRef                    `json:"location"`
+	Data     V2EventSessionNextMovedData    `json:"data,required"`
+	JSON     v2SessionDurableEventMovedJSON `json:"-"`
+}
+
+type v2SessionDurableEventMovedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventMoved) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventMovedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventMoved) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventPrompted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                       `json:"metadata"`
+	Type     string                            `json:"type,required"`
+	Durable  V2EventDurable                    `json:"durable"`
+	Location LocationRef                       `json:"location"`
+	Data     V2EventSessionNextPromptedData    `json:"data,required"`
+	JSON     v2SessionDurableEventPromptedJSON `json:"-"`
+}
+
+type v2SessionDurableEventPromptedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventPrompted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventPromptedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventPrompted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventPromptAdmitted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                             `json:"metadata"`
+	Type     string                                  `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Data     V2EventSessionNextPromptAdmittedData    `json:"data,required"`
+	JSON     v2SessionDurableEventPromptAdmittedJSON `json:"-"`
+}
+
+type v2SessionDurableEventPromptAdmittedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventPromptAdmitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventPromptAdmittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventPromptAdmitted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventContextUpdated struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                             `json:"metadata"`
+	Type     string                                  `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Data     V2EventSessionNextContextUpdatedData    `json:"data,required"`
+	JSON     v2SessionDurableEventContextUpdatedJSON `json:"-"`
+}
+
+type v2SessionDurableEventContextUpdatedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventContextUpdated) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventContextUpdatedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventContextUpdated) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventSynthetic struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                        `json:"metadata"`
+	Type     string                             `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Data     V2EventSessionNextSyntheticData    `json:"data,required"`
+	JSON     v2SessionDurableEventSyntheticJSON `json:"-"`
+}
+
+type v2SessionDurableEventSyntheticJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventSynthetic) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventSyntheticJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventSynthetic) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventShellStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                           `json:"metadata"`
+	Type     string                                `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Data     V2EventSessionNextShellStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventShellStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventShellStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventShellStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventShellStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventShellStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventShellEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                         `json:"metadata"`
+	Type     string                              `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Data     V2EventSessionNextShellEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventShellEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventShellEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventShellEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventShellEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventShellEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventStepStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                          `json:"metadata"`
+	Type     string                               `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Data     V2EventSessionNextStepStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventStepStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventStepStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventStepStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventStepStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventStepStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventStepEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                        `json:"metadata"`
+	Type     string                             `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Data     V2EventSessionNextStepEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventStepEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventStepEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventStepEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventStepEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventStepEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventStepFailed struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                         `json:"metadata"`
+	Type     string                              `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Data     V2EventSessionNextStepFailedData    `json:"data,required"`
+	JSON     v2SessionDurableEventStepFailedJSON `json:"-"`
+}
+
+type v2SessionDurableEventStepFailedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventStepFailed) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventStepFailedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventStepFailed) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventTextStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                          `json:"metadata"`
+	Type     string                               `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Data     V2EventSessionNextTextStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventTextStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventTextStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventTextStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventTextStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventTextStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventTextEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                        `json:"metadata"`
+	Type     string                             `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Data     V2EventSessionNextTextEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventTextEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventTextEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventTextEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventTextEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventTextEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolInputStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                               `json:"metadata"`
+	Type     string                                    `json:"type,required"`
+	Durable  V2EventDurable                            `json:"durable"`
+	Location LocationRef                               `json:"location"`
+	Data     V2EventSessionNextToolInputStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolInputStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolInputStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolInputStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolInputStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolInputStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolInputEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                             `json:"metadata"`
+	Type     string                                  `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Data     V2EventSessionNextToolInputEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolInputEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolInputEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolInputEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolInputEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolInputEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolCalled struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                         `json:"metadata"`
+	Type     string                              `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Data     V2EventSessionNextToolCalledData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolCalledJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolCalledJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolCalled) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolCalledJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolCalled) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolProgress struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                           `json:"metadata"`
+	Type     string                                `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Data     V2EventSessionNextToolProgressData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolProgressJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolProgressJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolProgress) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolProgressJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolProgress) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolSuccess struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                          `json:"metadata"`
+	Type     string                               `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Data     V2EventSessionNextToolSuccessData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolSuccessJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolSuccessJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolSuccess) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolSuccessJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolSuccess) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventToolFailed struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                         `json:"metadata"`
+	Type     string                              `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Data     V2EventSessionNextToolFailedData    `json:"data,required"`
+	JSON     v2SessionDurableEventToolFailedJSON `json:"-"`
+}
+
+type v2SessionDurableEventToolFailedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventToolFailed) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventToolFailedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventToolFailed) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventReasoningStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                               `json:"metadata"`
+	Type     string                                    `json:"type,required"`
+	Durable  V2EventDurable                            `json:"durable"`
+	Location LocationRef                               `json:"location"`
+	Data     V2EventSessionNextReasoningStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventReasoningStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventReasoningStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventReasoningStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventReasoningStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventReasoningStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventReasoningEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                             `json:"metadata"`
+	Type     string                                  `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Data     V2EventSessionNextReasoningEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventReasoningEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventReasoningEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventReasoningEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventReasoningEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventReasoningEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventRetried struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                      `json:"metadata"`
+	Type     string                           `json:"type,required"`
+	Durable  V2EventDurable                   `json:"durable"`
+	Location LocationRef                      `json:"location"`
+	Data     V2EventSessionNextRetriedData    `json:"data,required"`
+	JSON     v2SessionDurableEventRetriedJSON `json:"-"`
+}
+
+type v2SessionDurableEventRetriedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventRetried) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventRetriedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventRetried) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventCompactionStarted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                                `json:"metadata"`
+	Type     string                                     `json:"type,required"`
+	Durable  V2EventDurable                             `json:"durable"`
+	Location LocationRef                                `json:"location"`
+	Data     V2EventSessionNextCompactionStartedData    `json:"data,required"`
+	JSON     v2SessionDurableEventCompactionStartedJSON `json:"-"`
+}
+
+type v2SessionDurableEventCompactionStartedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventCompactionStarted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventCompactionStartedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventCompactionStarted) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventCompactionEnded struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                              `json:"metadata"`
+	Type     string                                   `json:"type,required"`
+	Durable  V2EventDurable                           `json:"durable"`
+	Location LocationRef                              `json:"location"`
+	Data     V2EventSessionNextCompactionEndedData    `json:"data,required"`
+	JSON     v2SessionDurableEventCompactionEndedJSON `json:"-"`
+}
+
+type v2SessionDurableEventCompactionEndedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventCompactionEnded) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventCompactionEndedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventCompactionEnded) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventRevertStaged struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                           `json:"metadata"`
+	Type     string                                `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Data     V2EventSessionNextRevertStagedData    `json:"data,required"`
+	JSON     v2SessionDurableEventRevertStagedJSON `json:"-"`
+}
+
+type v2SessionDurableEventRevertStagedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventRevertStaged) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventRevertStagedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventRevertStaged) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventRevertCleared struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                            `json:"metadata"`
+	Type     string                                 `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Data     V2EventSessionNextRevertClearedData    `json:"data,required"`
+	JSON     v2SessionDurableEventRevertClearedJSON `json:"-"`
+}
+
+type v2SessionDurableEventRevertClearedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventRevertCleared) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventRevertClearedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventRevertCleared) implementsV2SessionDurableEvent() {}
+
+type V2SessionDurableEventRevertCommitted struct {
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                              `json:"metadata"`
+	Type     string                                   `json:"type,required"`
+	Durable  V2EventDurable                           `json:"durable"`
+	Location LocationRef                              `json:"location"`
+	Data     V2EventSessionNextRevertCommittedData    `json:"data,required"`
+	JSON     v2SessionDurableEventRevertCommittedJSON `json:"-"`
+}
+
+type v2SessionDurableEventRevertCommittedJSON struct {
+	ID          apijson.Field
+	Metadata    apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Data        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *V2SessionDurableEventRevertCommitted) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r v2SessionDurableEventRevertCommittedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (V2SessionDurableEventRevertCommitted) implementsV2SessionDurableEvent() {}
 
 func init() {
 	apijson.RegisterUnion(
@@ -1606,6 +2640,22 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(V2SessionMessageToolStateError{}),
+		},
+	)
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2SessionMessageAssistantContentUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageAssistantTextContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageAssistantReasoningContent{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionMessageAssistantToolContent{}),
 		},
 	)
 	apijson.RegisterUnion(
@@ -1642,6 +2692,122 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(V2SessionMessageSystem{}),
+		},
+	)
+	apijson.RegisterUnion(
+		reflect.TypeOf((*V2SessionDurableEventUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventAgentSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventModelSwitched{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventMoved{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventPrompted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventPromptAdmitted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventContextUpdated{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventSynthetic{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventShellStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventShellEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventStepStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventStepEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventStepFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventTextStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventTextEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolInputStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolInputEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolCalled{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolProgress{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolSuccess{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventToolFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventReasoningStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventReasoningEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventRetried{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventCompactionStarted{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventCompactionEnded{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventRevertStaged{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventRevertCleared{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2SessionDurableEventRevertCommitted{}),
 		},
 	)
 }
@@ -1682,27 +2848,14 @@ func (r V2SessionListParams) URLQuery() (v url.Values) {
 }
 
 type V2SessionPromptParams struct {
-	Directory param.Field[string]       `query:"directory"`
-	Workspace param.Field[string]       `query:"workspace"`
-	Body      V2SessionPromptParamsBody `json:"body,required"`
-}
-
-func (r V2SessionPromptParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
-}
-
-func (r V2SessionPromptParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type V2SessionPromptParamsBody struct {
 	ID       param.Field[string]             `json:"id"`
 	Prompt   param.Field[V2PromptInputParam] `json:"prompt,required"`
 	Delivery param.Field[SessionDelivery]    `json:"delivery"`
 	Resume   param.Field[bool]               `json:"resume"`
+}
+
+func (r V2SessionPromptParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type SessionDelivery string
@@ -1718,10 +2871,6 @@ func (r SessionDelivery) IsKnown() bool {
 		return true
 	}
 	return false
-}
-
-func (r V2SessionPromptParamsBody) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
 }
 
 // V2PromptInputParam represents the prompt input for the v2.session.prompt
@@ -1837,7 +2986,7 @@ type RevertState struct {
 	PartID    string          `json:"partID"`
 	Snapshot  string          `json:"snapshot"`
 	Diff      string          `json:"diff"`
-	Files     []VcsFileDiff   `json:"files"`
+	Files     []FileDiff      `json:"files"`
 	JSON      revertStateJSON `json:"-"`
 }
 
@@ -2041,7 +3190,7 @@ func (r v2SessionEventResponseJSON) RawJSON() string {
 
 // V2SessionHistoryResponse is returned by the History method.
 type V2SessionHistoryResponse struct {
-	Data    []interface{}                `json:"data,required"`
+	Data    []V2SessionDurableEvent      `json:"data,required"`
 	HasMore bool                         `json:"hasMore,required"`
 	JSON    v2SessionHistoryResponseJSON `json:"-"`
 }

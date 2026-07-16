@@ -1180,6 +1180,29 @@ type FilePartSourceUnionParam interface {
 	implementsFilePartSourceUnionParam()
 }
 
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*FilePartSourceUnionParam)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(FilePartSourceParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(FileSourceParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SymbolSourceParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ResourceSourceParam{}),
+		},
+	)
+}
+
 type FilePartSourceText struct {
 	End   int64                  `json:"end,required"`
 	Start int64                  `json:"start,required"`

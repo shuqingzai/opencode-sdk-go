@@ -315,9 +315,9 @@ type IntegrationOAuthMethod struct {
 	ID    string                     `json:"id,required"`
 	Type  IntegrationOAuthMethodType `json:"type,required"`
 	Label string                     `json:"label,required"`
-	// This field can have the runtime type of [IntegrationTextPrompt],
-	// [IntegrationSelectPrompt].
-	Prompts []IntegrationPromptUnion   `json:"prompts"`
+	// This field can have the runtime type of [[]IntegrationTextPrompt],
+	// [[]IntegrationSelectPrompt].
+	Prompts interface{}                `json:"prompts"`
 	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 
@@ -650,10 +650,13 @@ func (r integrationAttemptTimeJSON) RawJSON() string {
 // failed, or expired.
 type IntegrationAttemptStatus struct {
 	Status IntegrationAttemptStatusType `json:"status,required"`
-	// Message is present only when status is "failed".
-	Message string                       `json:"message"`
-	Time    IntegrationAttemptTime       `json:"time,required"`
-	JSON    integrationAttemptStatusJSON `json:"-"`
+	// Message is present only when status is "failed". This field can have the
+	// runtime type of [string].
+	Message interface{} `json:"message"`
+	// This field can have the runtime type of [IntegrationAttemptTime].
+	Time  interface{}                  `json:"time,required"`
+	JSON  integrationAttemptStatusJSON `json:"-"`
+	union IntegrationAttemptStatusUnion
 }
 
 // integrationAttemptStatusJSON contains the JSON metadata for the struct [IntegrationAttemptStatus]
@@ -665,12 +668,37 @@ type integrationAttemptStatusJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *IntegrationAttemptStatus) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 func (r integrationAttemptStatusJSON) RawJSON() string {
 	return r.raw
+}
+
+func (r *IntegrationAttemptStatus) UnmarshalJSON(data []byte) (err error) {
+	*r = IntegrationAttemptStatus{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [IntegrationAttemptStatusUnion] interface which you can cast
+// to the specific types for more type safety.
+//
+// Possible runtime types of the union are [IntegrationAttemptStatusPending],
+// [IntegrationAttemptStatusComplete], [IntegrationAttemptStatusFailed],
+// [IntegrationAttemptStatusExpired].
+func (r IntegrationAttemptStatus) AsUnion() IntegrationAttemptStatusUnion {
+	return r.union
+}
+
+// IntegrationAttemptStatusUnion represents the union of integration attempt status
+// types.
+//
+// Possible runtime types are [IntegrationAttemptStatusPending],
+// [IntegrationAttemptStatusComplete], [IntegrationAttemptStatusFailed],
+// [IntegrationAttemptStatusExpired].
+type IntegrationAttemptStatusUnion interface {
+	implementsIntegrationAttemptStatus()
 }
 
 type IntegrationAttemptStatusType string
@@ -689,6 +717,139 @@ func (r IntegrationAttemptStatusType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// IntegrationAttemptStatusPending represents the status of an integration attempt
+// that is pending.
+type IntegrationAttemptStatusPending struct {
+	Status IntegrationAttemptStatusType        `json:"status,required"`
+	Time   IntegrationAttemptTime              `json:"time,required"`
+	JSON   integrationAttemptStatusPendingJSON `json:"-"`
+}
+
+// integrationAttemptStatusPendingJSON contains the JSON metadata for the struct
+// [IntegrationAttemptStatusPending]
+type integrationAttemptStatusPendingJSON struct {
+	Status      apijson.Field
+	Time        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *IntegrationAttemptStatusPending) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r integrationAttemptStatusPendingJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r IntegrationAttemptStatusPending) implementsIntegrationAttemptStatus() {}
+
+// IntegrationAttemptStatusComplete represents the status of an integration attempt
+// that has completed.
+type IntegrationAttemptStatusComplete struct {
+	Status IntegrationAttemptStatusType         `json:"status,required"`
+	Time   IntegrationAttemptTime               `json:"time,required"`
+	JSON   integrationAttemptStatusCompleteJSON `json:"-"`
+}
+
+// integrationAttemptStatusCompleteJSON contains the JSON metadata for the struct
+// [IntegrationAttemptStatusComplete]
+type integrationAttemptStatusCompleteJSON struct {
+	Status      apijson.Field
+	Time        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *IntegrationAttemptStatusComplete) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r integrationAttemptStatusCompleteJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r IntegrationAttemptStatusComplete) implementsIntegrationAttemptStatus() {}
+
+// IntegrationAttemptStatusFailed represents the status of an integration attempt
+// that has failed.
+type IntegrationAttemptStatusFailed struct {
+	Status  IntegrationAttemptStatusType       `json:"status,required"`
+	Message string                             `json:"message,required"`
+	Time    IntegrationAttemptTime             `json:"time,required"`
+	JSON    integrationAttemptStatusFailedJSON `json:"-"`
+}
+
+// integrationAttemptStatusFailedJSON contains the JSON metadata for the struct
+// [IntegrationAttemptStatusFailed]
+type integrationAttemptStatusFailedJSON struct {
+	Status      apijson.Field
+	Message     apijson.Field
+	Time        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *IntegrationAttemptStatusFailed) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r integrationAttemptStatusFailedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r IntegrationAttemptStatusFailed) implementsIntegrationAttemptStatus() {}
+
+// IntegrationAttemptStatusExpired represents the status of an integration attempt
+// that has expired.
+type IntegrationAttemptStatusExpired struct {
+	Status IntegrationAttemptStatusType        `json:"status,required"`
+	Time   IntegrationAttemptTime              `json:"time,required"`
+	JSON   integrationAttemptStatusExpiredJSON `json:"-"`
+}
+
+// integrationAttemptStatusExpiredJSON contains the JSON metadata for the struct
+// [IntegrationAttemptStatusExpired]
+type integrationAttemptStatusExpiredJSON struct {
+	Status      apijson.Field
+	Time        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *IntegrationAttemptStatusExpired) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r integrationAttemptStatusExpiredJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r IntegrationAttemptStatusExpired) implementsIntegrationAttemptStatus() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*IntegrationAttemptStatusUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationAttemptStatusPending{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationAttemptStatusComplete{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationAttemptStatusFailed{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(IntegrationAttemptStatusExpired{}),
+		},
+	)
 }
 
 // ===== Prompt Types =====

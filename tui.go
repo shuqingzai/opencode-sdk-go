@@ -524,9 +524,9 @@ func (r tuicontrolNextResponseJSON) RawJSON() string {
 }
 
 type TuiControlResponseParams struct {
-	Directory param.Field[string]      `query:"directory"`
-	Workspace param.Field[string]      `query:"workspace"`
-	Body      param.Field[interface{}] `json:"body"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
+	Body      param.Field[TuiPublishBodyUnion] `json:"body"`
 }
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
