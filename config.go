@@ -131,8 +131,10 @@ type Config struct {
 	Username string        `json:"username"`
 	Watcher  ConfigWatcher `json:"watcher"`
 	// Default agent ID to use
-	DefaultAgent string     `json:"default_agent"`
-	JSON         configJSON `json:"-"`
+	DefaultAgent string `json:"default_agent"`
+	// Maximum depth for nested subagents
+	SubagentDepth int64      `json:"subagent_depth"`
+	JSON          configJSON `json:"-"`
 }
 
 // configJSON contains the JSON metadata for the struct [Config]
@@ -172,6 +174,7 @@ type configJSON struct {
 	Username          apijson.Field
 	Watcher           apijson.Field
 	DefaultAgent      apijson.Field
+	SubagentDepth     apijson.Field
 	raw               string
 	ExtraFields       map[string]apijson.Field
 }
@@ -3166,6 +3169,7 @@ type ConfigUpdateParams struct {
 	Username          param.Field[string]                     `json:"username"`
 	Watcher           param.Field[ConfigWatcher]              `json:"watcher"`
 	DefaultAgent      param.Field[string]                     `json:"default_agent"`
+	SubagentDepth     param.Field[int64]                      `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
