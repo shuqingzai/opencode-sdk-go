@@ -459,9 +459,12 @@ type McpAddParamsConfigRemote struct {
 	Enabled param.Field[bool] `json:"enabled"`
 	// Headers to send with the request
 	Headers param.Field[map[string]string] `json:"headers"`
-	// OAuth authentication configuration for the MCP server. Set to `false` to
-	// disable OAuth auto-detection.
-	OAuth param.Field[interface{}] `json:"oauth"`
+	// OAuth authentication configuration for this MCP server.
+	//
+	// Per the OpenAPI schema, this field can be either [McpAddParamsConfigRemoteOAuth]
+	// (a complete OAuth config) or [McpAddParamsConfigRemoteOAuthDisabled] (a scalar
+	// `false` value explicitly disabling OAuth).
+	OAuth param.Field[McpAddParamsConfigRemoteOAuthUnion] `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
 	Timeout param.Field[int64] `json:"timeout"`
 }
@@ -471,6 +474,59 @@ func (r McpAddParamsConfigRemote) MarshalJSON() (data []byte, err error) {
 }
 
 func (r McpAddParamsConfigRemote) implementsMcpAddParamsConfigUnion() {}
+
+// McpAddParamsConfigRemoteOAuth represents the OAuth configuration for a remote
+// MCP server (OpenAPI McpOAuthConfig schema).
+type McpAddParamsConfigRemoteOAuth struct {
+	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
+	ClientID param.Field[string] `json:"clientId"`
+	// OAuth client secret (if required by the authorization server)
+	ClientSecret param.Field[string] `json:"clientSecret"`
+	// OAuth scopes to request during authorization
+	Scope param.Field[string] `json:"scope"`
+	// OAuth callback port for the local HTTP server
+	CallbackPort param.Field[int64] `json:"callbackPort"`
+	// OAuth redirect URI
+	RedirectURI param.Field[string] `json:"redirectUri"`
+}
+
+func (r McpAddParamsConfigRemoteOAuth) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r McpAddParamsConfigRemoteOAuth) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
+
+// McpAddParamsConfigRemoteOAuthDisabled represents the explicit `false` value
+// for OAuth, disabling OAuth auto-detection (OpenAPI boolean enum: [false]).
+type McpAddParamsConfigRemoteOAuthDisabled struct {
+}
+
+func (r McpAddParamsConfigRemoteOAuthDisabled) MarshalJSON() (data []byte, err error) {
+	return []byte("false"), nil
+}
+
+func (r McpAddParamsConfigRemoteOAuthDisabled) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
+
+// Satisfied by [McpAddParamsConfigRemoteOAuth],
+// [McpAddParamsConfigRemoteOAuthDisabled].
+type McpAddParamsConfigRemoteOAuthUnion interface {
+	implementsMcpAddParamsConfigRemoteOAuthUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*McpAddParamsConfigRemoteOAuthUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuth{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuthDisabled{}),
+		},
+	)
+}
 
 // McpAuthCallbackBody represents the body for the OAuth callback.
 type McpAuthCallbackBody struct {

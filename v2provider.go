@@ -112,9 +112,9 @@ type V2ProviderInfo struct {
 	Name          string `json:"name,required"`
 	Disabled      bool   `json:"disabled"`
 	// This field can have the runtime type of [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
-	Api      interface{}           `json:"api,required"`
-	Request  V2ProviderInfoRequest `json:"request,required"`
-	JSON     v2ProviderInfoJSON    `json:"-"`
+	Api      interface{}        `json:"api,required"`
+	Request  ProviderRequest    `json:"request,required"`
+	JSON     v2ProviderInfoJSON `json:"-"`
 	apiUnion V2ProviderInfoApiUnion
 }
 
@@ -245,28 +245,6 @@ func init() {
 			Type:               reflect.TypeOf(V2ProviderInfoApiNative{}),
 		},
 	)
-}
-
-type V2ProviderInfoRequest struct {
-	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Body map[string]interface{}    `json:"body,required"`
-	JSON v2ProviderInfoRequestJSON `json:"-"`
-}
-
-type v2ProviderInfoRequestJSON struct {
-	Headers     apijson.Field
-	Body        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2ProviderInfoRequest) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2ProviderInfoRequestJSON) RawJSON() string {
-	return r.raw
 }
 
 type V2ProviderListParams struct {

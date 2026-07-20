@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -3184,6 +3185,24 @@ func (r *V2SessionEventResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r v2SessionEventResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// ParseData deserializes the [V2SessionEventResponse.Data] field (which is
+// encoded as a JSON string in SSE events) into a [V2SessionDurableEvent]
+// value.
+//
+// Returns the deserialized event union, or an error if [Data] is empty or
+// contains malformed JSON.
+func (r V2SessionEventResponse) ParseData() (V2SessionDurableEvent, error) {
+	var result V2SessionDurableEvent
+	if r.Data == "" {
+		return result, errors.New("V2SessionEventResponse.Data is empty")
+	}
+	err := json.Unmarshal([]byte(r.Data), &result)
+	if err != nil {
+		return result, fmt.Errorf("V2SessionEventResponse.ParseData: %w", err)
+	}
+	return result, nil
 }
 
 // ===== V2SessionHistoryResponse =====

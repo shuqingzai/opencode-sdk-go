@@ -254,29 +254,6 @@ func (r ptyDurableJSON) RawJSON() string {
 	return r.raw
 }
 
-// PtyLocation represents the location context for a PTY event.
-type PtyLocation struct {
-	Directory   string          `json:"directory,required"`
-	WorkspaceID string          `json:"workspaceID"`
-	JSON        ptyLocationJSON `json:"-"`
-}
-
-// ptyLocationJSON contains the JSON metadata for the struct [PtyLocation]
-type ptyLocationJSON struct {
-	Directory   apijson.Field
-	WorkspaceID apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PtyLocation) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptyLocationJSON) RawJSON() string {
-	return r.raw
-}
-
 // PtyCreatedEvent represents a PtyEvent of type "pty.created".
 type PtyCreatedEvent struct {
 	ID   string              `json:"id,required"`

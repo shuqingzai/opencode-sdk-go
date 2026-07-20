@@ -501,9 +501,9 @@ func (r TuiControlNextParams) URLQuery() (v url.Values) {
 
 type TuiControlNextResponse struct {
 	Path string `json:"path,required"`
-	// This field can have the runtime type of [TuiPublishBodyPromptAppend],
-	// [TuiPublishBodyCommandExecute], [TuiPublishBodyToastShow],
-	// [TuiPublishBodySessionSelect].
+	// This field is `unknown` per the OpenAPI schema, so its runtime type is
+	// `interface{}`. The server returns arbitrary JSON in this field (e.g.
+	// `{text: "queued"}`); callers should type-assert as needed.
 	Body interface{}                `json:"body,required"`
 	JSON tuicontrolNextResponseJSON `json:"-"`
 }
@@ -524,9 +524,9 @@ func (r tuicontrolNextResponseJSON) RawJSON() string {
 }
 
 type TuiControlResponseParams struct {
-	Directory param.Field[string]              `query:"directory"`
-	Workspace param.Field[string]              `query:"workspace"`
-	Body      param.Field[TuiPublishBodyUnion] `json:"body"`
+	Directory param.Field[string]      `query:"directory"`
+	Workspace param.Field[string]      `query:"workspace"`
+	Body      param.Field[interface{}] `json:"body"`
 }
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {

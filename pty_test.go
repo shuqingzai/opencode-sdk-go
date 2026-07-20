@@ -150,10 +150,10 @@ func TestPtyConnect(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	stream := client.Pty.Connect(context.TODO(), "ptyID", opencode.PtyConnectParams{
+	_, err := client.Pty.Connect(context.TODO(), "ptyID", opencode.PtyConnectParams{
 		Directory: opencode.F("directory"),
 	})
-	if err := stream.Err(); err != nil {
+	if err != nil {
 		var apierr *opencode.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))

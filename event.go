@@ -2431,10 +2431,10 @@ func (r EventListResponseEventTuiToastShow) implementsEventListResponse() {}
 func (r EventListResponseEventTuiToastShow) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTuiToastShowProperties struct {
-	Duration *int    `json:"duration,omitempty"`
-	Message  string  `json:"message,required"`
-	Title    *string `json:"title,omitempty"`
-	Variant  string  `json:"variant,required"`
+	Duration int64               `json:"duration"`
+	Message  string              `json:"message,required"`
+	Title    string              `json:"title"`
+	Variant  TuiToastShowVariant `json:"variant,required"`
 	JSON     eventListResponseEventTuiToastShowPropertiesJSON
 }
 
@@ -2464,6 +2464,23 @@ const (
 func (r EventListResponseEventTuiToastShowType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventTuiToastShowTypeTuiToastShow:
+		return true
+	}
+	return false
+}
+
+type TuiToastShowVariant string
+
+const (
+	TuiToastShowVariantInfo    TuiToastShowVariant = "info"
+	TuiToastShowVariantSuccess TuiToastShowVariant = "success"
+	TuiToastShowVariantWarning TuiToastShowVariant = "warning"
+	TuiToastShowVariantError   TuiToastShowVariant = "error"
+)
+
+func (r TuiToastShowVariant) IsKnown() bool {
+	switch r {
+	case TuiToastShowVariantInfo, TuiToastShowVariantSuccess, TuiToastShowVariantWarning, TuiToastShowVariantError:
 		return true
 	}
 	return false
@@ -2755,8 +2772,8 @@ func (r EventListResponseEventSessionDiff) implementsEventListResponse() {}
 func (r EventListResponseEventSessionDiff) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionDiffProperties struct {
-	Diff      []EventListResponseEventSessionDiffPropertiesDiff `json:"diff,required"`
-	SessionID string                                            `json:"sessionID,required"`
+	Diff      []SnapshotFileDiff `json:"diff,required"`
+	SessionID string             `json:"sessionID,required"`
 	JSON      eventListResponseEventSessionDiffPropertiesJSON
 }
 
@@ -2772,33 +2789,6 @@ func (r *EventListResponseEventSessionDiffProperties) UnmarshalJSON(data []byte)
 }
 
 func (r eventListResponseEventSessionDiffPropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventSessionDiffPropertiesDiff struct {
-	Additions int    `json:"additions,required"`
-	Deletions int    `json:"deletions,required"`
-	File      string `json:"file"`
-	Patch     string `json:"patch"`
-	Status    string `json:"status,omitempty"`
-	JSON      eventListResponseEventSessionDiffPropertiesDiffJSON
-}
-
-type eventListResponseEventSessionDiffPropertiesDiffJSON struct {
-	Additions   apijson.Field
-	Deletions   apijson.Field
-	File        apijson.Field
-	Patch       apijson.Field
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionDiffPropertiesDiff) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionDiffPropertiesDiffJSON) RawJSON() string {
 	return r.raw
 }
 
