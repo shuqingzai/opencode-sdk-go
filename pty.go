@@ -53,8 +53,10 @@ func (r *PtyService) Shells(ctx context.Context, query PtyShellsParams, opts ...
 	return
 }
 
-// Create a new PTY
-func (r *PtyService) Create(ctx context.Context, params PtyCreateParams, opts ...option.RequestOption) (res *Pty, err error) {
+// New PTY
+//
+// Create a new PTY.
+func (r *PtyService) New(ctx context.Context, params PtyNewParams, opts ...option.RequestOption) (res *Pty, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "pty"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
@@ -126,7 +128,7 @@ func (r *PtyService) ConnectToken(ctx context.Context, ptyID string, query PtyCo
 	return
 }
 
-type PtyCreateParams struct {
+type PtyNewParams struct {
 	Command   param.Field[string]            `json:"command"`
 	Args      param.Field[[]string]          `json:"args"`
 	Cwd       param.Field[string]            `json:"cwd"`
@@ -136,12 +138,12 @@ type PtyCreateParams struct {
 	Workspace param.Field[string]            `query:"workspace"`
 }
 
-func (r PtyCreateParams) MarshalJSON() (data []byte, err error) {
+func (r PtyNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// URLQuery serializes [PtyCreateParams]'s query parameters as `url.Values`.
-func (r PtyCreateParams) URLQuery() (v url.Values) {
+// URLQuery serializes [PtyNewParams]'s query parameters as `url.Values`.
+func (r PtyNewParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

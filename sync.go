@@ -23,6 +23,7 @@ import (
 // the [NewSyncService] method instead.
 type SyncService struct {
 	Options []option.RequestOption
+	History *SyncHistoryService
 }
 
 // NewSyncService generates a new service that applies the given options to each
@@ -31,6 +32,7 @@ type SyncService struct {
 func NewSyncService(opts ...option.RequestOption) (r *SyncService) {
 	r = &SyncService{}
 	r.Options = opts
+	r.History = NewSyncHistoryService(opts...)
 	return
 }
 
@@ -64,7 +66,36 @@ func (r *SyncService) Steal(ctx context.Context, params SyncStealParams, opts ..
 // knows about, values are the last known sequence ID. Events with seq > value are
 // returned for those aggregates. Aggregates not listed in the input get their full
 // history.
+//
+// Deprecated: Use [SyncService.History.List] instead.
 func (r *SyncService) HistoryList(ctx context.Context, params SyncHistoryListParams, opts ...option.RequestOption) (res *[]SyncHistoryEvent, err error) {
+	return r.History.List(ctx, params, opts...)
+}
+
+// SyncHistoryService contains methods and other services that help with interacting
+// with the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewSyncHistoryService] method instead.
+type SyncHistoryService struct {
+	Options []option.RequestOption
+}
+
+// NewSyncHistoryService generates a new service that applies the given options to
+// each request. These options are applied after the parent client's options (if
+// there is one), and before any request-specific options.
+func NewSyncHistoryService(opts ...option.RequestOption) (r *SyncHistoryService) {
+	r = &SyncHistoryService{}
+	r.Options = opts
+	return
+}
+
+// List sync events for all aggregates. Keys are aggregate IDs the client already
+// knows about, values are the last known sequence ID. Events with seq > value are
+// returned for those aggregates. Aggregates not listed in the input get their full
+// history.
+func (r *SyncHistoryService) List(ctx context.Context, params SyncHistoryListParams, opts ...option.RequestOption) (res *[]SyncHistoryEvent, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "sync/history"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)

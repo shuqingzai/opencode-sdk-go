@@ -47,8 +47,10 @@ func (r *V2PtyService) List(ctx context.Context, query V2PtyListParams, opts ...
 	return
 }
 
-// Create a v2 PTY
-func (r *V2PtyService) Create(ctx context.Context, params V2PtyCreateParams, opts ...option.RequestOption) (res *V2PtyCreateResponse, err error) {
+// New v2 PTY
+//
+// Create a v2 PTY.
+func (r *V2PtyService) New(ctx context.Context, params V2PtyNewParams, opts ...option.RequestOption) (res *V2PtyCreateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/pty"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
@@ -720,8 +722,8 @@ func (r V2PtyListParams) URLQuery() (v url.Values) {
 	})
 }
 
-// V2PtyCreateParams contains the body and query parameters for creating a v2 PTY.
-type V2PtyCreateParams struct {
+// V2PtyNewParams contains the body and query parameters for creating a v2 PTY.
+type V2PtyNewParams struct {
 	Command  param.Field[string]            `json:"command"`
 	Args     param.Field[[]string]          `json:"args"`
 	Cwd      param.Field[string]            `json:"cwd"`
@@ -730,12 +732,12 @@ type V2PtyCreateParams struct {
 	Location param.Field[V2LocationParam]   `query:"location"`
 }
 
-func (r V2PtyCreateParams) MarshalJSON() (data []byte, err error) {
+func (r V2PtyNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// URLQuery serializes [V2PtyCreateParams]'s query parameters as `url.Values`.
-func (r V2PtyCreateParams) URLQuery() (v url.Values) {
+// URLQuery serializes [V2PtyNewParams]'s query parameters as `url.Values`.
+func (r V2PtyNewParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

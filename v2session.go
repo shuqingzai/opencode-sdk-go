@@ -129,10 +129,10 @@ func (r *V2SessionService) Messages(ctx context.Context, sessionID string, query
 	return
 }
 
-// Create v2 session
+// New v2 session
 //
 // Create a session at the requested location.
-func (r *V2SessionService) Create(ctx context.Context, params V2SessionCreateParams, opts ...option.RequestOption) (res *V2SessionCreateResponse, err error) {
+func (r *V2SessionService) New(ctx context.Context, params V2SessionNewParams, opts ...option.RequestOption) (res *V2SessionCreateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "api/session"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
@@ -3057,16 +3057,16 @@ func (r FileDiffStatus) IsKnown() bool {
 	return false
 }
 
-// ===== V2SessionCreateParams =====
+// ===== V2SessionNewParams =====
 
-type V2SessionCreateParams struct {
+type V2SessionNewParams struct {
 	ID       param.Field[string]      `json:"id"`
 	Agent    param.Field[string]      `json:"agent"`
 	Model    param.Field[ModelRef]    `json:"model"`
 	Location param.Field[LocationRef] `json:"location"`
 }
 
-func (r V2SessionCreateParams) MarshalJSON() (data []byte, err error) {
+func (r V2SessionNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

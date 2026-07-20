@@ -46,8 +46,10 @@ func (r *ExperimentalWorkspaceService) List(ctx context.Context, query Experimen
 	return
 }
 
-// Create a workspace
-func (r *ExperimentalWorkspaceService) Create(ctx context.Context, body ExperimentalWorkspaceCreateParams, opts ...option.RequestOption) (res *Workspace, err error) {
+// New workspace
+//
+// Create a workspace.
+func (r *ExperimentalWorkspaceService) New(ctx context.Context, body ExperimentalWorkspaceNewParams, opts ...option.RequestOption) (res *Workspace, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/workspace"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -167,36 +169,36 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 	})
 }
 
-// ExperimentalWorkspaceCreateParams contains the request parameters for creating a workspace.
-type ExperimentalWorkspaceCreateParams struct {
-	Directory param.Field[string]                   `query:"directory"`
-	Workspace param.Field[string]                   `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput      `json:"-"`
-	JSON      experimentalWorkspaceCreateParamsJSON `json:"-"`
+// ExperimentalWorkspaceNewParams contains the request parameters for creating a workspace.
+type ExperimentalWorkspaceNewParams struct {
+	Directory param.Field[string]                `query:"directory"`
+	Workspace param.Field[string]                `query:"workspace"`
+	Body      ExperimentalWorkspaceCreateInput   `json:"-"`
+	JSON      experimentalWorkspaceNewParamsJSON `json:"-"`
 }
 
-func (r ExperimentalWorkspaceCreateParams) MarshalJSON() (data []byte, err error) {
+func (r ExperimentalWorkspaceNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r.Body)
 }
 
-// URLQuery serializes [ExperimentalWorkspaceCreateParams]'s query parameters as `url.Values`.
-func (r ExperimentalWorkspaceCreateParams) URLQuery() (v url.Values) {
+// URLQuery serializes [ExperimentalWorkspaceNewParams]'s query parameters as `url.Values`.
+func (r ExperimentalWorkspaceNewParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-// experimentalWorkspaceCreateParamsJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceCreateParams]
-type experimentalWorkspaceCreateParamsJSON struct {
+// experimentalWorkspaceNewParamsJSON contains the JSON metadata for the struct
+// [ExperimentalWorkspaceNewParams]
+type experimentalWorkspaceNewParamsJSON struct {
 	Directory   apijson.Field
 	Workspace   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r experimentalWorkspaceCreateParamsJSON) RawJSON() string {
+func (r experimentalWorkspaceNewParamsJSON) RawJSON() string {
 	return r.raw
 }
 

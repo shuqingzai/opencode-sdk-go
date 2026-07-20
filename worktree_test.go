@@ -49,7 +49,7 @@ func TestWorktreeCreate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Worktree.Create(context.TODO(), opencode.WorktreeCreateParams{
+	_, err := client.Worktree.New(context.TODO(), opencode.WorktreeNewParams{
 		Name:         opencode.F("name"),
 		StartCommand: opencode.F("cmd"),
 		Directory:    opencode.F("directory"),

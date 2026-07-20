@@ -49,7 +49,7 @@ func TestExperimentalWorkspaceCreate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.WorkspaceCreate(context.TODO(), opencode.ExperimentalWorkspaceCreateParams{
+	_, err := client.Experimental.Workspace.New(context.TODO(), opencode.ExperimentalWorkspaceNewParams{
 		Body: opencode.ExperimentalWorkspaceCreateInput{
 			Type:   opencode.F("type"),
 			Branch: opencode.F("main"),

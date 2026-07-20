@@ -42,8 +42,10 @@ func (r *WorktreeService) List(ctx context.Context, query WorktreeListParams, op
 	return
 }
 
-// Create a worktree
-func (r *WorktreeService) Create(ctx context.Context, params WorktreeCreateParams, opts ...option.RequestOption) (res *Worktree, err error) {
+// New worktree
+//
+// Create a worktree.
+func (r *WorktreeService) New(ctx context.Context, params WorktreeNewParams, opts ...option.RequestOption) (res *Worktree, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/worktree"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
@@ -90,19 +92,19 @@ func (r worktreeJSON) RawJSON() string {
 	return r.raw
 }
 
-type WorktreeCreateParams struct {
+type WorktreeNewParams struct {
 	Name         param.Field[string] `json:"name"`
 	StartCommand param.Field[string] `json:"startCommand"`
 	Directory    param.Field[string] `query:"directory"`
 	Workspace    param.Field[string] `query:"workspace"`
 }
 
-func (r WorktreeCreateParams) MarshalJSON() (data []byte, err error) {
+func (r WorktreeNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// URLQuery serializes [WorktreeCreateParams]'s query parameters as `url.Values`.
-func (r WorktreeCreateParams) URLQuery() (v url.Values) {
+// URLQuery serializes [WorktreeNewParams]'s query parameters as `url.Values`.
+func (r WorktreeNewParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

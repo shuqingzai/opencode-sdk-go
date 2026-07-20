@@ -52,7 +52,7 @@ func (r *V2SessionPermissionService) List(ctx context.Context, sessionID string,
 //
 // Evaluate and, when approval is required, create a permission request for a
 // session.
-func (r *V2SessionPermissionService) New(ctx context.Context, sessionID string, body V2SessionPermissionCreateParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
+func (r *V2SessionPermissionService) New(ctx context.Context, sessionID string, body V2SessionPermissionNewParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if sessionID == "" {
 		err = errors.New("missing required sessionID parameter")
@@ -61,11 +61,6 @@ func (r *V2SessionPermissionService) New(ctx context.Context, sessionID string, 
 	path := fmt.Sprintf("api/session/%s/permission", sessionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
-}
-
-// Deprecated: Use [V2SessionPermissionService.New] instead.
-func (r *V2SessionPermissionService) Create(ctx context.Context, sessionID string, body V2SessionPermissionCreateParams, opts ...option.RequestOption) (res *V2SessionPermissionCreateResponse, err error) {
-	return r.New(ctx, sessionID, body, opts...)
 }
 
 // Get permission request
@@ -106,7 +101,7 @@ func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string
 
 // ===== Param Types =====
 
-type V2SessionPermissionCreateParams struct {
+type V2SessionPermissionNewParams struct {
 	ID        param.Field[string]   `json:"id"`
 	Action    param.Field[string]   `json:"action,required"`
 	Resources param.Field[[]string] `json:"resources,required"`
@@ -117,7 +112,7 @@ type V2SessionPermissionCreateParams struct {
 	Agent    param.Field[string]             `json:"agent"`
 }
 
-func (r V2SessionPermissionCreateParams) MarshalJSON() (data []byte, err error) {
+func (r V2SessionPermissionNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

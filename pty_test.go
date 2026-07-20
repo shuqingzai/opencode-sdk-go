@@ -49,7 +49,7 @@ func TestPtyCreate(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Pty.Create(context.TODO(), opencode.PtyCreateParams{
+	_, err := client.Pty.New(context.TODO(), opencode.PtyNewParams{
 		Command:   opencode.F("cmd"),
 		Args:      opencode.F([]string{"arg1"}),
 		Cwd:       opencode.F("/tmp"),

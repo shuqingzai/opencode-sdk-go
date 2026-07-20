@@ -48,13 +48,6 @@ func (r *ExperimentalService) WorkspaceList(ctx context.Context, query Experimen
 	return r.Workspace.List(ctx, query, opts...)
 }
 
-// WorkspaceCreate creates a workspace in the experimental API.
-//
-// Deprecated: Use [ExperimentalService.Workspace.Create] instead.
-func (r *ExperimentalService) WorkspaceCreate(ctx context.Context, body ExperimentalWorkspaceCreateParams, opts ...option.RequestOption) (res *Workspace, err error) {
-	return r.Workspace.Create(ctx, body, opts...)
-}
-
 // WorkspaceRemove removes a workspace in the experimental API.
 //
 // Deprecated: Use [ExperimentalService.Workspace.Remove] instead.

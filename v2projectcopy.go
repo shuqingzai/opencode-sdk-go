@@ -36,8 +36,10 @@ func NewV2ProjectCopyService(opts ...option.RequestOption) (r *V2ProjectCopyServ
 	return
 }
 
-// Create a project copy
-func (r *V2ProjectCopyService) Create(ctx context.Context, projectID string, body V2ProjectCopyCreateParams, opts ...option.RequestOption) (res *ProjectCopyCopy, err error) {
+// New project copy
+//
+// Create a project copy.
+func (r *V2ProjectCopyService) New(ctx context.Context, projectID string, body V2ProjectCopyNewParams, opts ...option.RequestOption) (res *ProjectCopyCopy, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if projectID == "" {
 		err = errors.New("missing required projectID parameter")
@@ -93,8 +95,8 @@ func (r projectCopyCopyJSON) RawJSON() string {
 	return r.raw
 }
 
-// V2ProjectCopyCreateParams contains the request parameters for creating a project copy.
-type V2ProjectCopyCreateParams struct {
+// V2ProjectCopyNewParams contains the request parameters for creating a project copy.
+type V2ProjectCopyNewParams struct {
 	// Location query params
 	Location param.Field[V2LocationParam] `query:"location"`
 	// Strategy for the copy operation
@@ -105,12 +107,12 @@ type V2ProjectCopyCreateParams struct {
 	Name param.Field[string] `json:"name"`
 }
 
-func (r V2ProjectCopyCreateParams) MarshalJSON() (data []byte, err error) {
+func (r V2ProjectCopyNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// URLQuery serializes [V2ProjectCopyCreateParams]'s query parameters as `url.Values`.
-func (r V2ProjectCopyCreateParams) URLQuery() (v url.Values) {
+// URLQuery serializes [V2ProjectCopyNewParams]'s query parameters as `url.Values`.
+func (r V2ProjectCopyNewParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
