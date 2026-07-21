@@ -453,15 +453,3 @@ type ProjectCopyErrorName = shared.ProjectCopyErrorName
 
 // This is an alias to an internal value.
 const ProjectCopyErrorNameProjectCopyError = shared.ProjectCopyErrorNameProjectCopyError
-
-// This is an alias to an internal type.
-type SessionMessageToolStateError = shared.SessionMessageToolStateError
-
-// This is an alias to an internal type.
-type SessionMessageToolStateErrorData = shared.SessionMessageToolStateErrorData
-
-// This is an alias to an internal type.
-type SessionMessageToolStateErrorName = shared.SessionMessageToolStateErrorName
-
-// This is an alias to an internal value.
-const SessionMessageToolStateErrorNameSessionMessageToolStateError = shared.SessionMessageToolStateErrorNameSessionMessageToolStateError

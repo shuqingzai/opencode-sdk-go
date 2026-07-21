@@ -83,9 +83,14 @@ type Config struct {
 	// Enable specific providers
 	EnabledProviders []string `json:"enabled_providers"`
 	// Enterprise configuration
-	Enterprise   EnterpriseConfig           `json:"enterprise"`
-	Experimental ConfigExperimental         `json:"experimental"`
-	Formatter    map[string]ConfigFormatter `json:"formatter"`
+	Enterprise   EnterpriseConfig   `json:"enterprise"`
+	Experimental ConfigExperimental `json:"experimental"`
+	// Enable or configure formatters. Omit or set to false to disable, true to
+	// enable built-ins, or an object to enable built-ins with overrides.
+	// Per OpenAPI `Config.formatter` is `boolean | object | map[string]ConfigFormatter`.
+	// This field can have the runtime type of [bool], [map[string]ConfigFormatter],
+	// [map[string]bool].
+	Formatter interface{} `json:"formatter"`
 	// Additional instruction files or patterns to include
 	Instructions []string `json:"instructions"`
 	// @deprecated Always uses stretch layout.
@@ -98,14 +103,21 @@ type Config struct {
 	// @deprecated Use `agent` field instead.
 	Mode ConfigMode `json:"mode"`
 	// Model to use in the format of provider/model, eg anthropic/claude-2
-	Model      string           `json:"model"`
-	Permission ConfigPermission `json:"permission"`
+	Model string `json:"model"`
+	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
+	// object with per-action permission rule overrides.
+	// This field can have the runtime type of [string], [ConfigPermission].
+	Permission interface{} `json:"permission"`
 	// This field can have the runtime type of [string] or [][2]interface{}{string, object}.
 	Plugin []interface{} `json:"plugin"`
 	// Custom provider configurations and model overrides
 	Provider map[string]ConfigProvider `json:"provider"`
-	// Reference configuration for external documentation
-	Reference ReferenceConfig `json:"reference"`
+	// Reference configuration for external documentation. Keys are reference
+	// names, values can be a plain URL/path string or a structured config (git
+	// or local).
+	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
+	// [ConfigV2ReferenceLocal].
+	Reference map[string]interface{} `json:"reference"`
 	// References from external sources. Keys are reference names, values can be a
 	// plain URL/path string or a structured config (git or local).
 	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
@@ -135,6 +147,9 @@ type Config struct {
 	// Maximum depth for nested subagents
 	SubagentDepth int64      `json:"subagent_depth"`
 	JSON          configJSON `json:"-"`
+	// permissionUnion holds the typed permission payload after [UnmarshalJSON]
+	// routes the raw data through [ConfigPermissionUnion] registered variants.
+	permissionUnion ConfigPermissionUnion
 }
 
 // configJSON contains the JSON metadata for the struct [Config]
@@ -180,12 +195,72 @@ type configJSON struct {
 }
 
 func (r *Config) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = Config{}
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
+		return err
+	}
+	permissionData := gjson.GetBytes(data, "permission").Raw
+	if permissionData != "" {
+		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
+			return err
+		}
+		r.Permission = r.permissionUnion
+	}
+	return nil
 }
 
 func (r configJSON) RawJSON() string {
 	return r.raw
 }
+
+// AsPermission returns the permission field as a typed union.
+//
+// Possible runtime types of the union are [string] (PermissionActionConfig:
+// "ask"|"allow"|"deny") or [ConfigPermission].
+func (r *Config) AsPermission() ConfigPermissionUnion {
+	return r.permissionUnion
+}
+
+// ConfigPermissionUnion represents the OpenAPI PermissionConfig anyOf union.
+//
+// Satisfied by [ConfigPermission], [ConfigPermissionAction] (a short string
+// permission: "ask"|"allow"|"deny").
+type ConfigPermissionUnion interface {
+	implementsConfigPermissionUnion()
+}
+
+// ConfigPermissionAction is a short string permission, e.g. "ask" / "allow" /
+// "deny", corresponding to OpenAPI [PermissionActionConfig].
+type ConfigPermissionAction string
+
+const (
+	ConfigPermissionActionAsk   ConfigPermissionAction = "ask"
+	ConfigPermissionActionAllow ConfigPermissionAction = "allow"
+	ConfigPermissionActionDeny  ConfigPermissionAction = "deny"
+)
+
+func (r ConfigPermissionAction) IsKnown() bool {
+	switch r {
+	case ConfigPermissionActionAsk, ConfigPermissionActionAllow, ConfigPermissionActionDeny:
+		return true
+	}
+	return false
+}
+
+func (r ConfigPermissionAction) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigPermissionAction) UnmarshalJSON(data []byte) (err error) {
+	var raw string
+	if err = apijson.UnmarshalRoot(data, &raw); err != nil {
+		return err
+	}
+	r = ConfigPermissionAction(raw)
+	return nil
+}
+
+func (r ConfigPermissionAction) implementsConfigPermissionUnion() {}
 
 type ConfigLogLevel string
 
@@ -401,20 +476,58 @@ func (r ConfigAgentBuildMode) IsKnown() bool {
 
 type ConfigAgentBuildPermission struct {
 	// This field can have the runtime type of [ConfigAgentBuildPermissionBashString], [ConfigAgentBuildPermissionBashMap].
-	Bash     interface{}                        `json:"bash"`
-	Edit     ConfigAgentBuildPermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentBuildPermissionWebfetch `json:"webfetch"`
-	JSON     configAgentBuildPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                    `json:"skill"`
+	JSON  configAgentBuildPermissionJSON `json:"-"`
 }
 
 // configAgentBuildPermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentBuildPermission]
 type configAgentBuildPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentBuildPermission) UnmarshalJSON(data []byte) (err error) {
@@ -585,20 +698,58 @@ func (r ConfigAgentGeneralMode) IsKnown() bool {
 
 type ConfigAgentGeneralPermission struct {
 	// This field can have the runtime type of [ConfigAgentGeneralPermissionBashString], [ConfigAgentGeneralPermissionBashMap].
-	Bash     interface{}                          `json:"bash"`
-	Edit     ConfigAgentGeneralPermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentGeneralPermissionWebfetch `json:"webfetch"`
-	JSON     configAgentGeneralPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                      `json:"skill"`
+	JSON  configAgentGeneralPermissionJSON `json:"-"`
 }
 
 // configAgentGeneralPermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentGeneralPermission]
 type configAgentGeneralPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentGeneralPermission) UnmarshalJSON(data []byte) (err error) {
@@ -768,20 +919,58 @@ func (r ConfigAgentPlanMode) IsKnown() bool {
 
 type ConfigAgentPlanPermission struct {
 	// This field can have the runtime type of [ConfigAgentPlanPermissionBashString], [ConfigAgentPlanPermissionBashMap].
-	Bash     interface{}                       `json:"bash"`
-	Edit     ConfigAgentPlanPermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentPlanPermissionWebfetch `json:"webfetch"`
-	JSON     configAgentPlanPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                   `json:"skill"`
+	JSON  configAgentPlanPermissionJSON `json:"-"`
 }
 
 // configAgentPlanPermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentPlanPermission]
 type configAgentPlanPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentPlanPermission) UnmarshalJSON(data []byte) (err error) {
@@ -951,20 +1140,58 @@ func (r ConfigAgentExploreMode) IsKnown() bool {
 
 type ConfigAgentExplorePermission struct {
 	// This field can have the runtime type of [ConfigAgentExplorePermissionBashString], [ConfigAgentExplorePermissionBashMap].
-	Bash     interface{}                          `json:"bash"`
-	Edit     ConfigAgentExplorePermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentExplorePermissionWebfetch `json:"webfetch"`
-	JSON     configAgentExplorePermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                      `json:"skill"`
+	JSON  configAgentExplorePermissionJSON `json:"-"`
 }
 
 // configAgentExplorePermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentExplorePermission]
 type configAgentExplorePermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentExplorePermission) UnmarshalJSON(data []byte) (err error) {
@@ -1133,20 +1360,58 @@ func (r ConfigAgentTitleMode) IsKnown() bool {
 
 type ConfigAgentTitlePermission struct {
 	// This field can have the runtime type of [ConfigAgentTitlePermissionBashString], [ConfigAgentTitlePermissionBashMap].
-	Bash     interface{}                        `json:"bash"`
-	Edit     ConfigAgentTitlePermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentTitlePermissionWebfetch `json:"webfetch"`
-	JSON     configAgentTitlePermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                    `json:"skill"`
+	JSON  configAgentTitlePermissionJSON `json:"-"`
 }
 
 // configAgentTitlePermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentTitlePermission]
 type configAgentTitlePermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentTitlePermission) UnmarshalJSON(data []byte) (err error) {
@@ -1315,20 +1580,58 @@ func (r ConfigAgentSummaryMode) IsKnown() bool {
 
 type ConfigAgentSummaryPermission struct {
 	// This field can have the runtime type of [ConfigAgentSummaryPermissionBashString], [ConfigAgentSummaryPermissionBashMap].
-	Bash     interface{}                          `json:"bash"`
-	Edit     ConfigAgentSummaryPermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentSummaryPermissionWebfetch `json:"webfetch"`
-	JSON     configAgentSummaryPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                      `json:"skill"`
+	JSON  configAgentSummaryPermissionJSON `json:"-"`
 }
 
 // configAgentSummaryPermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentSummaryPermission]
 type configAgentSummaryPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentSummaryPermission) UnmarshalJSON(data []byte) (err error) {
@@ -1498,20 +1801,58 @@ func (r ConfigAgentCompactionMode) IsKnown() bool {
 
 type ConfigAgentCompactionPermission struct {
 	// This field can have the runtime type of [ConfigAgentCompactionPermissionBashString], [ConfigAgentCompactionPermissionBashMap].
-	Bash     interface{}                             `json:"bash"`
-	Edit     ConfigAgentCompactionPermissionEdit     `json:"edit"`
-	Webfetch ConfigAgentCompactionPermissionWebfetch `json:"webfetch"`
-	JSON     configAgentCompactionPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                         `json:"skill"`
+	JSON  configAgentCompactionPermissionJSON `json:"-"`
 }
 
 // configAgentCompactionPermissionJSON contains the JSON metadata for the struct
 // [ConfigAgentCompactionPermission]
 type configAgentCompactionPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigAgentCompactionPermission) UnmarshalJSON(data []byte) (err error) {
@@ -1910,12 +2251,18 @@ type ConfigMcp struct {
 	Type ConfigMcpType `json:"type,required"`
 	// This field can have the runtime type of [[]string]. Command and arguments to run the MCP server (for "local" type).
 	Command interface{} `json:"command"`
+	// This field can have the runtime type of [string, nil]. Working directory for the MCP server process (for "local" type).
+	Cwd interface{} `json:"cwd"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
 	// This field can have the runtime type of [map[string]string]. Environment variables to set when running the MCP server (for "local" type).
 	Environment interface{} `json:"environment"`
 	// This field can have the runtime type of [map[string]string]. Headers to send with the request (for "remote" type).
 	Headers interface{} `json:"headers"`
+	// This field can have the runtime type of [McpOAuthConfig, nil]. OAuth authentication configuration for the MCP server (for "remote" type).
+	OAuth interface{} `json:"oauth"`
+	// This field can have the runtime type of [int64, nil]. Timeout in milliseconds for MCP server requests.
+	Timeout interface{} `json:"timeout"`
 	// URL of the remote MCP server (for "remote" type).
 	URL   string        `json:"url"`
 	JSON  configMcpJSON `json:"-"`
@@ -1926,9 +2273,12 @@ type ConfigMcp struct {
 type configMcpJSON struct {
 	Type        apijson.Field
 	Command     apijson.Field
+	Cwd         apijson.Field
 	Enabled     apijson.Field
 	Environment apijson.Field
 	Headers     apijson.Field
+	OAuth       apijson.Field
+	Timeout     apijson.Field
 	URL         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -2103,20 +2453,58 @@ func (r ConfigModeBuildMode) IsKnown() bool {
 
 type ConfigModeBuildPermission struct {
 	// This field can have the runtime type of [ConfigModeBuildPermissionBashString], [ConfigModeBuildPermissionBashMap].
-	Bash     interface{}                       `json:"bash"`
-	Edit     ConfigModeBuildPermissionEdit     `json:"edit"`
-	Webfetch ConfigModeBuildPermissionWebfetch `json:"webfetch"`
-	JSON     configModeBuildPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                   `json:"skill"`
+	JSON  configModeBuildPermissionJSON `json:"-"`
 }
 
 // configModeBuildPermissionJSON contains the JSON metadata for the struct
 // [ConfigModeBuildPermission]
 type configModeBuildPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigModeBuildPermission) UnmarshalJSON(data []byte) (err error) {
@@ -2274,20 +2662,58 @@ func (r ConfigModePlanMode) IsKnown() bool {
 
 type ConfigModePlanPermission struct {
 	// This field can have the runtime type of [ConfigModePlanPermissionBashString], [ConfigModePlanPermissionBashMap].
-	Bash     interface{}                      `json:"bash"`
-	Edit     ConfigModePlanPermissionEdit     `json:"edit"`
-	Webfetch ConfigModePlanPermissionWebfetch `json:"webfetch"`
-	JSON     configModePlanPermissionJSON     `json:"-"`
+	Bash interface{} `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Edit interface{} `json:"edit"`
+	// This field can have the runtime type of [string].
+	Webfetch interface{} `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Read interface{} `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Glob interface{} `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Grep interface{} `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	List interface{} `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Task interface{} `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	ExternalDirectory interface{} `json:"external_directory"`
+	// This field can have the runtime type of [string].
+	Todowrite interface{} `json:"todowrite"`
+	// This field can have the runtime type of [string].
+	Question interface{} `json:"question"`
+	// This field can have the runtime type of [string].
+	Websearch interface{} `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Lsp interface{} `json:"lsp"`
+	// This field can have the runtime type of [string].
+	DoomLoop interface{} `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]interface{}].
+	Skill interface{}                  `json:"skill"`
+	JSON  configModePlanPermissionJSON `json:"-"`
 }
 
 // configModePlanPermissionJSON contains the JSON metadata for the struct
 // [ConfigModePlanPermission]
 type configModePlanPermissionJSON struct {
-	Bash        apijson.Field
-	Edit        apijson.Field
-	Webfetch    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Bash              apijson.Field
+	Edit              apijson.Field
+	Webfetch          apijson.Field
+	Read              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Websearch         apijson.Field
+	Lsp               apijson.Field
+	DoomLoop          apijson.Field
+	Skill             apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *ConfigModePlanPermission) UnmarshalJSON(data []byte) (err error) {
@@ -2394,29 +2820,29 @@ type ConfigPermission struct {
 	Bash     interface{}              `json:"bash"`
 	Edit     ConfigPermissionEdit     `json:"edit"`
 	Webfetch ConfigPermissionWebfetch `json:"webfetch"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Read interface{} `json:"read"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	List interface{} `json:"list"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Task interface{} `json:"task"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	ExternalDirectory interface{} `json:"external_directory"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Todowrite interface{} `json:"todowrite"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Question interface{} `json:"question"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Lsp interface{} `json:"lsp"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [PermissionActionConfig] or [PermissionObjectConfig].
+	// This field can have the runtime type of [string] or [map[string]interface{}].
 	Skill interface{}          `json:"skill"`
 	JSON  configPermissionJSON `json:"-"`
 }
@@ -2454,6 +2880,21 @@ func (r configPermissionJSON) RawJSON() string {
 // Union satisfied by [ConfigPermissionBashString] or [ConfigPermissionBashMap].
 type ConfigPermissionBashUnion interface {
 	implementsConfigPermissionBashUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigPermissionUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigPermissionAction("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigPermission{}),
+		},
+	)
 }
 
 func init() {
@@ -2621,35 +3062,17 @@ func (r ConfigPermissionDoomLoop) IsKnown() bool {
 	return false
 }
 
-// ConfigProviderSource represents the source of a config provider.
-type ConfigProviderSource string
-
-const (
-	ConfigProviderSourceEnv    ConfigProviderSource = "env"
-	ConfigProviderSourceConfig ConfigProviderSource = "config"
-	ConfigProviderSourceCustom ConfigProviderSource = "custom"
-	ConfigProviderSourceAPI    ConfigProviderSource = "api"
-)
-
-func (r ConfigProviderSource) IsKnown() bool {
-	switch r {
-	case ConfigProviderSourceEnv, ConfigProviderSourceConfig, ConfigProviderSourceCustom, ConfigProviderSourceAPI:
-		return true
-	}
-	return false
-}
-
 type ConfigProvider struct {
-	ID      string                         `json:"id,required"`
-	API     string                         `json:"api"`
-	Env     []string                       `json:"env,required"`
-	Models  map[string]ConfigProviderModel `json:"models,required"`
-	Name    string                         `json:"name,required"`
-	NPM     string                         `json:"npm"`
-	Options ConfigProviderOptions          `json:"options,required"`
-	Source  ConfigProviderSource           `json:"source,required"`
-	Key     string                         `json:"key"`
-	JSON    configProviderJSON             `json:"-"`
+	ID        string                         `json:"id"`
+	API       string                         `json:"api"`
+	Env       []string                       `json:"env"`
+	Models    map[string]ConfigProviderModel `json:"models"`
+	Name      string                         `json:"name"`
+	NPM       string                         `json:"npm"`
+	Whitelist []string                       `json:"whitelist"`
+	Blacklist []string                       `json:"blacklist"`
+	Options   ConfigProviderOptions          `json:"options"`
+	JSON      configProviderJSON             `json:"-"`
 }
 
 // configProviderJSON contains the JSON metadata for the struct [ConfigProvider]
@@ -2660,9 +3083,9 @@ type configProviderJSON struct {
 	Models      apijson.Field
 	Name        apijson.Field
 	NPM         apijson.Field
+	Whitelist   apijson.Field
+	Blacklist   apijson.Field
 	Options     apijson.Field
-	Source      apijson.Field
-	Key         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2873,7 +3296,8 @@ func (r ConfigProviderModelsModalitiesOutput) IsKnown() bool {
 }
 
 type ConfigProviderModelsProvider struct {
-	NPM  string                           `json:"npm,required"`
+	NPM  string                           `json:"npm"`
+	API  string                           `json:"api"`
 	JSON configProviderModelsProviderJSON `json:"-"`
 }
 
@@ -2881,6 +3305,7 @@ type ConfigProviderModelsProvider struct {
 // [ConfigProviderModelsProvider]
 type configProviderModelsProviderJSON struct {
 	NPM         apijson.Field
+	API         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2911,8 +3336,10 @@ func (r ConfigProviderModelsStatus) IsKnown() bool {
 }
 
 type ConfigProviderOptions struct {
-	APIKey  string `json:"apiKey"`
-	BaseURL string `json:"baseURL"`
+	APIKey        string `json:"apiKey"`
+	BaseURL       string `json:"baseURL"`
+	EnterpriseURL string `json:"enterpriseUrl"`
+	SetCacheKey   bool   `json:"setCacheKey"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
 	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
@@ -2921,6 +3348,7 @@ type ConfigProviderOptions struct {
 	// may set defaults. Set to false to disable timeout.
 	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
 	HeaderTimeout interface{}               `json:"headerTimeout"`
+	ChunkTimeout  int64                     `json:"chunkTimeout"`
 	ExtraFields   map[string]interface{}    `json:"-,extras"`
 	JSON          configProviderOptionsJSON `json:"-"`
 }
@@ -2930,8 +3358,11 @@ type ConfigProviderOptions struct {
 type configProviderOptionsJSON struct {
 	APIKey        apijson.Field
 	BaseURL       apijson.Field
+	EnterpriseURL apijson.Field
+	SetCacheKey   apijson.Field
 	Timeout       apijson.Field
 	HeaderTimeout apijson.Field
+	ChunkTimeout  apijson.Field
 	raw           string
 	ExtraFields   map[string]apijson.Field
 }
@@ -3134,31 +3565,44 @@ type ConfigUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 	// Body parameters — all Config fields as optional
-	Schema            param.Field[string]                     `json:"$schema"`
-	Agent             param.Field[ConfigAgent]                `json:"agent"`
-	Attachment        param.Field[AttachmentConfig]           `json:"attachment"`
-	Autoshare         param.Field[bool]                       `json:"autoshare"`
-	Autoupdate        param.Field[interface{}]                `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand]   `json:"command"`
-	Compaction        param.Field[ConfigCompaction]           `json:"compaction"`
-	DisabledProviders param.Field[[]string]                   `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                   `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]           `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
-	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
-	Instructions      param.Field[[]string]                   `json:"instructions"`
-	Layout            param.Field[ConfigLayout]               `json:"layout"`
-	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
-	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
-	Mcp               param.Field[map[string]ConfigMcp]       `json:"mcp"`
-	Mode              param.Field[ConfigMode]                 `json:"mode"`
-	Model             param.Field[string]                     `json:"model"`
-	Permission        param.Field[ConfigPermission]           `json:"permission"`
+	Schema     param.Field[string]           `json:"$schema"`
+	Agent      param.Field[ConfigAgent]      `json:"agent"`
+	Attachment param.Field[AttachmentConfig] `json:"attachment"`
+	Autoshare  param.Field[bool]             `json:"autoshare"`
+	// Automatically update to the latest version. Pass true to auto-update,
+	// false to disable, or "notify" to show update notifications.
+	// Accepts [bool] or [string] ("notify").
+	Autoupdate        param.Field[interface{}]              `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand] `json:"command"`
+	Compaction        param.Field[ConfigCompaction]         `json:"compaction"`
+	DisabledProviders param.Field[[]string]                 `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                 `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]         `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]       `json:"experimental"`
+	// Enable or configure formatters. Pass false to disable, true to enable
+	// built-ins, or a map of formatter-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigFormatter].
+	Formatter    param.Field[interface{}]          `json:"formatter"`
+	Instructions param.Field[[]string]             `json:"instructions"`
+	Layout       param.Field[ConfigLayout]         `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel]       `json:"logLevel"`
+	Lsp          param.Field[map[string]ConfigLsp] `json:"lsp"`
+	Mcp          param.Field[map[string]ConfigMcp] `json:"mcp"`
+	Mode         param.Field[ConfigMode]           `json:"mode"`
+	Model        param.Field[string]               `json:"model"`
+	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
+	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
+	// (a string constant) or [ConfigPermission].
+	Permission param.Field[ConfigPermissionUnion] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
 	Plugin        param.Field[[]interface{}]             `json:"plugin"`
 	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
-	Reference     param.Field[ReferenceConfig]           `json:"reference"`
+	// Map of reference name → value. Each value can be a plain [string] (URL/path),
+	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
+	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	// Map of reference name → value. Each value can be a plain [string] (URL/path),
+	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
 	References    param.Field[map[string]interface{}]    `json:"references"`
 	Share         param.Field[ConfigShare]               `json:"share"`
 	Shell         param.Field[string]                    `json:"shell"`
@@ -3274,58 +3718,8 @@ func (r imageAttachmentConfigJSON) RawJSON() string {
 	return r.raw
 }
 
-// Reference configuration for external documentation
-type ReferenceConfig map[string]ReferenceConfigEntry
-
-// Reference configuration entry
-// This field can have the runtime type of [string], [ReferenceConfigEntryRepository], [ReferenceConfigEntryPath].
-type ReferenceConfigEntry interface{}
-
-// Reference configuration entry for a repository
-type ReferenceConfigEntryRepository struct {
-	// Git repository URL, host/path reference, or GitHub owner/repo shorthand
-	Repository string `json:"repository"`
-	// Branch to reference
-	Branch string                             `json:"branch"`
-	JSON   referenceConfigEntryRepositoryJSON `json:"-"`
-}
-
-// referenceConfigEntryRepositoryJSON contains the JSON metadata for the struct [ReferenceConfigEntryRepository]
-type referenceConfigEntryRepositoryJSON struct {
-	Repository  apijson.Field
-	Branch      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ReferenceConfigEntryRepository) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r referenceConfigEntryRepositoryJSON) RawJSON() string {
-	return r.raw
-}
-
-// Reference configuration entry for a local path
-type ReferenceConfigEntryPath struct {
-	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
-	Path string                       `json:"path"`
-	JSON referenceConfigEntryPathJSON `json:"-"`
-}
-
-// referenceConfigEntryPathJSON contains the JSON metadata for the struct [ReferenceConfigEntryPath]
-type referenceConfigEntryPathJSON struct {
-	Path        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ReferenceConfigEntryPath) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r referenceConfigEntryPathJSON) RawJSON() string {
-	return r.raw
+type ConfigV2ReferenceUnion interface {
+	implementsConfigV2ReferenceUnion()
 }
 
 type ConfigV2ReferenceGit struct {
@@ -3358,6 +3752,8 @@ func (r configV2ReferenceGitJSON) RawJSON() string {
 	return r.raw
 }
 
+func (r ConfigV2ReferenceGit) implementsConfigV2ReferenceUnion() {}
+
 type ConfigV2ReferenceLocal struct {
 	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
 	Path string `json:"path,required"`
@@ -3383,6 +3779,23 @@ func (r *ConfigV2ReferenceLocal) UnmarshalJSON(data []byte) (err error) {
 
 func (r configV2ReferenceLocalJSON) RawJSON() string {
 	return r.raw
+}
+
+func (r ConfigV2ReferenceLocal) implementsConfigV2ReferenceUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigV2ReferenceUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigV2ReferenceGit{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigV2ReferenceLocal{}),
+		},
+	)
 }
 
 // Tool output configuration

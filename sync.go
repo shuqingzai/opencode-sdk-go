@@ -62,16 +62,6 @@ func (r *SyncService) Steal(ctx context.Context, params SyncStealParams, opts ..
 	return
 }
 
-// List sync events for all aggregates. Keys are aggregate IDs the client already
-// knows about, values are the last known sequence ID. Events with seq > value are
-// returned for those aggregates. Aggregates not listed in the input get their full
-// history.
-//
-// Deprecated: Use [SyncService.History.List] instead.
-func (r *SyncService) HistoryList(ctx context.Context, params SyncHistoryListParams, opts ...option.RequestOption) (res *[]SyncHistoryEvent, err error) {
-	return r.History.List(ctx, params, opts...)
-}
-
 // SyncHistoryService contains methods and other services that help with interacting
 // with the opencode API.
 //
@@ -183,11 +173,14 @@ func (r SyncStartParams) URLQuery() (v url.Values) {
 type SyncReplayParams struct {
 	Directory param.Field[string]  `query:"directory"`
 	Workspace param.Field[string]  `query:"workspace"`
-	Body      SyncReplayParamsBody `json:"body,required"`
+	Body      SyncReplayParamsBody `json:"-"`
 }
 
 func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Directory.Present || len(r.Body.Events.Value) > 0 {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [SyncReplayParams]'s query parameters as `url.Values`.
@@ -222,11 +215,14 @@ func (r SyncReplayParamsBodyEvent) MarshalJSON() (data []byte, err error) {
 type SyncStealParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
-	Body      SyncStealParamsBody `json:"body,required"`
+	Body      SyncStealParamsBody `json:"-"`
 }
 
 func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.SessionID.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [SyncStealParams]'s query parameters as `url.Values`.
@@ -248,11 +244,14 @@ func (r SyncStealParamsBody) MarshalJSON() (data []byte, err error) {
 type SyncHistoryListParams struct {
 	Directory param.Field[string]       `query:"directory"`
 	Workspace param.Field[string]       `query:"workspace"`
-	Body      SyncHistoryListParamsBody `json:"body,required"`
+	Body      SyncHistoryListParamsBody `json:"-"`
 }
 
 func (r SyncHistoryListParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if len(r.Body) > 0 {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [SyncHistoryListParams]'s query parameters as `url.Values`.

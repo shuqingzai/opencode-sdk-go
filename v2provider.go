@@ -150,8 +150,8 @@ func (r v2ProviderInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-// AsApiUnion returns the api field as a typed union.
-func (r *V2ProviderInfo) AsApiUnion() V2ProviderInfoApiUnion {
+// AsAPIUnion returns the api field as a typed union.
+func (r *V2ProviderInfo) AsAPIUnion() V2ProviderInfoApiUnion {
 	return r.apiUnion
 }
 
@@ -162,9 +162,9 @@ type V2ProviderInfoApiUnion interface {
 }
 
 type V2ProviderInfoApiAisdk struct {
-	Type    V2ProviderInfoApiType `json:"type,required"`
-	Package string                `json:"package,required"`
-	URL     string                `json:"url"`
+	Type    V2ProviderInfoApiAisdkType `json:"type,required"`
+	Package string                     `json:"package,required"`
+	URL     string                     `json:"url"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Settings interface{}                `json:"settings"`
 	JSON     v2ProviderInfoApiAisdkJSON `json:"-"`
@@ -190,8 +190,8 @@ func (r v2ProviderInfoApiAisdkJSON) RawJSON() string {
 func (r V2ProviderInfoApiAisdk) implementsV2ProviderInfoApiUnion() {}
 
 type V2ProviderInfoApiNative struct {
-	Type V2ProviderInfoApiType `json:"type,required"`
-	URL  string                `json:"url"`
+	Type V2ProviderInfoApiNativeType `json:"type,required"`
+	URL  string                      `json:"url"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Settings interface{}                 `json:"settings,required"`
 	JSON     v2ProviderInfoApiNativeJSON `json:"-"`
@@ -215,16 +215,29 @@ func (r v2ProviderInfoApiNativeJSON) RawJSON() string {
 
 func (r V2ProviderInfoApiNative) implementsV2ProviderInfoApiUnion() {}
 
-type V2ProviderInfoApiType string
+type V2ProviderInfoApiAisdkType string
 
 const (
-	V2ProviderInfoApiTypeAisdk  V2ProviderInfoApiType = "aisdk"
-	V2ProviderInfoApiTypeNative V2ProviderInfoApiType = "native"
+	V2ProviderInfoApiAisdkTypeAisdk V2ProviderInfoApiAisdkType = "aisdk"
 )
 
-func (r V2ProviderInfoApiType) IsKnown() bool {
+func (r V2ProviderInfoApiAisdkType) IsKnown() bool {
 	switch r {
-	case V2ProviderInfoApiTypeAisdk, V2ProviderInfoApiTypeNative:
+	case V2ProviderInfoApiAisdkTypeAisdk:
+		return true
+	}
+	return false
+}
+
+type V2ProviderInfoApiNativeType string
+
+const (
+	V2ProviderInfoApiNativeTypeNative V2ProviderInfoApiNativeType = "native"
+)
+
+func (r V2ProviderInfoApiNativeType) IsKnown() bool {
+	switch r {
+	case V2ProviderInfoApiNativeTypeNative:
 		return true
 	}
 	return false
@@ -233,16 +246,14 @@ func (r V2ProviderInfoApiType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*V2ProviderInfoApiUnion)(nil)).Elem(),
-		"type",
+		"",
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			DiscriminatorValue: "aisdk",
-			Type:               reflect.TypeOf(V2ProviderInfoApiAisdk{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2ProviderInfoApiAisdk{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter:         gjson.JSON,
-			DiscriminatorValue: "native",
-			Type:               reflect.TypeOf(V2ProviderInfoApiNative{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(V2ProviderInfoApiNative{}),
 		},
 	)
 }

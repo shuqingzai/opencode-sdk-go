@@ -1762,8 +1762,9 @@ func (r projectCopyErrorJSON) RawJSON() string {
 }
 
 type ProjectCopyErrorData struct {
-	Message       string                   `json:"message,required"`
-	ForceRequired *bool                    `json:"forceRequired"`
+	Message string `json:"message,required"`
+	// This field can have the runtime type of [bool].
+	ForceRequired interface{}              `json:"forceRequired"`
 	JSON          projectCopyErrorDataJSON `json:"-"`
 }
 
@@ -1791,60 +1792,6 @@ const (
 func (r ProjectCopyErrorName) IsKnown() bool {
 	switch r {
 	case ProjectCopyErrorNameProjectCopyError:
-		return true
-	}
-	return false
-}
-
-type SessionMessageToolStateError struct {
-	Data SessionMessageToolStateErrorData `json:"data,required"`
-	Name SessionMessageToolStateErrorName `json:"name,required"`
-	JSON sessionMessageToolStateErrorJSON `json:"-"`
-}
-
-type sessionMessageToolStateErrorJSON struct {
-	Data        apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SessionMessageToolStateError) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r sessionMessageToolStateErrorJSON) RawJSON() string {
-	return r.raw
-}
-
-type SessionMessageToolStateErrorData struct {
-	Message string                               `json:"message,required"`
-	JSON    sessionMessageToolStateErrorDataJSON `json:"-"`
-}
-
-type sessionMessageToolStateErrorDataJSON struct {
-	Message     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SessionMessageToolStateErrorData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r sessionMessageToolStateErrorDataJSON) RawJSON() string {
-	return r.raw
-}
-
-type SessionMessageToolStateErrorName string
-
-const (
-	SessionMessageToolStateErrorNameSessionMessageToolStateError SessionMessageToolStateErrorName = "SessionMessageToolStateError"
-)
-
-func (r SessionMessageToolStateErrorName) IsKnown() bool {
-	switch r {
-	case SessionMessageToolStateErrorNameSessionMessageToolStateError:
 		return true
 	}
 	return false

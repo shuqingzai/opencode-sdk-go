@@ -7,12 +7,14 @@ import (
 )
 
 type EventListResponseEventMessageUpdated struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventMessageUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventMessageUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventMessageUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventMessageUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -67,12 +69,14 @@ func (r EventListResponseEventMessageUpdatedType) IsKnown() bool {
 }
 
 type EventListResponseEventMessageRemoved struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventMessageRemovedProperties `json:"properties,required"`
 	Type       EventListResponseEventMessageRemovedType       `json:"type,required"`
 	JSON       eventListResponseEventMessageRemovedJSON       `json:"-"`
 }
 
 type eventListResponseEventMessageRemovedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -127,12 +131,14 @@ func (r EventListResponseEventMessageRemovedType) IsKnown() bool {
 }
 
 type EventListResponseEventMessagePartUpdated struct {
+	ID         string                                             `json:"id,required"`
 	Properties EventListResponseEventMessagePartUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventMessagePartUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventMessagePartUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventMessagePartUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -189,12 +195,14 @@ func (r EventListResponseEventMessagePartUpdatedType) IsKnown() bool {
 }
 
 type EventListResponseEventMessagePartRemoved struct {
+	ID         string                                             `json:"id,required"`
 	Properties EventListResponseEventMessagePartRemovedProperties `json:"properties,required"`
 	Type       EventListResponseEventMessagePartRemovedType       `json:"type,required"`
 	JSON       eventListResponseEventMessagePartRemovedJSON       `json:"-"`
 }
 
 type eventListResponseEventMessagePartRemovedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -251,12 +259,14 @@ func (r EventListResponseEventMessagePartRemovedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionCreated struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventSessionCreatedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionCreatedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionCreatedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionCreatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -311,12 +321,14 @@ func (r EventListResponseEventSessionCreatedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionUpdated struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventSessionUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -371,12 +383,14 @@ func (r EventListResponseEventSessionUpdatedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionDeleted struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventSessionDeletedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionDeletedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionDeletedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionDeletedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -431,12 +445,14 @@ func (r EventListResponseEventSessionDeletedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextAgentSwitched struct {
+	ID         string                                                   `json:"id,required"`
 	Properties EventListResponseEventSessionNextAgentSwitchedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextAgentSwitchedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextAgentSwitchedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextAgentSwitchedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -495,12 +511,14 @@ func (r EventListResponseEventSessionNextAgentSwitchedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextModelSwitched struct {
+	ID         string                                                   `json:"id,required"`
 	Properties EventListResponseEventSessionNextModelSwitchedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextModelSwitchedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextModelSwitchedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextModelSwitchedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -559,12 +577,14 @@ func (r EventListResponseEventSessionNextModelSwitchedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextPrompted struct {
+	ID         string                                              `json:"id,required"`
 	Properties EventListResponseEventSessionNextPromptedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextPromptedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextPromptedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -641,12 +661,14 @@ func (r EventListResponseEventSessionNextPromptedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextSynthetic struct {
+	ID         string                                               `json:"id,required"`
 	Properties EventListResponseEventSessionNextSyntheticProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextSyntheticType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextSyntheticJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextSyntheticJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -705,12 +727,14 @@ func (r EventListResponseEventSessionNextSyntheticType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextShellStarted struct {
+	ID         string                                                  `json:"id,required"`
 	Properties EventListResponseEventSessionNextShellStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextShellStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextShellStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextShellStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -771,12 +795,14 @@ func (r EventListResponseEventSessionNextShellStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextShellEnded struct {
+	ID         string                                                `json:"id,required"`
 	Properties EventListResponseEventSessionNextShellEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextShellEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextShellEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextShellEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -835,12 +861,14 @@ func (r EventListResponseEventSessionNextShellEndedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextStepStarted struct {
+	ID         string                                                 `json:"id,required"`
 	Properties EventListResponseEventSessionNextStepStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextStepStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextStepStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -903,12 +931,14 @@ func (r EventListResponseEventSessionNextStepStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextStepEnded struct {
+	ID         string                                               `json:"id,required"`
 	Properties EventListResponseEventSessionNextStepEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextStepEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextStepEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -975,12 +1005,14 @@ func (r EventListResponseEventSessionNextStepEndedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextStepFailed struct {
+	ID         string                                                `json:"id,required"`
 	Properties EventListResponseEventSessionNextStepFailedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextStepFailedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextStepFailedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextStepFailedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1039,12 +1071,14 @@ func (r EventListResponseEventSessionNextStepFailedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextTextStarted struct {
+	ID         string                                                 `json:"id,required"`
 	Properties EventListResponseEventSessionNextTextStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextTextStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextTextStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextTextStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1103,12 +1137,14 @@ func (r EventListResponseEventSessionNextTextStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextTextDelta struct {
+	ID         string                                               `json:"id,required"`
 	Properties EventListResponseEventSessionNextTextDeltaProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextTextDeltaType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextTextDeltaJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextTextDeltaJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1169,12 +1205,14 @@ func (r EventListResponseEventSessionNextTextDeltaType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextTextEnded struct {
+	ID         string                                               `json:"id,required"`
 	Properties EventListResponseEventSessionNextTextEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextTextEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextTextEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextTextEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1235,12 +1273,14 @@ func (r EventListResponseEventSessionNextTextEndedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextReasoningStarted struct {
+	ID         string                                                      `json:"id,required"`
 	Properties EventListResponseEventSessionNextReasoningStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextReasoningStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextReasoningStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1302,12 +1342,14 @@ func (r EventListResponseEventSessionNextReasoningStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextReasoningDelta struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextReasoningDeltaProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextReasoningDeltaType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextReasoningDeltaJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningDeltaJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1368,12 +1410,14 @@ func (r EventListResponseEventSessionNextReasoningDeltaType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextReasoningEnded struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextReasoningEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextReasoningEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextReasoningEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1437,12 +1481,14 @@ func (r EventListResponseEventSessionNextReasoningEndedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolInputStarted struct {
+	ID         string                                                      `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolInputStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolInputStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolInputStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1503,12 +1549,14 @@ func (r EventListResponseEventSessionNextToolInputStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolInputDelta struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolInputDeltaProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolInputDeltaType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolInputDeltaJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputDeltaJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1569,12 +1617,14 @@ func (r EventListResponseEventSessionNextToolInputDeltaType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolInputEnded struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolInputEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolInputEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolInputEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolInputEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1635,12 +1685,14 @@ func (r EventListResponseEventSessionNextToolInputEndedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolCalled struct {
+	ID         string                                                `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolCalledProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolCalledType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolCalledJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolCalledJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1706,12 +1758,14 @@ func (r EventListResponseEventSessionNextToolCalledType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolProgress struct {
+	ID         string                                                  `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolProgressProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolProgressType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolProgressJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolProgressJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1776,12 +1830,14 @@ func (r EventListResponseEventSessionNextToolProgressType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolSuccess struct {
+	ID         string                                                 `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolSuccessProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolSuccessType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolSuccessJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolSuccessJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1852,12 +1908,14 @@ func (r EventListResponseEventSessionNextToolSuccessType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextToolFailed struct {
+	ID         string                                                `json:"id,required"`
 	Properties EventListResponseEventSessionNextToolFailedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextToolFailedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextToolFailedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolFailedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1922,12 +1980,14 @@ func (r EventListResponseEventSessionNextToolFailedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextRetried struct {
+	ID         string                                             `json:"id,required"`
 	Properties EventListResponseEventSessionNextRetriedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextRetriedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextRetriedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextRetriedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -1986,12 +2046,14 @@ func (r EventListResponseEventSessionNextRetriedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextCompactionStarted struct {
+	ID         string                                                       `json:"id,required"`
 	Properties EventListResponseEventSessionNextCompactionStartedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextCompactionStartedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextCompactionStartedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionStartedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2050,12 +2112,14 @@ func (r EventListResponseEventSessionNextCompactionStartedType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextCompactionDelta struct {
+	ID         string                                                     `json:"id,required"`
 	Properties EventListResponseEventSessionNextCompactionDeltaProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextCompactionDeltaType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextCompactionDeltaJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionDeltaJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2114,12 +2178,14 @@ func (r EventListResponseEventSessionNextCompactionDeltaType) IsKnown() bool {
 }
 
 type EventListResponseEventSessionNextCompactionEnded struct {
+	ID         string                                                     `json:"id,required"`
 	Properties EventListResponseEventSessionNextCompactionEndedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextCompactionEndedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextCompactionEndedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextCompactionEndedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2365,12 +2431,14 @@ func (r EventListResponseEventSessionNextCompactionStartedReason) IsKnown() bool
 }
 
 type EventListResponseEventPluginAdded struct {
+	ID         string                                      `json:"id,required"`
 	Properties EventListResponseEventPluginAddedProperties `json:"properties,required"`
 	Type       EventListResponseEventPluginAddedType       `json:"type,required"`
 	JSON       eventListResponseEventPluginAddedJSON       `json:"-"`
 }
 
 type eventListResponseEventPluginAddedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2596,12 +2664,14 @@ func (r eventListResponseEventQuestionV2AskedPropertiesToolJSON) RawJSON() strin
 // =============================================================================
 
 type EventListResponseEventIntegrationUpdated struct {
+	ID         string                                             `json:"id,required"`
 	Properties EventListResponseEventIntegrationUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventIntegrationUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventIntegrationUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventIntegrationUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2655,12 +2725,14 @@ func (r EventListResponseEventIntegrationUpdatedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventIntegrationConnectionUpdated struct {
+	ID         string                                                       `json:"id,required"`
 	Properties EventListResponseEventIntegrationConnectionUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventIntegrationConnectionUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventIntegrationConnectionUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventIntegrationConnectionUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2716,12 +2788,14 @@ func (r EventListResponseEventIntegrationConnectionUpdatedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventCatalogUpdated struct {
+	ID         string                                         `json:"id,required"`
 	Properties EventListResponseEventCatalogUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventCatalogUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventCatalogUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventCatalogUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2775,12 +2849,14 @@ func (r EventListResponseEventCatalogUpdatedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventPermissionV2Asked struct {
+	ID         string                                            `json:"id,required"`
 	Properties EventListResponseEventPermissionV2AskedProperties `json:"properties,required"`
 	Type       EventListResponseEventPermissionV2AskedType       `json:"type,required"`
 	JSON       eventListResponseEventPermissionV2AskedJSON       `json:"-"`
 }
 
 type eventListResponseEventPermissionV2AskedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2849,12 +2925,14 @@ func (r EventListResponseEventPermissionV2AskedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventPermissionV2Replied struct {
+	ID         string                                              `json:"id,required"`
 	Properties EventListResponseEventPermissionV2RepliedProperties `json:"properties,required"`
 	Type       EventListResponseEventPermissionV2RepliedType       `json:"type,required"`
 	JSON       eventListResponseEventPermissionV2RepliedJSON       `json:"-"`
 }
 
 type eventListResponseEventPermissionV2RepliedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2914,12 +2992,14 @@ func (r EventListResponseEventPermissionV2RepliedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventReferenceUpdated struct {
+	ID         string                                           `json:"id,required"`
 	Properties EventListResponseEventReferenceUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventReferenceUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventReferenceUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventReferenceUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -2973,12 +3053,14 @@ func (r EventListResponseEventReferenceUpdatedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventQuestionV2Asked struct {
+	ID         string                                          `json:"id,required"`
 	Properties EventListResponseEventQuestionV2AskedProperties `json:"properties,required"`
 	Type       EventListResponseEventQuestionV2AskedType       `json:"type,required"`
 	JSON       eventListResponseEventQuestionV2AskedJSON       `json:"-"`
 }
 
 type eventListResponseEventQuestionV2AskedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3041,12 +3123,14 @@ func (r EventListResponseEventQuestionV2AskedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventQuestionV2Replied struct {
+	ID         string                                            `json:"id,required"`
 	Properties EventListResponseEventQuestionV2RepliedProperties `json:"properties,required"`
 	Type       EventListResponseEventQuestionV2RepliedType       `json:"type,required"`
 	JSON       eventListResponseEventQuestionV2RepliedJSON       `json:"-"`
 }
 
 type eventListResponseEventQuestionV2RepliedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3106,12 +3190,14 @@ func (r EventListResponseEventQuestionV2RepliedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventQuestionV2Rejected struct {
+	ID         string                                             `json:"id,required"`
 	Properties EventListResponseEventQuestionV2RejectedProperties `json:"properties,required"`
 	Type       EventListResponseEventQuestionV2RejectedType       `json:"type,required"`
 	JSON       eventListResponseEventQuestionV2RejectedJSON       `json:"-"`
 }
 
 type eventListResponseEventQuestionV2RejectedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3169,12 +3255,14 @@ func (r EventListResponseEventQuestionV2RejectedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextMoved struct {
+	ID         string                                           `json:"id,required"`
 	Properties EventListResponseEventSessionNextMovedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextMovedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextMovedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextMovedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3236,12 +3324,14 @@ func (r EventListResponseEventSessionNextMovedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextRevertStaged struct {
+	ID         string                                                  `json:"id,required"`
 	Properties EventListResponseEventSessionNextRevertStagedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextRevertStagedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextRevertStagedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextRevertStagedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3301,12 +3391,14 @@ func (r EventListResponseEventSessionNextRevertStagedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextRevertCleared struct {
+	ID         string                                                   `json:"id,required"`
 	Properties EventListResponseEventSessionNextRevertClearedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextRevertClearedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextRevertClearedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextRevertClearedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3364,12 +3456,14 @@ func (r EventListResponseEventSessionNextRevertClearedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextRevertCommitted struct {
+	ID         string                                                     `json:"id,required"`
 	Properties EventListResponseEventSessionNextRevertCommittedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextRevertCommittedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextRevertCommittedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextRevertCommittedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3429,12 +3523,14 @@ func (r EventListResponseEventSessionNextRevertCommittedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextPromptAdmitted struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextPromptAdmittedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextPromptAdmittedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextPromptAdmittedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptAdmittedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3523,12 +3619,14 @@ func (r EventListResponseEventSessionNextPromptAdmittedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventSessionNextContextUpdated struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventSessionNextContextUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventSessionNextContextUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventSessionNextContextUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventSessionNextContextUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string
@@ -3590,12 +3688,14 @@ func (r EventListResponseEventSessionNextContextUpdatedType) IsKnown() bool {
 // =============================================================================
 
 type EventListResponseEventProjectDirectoriesUpdated struct {
+	ID         string                                                    `json:"id,required"`
 	Properties EventListResponseEventProjectDirectoriesUpdatedProperties `json:"properties,required"`
 	Type       EventListResponseEventProjectDirectoriesUpdatedType       `json:"type,required"`
 	JSON       eventListResponseEventProjectDirectoriesUpdatedJSON       `json:"-"`
 }
 
 type eventListResponseEventProjectDirectoriesUpdatedJSON struct {
+	ID          apijson.Field
 	Properties  apijson.Field
 	Type        apijson.Field
 	raw         string

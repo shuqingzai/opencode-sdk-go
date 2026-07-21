@@ -15,10 +15,19 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
+// FormatterService contains methods and other services that help with interacting
+// with the opencode API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewFormatterService] method instead.
 type FormatterService struct {
 	Options []option.RequestOption
 }
 
+// NewFormatterService generates a new service that applies the given options to each
+// request. These options are applied after the parent client's options (if there
+// is one), and before any request-specific options.
 func NewFormatterService(opts ...option.RequestOption) (r *FormatterService) {
 	r = &FormatterService{}
 	r.Options = opts

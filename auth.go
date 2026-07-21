@@ -12,6 +12,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // AuthService contains methods and other services that help with interacting with
@@ -67,14 +68,17 @@ func init() {
 		reflect.TypeOf((*Auth)(nil)).Elem(),
 		"type",
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "oauth",
 			Type:               reflect.TypeOf(OAuth{}),
 		},
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "api",
 			Type:               reflect.TypeOf(ApiAuth{}),
 		},
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "wellknown",
 			Type:               reflect.TypeOf(WellKnownAuth{}),
 		},

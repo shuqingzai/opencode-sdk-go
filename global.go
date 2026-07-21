@@ -171,7 +171,11 @@ type GlobalConfigUpdateParams struct {
 	// of [pluginName, configObject] (where configObject is a map[string]any).
 	Plugin        param.Field[[]interface{}]             `json:"plugin"`
 	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
-	Reference     param.Field[ReferenceConfig]           `json:"reference"`
+	// Map of reference name → value. Each value can be a plain [string] (URL/path),
+	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
+	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	// Map of reference name → value. Each value can be a plain [string] (URL/path),
+	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
 	References    param.Field[map[string]interface{}]    `json:"references"`
 	Share         param.Field[ConfigShare]               `json:"share"`
 	Shell         param.Field[string]                    `json:"shell"`
@@ -1220,7 +1224,6 @@ type SyncEventResponseSyncEventDataUnion interface {
 // The Data field is populated via union matching from the underlying SyncEvent type.
 type SyncEventResponseSyncEvent struct {
 	Type        SyncEventResponseSyncEventType `json:"type,required"`
-	Name        string                         `json:"name,required"`
 	ID          string                         `json:"id,required"`
 	Seq         int64                          `json:"seq,required"`
 	AggregateID string                         `json:"aggregateID,required"`
@@ -1268,7 +1271,6 @@ type SyncEventResponseSyncEvent struct {
 
 type syncEventResponseSyncEventJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field

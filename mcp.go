@@ -214,21 +214,26 @@ type McpStatusUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*McpStatusUnion)(nil)).Elem(),
-		"status",
+		"",
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(McpStatusConnected{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpStatusConnected{}),
 		},
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(McpStatusDisabled{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpStatusDisabled{}),
 		},
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(McpStatusFailed{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpStatusFailed{}),
 		},
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(McpStatusNeedsAuth{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpStatusNeedsAuth{}),
 		},
 		apijson.UnionVariant{
-			Type: reflect.TypeOf(McpStatusNeedsClientRegistration{}),
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpStatusNeedsClientRegistration{}),
 		},
 	)
 }
@@ -526,27 +531,6 @@ func init() {
 			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuthDisabled{}),
 		},
 	)
-}
-
-// McpAuthCallbackBody represents the body for the OAuth callback.
-type McpAuthCallbackBody struct {
-	Code string                  `json:"code,required"`
-	JSON mcpAuthCallbackBodyJSON `json:"-"`
-}
-
-// mcpAuthCallbackBodyJSON contains the JSON metadata for the struct [McpAuthCallbackBody]
-type mcpAuthCallbackBodyJSON struct {
-	Code        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *McpAuthCallbackBody) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r mcpAuthCallbackBodyJSON) RawJSON() string {
-	return r.raw
 }
 
 // McpAuthStartResponse represents the response from starting OAuth authentication.

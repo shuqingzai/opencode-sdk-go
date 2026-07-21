@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -53,6 +54,10 @@ func (r *ProjectService) Current(ctx context.Context, query ProjectCurrentParams
 
 // Update a project
 func (r *ProjectService) Update(ctx context.Context, projectID string, params ProjectUpdateParams, opts ...option.RequestOption) (res *Project, err error) {
+	if projectID == "" {
+		err = errors.New("missing required projectID parameter")
+		return
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := fmt.Sprintf("project/%s", projectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, &res, opts...)
@@ -76,9 +81,7 @@ type Project struct {
 	Icon      ProjectIcon     `json:"icon"`
 	Commands  ProjectCommands `json:"commands"`
 	Vcs       ProjectVcs      `json:"vcs"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
-	JSON     projectJSON `json:"-"`
+	JSON      projectJSON     `json:"-"`
 }
 
 // projectJSON contains the JSON metadata for the struct [Project]
@@ -91,7 +94,6 @@ type projectJSON struct {
 	Icon        apijson.Field
 	Commands    apijson.Field
 	Vcs         apijson.Field
-	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -201,6 +203,10 @@ type ProjectCommands struct {
 
 // List known local absolute directories for a project.
 func (r *ProjectService) Directories(ctx context.Context, projectID string, query ProjectDirectoriesParams, opts ...option.RequestOption) (res *[]ProjectDirectoryEntry, err error) {
+	if projectID == "" {
+		err = errors.New("missing required projectID parameter")
+		return
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := fmt.Sprintf("project/%s/directories", projectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)

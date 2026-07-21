@@ -310,11 +310,22 @@ func (r TuiSubmitPromptParams) URLQuery() (v url.Values) {
 type TuiPublishParams struct {
 	Directory param.Field[string]              `query:"directory"`
 	Workspace param.Field[string]              `query:"workspace"`
-	Body      param.Field[TuiPublishBodyUnion] `json:"body"`
+	Body      param.Field[TuiPublishBodyUnion] `json:"-"`
 }
 
 func (r TuiPublishParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
+}
+
+// URLQuery serializes [TuiPublishParams]'s query parameters as `url.Values`.
+func (r TuiPublishParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type TuiPublishBodyUnion interface {
@@ -487,6 +498,15 @@ func (r TuiSelectSessionParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// URLQuery serializes [TuiSelectSessionParams]'s query parameters as
+// `url.Values`.
+func (r TuiSelectSessionParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 type TuiControlNextParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
@@ -526,11 +546,23 @@ func (r tuicontrolNextResponseJSON) RawJSON() string {
 type TuiControlResponseParams struct {
 	Directory param.Field[string]      `query:"directory"`
 	Workspace param.Field[string]      `query:"workspace"`
-	Body      param.Field[interface{}] `json:"body"`
+	Body      param.Field[interface{}] `json:"-"`
 }
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
+}
+
+// URLQuery serializes [TuiControlResponseParams]'s query parameters as
+// `url.Values`.
+func (r TuiControlResponseParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 func init() {

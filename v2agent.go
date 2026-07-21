@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
@@ -13,6 +14,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // V2AgentService contains methods and other services that help with interacting
@@ -66,17 +68,22 @@ func (r v2AgentListResponseJSON) RawJSON() string {
 }
 
 type V2AgentInfo struct {
-	ID          string             `json:"id,required"`
-	Model       ModelRef           `json:"model"`
-	Request     ProviderRequest    `json:"request,required"`
-	System      string             `json:"system"`
-	Description string             `json:"description"`
-	Mode        V2AgentInfoMode    `json:"mode,required"`
-	Hidden      bool               `json:"hidden,required"`
-	Color       AgentColor         `json:"color"`
+	ID          string          `json:"id,required"`
+	Model       ModelRef        `json:"model"`
+	Request     ProviderRequest `json:"request,required"`
+	System      string          `json:"system"`
+	Description string          `json:"description"`
+	Mode        V2AgentInfoMode `json:"mode,required"`
+	Hidden      bool            `json:"hidden,required"`
+	// Color of the agent. Can be a hex color string (e.g. "#FF5733") or a
+	// preset name ("primary"|"secondary"|"accent"|"success"|"warning"|"error"|
+	// "info").
+	// This field can have the runtime type of [string], [AgentColor].
+	Color       interface{}        `json:"color"`
 	Steps       int64              `json:"steps"`
 	Permissions []PermissionV2Rule `json:"permissions,required"`
 	JSON        v2AgentInfoJSON    `json:"-"`
+	colorUnion  AgentColorUnion
 }
 
 // v2AgentInfoJSON contains the JSON metadata for the struct [V2AgentInfo]
@@ -96,11 +103,29 @@ type v2AgentInfoJSON struct {
 }
 
 func (r *V2AgentInfo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = V2AgentInfo{}
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
+		return err
+	}
+	colorData := gjson.GetBytes(data, "color").Raw
+	if colorData != "" {
+		if err = apijson.UnmarshalRoot([]byte(colorData), &r.colorUnion); err != nil {
+			return err
+		}
+		r.Color = r.colorUnion
+	}
+	return nil
 }
 
 func (r v2AgentInfoJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsColor returns the color field as a typed [AgentColor] value for type-safe
+// access to preset constants and [AgentColor.IsKnown].
+func (r *V2AgentInfo) AsColor() AgentColor {
+	c, _ := r.colorUnion.(AgentColor)
+	return c
 }
 
 type V2AgentInfoMode string
@@ -119,6 +144,12 @@ func (r V2AgentInfoMode) IsKnown() bool {
 	return false
 }
 
+// AgentColor represents an agent's color (preset name or hex code).
+//
+// Per OpenAPI AgentColor anyOf:
+//   - preset name string: "primary" | "secondary" | "accent" | "success" |
+//     "warning" | "error" | "info"
+//   - hex color string matching pattern "^#[0-9a-fA-F]{6}$"
 type AgentColor string
 
 const (
@@ -138,6 +169,27 @@ func (r AgentColor) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+func (r AgentColor) implementsAgentColorUnion() {}
+
+// AgentColorUnion routes JSON string values to [AgentColor].
+//
+// OpenAPI AgentColor is string | string enum — both variants are JSON strings.
+// A single [gjson.String] variant maps all color values to [AgentColor].
+type AgentColorUnion interface {
+	implementsAgentColorUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*AgentColorUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(AgentColor("")),
+		},
+	)
 }
 
 type ModelRef struct {
@@ -165,9 +217,10 @@ func (r modelRefJSON) RawJSON() string {
 }
 
 type ProviderRequest struct {
-	Headers map[string]string      `json:"headers,required"`
-	Body    map[string]interface{} `json:"body,required"`
-	JSON    providerRequestJSON    `json:"-"`
+	Headers map[string]string `json:"headers,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Body interface{}         `json:"body,required"`
+	JSON providerRequestJSON `json:"-"`
 }
 
 type providerRequestJSON struct {
@@ -234,3 +287,6 @@ func (r V2AgentListParams) URLQuery() (v url.Values) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+// AgentV2Info is an alias matching the OpenAPI schema name for [V2AgentInfo].
+type AgentV2Info = V2AgentInfo

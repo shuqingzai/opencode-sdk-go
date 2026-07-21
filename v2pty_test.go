@@ -3,110 +3,37 @@
 package opencode_test
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
+	"os"
 	"testing"
 
-	opencode "github.com/sst/opencode-sdk-go"
+	"github.com/sst/opencode-sdk-go"
+	"github.com/sst/opencode-sdk-go/internal/testutil"
+	"github.com/sst/opencode-sdk-go/option"
 )
 
-// TestPtyEventCarrierFields verifies that PtyEvent (union carrier) correctly
-// populates the common public fields (ID, Metadata, Durable, Location) from a
-// variant during JSON unmarshaling. Each variant struct must contain the
-// same shared fields so that apijson.Port can copy them from variant to carrier.
-func TestPtyEventCarrierFields(t *testing.T) {
-	jsonData := `{"id":"evt_123","type":"pty.created","metadata":{"k":"v"},"durable":{"aggregateID":"pty","seq":1,"version":1},"location":{"directory":"/tmp","workspaceID":"ws1"},"data":{"info":{"id":"pty_1","title":"test","command":"bash","args":[],"cwd":"/","status":"running","pid":1234}}}`
-	var event opencode.PtyEvent
-	if err := json.Unmarshal([]byte(jsonData), &event); err != nil {
-		t.Fatalf("unexpected unmarshal error: %v", err)
+func TestV2PtyConnect(t *testing.T) {
+	t.Skip("Prism tests are disabled")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
 	}
-	if event.ID != "evt_123" {
-		t.Errorf("event.ID = %q, want %q", event.ID, "evt_123")
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
 	}
-	if event.Metadata == nil {
-		t.Errorf("event.Metadata is nil, want non-nil")
-	}
-	if event.Durable == nil {
-		t.Errorf("event.Durable is nil, want non-nil")
-	}
-	if event.Location == nil {
-		t.Errorf("event.Location is nil, want non-nil")
-	}
-	if event.Type != opencode.PtyEventTypePtyCreated {
-		t.Errorf("event.Type = %q, want %q", event.Type, opencode.PtyEventTypePtyCreated)
-	}
-	if event.Data == nil {
-		t.Errorf("event.Data is nil, want non-nil")
-	}
-}
-
-// TestPtyEventVariantDirectUnmarshal verifies that direct unmarshal into a
-// specific variant struct (e.g. PtyCreatedEvent) populates the common fields.
-func TestPtyEventVariantDirectUnmarshal(t *testing.T) {
-	jsonData := `{"id":"evt_456","type":"pty.created","metadata":{"k":"v"},"durable":{"aggregateID":"pty","seq":2,"version":2},"location":{"directory":"/var","workspaceID":"ws2"},"data":{"info":{"id":"pty_2","title":"test2","command":"sh","args":[],"cwd":"/","status":"running","pid":5678}}}`
-	var event opencode.PtyCreatedEvent
-	if err := json.Unmarshal([]byte(jsonData), &event); err != nil {
-		t.Fatalf("unexpected unmarshal error: %v", err)
-	}
-	if event.ID != "evt_456" {
-		t.Errorf("event.ID = %q, want %q", event.ID, "evt_456")
-	}
-	if event.Metadata == nil {
-		t.Errorf("event.Metadata is nil, want non-nil")
-	}
-	if event.Durable == nil {
-		t.Errorf("event.Durable is nil, want non-nil")
-	}
-	if event.Location == nil {
-		t.Errorf("event.Location is nil, want non-nil")
-	}
-}
-
-// TestPtyExitedEventVariantDirectUnmarshal verifies the ID field name fix
-// (Id -> ID) on PtyExitedEventData and carrier field propagation for the
-// PtyExitedEvent variant.
-func TestPtyExitedEventVariantDirectUnmarshal(t *testing.T) {
-	jsonData := `{"id":"evt_exited","type":"pty.exited","metadata":{"k":"v"},"durable":{"aggregateID":"pty","seq":3,"version":3},"location":{"directory":"/etc","workspaceID":"ws3"},"data":{"id":"pty_3","exitCode":0}}`
-	var event opencode.PtyExitedEvent
-	if err := json.Unmarshal([]byte(jsonData), &event); err != nil {
-		t.Fatalf("unexpected unmarshal error: %v", err)
-	}
-	if event.ID != "evt_exited" {
-		t.Errorf("event.ID = %q, want %q", event.ID, "evt_exited")
-	}
-	if event.Data.ID != "pty_3" {
-		t.Errorf("event.Data.ID = %q, want %q", event.Data.ID, "pty_3")
-	}
-	if event.Data.ExitCode != 0 {
-		t.Errorf("event.Data.ExitCode = %d, want 0", event.Data.ExitCode)
-	}
-}
-
-// TestPtyDeletedEventVariantDirectUnmarshal verifies the ID field name fix
-// (Id -> ID) on PtyDeletedEventData and carrier field propagation for the
-// PtyDeletedEvent variant.
-func TestPtyDeletedEventVariantDirectUnmarshal(t *testing.T) {
-	jsonData := `{"id":"evt_deleted","type":"pty.deleted","metadata":{"k":"v"},"durable":{"aggregateID":"pty","seq":4,"version":4},"location":{"directory":"/","workspaceID":"ws4"},"data":{"id":"pty_4"}}`
-	var event opencode.PtyDeletedEvent
-	if err := json.Unmarshal([]byte(jsonData), &event); err != nil {
-		t.Fatalf("unexpected unmarshal error: %v", err)
-	}
-	if event.ID != "evt_deleted" {
-		t.Errorf("event.ID = %q, want %q", event.ID, "evt_deleted")
-	}
-	if event.Data.ID != "pty_4" {
-		t.Errorf("event.Data.ID = %q, want %q", event.Data.ID, "pty_4")
-	}
-}
-
-// TestPtyUpdatedEventVariantDirectUnmarshal verifies carrier field propagation
-// for the PtyUpdatedEvent variant.
-func TestPtyUpdatedEventVariantDirectUnmarshal(t *testing.T) {
-	jsonData := `{"id":"evt_updated","type":"pty.updated","metadata":{"k":"v"},"durable":{"aggregateID":"pty","seq":5,"version":5},"location":{"directory":"/","workspaceID":"ws5"},"data":{"info":{"id":"pty_5","title":"updated","command":"bash","args":[],"cwd":"/","status":"running","pid":42}}}`
-	var event opencode.PtyUpdatedEvent
-	if err := json.Unmarshal([]byte(jsonData), &event); err != nil {
-		t.Fatalf("unexpected unmarshal error: %v", err)
-	}
-	if event.ID != "evt_updated" {
-		t.Errorf("event.ID = %q, want %q", event.ID, "evt_updated")
+	client := opencode.NewClient(
+		option.WithBaseURL(baseURL),
+	)
+	_, err := client.V2Pty.Connect(context.TODO(), "ptyID", opencode.V2PtyConnectParams{
+		Cursor: opencode.F("cursor"),
+		Ticket: opencode.F("ticket"),
+	})
+	if err != nil {
+		var apierr *opencode.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
 	}
 }

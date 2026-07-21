@@ -22,7 +22,6 @@ func (r SyncEventMessagePartRemovedType) IsKnown() bool {
 
 type SyncEventMessagePartRemoved struct {
 	Type        SyncEventMessagePartRemovedType                    `json:"type,required"`
-	Name        string                                             `json:"name,required"`
 	ID          string                                             `json:"id,required"`
 	Seq         int64                                              `json:"seq,required"`
 	AggregateID string                                             `json:"aggregateID,required"`
@@ -32,7 +31,6 @@ type SyncEventMessagePartRemoved struct {
 
 type syncEventMessagePartRemovedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -67,7 +65,6 @@ func (r SyncEventMessagePartUpdatedType) IsKnown() bool {
 
 type SyncEventMessagePartUpdated struct {
 	Type        SyncEventMessagePartUpdatedType                    `json:"type,required"`
-	Name        string                                             `json:"name,required"`
 	ID          string                                             `json:"id,required"`
 	Seq         int64                                              `json:"seq,required"`
 	AggregateID string                                             `json:"aggregateID,required"`
@@ -77,7 +74,6 @@ type SyncEventMessagePartUpdated struct {
 
 type syncEventMessagePartUpdatedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -112,7 +108,6 @@ func (r SyncEventMessageRemovedType) IsKnown() bool {
 
 type SyncEventMessageRemoved struct {
 	Type        SyncEventMessageRemovedType                    `json:"type,required"`
-	Name        string                                         `json:"name,required"`
 	ID          string                                         `json:"id,required"`
 	Seq         int64                                          `json:"seq,required"`
 	AggregateID string                                         `json:"aggregateID,required"`
@@ -122,7 +117,6 @@ type SyncEventMessageRemoved struct {
 
 type syncEventMessageRemovedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -157,7 +151,6 @@ func (r SyncEventMessageUpdatedType) IsKnown() bool {
 
 type SyncEventMessageUpdated struct {
 	Type        SyncEventMessageUpdatedType                    `json:"type,required"`
-	Name        string                                         `json:"name,required"`
 	ID          string                                         `json:"id,required"`
 	Seq         int64                                          `json:"seq,required"`
 	AggregateID string                                         `json:"aggregateID,required"`
@@ -167,7 +160,6 @@ type SyncEventMessageUpdated struct {
 
 type syncEventMessageUpdatedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -202,7 +194,6 @@ func (r SyncEventSessionCreatedType) IsKnown() bool {
 
 type SyncEventSessionCreated struct {
 	Type        SyncEventSessionCreatedType                    `json:"type,required"`
-	Name        string                                         `json:"name,required"`
 	ID          string                                         `json:"id,required"`
 	Seq         int64                                          `json:"seq,required"`
 	AggregateID string                                         `json:"aggregateID,required"`
@@ -212,7 +203,6 @@ type SyncEventSessionCreated struct {
 
 type syncEventSessionCreatedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -247,7 +237,6 @@ func (r SyncEventSessionDeletedType) IsKnown() bool {
 
 type SyncEventSessionDeleted struct {
 	Type        SyncEventSessionDeletedType                    `json:"type,required"`
-	Name        string                                         `json:"name,required"`
 	ID          string                                         `json:"id,required"`
 	Seq         int64                                          `json:"seq,required"`
 	AggregateID string                                         `json:"aggregateID,required"`
@@ -257,7 +246,6 @@ type SyncEventSessionDeleted struct {
 
 type syncEventSessionDeletedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -292,7 +280,6 @@ func (r SyncEventSessionNextAgentSwitchedType) IsKnown() bool {
 
 type SyncEventSessionNextAgentSwitched struct {
 	Type        SyncEventSessionNextAgentSwitchedType                    `json:"type,required"`
-	Name        string                                                   `json:"name,required"`
 	ID          string                                                   `json:"id,required"`
 	Seq         int64                                                    `json:"seq,required"`
 	AggregateID string                                                   `json:"aggregateID,required"`
@@ -302,7 +289,6 @@ type SyncEventSessionNextAgentSwitched struct {
 
 type syncEventSessionNextAgentSwitchedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -337,7 +323,6 @@ func (r SyncEventSessionNextCompactionEndedType) IsKnown() bool {
 
 type SyncEventSessionNextCompactionEnded struct {
 	Type        SyncEventSessionNextCompactionEndedType                    `json:"type,required"`
-	Name        string                                                     `json:"name,required"`
 	ID          string                                                     `json:"id,required"`
 	Seq         int64                                                      `json:"seq,required"`
 	AggregateID string                                                     `json:"aggregateID,required"`
@@ -347,7 +332,6 @@ type SyncEventSessionNextCompactionEnded struct {
 
 type syncEventSessionNextCompactionEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -382,7 +366,6 @@ func (r SyncEventSessionNextCompactionStartedType) IsKnown() bool {
 
 type SyncEventSessionNextCompactionStarted struct {
 	Type        SyncEventSessionNextCompactionStartedType                    `json:"type,required"`
-	Name        string                                                       `json:"name,required"`
 	ID          string                                                       `json:"id,required"`
 	Seq         int64                                                        `json:"seq,required"`
 	AggregateID string                                                       `json:"aggregateID,required"`
@@ -392,7 +375,6 @@ type SyncEventSessionNextCompactionStarted struct {
 
 type syncEventSessionNextCompactionStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -427,7 +409,6 @@ func (r SyncEventSessionNextModelSwitchedType) IsKnown() bool {
 
 type SyncEventSessionNextModelSwitched struct {
 	Type        SyncEventSessionNextModelSwitchedType                    `json:"type,required"`
-	Name        string                                                   `json:"name,required"`
 	ID          string                                                   `json:"id,required"`
 	Seq         int64                                                    `json:"seq,required"`
 	AggregateID string                                                   `json:"aggregateID,required"`
@@ -437,7 +418,6 @@ type SyncEventSessionNextModelSwitched struct {
 
 type syncEventSessionNextModelSwitchedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -472,7 +452,6 @@ func (r SyncEventSessionNextPromptedType) IsKnown() bool {
 
 type SyncEventSessionNextPrompted struct {
 	Type        SyncEventSessionNextPromptedType                    `json:"type,required"`
-	Name        string                                              `json:"name,required"`
 	ID          string                                              `json:"id,required"`
 	Seq         int64                                               `json:"seq,required"`
 	AggregateID string                                              `json:"aggregateID,required"`
@@ -482,7 +461,6 @@ type SyncEventSessionNextPrompted struct {
 
 type syncEventSessionNextPromptedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -517,7 +495,6 @@ func (r SyncEventSessionNextReasoningEndedType) IsKnown() bool {
 
 type SyncEventSessionNextReasoningEnded struct {
 	Type        SyncEventSessionNextReasoningEndedType                    `json:"type,required"`
-	Name        string                                                    `json:"name,required"`
 	ID          string                                                    `json:"id,required"`
 	Seq         int64                                                     `json:"seq,required"`
 	AggregateID string                                                    `json:"aggregateID,required"`
@@ -527,7 +504,6 @@ type SyncEventSessionNextReasoningEnded struct {
 
 type syncEventSessionNextReasoningEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -562,7 +538,6 @@ func (r SyncEventSessionNextReasoningStartedType) IsKnown() bool {
 
 type SyncEventSessionNextReasoningStarted struct {
 	Type        SyncEventSessionNextReasoningStartedType                    `json:"type,required"`
-	Name        string                                                      `json:"name,required"`
 	ID          string                                                      `json:"id,required"`
 	Seq         int64                                                       `json:"seq,required"`
 	AggregateID string                                                      `json:"aggregateID,required"`
@@ -572,7 +547,6 @@ type SyncEventSessionNextReasoningStarted struct {
 
 type syncEventSessionNextReasoningStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -607,7 +581,6 @@ func (r SyncEventSessionNextRetriedType) IsKnown() bool {
 
 type SyncEventSessionNextRetried struct {
 	Type        SyncEventSessionNextRetriedType                    `json:"type,required"`
-	Name        string                                             `json:"name,required"`
 	ID          string                                             `json:"id,required"`
 	Seq         int64                                              `json:"seq,required"`
 	AggregateID string                                             `json:"aggregateID,required"`
@@ -617,7 +590,6 @@ type SyncEventSessionNextRetried struct {
 
 type syncEventSessionNextRetriedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -652,7 +624,6 @@ func (r SyncEventSessionNextShellEndedType) IsKnown() bool {
 
 type SyncEventSessionNextShellEnded struct {
 	Type        SyncEventSessionNextShellEndedType                    `json:"type,required"`
-	Name        string                                                `json:"name,required"`
 	ID          string                                                `json:"id,required"`
 	Seq         int64                                                 `json:"seq,required"`
 	AggregateID string                                                `json:"aggregateID,required"`
@@ -662,7 +633,6 @@ type SyncEventSessionNextShellEnded struct {
 
 type syncEventSessionNextShellEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -697,7 +667,6 @@ func (r SyncEventSessionNextShellStartedType) IsKnown() bool {
 
 type SyncEventSessionNextShellStarted struct {
 	Type        SyncEventSessionNextShellStartedType                    `json:"type,required"`
-	Name        string                                                  `json:"name,required"`
 	ID          string                                                  `json:"id,required"`
 	Seq         int64                                                   `json:"seq,required"`
 	AggregateID string                                                  `json:"aggregateID,required"`
@@ -707,7 +676,6 @@ type SyncEventSessionNextShellStarted struct {
 
 type syncEventSessionNextShellStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -742,7 +710,6 @@ func (r SyncEventSessionNextStepEndedType) IsKnown() bool {
 
 type SyncEventSessionNextStepEnded struct {
 	Type        SyncEventSessionNextStepEndedType                    `json:"type,required"`
-	Name        string                                               `json:"name,required"`
 	ID          string                                               `json:"id,required"`
 	Seq         int64                                                `json:"seq,required"`
 	AggregateID string                                               `json:"aggregateID,required"`
@@ -752,7 +719,6 @@ type SyncEventSessionNextStepEnded struct {
 
 type syncEventSessionNextStepEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -787,7 +753,6 @@ func (r SyncEventSessionNextStepFailedType) IsKnown() bool {
 
 type SyncEventSessionNextStepFailed struct {
 	Type        SyncEventSessionNextStepFailedType                    `json:"type,required"`
-	Name        string                                                `json:"name,required"`
 	ID          string                                                `json:"id,required"`
 	Seq         int64                                                 `json:"seq,required"`
 	AggregateID string                                                `json:"aggregateID,required"`
@@ -797,7 +762,6 @@ type SyncEventSessionNextStepFailed struct {
 
 type syncEventSessionNextStepFailedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -832,7 +796,6 @@ func (r SyncEventSessionNextStepStartedType) IsKnown() bool {
 
 type SyncEventSessionNextStepStarted struct {
 	Type        SyncEventSessionNextStepStartedType                    `json:"type,required"`
-	Name        string                                                 `json:"name,required"`
 	ID          string                                                 `json:"id,required"`
 	Seq         int64                                                  `json:"seq,required"`
 	AggregateID string                                                 `json:"aggregateID,required"`
@@ -842,7 +805,6 @@ type SyncEventSessionNextStepStarted struct {
 
 type syncEventSessionNextStepStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -877,7 +839,6 @@ func (r SyncEventSessionNextSyntheticType) IsKnown() bool {
 
 type SyncEventSessionNextSynthetic struct {
 	Type        SyncEventSessionNextSyntheticType                    `json:"type,required"`
-	Name        string                                               `json:"name,required"`
 	ID          string                                               `json:"id,required"`
 	Seq         int64                                                `json:"seq,required"`
 	AggregateID string                                               `json:"aggregateID,required"`
@@ -887,7 +848,6 @@ type SyncEventSessionNextSynthetic struct {
 
 type syncEventSessionNextSyntheticJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -922,7 +882,6 @@ func (r SyncEventSessionNextTextEndedType) IsKnown() bool {
 
 type SyncEventSessionNextTextEnded struct {
 	Type        SyncEventSessionNextTextEndedType                    `json:"type,required"`
-	Name        string                                               `json:"name,required"`
 	ID          string                                               `json:"id,required"`
 	Seq         int64                                                `json:"seq,required"`
 	AggregateID string                                               `json:"aggregateID,required"`
@@ -932,7 +891,6 @@ type SyncEventSessionNextTextEnded struct {
 
 type syncEventSessionNextTextEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -967,7 +925,6 @@ func (r SyncEventSessionNextTextStartedType) IsKnown() bool {
 
 type SyncEventSessionNextTextStarted struct {
 	Type        SyncEventSessionNextTextStartedType                    `json:"type,required"`
-	Name        string                                                 `json:"name,required"`
 	ID          string                                                 `json:"id,required"`
 	Seq         int64                                                  `json:"seq,required"`
 	AggregateID string                                                 `json:"aggregateID,required"`
@@ -977,7 +934,6 @@ type SyncEventSessionNextTextStarted struct {
 
 type syncEventSessionNextTextStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1012,7 +968,6 @@ func (r SyncEventSessionNextToolCalledType) IsKnown() bool {
 
 type SyncEventSessionNextToolCalled struct {
 	Type        SyncEventSessionNextToolCalledType                    `json:"type,required"`
-	Name        string                                                `json:"name,required"`
 	ID          string                                                `json:"id,required"`
 	Seq         int64                                                 `json:"seq,required"`
 	AggregateID string                                                `json:"aggregateID,required"`
@@ -1022,7 +977,6 @@ type SyncEventSessionNextToolCalled struct {
 
 type syncEventSessionNextToolCalledJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1057,7 +1011,6 @@ func (r SyncEventSessionNextToolFailedType) IsKnown() bool {
 
 type SyncEventSessionNextToolFailed struct {
 	Type        SyncEventSessionNextToolFailedType                    `json:"type,required"`
-	Name        string                                                `json:"name,required"`
 	ID          string                                                `json:"id,required"`
 	Seq         int64                                                 `json:"seq,required"`
 	AggregateID string                                                `json:"aggregateID,required"`
@@ -1067,7 +1020,6 @@ type SyncEventSessionNextToolFailed struct {
 
 type syncEventSessionNextToolFailedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1102,7 +1054,6 @@ func (r SyncEventSessionNextToolInputEndedType) IsKnown() bool {
 
 type SyncEventSessionNextToolInputEnded struct {
 	Type        SyncEventSessionNextToolInputEndedType                    `json:"type,required"`
-	Name        string                                                    `json:"name,required"`
 	ID          string                                                    `json:"id,required"`
 	Seq         int64                                                     `json:"seq,required"`
 	AggregateID string                                                    `json:"aggregateID,required"`
@@ -1112,7 +1063,6 @@ type SyncEventSessionNextToolInputEnded struct {
 
 type syncEventSessionNextToolInputEndedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1147,7 +1097,6 @@ func (r SyncEventSessionNextToolInputStartedType) IsKnown() bool {
 
 type SyncEventSessionNextToolInputStarted struct {
 	Type        SyncEventSessionNextToolInputStartedType                    `json:"type,required"`
-	Name        string                                                      `json:"name,required"`
 	ID          string                                                      `json:"id,required"`
 	Seq         int64                                                       `json:"seq,required"`
 	AggregateID string                                                      `json:"aggregateID,required"`
@@ -1157,7 +1106,6 @@ type SyncEventSessionNextToolInputStarted struct {
 
 type syncEventSessionNextToolInputStartedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1192,7 +1140,6 @@ func (r SyncEventSessionNextToolProgressType) IsKnown() bool {
 
 type SyncEventSessionNextToolProgress struct {
 	Type        SyncEventSessionNextToolProgressType                    `json:"type,required"`
-	Name        string                                                  `json:"name,required"`
 	ID          string                                                  `json:"id,required"`
 	Seq         int64                                                   `json:"seq,required"`
 	AggregateID string                                                  `json:"aggregateID,required"`
@@ -1202,7 +1149,6 @@ type SyncEventSessionNextToolProgress struct {
 
 type syncEventSessionNextToolProgressJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1237,7 +1183,6 @@ func (r SyncEventSessionNextToolSuccessType) IsKnown() bool {
 
 type SyncEventSessionNextToolSuccess struct {
 	Type        SyncEventSessionNextToolSuccessType                    `json:"type,required"`
-	Name        string                                                 `json:"name,required"`
 	ID          string                                                 `json:"id,required"`
 	Seq         int64                                                  `json:"seq,required"`
 	AggregateID string                                                 `json:"aggregateID,required"`
@@ -1247,7 +1192,6 @@ type SyncEventSessionNextToolSuccess struct {
 
 type syncEventSessionNextToolSuccessJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1282,7 +1226,6 @@ func (r SyncEventSessionUpdatedType) IsKnown() bool {
 
 type SyncEventSessionUpdated struct {
 	Type        SyncEventSessionUpdatedType                    `json:"type,required"`
-	Name        string                                         `json:"name,required"`
 	ID          string                                         `json:"id,required"`
 	Seq         int64                                          `json:"seq,required"`
 	AggregateID string                                         `json:"aggregateID,required"`
@@ -1292,7 +1235,6 @@ type SyncEventSessionUpdated struct {
 
 type syncEventSessionUpdatedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1331,7 +1273,6 @@ func (r SyncEventSessionNextMovedType) IsKnown() bool {
 
 type SyncEventSessionNextMoved struct {
 	Type        SyncEventSessionNextMovedType                    `json:"type,required"`
-	Name        string                                           `json:"name,required"`
 	ID          string                                           `json:"id,required"`
 	Seq         int64                                            `json:"seq,required"`
 	AggregateID string                                           `json:"aggregateID,required"`
@@ -1341,7 +1282,6 @@ type SyncEventSessionNextMoved struct {
 
 type syncEventSessionNextMovedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1380,7 +1320,6 @@ func (r SyncEventSessionNextRevertStagedType) IsKnown() bool {
 
 type SyncEventSessionNextRevertStaged struct {
 	Type        SyncEventSessionNextRevertStagedType                    `json:"type,required"`
-	Name        string                                                  `json:"name,required"`
 	ID          string                                                  `json:"id,required"`
 	Seq         int64                                                   `json:"seq,required"`
 	AggregateID string                                                  `json:"aggregateID,required"`
@@ -1390,7 +1329,6 @@ type SyncEventSessionNextRevertStaged struct {
 
 type syncEventSessionNextRevertStagedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1429,7 +1367,6 @@ func (r SyncEventSessionNextRevertClearedType) IsKnown() bool {
 
 type SyncEventSessionNextRevertCleared struct {
 	Type        SyncEventSessionNextRevertClearedType                    `json:"type,required"`
-	Name        string                                                   `json:"name,required"`
 	ID          string                                                   `json:"id,required"`
 	Seq         int64                                                    `json:"seq,required"`
 	AggregateID string                                                   `json:"aggregateID,required"`
@@ -1439,7 +1376,6 @@ type SyncEventSessionNextRevertCleared struct {
 
 type syncEventSessionNextRevertClearedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1478,7 +1414,6 @@ func (r SyncEventSessionNextRevertCommittedType) IsKnown() bool {
 
 type SyncEventSessionNextRevertCommitted struct {
 	Type        SyncEventSessionNextRevertCommittedType                    `json:"type,required"`
-	Name        string                                                     `json:"name,required"`
 	ID          string                                                     `json:"id,required"`
 	Seq         int64                                                      `json:"seq,required"`
 	AggregateID string                                                     `json:"aggregateID,required"`
@@ -1488,7 +1423,6 @@ type SyncEventSessionNextRevertCommitted struct {
 
 type syncEventSessionNextRevertCommittedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1573,7 +1507,6 @@ func (r *SyncEventSessionNextContextUpdatedProperties) UnmarshalJSON(data []byte
 
 type SyncEventSessionNextContextUpdated struct {
 	Type        SyncEventSessionNextContextUpdatedType       `json:"type,required"`
-	Name        string                                       `json:"name,required"`
 	ID          string                                       `json:"id,required"`
 	Seq         int64                                        `json:"seq,required"`
 	AggregateID string                                       `json:"aggregateID,required"`
@@ -1583,7 +1516,6 @@ type SyncEventSessionNextContextUpdated struct {
 
 type syncEventSessionNextContextUpdatedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field
@@ -1661,7 +1593,6 @@ func (r *SyncEventSessionNextPromptAdmittedProperties) UnmarshalJSON(data []byte
 
 type SyncEventSessionNextPromptAdmitted struct {
 	Type        SyncEventSessionNextPromptAdmittedType       `json:"type,required"`
-	Name        string                                       `json:"name,required"`
 	ID          string                                       `json:"id,required"`
 	Seq         int64                                        `json:"seq,required"`
 	AggregateID string                                       `json:"aggregateID,required"`
@@ -1671,7 +1602,6 @@ type SyncEventSessionNextPromptAdmitted struct {
 
 type syncEventSessionNextPromptAdmittedJSON struct {
 	Type        apijson.Field
-	Name        apijson.Field
 	ID          apijson.Field
 	Seq         apijson.Field
 	AggregateID apijson.Field

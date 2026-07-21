@@ -106,3 +106,6 @@ func (r V2CommandListParams) URLQuery() (v url.Values) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+// CommandV2Info is an alias matching the OpenAPI schema name for [V2CommandInfo].
+type CommandV2Info = V2CommandInfo

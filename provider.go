@@ -776,30 +776,6 @@ func (r providerAuthMethodPromptSelectOptionJSON) RawJSON() string {
 	return r.raw
 }
 
-// ProviderOauthAuthorizeBody represents the body for OAuth authorization request.
-type ProviderOauthAuthorizeBody struct {
-	Method int64                          `json:"method,required"`
-	Inputs map[string]string              `json:"inputs"`
-	JSON   providerOauthAuthorizeBodyJSON `json:"-"`
-}
-
-// providerOauthAuthorizeBodyJSON contains the JSON metadata for the struct
-// [ProviderOauthAuthorizeBody]
-type providerOauthAuthorizeBodyJSON struct {
-	Method      apijson.Field
-	Inputs      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderOauthAuthorizeBody) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerOauthAuthorizeBodyJSON) RawJSON() string {
-	return r.raw
-}
-
 // ProviderOauthAuthorizeResponse represents the response from OAuth authorization.
 type ProviderOauthAuthorizeResponse struct {
 	URL          string                               `json:"url,required"`
@@ -838,30 +814,6 @@ func (r *ProviderOauthAuthorizeResponse) UnmarshalJSON(data []byte) (err error) 
 }
 
 func (r providerOauthAuthorizeResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// ProviderOauthCallbackBody represents the body for OAuth callback.
-type ProviderOauthCallbackBody struct {
-	Method int64                         `json:"method,required"`
-	Code   string                        `json:"code"`
-	JSON   providerOauthCallbackBodyJSON `json:"-"`
-}
-
-// providerOauthCallbackBodyJSON contains the JSON metadata for the struct
-// [ProviderOauthCallbackBody]
-type providerOauthCallbackBodyJSON struct {
-	Method      apijson.Field
-	Code        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderOauthCallbackBody) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerOauthCallbackBodyJSON) RawJSON() string {
 	return r.raw
 }
 

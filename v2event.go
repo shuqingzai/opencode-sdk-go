@@ -930,13 +930,13 @@ func (r V2EventMcpBrowserOpenFailedType) IsKnown() bool {
 
 type V2EventMcpBrowserOpenFailedData struct {
 	McpName string                              `json:"mcpName,required"`
-	Url     string                              `json:"url,required"`
+	URL     string                              `json:"url,required"`
 	JSON    v2EventMcpBrowserOpenFailedDataJSON `json:"-"`
 }
 
 type v2EventMcpBrowserOpenFailedDataJSON struct {
 	McpName     apijson.Field
-	Url         apijson.Field
+	URL         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1397,8 +1397,9 @@ func (r V2EventPermissionAskedType) IsKnown() bool {
 }
 
 type V2EventPermissionAskedData struct {
-	Always     []string                       `json:"always,required"`
-	Id         string                         `json:"id,required"`
+	Always []string `json:"always,required"`
+	ID     string   `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata   interface{}                    `json:"metadata,required"`
 	Patterns   []string                       `json:"patterns,required"`
 	Permission string                         `json:"permission,required"`
@@ -1409,7 +1410,7 @@ type V2EventPermissionAskedData struct {
 
 type v2EventPermissionAskedDataJSON struct {
 	Always      apijson.Field
-	Id          apijson.Field
+	ID          apijson.Field
 	Metadata    apijson.Field
 	Patterns    apijson.Field
 	Permission  apijson.Field
@@ -1546,8 +1547,9 @@ func (r V2EventPermissionV2AskedType) IsKnown() bool {
 }
 
 type V2EventPermissionV2AskedData struct {
-	Action    string                           `json:"action,required"`
-	Id        string                           `json:"id,required"`
+	Action string `json:"action,required"`
+	ID     string `json:"id,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata  interface{}                      `json:"metadata"`
 	Resources []string                         `json:"resources,required"`
 	Save      []string                         `json:"save"`
@@ -1558,7 +1560,7 @@ type V2EventPermissionV2AskedData struct {
 
 type v2EventPermissionV2AskedDataJSON struct {
 	Action      apijson.Field
-	Id          apijson.Field
+	ID          apijson.Field
 	Metadata    apijson.Field
 	Resources   apijson.Field
 	Save        apijson.Field
@@ -1674,12 +1676,12 @@ func (r V2EventPluginAddedType) IsKnown() bool {
 }
 
 type V2EventPluginAddedData struct {
-	Id   string                     `json:"id,required"`
+	ID   string                     `json:"id,required"`
 	JSON v2EventPluginAddedDataJSON `json:"-"`
 }
 
 type v2EventPluginAddedDataJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1788,7 +1790,7 @@ func (r V2EventProjectUpdatedType) IsKnown() bool {
 type V2EventProjectUpdatedData struct {
 	Commands  ProjectCommands               `json:"commands"`
 	Icon      ProjectIcon                   `json:"icon"`
-	Id        string                        `json:"id,required"`
+	ID        string                        `json:"id,required"`
 	Name      string                        `json:"name"`
 	Sandboxes []string                      `json:"sandboxes,required"`
 	Time      ProjectTime                   `json:"time,required"`
@@ -1800,7 +1802,7 @@ type V2EventProjectUpdatedData struct {
 type v2EventProjectUpdatedDataJSON struct {
 	Commands    apijson.Field
 	Icon        apijson.Field
-	Id          apijson.Field
+	ID          apijson.Field
 	Name        apijson.Field
 	Sandboxes   apijson.Field
 	Time        apijson.Field
@@ -1912,12 +1914,12 @@ func (r V2EventPtyDeletedType) IsKnown() bool {
 }
 
 type V2EventPtyDeletedData struct {
-	Id   string                    `json:"id,required"`
+	ID   string                    `json:"id,required"`
 	JSON v2EventPtyDeletedDataJSON `json:"-"`
 }
 
 type v2EventPtyDeletedDataJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1969,13 +1971,13 @@ func (r V2EventPtyExitedType) IsKnown() bool {
 
 type V2EventPtyExitedData struct {
 	ExitCode int64                    `json:"exitCode,required"`
-	Id       string                   `json:"id,required"`
+	ID       string                   `json:"id,required"`
 	JSON     v2EventPtyExitedDataJSON `json:"-"`
 }
 
 type v2EventPtyExitedDataJSON struct {
 	ExitCode    apijson.Field
-	Id          apijson.Field
+	ID          apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2082,15 +2084,16 @@ func (r V2EventQuestionAskedType) IsKnown() bool {
 }
 
 type V2EventQuestionAskedData struct {
-	Id        string                       `json:"id,required"`
-	Questions []QuestionInfo               `json:"questions,required"`
-	SessionID string                       `json:"sessionID,required"`
-	Tool      interface{}                  `json:"tool"`
-	JSON      v2EventQuestionAskedDataJSON `json:"-"`
+	ID        string         `json:"id,required"`
+	Questions []QuestionInfo `json:"questions,required"`
+	SessionID string         `json:"sessionID,required"`
+	// This field can have the runtime type of [V2EventPermissionAskedDataTool].
+	Tool interface{}                  `json:"tool"`
+	JSON v2EventQuestionAskedDataJSON `json:"-"`
 }
 
 type v2EventQuestionAskedDataJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Questions   apijson.Field
 	SessionID   apijson.Field
 	Tool        apijson.Field
@@ -2262,7 +2265,7 @@ func (r V2EventQuestionV2AskedType) IsKnown() bool {
 }
 
 type V2EventQuestionV2AskedData struct {
-	Id        string                         `json:"id,required"`
+	ID        string                         `json:"id,required"`
 	Questions []QuestionV2Info               `json:"questions,required"`
 	SessionID string                         `json:"sessionID,required"`
 	Tool      QuestionV2Tool                 `json:"tool"`
@@ -2270,7 +2273,7 @@ type V2EventQuestionV2AskedData struct {
 }
 
 type v2EventQuestionV2AskedDataJSON struct {
-	Id          apijson.Field
+	ID          apijson.Field
 	Questions   apijson.Field
 	SessionID   apijson.Field
 	Tool        apijson.Field
@@ -2780,6 +2783,9 @@ func (r V2EventSessionErrorType) IsKnown() bool {
 }
 
 type V2EventSessionErrorData struct {
+	// This field can have the runtime type of [ProviderAuthError], [UnknownError],
+	// [MessageOutputLengthError], [MessageAbortedError], [StructuredOutputError],
+	// [ContextOverflowError], [ContentFilterError], [APIError].
 	Error     interface{}                 `json:"error"`
 	SessionID string                      `json:"sessionID"`
 	JSON      v2EventSessionErrorDataJSON `json:"-"`
@@ -3382,6 +3388,7 @@ func (r V2EventSessionNextPromptAdmittedType) IsKnown() bool {
 type V2EventSessionNextPromptAdmittedData struct {
 	Delivery  V2EventSessionNextPromptAdmittedDelivery `json:"delivery,required"`
 	MessageID string                                   `json:"messageID,required"`
+	// This field can have the runtime type of [V2SessionInputPrompt].
 	Prompt    interface{}                              `json:"prompt,required"`
 	SessionID string                                   `json:"sessionID,required"`
 	Timestamp int64                                    `json:"timestamp,required"`
@@ -3462,6 +3469,7 @@ func (r V2EventSessionNextPromptedType) IsKnown() bool {
 type V2EventSessionNextPromptedData struct {
 	Delivery  V2EventSessionNextPromptedDelivery `json:"delivery,required"`
 	MessageID string                             `json:"messageID,required"`
+	// This field can have the runtime type of [V2SessionInputPrompt].
 	Prompt    interface{}                        `json:"prompt,required"`
 	SessionID string                             `json:"sessionID,required"`
 	Timestamp int64                              `json:"timestamp,required"`
@@ -3588,13 +3596,14 @@ func (r V2EventSessionNextReasoningEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningEndedData struct {
-	AssistantMessageID string                                   `json:"assistantMessageID,required"`
-	ProviderMetadata   interface{}                              `json:"providerMetadata"`
-	ReasoningID        string                                   `json:"reasoningID,required"`
-	SessionID          string                                   `json:"sessionID,required"`
-	Text               string                                   `json:"text,required"`
-	Timestamp          int64                                    `json:"timestamp,required"`
-	JSON               v2EventSessionNextReasoningEndedDataJSON `json:"-"`
+	AssistantMessageID string `json:"assistantMessageID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	ProviderMetadata interface{}                              `json:"providerMetadata"`
+	ReasoningID      string                                   `json:"reasoningID,required"`
+	SessionID        string                                   `json:"sessionID,required"`
+	Text             string                                   `json:"text,required"`
+	Timestamp        int64                                    `json:"timestamp,required"`
+	JSON             v2EventSessionNextReasoningEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningEndedDataJSON struct {
@@ -3654,12 +3663,13 @@ func (r V2EventSessionNextReasoningStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningStartedData struct {
-	AssistantMessageID string                                     `json:"assistantMessageID,required"`
-	ProviderMetadata   interface{}                                `json:"providerMetadata"`
-	ReasoningID        string                                     `json:"reasoningID,required"`
-	SessionID          string                                     `json:"sessionID,required"`
-	Timestamp          int64                                      `json:"timestamp,required"`
-	JSON               v2EventSessionNextReasoningStartedDataJSON `json:"-"`
+	AssistantMessageID string `json:"assistantMessageID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	ProviderMetadata interface{}                                `json:"providerMetadata"`
+	ReasoningID      string                                     `json:"reasoningID,required"`
+	SessionID        string                                     `json:"sessionID,required"`
+	Timestamp        int64                                      `json:"timestamp,required"`
+	JSON             v2EventSessionNextReasoningStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningStartedDataJSON struct {
@@ -3718,7 +3728,8 @@ func (r V2EventSessionNextRetriedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRetriedData struct {
-	Attempt   int64                             `json:"attempt,required"`
+	Attempt int64 `json:"attempt,required"`
+	// This field can have the runtime type of [EventListResponseEventSessionNextRetriedError].
 	Error     interface{}                       `json:"error,required"`
 	SessionID string                            `json:"sessionID,required"`
 	Timestamp int64                             `json:"timestamp,required"`
@@ -4580,14 +4591,15 @@ func (r V2EventSessionNextToolCalledType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolCalledData struct {
-	AssistantMessageID string                                   `json:"assistantMessageID,required"`
-	CallID             string                                   `json:"callID,required"`
-	Input              interface{}                              `json:"input,required"`
-	Provider           V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
-	SessionID          string                                   `json:"sessionID,required"`
-	Timestamp          int64                                    `json:"timestamp,required"`
-	Tool               string                                   `json:"tool,required"`
-	JSON               v2EventSessionNextToolCalledDataJSON     `json:"-"`
+	AssistantMessageID string `json:"assistantMessageID,required"`
+	CallID             string `json:"callID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Input     interface{}                              `json:"input,required"`
+	Provider  V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
+	SessionID string                                   `json:"sessionID,required"`
+	Timestamp int64                                    `json:"timestamp,required"`
+	Tool      string                                   `json:"tool,required"`
+	JSON      v2EventSessionNextToolCalledDataJSON     `json:"-"`
 }
 
 type v2EventSessionNextToolCalledDataJSON struct {
@@ -4611,7 +4623,8 @@ func (r v2EventSessionNextToolCalledDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolCalledDataProvider struct {
-	Executed bool                                         `json:"executed,required"`
+	Executed bool `json:"executed,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                                  `json:"metadata"`
 	JSON     V2EventSessionNextToolCalledDataProviderJSON `json:"-"`
 }
@@ -4673,10 +4686,11 @@ type V2EventSessionNextToolFailedData struct {
 	CallID             string                                   `json:"callID,required"`
 	Error              SessionErrorUnknown                      `json:"error,required"`
 	Provider           V2EventSessionNextToolFailedDataProvider `json:"provider,required"`
-	Result             interface{}                              `json:"result"`
-	SessionID          string                                   `json:"sessionID,required"`
-	Timestamp          int64                                    `json:"timestamp,required"`
-	JSON               v2EventSessionNextToolFailedDataJSON     `json:"-"`
+	// This field can have the runtime type of [interface{}].
+	Result    interface{}                          `json:"result"`
+	SessionID string                               `json:"sessionID,required"`
+	Timestamp int64                                `json:"timestamp,required"`
+	JSON      v2EventSessionNextToolFailedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolFailedDataJSON struct {
@@ -4700,7 +4714,8 @@ func (r v2EventSessionNextToolFailedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolFailedDataProvider struct {
-	Executed bool                                         `json:"executed,required"`
+	Executed bool `json:"executed,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                                  `json:"metadata"`
 	JSON     V2EventSessionNextToolFailedDataProviderJSON `json:"-"`
 }
@@ -4950,13 +4965,15 @@ func (r V2EventSessionNextToolProgressType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolProgressData struct {
-	AssistantMessageID string                                 `json:"assistantMessageID,required"`
-	CallID             string                                 `json:"callID,required"`
-	Content            []interface{}                          `json:"content,required"`
-	SessionID          string                                 `json:"sessionID,required"`
-	Structured         interface{}                            `json:"structured,required"`
-	Timestamp          int64                                  `json:"timestamp,required"`
-	JSON               v2EventSessionNextToolProgressDataJSON `json:"-"`
+	AssistantMessageID string `json:"assistantMessageID,required"`
+	CallID             string `json:"callID,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content   []interface{} `json:"content,required"`
+	SessionID string        `json:"sessionID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Structured interface{}                            `json:"structured,required"`
+	Timestamp  int64                                  `json:"timestamp,required"`
+	JSON       v2EventSessionNextToolProgressDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolProgressDataJSON struct {
@@ -5016,16 +5033,19 @@ func (r V2EventSessionNextToolSuccessType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolSuccessData struct {
-	AssistantMessageID string                                    `json:"assistantMessageID,required"`
-	CallID             string                                    `json:"callID,required"`
-	Content            []interface{}                             `json:"content,required"`
-	OutputPaths        []string                                  `json:"outputPaths"`
-	Provider           V2EventSessionNextToolSuccessDataProvider `json:"provider,required"`
-	Result             interface{}                               `json:"result"`
-	SessionID          string                                    `json:"sessionID,required"`
-	Structured         interface{}                               `json:"structured,required"`
-	Timestamp          int64                                     `json:"timestamp,required"`
-	JSON               v2EventSessionNextToolSuccessDataJSON     `json:"-"`
+	AssistantMessageID string `json:"assistantMessageID,required"`
+	CallID             string `json:"callID,required"`
+	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
+	Content     []interface{}                             `json:"content,required"`
+	OutputPaths []string                                  `json:"outputPaths"`
+	Provider    V2EventSessionNextToolSuccessDataProvider `json:"provider,required"`
+	// This field can have the runtime type of [interface{}].
+	Result    interface{} `json:"result"`
+	SessionID string      `json:"sessionID,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Structured interface{}                           `json:"structured,required"`
+	Timestamp  int64                                 `json:"timestamp,required"`
+	JSON       v2EventSessionNextToolSuccessDataJSON `json:"-"`
 }
 
 type v2EventSessionNextToolSuccessDataJSON struct {
@@ -5051,7 +5071,8 @@ func (r v2EventSessionNextToolSuccessDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolSuccessDataProvider struct {
-	Executed bool                                          `json:"executed,required"`
+	Executed bool `json:"executed,required"`
+	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}                                   `json:"metadata"`
 	JSON     V2EventSessionNextToolSuccessDataProviderJSON `json:"-"`
 }
@@ -5283,6 +5304,7 @@ func (r V2EventTuiCommandExecuteType) IsKnown() bool {
 }
 
 type V2EventTuiCommandExecuteData struct {
+	// This field can have the runtime type of [string].
 	Command interface{}                      `json:"command,required"`
 	JSON    v2EventTuiCommandExecuteDataJSON `json:"-"`
 }

@@ -815,7 +815,8 @@ func (r *AssistantMessageError) UnmarshalJSON(data []byte) (err error) {
 // Possible runtime types of the union are [shared.ProviderAuthError],
 // [shared.UnknownError], [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
-// [shared.ContextOverflowError], [shared.APIError].
+// [shared.ContextOverflowError], [shared.APIError],
+// [shared.ContentFilterError].
 func (r AssistantMessageError) AsUnion() AssistantMessageErrorUnion {
 	return r.union
 }
@@ -1397,31 +1398,38 @@ func (r MessageRole) IsKnown() bool {
 }
 
 type Part struct {
-	ID        string   `json:"id,required"`
-	MessageID string   `json:"messageID,required"`
-	SessionID string   `json:"sessionID,required"`
-	Type      PartType `json:"type,required"`
-	Attempt   int64    `json:"attempt"`
-	CallID    string   `json:"callID"`
-	Cost      float64  `json:"cost"`
-	// This field can have the runtime type of [PartRetryPartError].
-	Error    interface{} `json:"error"`
-	Filename string      `json:"filename"`
-	// This field can have the runtime type of [[]string].
-	Files interface{} `json:"files"`
-	Hash  string      `json:"hash"`
+	ID          string             `json:"id,required"`
+	MessageID   string             `json:"messageID,required"`
+	SessionID   string             `json:"sessionID,required"`
+	Type        PartType           `json:"type,required"`
+	Agent       string             `json:"agent"`
+	Auto        bool               `json:"auto"`
+	Attempt     int64              `json:"attempt"`
+	CallID      string             `json:"callID"`
+	Command     string             `json:"command"`
+	Cost        float64            `json:"cost"`
+	Description string             `json:"description"`
+	Error       PartRetryPartError `json:"error"`
+	Filename    string             `json:"filename"`
+	Files       []string           `json:"files"`
+	Hash        string             `json:"hash"`
+	Ignored     bool               `json:"ignored"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
-	Mime     string      `json:"mime"`
-	Name     string      `json:"name"`
-	Reason   string      `json:"reason"`
-	Snapshot string      `json:"snapshot"`
+	Metadata interface{}      `json:"metadata"`
+	Mime     string           `json:"mime"`
+	Model    SubtaskPartModel `json:"model"`
+	Name     string           `json:"name"`
+	Overflow bool             `json:"overflow"`
+	Prompt   string           `json:"prompt"`
+	Reason   string           `json:"reason"`
+	Snapshot string           `json:"snapshot"`
 	// This field can have the runtime type of [FilePartSource], [AgentPartSource].
 	Source interface{} `json:"source"`
 	// This field can have the runtime type of [ToolPartState].
-	State     interface{} `json:"state"`
-	Synthetic bool        `json:"synthetic"`
-	Text      string      `json:"text"`
+	State       interface{} `json:"state"`
+	Synthetic   bool        `json:"synthetic"`
+	TailStartID string      `json:"tail_start_id"`
+	Text        string      `json:"text"`
 	// This field can have the runtime type of [TextPartTime], [ReasoningPartTime],
 	// [PartRetryPartTime].
 	Time interface{} `json:"time"`
@@ -1439,21 +1447,30 @@ type partJSON struct {
 	MessageID   apijson.Field
 	SessionID   apijson.Field
 	Type        apijson.Field
+	Agent       apijson.Field
+	Auto        apijson.Field
 	Attempt     apijson.Field
 	CallID      apijson.Field
+	Command     apijson.Field
 	Cost        apijson.Field
+	Description apijson.Field
 	Error       apijson.Field
 	Filename    apijson.Field
 	Files       apijson.Field
 	Hash        apijson.Field
+	Ignored     apijson.Field
 	Metadata    apijson.Field
 	Mime        apijson.Field
+	Model       apijson.Field
 	Name        apijson.Field
+	Overflow    apijson.Field
+	Prompt      apijson.Field
 	Reason      apijson.Field
 	Snapshot    apijson.Field
 	Source      apijson.Field
 	State       apijson.Field
 	Synthetic   apijson.Field
+	TailStartID apijson.Field
 	Text        apijson.Field
 	Time        apijson.Field
 	Tokens      apijson.Field
