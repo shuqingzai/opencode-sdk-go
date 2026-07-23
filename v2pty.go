@@ -119,25 +119,30 @@ func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2P
 // ===== Response Types =====
 
 // PtyConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
-type PtyConnectToken struct {
-	Ticket    string              `json:"ticket,required"`
-	ExpiresIn int64               `json:"expires_in,required"`
-	JSON      ptyConnectTokenJSON `json:"-"`
+//
+// Deprecated: Use [PtyTicketConnectToken] instead (matches OpenAPI schema name).
+type PtyConnectToken = PtyTicketConnectToken
+
+// PtyTicketConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
+type PtyTicketConnectToken struct {
+	Ticket    string                    `json:"ticket,required"`
+	ExpiresIn int64                     `json:"expires_in,required"`
+	JSON      ptyTicketConnectTokenJSON `json:"-"`
 }
 
-// ptyConnectTokenJSON contains the JSON metadata for the struct [PtyConnectToken]
-type ptyConnectTokenJSON struct {
+// ptyTicketConnectTokenJSON contains the JSON metadata for the struct [PtyTicketConnectToken]
+type ptyTicketConnectTokenJSON struct {
 	Ticket      apijson.Field
 	ExpiresIn   apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *PtyConnectToken) UnmarshalJSON(data []byte) (err error) {
+func (r *PtyTicketConnectToken) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r ptyConnectTokenJSON) RawJSON() string {
+func (r ptyTicketConnectTokenJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -314,7 +319,7 @@ func (r V2PtyGetParams) URLQuery() (v url.Values) {
 // V2PtyUpdateParams contains the body and query parameters for updating a v2 PTY.
 type V2PtyUpdateParams struct {
 	Title    param.Field[string]          `json:"title"`
-	Size     param.Field[V2PtySize]       `json:"size"`
+	Size     param.Field[V2PtySizeParam]  `json:"size"`
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
@@ -330,27 +335,14 @@ func (r V2PtyUpdateParams) URLQuery() (v url.Values) {
 	})
 }
 
-// V2PtySize represents the terminal size for a PTY.
-type V2PtySize struct {
-	Rows int64         `json:"rows,required"`
-	Cols int64         `json:"cols,required"`
-	JSON v2PtySizeJSON `json:"-"`
+// V2PtySizeParam represents the terminal size for a PTY.
+type V2PtySizeParam struct {
+	Rows param.Field[int64] `json:"rows,required"`
+	Cols param.Field[int64] `json:"cols,required"`
 }
 
-// v2PtySizeJSON contains the JSON metadata for the struct [V2PtySize]
-type v2PtySizeJSON struct {
-	Rows        apijson.Field
-	Cols        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2PtySize) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2PtySizeJSON) RawJSON() string {
-	return r.raw
+func (r V2PtySizeParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // V2PtyRemoveParams contains the query parameters for removing a v2 PTY.

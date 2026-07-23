@@ -120,13 +120,15 @@ func (r *ExperimentalWorkspaceAdapterService) List(ctx context.Context, query Ex
 }
 
 type Workspace struct {
-	ID        string `json:"id,required"`
-	Type      string `json:"type,required"`
-	Name      string `json:"name,required"`
-	Branch    string `json:"branch"`
-	Directory string `json:"directory"`
-	Extra     any    `json:"extra"`
-	ProjectID string `json:"projectID,required"`
+	ID   string `json:"id,required"`
+	Type string `json:"type,required"`
+	Name string `json:"name,required"`
+	// This field can have the runtime type of [string].
+	Branch interface{} `json:"branch"`
+	// This field can have the runtime type of [string].
+	Directory interface{} `json:"directory"`
+	Extra     any         `json:"extra"`
+	ProjectID string      `json:"projectID,required"`
 	// The amount of time in milliseconds that this workspace has been used.
 	// This field can have the runtime type of [float64], [string] (one of "NaN",
 	// "Infinity", "-Infinity").
@@ -171,10 +173,9 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 
 // ExperimentalWorkspaceNewParams contains the request parameters for creating a workspace.
 type ExperimentalWorkspaceNewParams struct {
-	Directory param.Field[string]                `query:"directory"`
-	Workspace param.Field[string]                `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput   `json:"-"`
-	JSON      experimentalWorkspaceNewParamsJSON `json:"-"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
+	Body      ExperimentalWorkspaceCreateInput `json:"-"`
 }
 
 func (r ExperimentalWorkspaceNewParams) MarshalJSON() (data []byte, err error) {
@@ -189,48 +190,15 @@ func (r ExperimentalWorkspaceNewParams) URLQuery() (v url.Values) {
 	})
 }
 
-// experimentalWorkspaceNewParamsJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceNewParams]
-type experimentalWorkspaceNewParamsJSON struct {
-	Directory   apijson.Field
-	Workspace   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r experimentalWorkspaceNewParamsJSON) RawJSON() string {
-	return r.raw
-}
-
 type ExperimentalWorkspaceCreateInput struct {
-	ID     param.Field[string]                  `json:"id"`
-	Type   param.Field[string]                  `json:"type,required"`
-	Branch param.Field[string]                  `json:"branch"`
-	Extra  param.Field[any]                     `json:"extra"`
-	JSON   experimentalWorkspaceCreateInputJSON `json:"-"`
-}
-
-// experimentalWorkspaceCreateInputJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceCreateInput]
-type experimentalWorkspaceCreateInputJSON struct {
-	ID          apijson.Field
-	Type        apijson.Field
-	Branch      apijson.Field
-	Extra       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ExperimentalWorkspaceCreateInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	ID     param.Field[string] `json:"id"`
+	Type   param.Field[string] `json:"type,required"`
+	Branch param.Field[string] `json:"branch"`
+	Extra  param.Field[any]    `json:"extra"`
 }
 
 func (r ExperimentalWorkspaceCreateInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r experimentalWorkspaceCreateInputJSON) RawJSON() string {
-	return r.raw
 }
 
 type ExperimentalWorkspaceRemoveParams struct {
@@ -280,6 +248,10 @@ func (r ExperimentalAdapterListParams) URLQuery() (v url.Values) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+// WorkspaceEventConnectionStatus is an alias for [WorkspaceStatusItem] for
+// compatibility with the OpenAPI schema name.
+type WorkspaceEventConnectionStatus = WorkspaceStatusItem
 
 type WorkspaceStatusItem struct {
 	WorkspaceID string                    `json:"workspaceID,required"`

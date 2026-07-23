@@ -95,11 +95,18 @@ type v2ReferenceInfoJSON struct {
 
 func (r *V2ReferenceInfo) UnmarshalJSON(data []byte) (err error) {
 	*r = V2ReferenceInfo{}
-	err = apijson.UnmarshalRoot(data, &r.sourceUnion)
+	err = apijson.UnmarshalRoot(data, r)
 	if err != nil {
 		return err
 	}
-	return apijson.Port(r.sourceUnion, r)
+	sourceData := gjson.GetBytes(data, "source").Raw
+	if sourceData != "" {
+		err = apijson.UnmarshalRoot([]byte(sourceData), &r.sourceUnion)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r v2ReferenceInfoJSON) RawJSON() string {
@@ -117,9 +124,24 @@ type ReferenceSourceUnion interface {
 	implementsReferenceSourceUnion()
 }
 
+// ReferenceLocalSourceType is the type discriminator for [ReferenceLocalSource].
+type ReferenceLocalSourceType string
+
+const (
+	ReferenceLocalSourceTypeLocal ReferenceLocalSourceType = "local"
+)
+
+func (r ReferenceLocalSourceType) IsKnown() bool {
+	switch r {
+	case ReferenceLocalSourceTypeLocal:
+		return true
+	}
+	return false
+}
+
 // ReferenceLocalSource represents a local reference source.
 type ReferenceLocalSource struct {
-	Type        string                   `json:"type,required"`
+	Type        ReferenceLocalSourceType `json:"type,required"`
 	Path        string                   `json:"path,required"`
 	Description string                   `json:"description"`
 	Hidden      bool                     `json:"hidden"`
@@ -146,9 +168,24 @@ func (r referenceLocalSourceJSON) RawJSON() string {
 
 func (r ReferenceLocalSource) implementsReferenceSourceUnion() {}
 
+// ReferenceGitSourceType is the type discriminator for [ReferenceGitSource].
+type ReferenceGitSourceType string
+
+const (
+	ReferenceGitSourceTypeGit ReferenceGitSourceType = "git"
+)
+
+func (r ReferenceGitSourceType) IsKnown() bool {
+	switch r {
+	case ReferenceGitSourceTypeGit:
+		return true
+	}
+	return false
+}
+
 // ReferenceGitSource represents a git reference source.
 type ReferenceGitSource struct {
-	Type        string                 `json:"type,required"`
+	Type        ReferenceGitSourceType `json:"type,required"`
 	Repository  string                 `json:"repository,required"`
 	Branch      string                 `json:"branch"`
 	Description string                 `json:"description"`

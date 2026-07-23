@@ -186,6 +186,7 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventLspUpdated],
 // [EventListResponseEventMcpBrowserOpenFailed],
 // [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventModelsDevRefreshed],
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventMessagePartUpdated],
@@ -278,6 +279,7 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventLspUpdated],
 // [EventListResponseEventMcpBrowserOpenFailed],
 // [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventModelsDevRefreshed],
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventMessagePartUpdated],
@@ -884,7 +886,7 @@ func (r EventListResponseEventPermissionReplied) implementsGlobalEventPayload() 
 
 type EventListResponseEventPermissionRepliedProperties struct {
 	RequestID string                                                `json:"requestID,required"`
-	Reply     PermissionReplyParamsReply                            `json:"reply,required"`
+	Reply     PermissionV2Reply                                     `json:"reply,required"`
 	SessionID string                                                `json:"sessionID,required"`
 	JSON      eventListResponseEventPermissionRepliedPropertiesJSON `json:"-"`
 }
@@ -1330,6 +1332,7 @@ func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListRe
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
 // [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContentFilterError],
 // [shared.ContextOverflowError] or
 // [shared.APIError].
 type EventListResponseEventSessionErrorPropertiesErrorUnion interface {

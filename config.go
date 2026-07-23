@@ -96,8 +96,11 @@ type Config struct {
 	// @deprecated Always uses stretch layout.
 	Layout ConfigLayout `json:"layout"`
 	// Log level for the application
-	LogLevel ConfigLogLevel       `json:"logLevel"`
-	Lsp      map[string]ConfigLsp `json:"lsp"`
+	LogLevel ConfigLogLevel `json:"logLevel"`
+	// Enable or configure LSP servers. Omit or set to false to disable, true to
+	// enable built-ins, or an object to enable built-ins with overrides.
+	// This field can have the runtime type of [bool], [map[string]ConfigLsp].
+	Lsp interface{} `json:"lsp"`
 	// MCP (Model Context Protocol) server configurations
 	Mcp map[string]ConfigMcp `json:"mcp"`
 	// @deprecated Use `agent` field instead.
@@ -420,7 +423,7 @@ type ConfigAgentBuild struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]string          `json:"options"`
+	Options     map[string]interface{}     `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
 	MaxSteps    int64                      `json:"max_steps"`
@@ -642,7 +645,7 @@ type ConfigAgentGeneral struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"max_steps"`
@@ -864,7 +867,7 @@ type ConfigAgentPlan struct {
 	TopP        float64                   `json:"top_p"`
 	Variant     string                    `json:"variant"`
 	Hidden      bool                      `json:"hidden"`
-	Options     map[string]string         `json:"options"`
+	Options     map[string]interface{}    `json:"options"`
 	Color       string                    `json:"color"`
 	Steps       int64                     `json:"steps"`
 	MaxSteps    int64                     `json:"max_steps"`
@@ -1084,7 +1087,7 @@ type ConfigAgentExplore struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"max_steps"`
@@ -1305,7 +1308,7 @@ type ConfigAgentTitle struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]string          `json:"options"`
+	Options     map[string]interface{}     `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
 	MaxSteps    int64                      `json:"max_steps"`
@@ -1525,7 +1528,7 @@ type ConfigAgentSummary struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"max_steps"`
@@ -1745,7 +1748,7 @@ type ConfigAgentCompaction struct {
 	TopP        float64                         `json:"top_p"`
 	Variant     string                          `json:"variant"`
 	Hidden      bool                            `json:"hidden"`
-	Options     map[string]string               `json:"options"`
+	Options     map[string]interface{}          `json:"options"`
 	Color       string                          `json:"color"`
 	Steps       int64                           `json:"steps"`
 	MaxSteps    int64                           `json:"max_steps"`
@@ -1961,6 +1964,7 @@ type ConfigCommand struct {
 	Agent       string            `json:"agent"`
 	Description string            `json:"description"`
 	Model       string            `json:"model"`
+	Variant     string            `json:"variant"`
 	Subtask     bool              `json:"subtask"`
 	JSON        configCommandJSON `json:"-"`
 }
@@ -1971,6 +1975,7 @@ type configCommandJSON struct {
 	Agent       apijson.Field
 	Description apijson.Field
 	Model       apijson.Field
+	Variant     apijson.Field
 	Subtask     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -2877,6 +2882,8 @@ func (r configPermissionJSON) RawJSON() string {
 	return r.raw
 }
 
+func (r ConfigPermission) implementsConfigPermissionUnion() {}
+
 // Union satisfied by [ConfigPermissionBashString] or [ConfigPermissionBashMap].
 type ConfigPermissionBashUnion interface {
 	implementsConfigPermissionBashUnion()
@@ -3025,22 +3032,6 @@ const (
 func (r ConfigPermissionWebsearch) IsKnown() bool {
 	switch r {
 	case ConfigPermissionWebsearchAsk, ConfigPermissionWebsearchAllow, ConfigPermissionWebsearchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionCodesearch string
-
-const (
-	ConfigPermissionCodesearchAsk   ConfigPermissionCodesearch = "ask"
-	ConfigPermissionCodesearchAllow ConfigPermissionCodesearch = "allow"
-	ConfigPermissionCodesearchDeny  ConfigPermissionCodesearch = "deny"
-)
-
-func (r ConfigPermissionCodesearch) IsKnown() bool {
-	switch r {
-	case ConfigPermissionCodesearchAsk, ConfigPermissionCodesearchAllow, ConfigPermissionCodesearchDeny:
 		return true
 	}
 	return false
@@ -3582,40 +3573,43 @@ type ConfigUpdateParams struct {
 	// Enable or configure formatters. Pass false to disable, true to enable
 	// built-ins, or a map of formatter-name to config to enable with overrides.
 	// Accepts [bool] or [map[string]ConfigFormatter].
-	Formatter    param.Field[interface{}]          `json:"formatter"`
-	Instructions param.Field[[]string]             `json:"instructions"`
-	Layout       param.Field[ConfigLayout]         `json:"layout"`
-	LogLevel     param.Field[ConfigLogLevel]       `json:"logLevel"`
-	Lsp          param.Field[map[string]ConfigLsp] `json:"lsp"`
-	Mcp          param.Field[map[string]ConfigMcp] `json:"mcp"`
-	Mode         param.Field[ConfigMode]           `json:"mode"`
-	Model        param.Field[string]               `json:"model"`
+	Formatter    param.Field[interface{}]    `json:"formatter"`
+	Instructions param.Field[[]string]       `json:"instructions"`
+	Layout       param.Field[ConfigLayout]   `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
+	// Enable or configure LSP servers. Pass false to disable, true to enable
+	// built-ins, or a map of LSP-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigLsp].
+	Lsp   param.Field[interface{}]          `json:"lsp"`
+	Mcp   param.Field[map[string]ConfigMcp] `json:"mcp"`
+	Mode  param.Field[ConfigMode]           `json:"mode"`
+	Model param.Field[string]               `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
 	// (a string constant) or [ConfigPermission].
 	Permission param.Field[ConfigPermissionUnion] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin        param.Field[[]interface{}]             `json:"plugin"`
-	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
+	Plugin   param.Field[[]interface{}]             `json:"plugin"`
+	Provider param.Field[map[string]ConfigProvider] `json:"provider"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	Reference param.Field[map[string]interface{}] `json:"reference"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]interface{}]    `json:"references"`
-	Share         param.Field[ConfigShare]               `json:"share"`
-	Shell         param.Field[string]                    `json:"shell"`
-	Server        param.Field[ServerConfig]              `json:"server"`
-	Skills        param.Field[ConfigSkills]              `json:"skills"`
-	SmallModel    param.Field[string]                    `json:"small_model"`
-	Snapshot      param.Field[bool]                      `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutput]          `json:"tool_output"`
-	Tools         param.Field[map[string]bool]           `json:"tools"`
-	Username      param.Field[string]                    `json:"username"`
-	Watcher       param.Field[ConfigWatcher]             `json:"watcher"`
-	DefaultAgent  param.Field[string]                    `json:"default_agent"`
-	SubagentDepth param.Field[int64]                     `json:"subagent_depth"`
+	References    param.Field[map[string]interface{}] `json:"references"`
+	Share         param.Field[ConfigShare]            `json:"share"`
+	Shell         param.Field[string]                 `json:"shell"`
+	Server        param.Field[ServerConfig]           `json:"server"`
+	Skills        param.Field[ConfigSkills]           `json:"skills"`
+	SmallModel    param.Field[string]                 `json:"small_model"`
+	Snapshot      param.Field[bool]                   `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutput]       `json:"tool_output"`
+	Tools         param.Field[map[string]bool]        `json:"tools"`
+	Username      param.Field[string]                 `json:"username"`
+	Watcher       param.Field[ConfigWatcher]          `json:"watcher"`
+	DefaultAgent  param.Field[string]                 `json:"default_agent"`
+	SubagentDepth param.Field[int64]                  `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {

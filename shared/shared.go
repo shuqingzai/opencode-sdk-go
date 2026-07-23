@@ -31,6 +31,8 @@ func (r messageAbortedErrorJSON) RawJSON() string {
 
 func (r MessageAbortedError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
 
+func (r MessageAbortedError) ImplementsV2EventSessionErrorDataError() {}
+
 func (r MessageAbortedError) ImplementsAssistantMessageError() {}
 
 type MessageAbortedErrorData struct {
@@ -92,6 +94,8 @@ func (r providerAuthErrorJSON) RawJSON() string {
 }
 
 func (r ProviderAuthError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r ProviderAuthError) ImplementsV2EventSessionErrorDataError() {}
 
 func (r ProviderAuthError) ImplementsAssistantMessageError() {}
 
@@ -224,6 +228,8 @@ func (r unknownErrorJSON) RawJSON() string {
 
 func (r UnknownError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
 
+func (r UnknownError) ImplementsV2EventSessionErrorDataError() {}
+
 func (r UnknownError) ImplementsAssistantMessageError() {}
 
 type UnknownErrorData struct {
@@ -287,6 +293,8 @@ func (r structuredOutputErrorJSON) RawJSON() string {
 }
 
 func (r StructuredOutputError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r StructuredOutputError) ImplementsV2EventSessionErrorDataError() {}
 
 func (r StructuredOutputError) ImplementsAssistantMessageError() {}
 
@@ -352,6 +360,8 @@ func (r contextOverflowErrorJSON) RawJSON() string {
 
 func (r ContextOverflowError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
 
+func (r ContextOverflowError) ImplementsV2EventSessionErrorDataError() {}
+
 func (r ContextOverflowError) ImplementsAssistantMessageError() {}
 
 type ContextOverflowErrorData struct {
@@ -416,6 +426,8 @@ func (r messageOutputLengthErrorJSON) RawJSON() string {
 
 func (r MessageOutputLengthError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
 
+func (r MessageOutputLengthError) ImplementsV2EventSessionErrorDataError() {}
+
 func (r MessageOutputLengthError) ImplementsAssistantMessageError() {}
 
 type MessageOutputLengthErrorName string
@@ -455,6 +467,8 @@ func (r apiErrorJSON) RawJSON() string {
 }
 
 func (r APIError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r APIError) ImplementsV2EventSessionErrorDataError() {}
 
 func (r APIError) ImplementsAssistantMessageError() {}
 
@@ -1232,13 +1246,13 @@ func (r McpServerNotFoundErrorTag) IsKnown() bool {
 }
 
 type ProjectNotFoundError struct {
-	Tag       ProjectNotFoundErrorTag   `json:"_tag,required"`
-	ProjectID string                    `json:"projectID,required"`
-	Message   string                    `json:"message,required"`
-	JSON      projectNotFoundError1JSON `json:"-"`
+	Tag       ProjectNotFoundErrorTag  `json:"_tag,required"`
+	ProjectID string                   `json:"projectID,required"`
+	Message   string                   `json:"message,required"`
+	JSON      projectNotFoundErrorJSON `json:"-"`
 }
 
-type projectNotFoundError1JSON struct {
+type projectNotFoundErrorJSON struct {
 	Tag         apijson.Field
 	ProjectID   apijson.Field
 	Message     apijson.Field
@@ -1250,7 +1264,7 @@ func (r *ProjectNotFoundError) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r projectNotFoundError1JSON) RawJSON() string {
+func (r projectNotFoundErrorJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1378,13 +1392,13 @@ func (r QuestionNotFoundErrorTag) IsKnown() bool {
 }
 
 type PermissionNotFoundError struct {
-	Tag       PermissionNotFoundErrorTag   `json:"_tag,required"`
-	RequestID string                       `json:"requestID,required"`
-	Message   string                       `json:"message,required"`
-	JSON      permissionNotFoundError1JSON `json:"-"`
+	Tag       PermissionNotFoundErrorTag  `json:"_tag,required"`
+	RequestID string                      `json:"requestID,required"`
+	Message   string                      `json:"message,required"`
+	JSON      permissionNotFoundErrorJSON `json:"-"`
 }
 
-type permissionNotFoundError1JSON struct {
+type permissionNotFoundErrorJSON struct {
 	Tag         apijson.Field
 	RequestID   apijson.Field
 	Message     apijson.Field
@@ -1396,7 +1410,7 @@ func (r *PermissionNotFoundError) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r permissionNotFoundError1JSON) RawJSON() string {
+func (r permissionNotFoundErrorJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1576,6 +1590,8 @@ func (r contentFilterErrorJSON) RawJSON() string {
 }
 
 func (r ContentFilterError) ImplementsEventListResponseEventSessionErrorPropertiesError() {}
+
+func (r ContentFilterError) ImplementsV2EventSessionErrorDataError() {}
 
 func (r ContentFilterError) ImplementsAssistantMessageError() {}
 

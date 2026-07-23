@@ -119,11 +119,70 @@ func (r GlobalUpgradeBody) MarshalJSON() ([]byte, error) {
 	return apijson.MarshalRoot(r)
 }
 
+// GlobalUpgradeParams is an alias for [GlobalUpgradeBody] following the standard Params naming convention.
+type GlobalUpgradeParams = GlobalUpgradeBody
+
+// Union satisfied by [GlobalUpgradeResponseSuccess] or [GlobalUpgradeResponseFailed].
+type GlobalUpgradeResponseUnion interface {
+	implementsGlobalUpgradeResponse()
+}
+
+type GlobalUpgradeResponseSuccess struct {
+	Success bool                             `json:"success,required"`
+	Version string                           `json:"version,required"`
+	JSON    globalUpgradeResponseSuccessJSON `json:"-"`
+}
+
+// globalUpgradeResponseSuccessJSON contains the JSON metadata for the struct [GlobalUpgradeResponseSuccess]
+type globalUpgradeResponseSuccessJSON struct {
+	Success     apijson.Field
+	Version     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalUpgradeResponseSuccess) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalUpgradeResponseSuccessJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r GlobalUpgradeResponseSuccess) implementsGlobalUpgradeResponse() {}
+
+type GlobalUpgradeResponseFailed struct {
+	Success bool                            `json:"success,required"`
+	Error   string                          `json:"error,required"`
+	JSON    globalUpgradeResponseFailedJSON `json:"-"`
+}
+
+// globalUpgradeResponseFailedJSON contains the JSON metadata for the struct [GlobalUpgradeResponseFailed]
+type globalUpgradeResponseFailedJSON struct {
+	Success     apijson.Field
+	Error       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *GlobalUpgradeResponseFailed) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r globalUpgradeResponseFailedJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r GlobalUpgradeResponseFailed) implementsGlobalUpgradeResponse() {}
+
 type GlobalUpgradeResponse struct {
-	Success bool                      `json:"success,required"`
-	Version string                    `json:"version,omitempty"`
-	Error   string                    `json:"error,omitempty"`
-	JSON    globalUpgradeResponseJSON `json:"-"`
+	Success bool `json:"success,required"`
+	// This field can have the runtime type of [string].
+	Version interface{} `json:"version"`
+	// This field can have the runtime type of [string].
+	Error interface{}               `json:"error"`
+	JSON  globalUpgradeResponseJSON `json:"-"`
+	union GlobalUpgradeResponseUnion
 }
 
 // globalUpgradeResponseJSON contains the JSON metadata for the struct [GlobalUpgradeResponse]
@@ -136,59 +195,80 @@ type globalUpgradeResponseJSON struct {
 }
 
 func (r *GlobalUpgradeResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = GlobalUpgradeResponse{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
 }
 
 func (r globalUpgradeResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// AsUnion returns a [GlobalUpgradeResponseUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [GlobalUpgradeResponseSuccess],
+// [GlobalUpgradeResponseFailed].
+func (r GlobalUpgradeResponse) AsUnion() GlobalUpgradeResponseUnion {
+	return r.union
+}
+
 // GlobalConfigUpdateParams contains the parameters for updating global configuration.
 // All fields are optional for PATCH semantics.
 type GlobalConfigUpdateParams struct {
 	// Body parameters — all Config fields as optional
-	Schema            param.Field[string]                     `json:"$schema"`
-	Agent             param.Field[ConfigAgent]                `json:"agent"`
-	Attachment        param.Field[AttachmentConfig]           `json:"attachment"`
-	Autoshare         param.Field[bool]                       `json:"autoshare"`
-	Autoupdate        param.Field[interface{}]                `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand]   `json:"command"`
-	Compaction        param.Field[ConfigCompaction]           `json:"compaction"`
-	DisabledProviders param.Field[[]string]                   `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                   `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]           `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
-	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
-	Instructions      param.Field[[]string]                   `json:"instructions"`
-	Layout            param.Field[ConfigLayout]               `json:"layout"`
-	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
-	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
-	Mcp               param.Field[map[string]ConfigMcp]       `json:"mcp"`
-	Mode              param.Field[ConfigMode]                 `json:"mode"`
-	Model             param.Field[string]                     `json:"model"`
-	Permission        param.Field[ConfigPermission]           `json:"permission"`
+	Schema            param.Field[string]                   `json:"$schema"`
+	Agent             param.Field[ConfigAgent]              `json:"agent"`
+	Attachment        param.Field[AttachmentConfig]         `json:"attachment"`
+	Autoshare         param.Field[bool]                     `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]              `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommand] `json:"command"`
+	Compaction        param.Field[ConfigCompaction]         `json:"compaction"`
+	DisabledProviders param.Field[[]string]                 `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                 `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfig]         `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimental]       `json:"experimental"`
+	// Accepts [bool] (false = disable formatters, true = enable defaults) or a
+	// map of language-name to formatter config. Pass false to disable all
+	// formatters, true to enable built-ins, or a map[string]ConfigFormatter
+	// to configure individual formatters.
+	Formatter    param.Field[interface{}]    `json:"formatter"`
+	Instructions param.Field[[]string]       `json:"instructions"`
+	Layout       param.Field[ConfigLayout]   `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
+	// Enable or configure LSP servers. Pass false to disable, true to enable
+	// built-ins, or a map of LSP-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigLsp].
+	Lsp        param.Field[interface{}]           `json:"lsp"`
+	Mcp        param.Field[map[string]ConfigMcp]  `json:"mcp"`
+	Mode       param.Field[ConfigMode]            `json:"mode"`
+	Model      param.Field[string]                `json:"model"`
+	Permission param.Field[ConfigPermissionUnion] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin        param.Field[[]interface{}]             `json:"plugin"`
-	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
+	Plugin   param.Field[[]interface{}]             `json:"plugin"`
+	Provider param.Field[map[string]ConfigProvider] `json:"provider"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	Reference param.Field[map[string]interface{}] `json:"reference"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]interface{}]    `json:"references"`
-	Share         param.Field[ConfigShare]               `json:"share"`
-	Shell         param.Field[string]                    `json:"shell"`
-	Server        param.Field[ServerConfig]              `json:"server"`
-	Skills        param.Field[ConfigSkills]              `json:"skills"`
-	SmallModel    param.Field[string]                    `json:"small_model"`
-	Snapshot      param.Field[bool]                      `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutput]          `json:"tool_output"`
-	Tools         param.Field[map[string]bool]           `json:"tools"`
-	Username      param.Field[string]                    `json:"username"`
-	Watcher       param.Field[ConfigWatcher]             `json:"watcher"`
-	DefaultAgent  param.Field[string]                    `json:"default_agent"`
-	SubagentDepth param.Field[int64]                     `json:"subagent_depth"`
+	References    param.Field[map[string]interface{}] `json:"references"`
+	Share         param.Field[ConfigShare]            `json:"share"`
+	Shell         param.Field[string]                 `json:"shell"`
+	Server        param.Field[ServerConfig]           `json:"server"`
+	Skills        param.Field[ConfigSkills]           `json:"skills"`
+	SmallModel    param.Field[string]                 `json:"small_model"`
+	Snapshot      param.Field[bool]                   `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutput]       `json:"tool_output"`
+	Tools         param.Field[map[string]bool]        `json:"tools"`
+	Username      param.Field[string]                 `json:"username"`
+	Watcher       param.Field[ConfigWatcher]          `json:"watcher"`
+	DefaultAgent  param.Field[string]                 `json:"default_agent"`
+	SubagentDepth param.Field[int64]                  `json:"subagent_depth"`
 }
 
 func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -286,6 +366,9 @@ type GlobalEvent struct {
 	// [EventListResponseEventSessionNextRevertStaged],
 	// [EventListResponseEventSessionNextRevertCleared],
 	// [EventListResponseEventSessionNextRevertCommitted],
+	// [EventListResponseEventSessionNextPromptAdmitted],
+	// [EventListResponseEventSessionNextContextUpdated],
+	// [EventListResponseEventProjectDirectoriesUpdated],
 	//
 	// [SyncEventResponse] (V1 SyncEvent).
 	Payload   interface{}     `json:"payload,required"`
@@ -891,6 +974,19 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SyncEventSessionNextRevertCommitted{}),
+		},
+	)
+
+	apijson.RegisterUnion(
+		reflect.TypeOf((*GlobalUpgradeResponseUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(GlobalUpgradeResponseSuccess{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(GlobalUpgradeResponseFailed{}),
 		},
 	)
 }

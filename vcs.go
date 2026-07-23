@@ -227,7 +227,7 @@ func (r VcsStatusParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Deprecated: Use Diff.Raw instead.
+// Deprecated: Use [VcsDiffService.Raw] instead.
 func (r *VcsService) DiffRaw(ctx context.Context, query VcsDiffRawParams, opts ...option.RequestOption) (res *string, err error) {
 	return r.Diff.Raw(ctx, query, opts...)
 }

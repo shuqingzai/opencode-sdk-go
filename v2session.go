@@ -1009,15 +1009,18 @@ func (r v2SessionMessageAssistantSnapshotJSON) RawJSON() string {
 type V2SessionMessageToolProvider struct {
 	Executed bool `json:"executed,required"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                      `json:"metadata"`
-	JSON     v2SessionMessageToolProviderJSON `json:"-"`
+	Metadata interface{} `json:"metadata"`
+	// This field can have the runtime type of [map[string]interface{}].
+	ResultMetadata interface{}                      `json:"resultMetadata"`
+	JSON           v2SessionMessageToolProviderJSON `json:"-"`
 }
 
 type v2SessionMessageToolProviderJSON struct {
-	Executed    apijson.Field
-	Metadata    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Executed       apijson.Field
+	Metadata       apijson.Field
+	ResultMetadata apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
 }
 
 func (r *V2SessionMessageToolProvider) UnmarshalJSON(data []byte) (err error) {
@@ -1066,7 +1069,7 @@ type V2SessionInputAdmitted struct {
 	ID          string                     `json:"id,required"`
 	SessionID   string                     `json:"sessionID,required"`
 	Prompt      V2SessionInputPrompt       `json:"prompt,required"`
-	Delivery    string                     `json:"delivery"`
+	Delivery    SessionDelivery            `json:"delivery,required"`
 	TimeCreated int64                      `json:"timeCreated,required"`
 	PromotedSeq int64                      `json:"promotedSeq"`
 	JSON        v2SessionInputAdmittedJSON `json:"-"`
@@ -1184,57 +1187,6 @@ func (r *V2PromptAgentAttachment) UnmarshalJSON(data []byte) (err error) {
 
 func (r v2PromptAgentAttachmentJSON) RawJSON() string {
 	return r.raw
-}
-
-type V2PromptReferenceAttachment struct {
-	Name       string                          `json:"name,required"`
-	Kind       V2PromptReferenceAttachmentKind `json:"kind,required"`
-	URI        string                          `json:"uri"`
-	Repository string                          `json:"repository"`
-	Branch     string                          `json:"branch"`
-	Target     string                          `json:"target"`
-	TargetURI  string                          `json:"targetUri"`
-	Problem    string                          `json:"problem"`
-	Source     V2PromptSource                  `json:"source"`
-	JSON       v2PromptReferenceAttachmentJSON `json:"-"`
-}
-
-type v2PromptReferenceAttachmentJSON struct {
-	Name        apijson.Field
-	Kind        apijson.Field
-	URI         apijson.Field
-	Repository  apijson.Field
-	Branch      apijson.Field
-	Target      apijson.Field
-	TargetURI   apijson.Field
-	Problem     apijson.Field
-	Source      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2PromptReferenceAttachment) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2PromptReferenceAttachmentJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2PromptReferenceAttachmentKind string
-
-const (
-	V2PromptReferenceAttachmentKindLocal   V2PromptReferenceAttachmentKind = "local"
-	V2PromptReferenceAttachmentKindGit     V2PromptReferenceAttachmentKind = "git"
-	V2PromptReferenceAttachmentKindInvalid V2PromptReferenceAttachmentKind = "invalid"
-)
-
-func (r V2PromptReferenceAttachmentKind) IsKnown() bool {
-	switch r {
-	case V2PromptReferenceAttachmentKindLocal, V2PromptReferenceAttachmentKindGit, V2PromptReferenceAttachmentKindInvalid:
-		return true
-	}
-	return false
 }
 
 type V2PromptSource struct {
@@ -3061,13 +3013,34 @@ func (r FileDiffStatus) IsKnown() bool {
 // ===== V2SessionNewParams =====
 
 type V2SessionNewParams struct {
-	ID       param.Field[string]      `json:"id"`
-	Agent    param.Field[string]      `json:"agent"`
-	Model    param.Field[ModelRef]    `json:"model"`
-	Location param.Field[LocationRef] `json:"location"`
+	ID       param.Field[string]                     `json:"id"`
+	Agent    param.Field[string]                     `json:"agent"`
+	Model    param.Field[V2SessionNewParamsModel]    `json:"model"`
+	Location param.Field[V2SessionNewParamsLocation] `json:"location"`
 }
 
 func (r V2SessionNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// V2SessionNewParamsModel contains the model reference for creating a new session.
+type V2SessionNewParamsModel struct {
+	ID         param.Field[string] `json:"id,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
+	Variant    param.Field[string] `json:"variant"`
+}
+
+func (r V2SessionNewParamsModel) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// V2SessionNewParamsLocation contains the location reference for creating a new session.
+type V2SessionNewParamsLocation struct {
+	Directory   param.Field[string] `json:"directory,required"`
+	WorkspaceID param.Field[string] `json:"workspaceID"`
+}
+
+func (r V2SessionNewParamsLocation) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -3084,10 +3057,21 @@ func (r V2SessionSwitchAgentParams) MarshalJSON() (data []byte, err error) {
 // ===== V2SessionSwitchModelParams =====
 
 type V2SessionSwitchModelParams struct {
-	Model param.Field[ModelRef] `json:"model,required"`
+	Model param.Field[V2SessionSwitchModelParamsModel] `json:"model,required"`
 }
 
 func (r V2SessionSwitchModelParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// V2SessionSwitchModelParamsModel contains the model reference for switching a session's model.
+type V2SessionSwitchModelParamsModel struct {
+	ID         param.Field[string] `json:"id,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
+	Variant    param.Field[string] `json:"variant"`
+}
+
+func (r V2SessionSwitchModelParamsModel) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -3107,8 +3091,8 @@ func (r V2SessionEventsParams) URLQuery() (v url.Values) {
 // ===== V2SessionHistoryParams =====
 
 type V2SessionHistoryParams struct {
-	Limit param.Field[int64] `query:"limit"`
-	After param.Field[int64] `query:"after"`
+	Limit param.Field[string] `query:"limit"`
+	After param.Field[string] `query:"after"`
 }
 
 func (r V2SessionHistoryParams) URLQuery() (v url.Values) {
@@ -3267,7 +3251,7 @@ func (V2SessionMessageSystem) implementsV2SessionMessageUnion() {}
 // V2SessionActiveResponse is returned by the Active method. It contains a map of
 // session IDs to their active state.
 type V2SessionActiveResponse struct {
-	Data map[string]interface{}      `json:"data,required"`
+	Data map[string]SessionActive    `json:"data,required"`
 	JSON v2SessionActiveResponseJSON `json:"-"`
 }
 
@@ -3283,4 +3267,39 @@ func (r *V2SessionActiveResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r v2SessionActiveResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// SessionActive represents the active state of a session.
+type SessionActive struct {
+	Type SessionActiveType `json:"type,required"`
+	JSON sessionActiveJSON `json:"-"`
+}
+
+// sessionActiveJSON contains the JSON metadata for the struct [SessionActive]
+type sessionActiveJSON struct {
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SessionActive) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r sessionActiveJSON) RawJSON() string {
+	return r.raw
+}
+
+type SessionActiveType string
+
+const (
+	SessionActiveTypeRunning SessionActiveType = "running"
+)
+
+func (r SessionActiveType) IsKnown() bool {
+	switch r {
+	case SessionActiveTypeRunning:
+		return true
+	}
+	return false
 }

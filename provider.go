@@ -86,7 +86,7 @@ func (r *ProviderOauthService) Authorize(ctx context.Context, providerID string,
 	return
 }
 
-// Deprecated: Use Oauth.Authorize instead.
+// Deprecated: Use [ProviderOauthService.Authorize] instead.
 func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
 	return r.Oauth.Authorize(ctx, providerID, params, opts...)
 }
@@ -103,7 +103,7 @@ func (r *ProviderOauthService) Callback(ctx context.Context, providerID string, 
 	return
 }
 
-// Deprecated: Use Oauth.Callback instead.
+// Deprecated: Use [ProviderOauthService.Callback] instead.
 func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
 	return r.Oauth.Callback(ctx, providerID, params, opts...)
 }
@@ -554,10 +554,12 @@ func (r providerModelLimitJSON) RawJSON() string {
 
 // ProviderAuthMethod represents an authentication method for a provider.
 type ProviderAuthMethod struct {
-	Type    ProviderAuthMethodType     `json:"type,required"`
-	Label   string                     `json:"label,required"`
-	Prompts []ProviderAuthMethodPrompt `json:"prompts"`
-	JSON    providerAuthMethodJSON     `json:"-"`
+	Type  ProviderAuthMethodType `json:"type,required"`
+	Label string                 `json:"label,required"`
+	// This field can have the runtime type of [[]ProviderAuthMethodPromptText],
+	// [[]ProviderAuthMethodPromptSelect].
+	Prompts interface{}            `json:"prompts"`
+	JSON    providerAuthMethodJSON `json:"-"`
 }
 
 // providerAuthMethodJSON contains the JSON metadata for the struct [ProviderAuthMethod]
@@ -849,7 +851,7 @@ func (r ProviderAuthParams) URLQuery() (v url.Values) {
 type ProviderOauthAuthorizeParams struct {
 	Directory param.Field[string]            `query:"directory"`
 	Workspace param.Field[string]            `query:"workspace"`
-	Method    param.Field[int64]             `json:"method,required"`
+	Method    param.Field[float64]           `json:"method,required"`
 	Inputs    param.Field[map[string]string] `json:"inputs"`
 }
 
@@ -868,10 +870,10 @@ func (r ProviderOauthAuthorizeParams) URLQuery() (v url.Values) {
 
 // ProviderOauthCallbackParams contains the parameters for OAuth callback.
 type ProviderOauthCallbackParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Method    param.Field[int64]  `json:"method,required"`
-	Code      param.Field[string] `json:"code"`
+	Directory param.Field[string]  `query:"directory"`
+	Workspace param.Field[string]  `query:"workspace"`
+	Method    param.Field[float64] `json:"method,required"`
+	Code      param.Field[string]  `json:"code"`
 }
 
 // MarshalJSON serializes [ProviderOauthCallbackParams] omitting query parameters.

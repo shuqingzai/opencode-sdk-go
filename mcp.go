@@ -11,12 +11,14 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
-	"github.com/tidwall/gjson"
+	"github.com/sst/opencode-sdk-go/shared"
 )
 
 // McpService contains methods and other services that help with interacting with
@@ -111,7 +113,7 @@ func (r *McpAuthService) Start(ctx context.Context, name string, query McpAuthSt
 	return
 }
 
-// Deprecated: Use Auth.Start instead.
+// Deprecated: Use [McpAuthService.Start] instead.
 func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthStartParams, opts ...option.RequestOption) (res *McpAuthStartResponse, err error) {
 	return r.Auth.Start(ctx, name, query, opts...)
 }
@@ -128,7 +130,7 @@ func (r *McpAuthService) Callback(ctx context.Context, name string, params McpAu
 	return
 }
 
-// Deprecated: Use Auth.Callback instead.
+// Deprecated: Use [McpAuthService.Callback] instead.
 func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	return r.Auth.Callback(ctx, name, params, opts...)
 }
@@ -145,7 +147,7 @@ func (r *McpAuthService) Authenticate(ctx context.Context, name string, query Mc
 	return
 }
 
-// Deprecated: Use Auth.Authenticate instead.
+// Deprecated: Use [McpAuthService.Authenticate] instead.
 func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	return r.Auth.Authenticate(ctx, name, query, opts...)
 }
@@ -162,7 +164,7 @@ func (r *McpAuthService) Remove(ctx context.Context, name string, query McpAuthR
 	return
 }
 
-// Deprecated: Use Auth.Remove instead.
+// Deprecated: Use [McpAuthService.Remove] instead.
 func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
 	return r.Auth.Remove(ctx, name, query, opts...)
 }
@@ -499,23 +501,12 @@ func (r McpAddParamsConfigRemoteOAuth) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r McpAddParamsConfigRemoteOAuth) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
-
-// McpAddParamsConfigRemoteOAuthDisabled represents the explicit `false` value
-// for OAuth, disabling OAuth auto-detection (OpenAPI boolean enum: [false]).
-type McpAddParamsConfigRemoteOAuthDisabled struct {
-}
-
-func (r McpAddParamsConfigRemoteOAuthDisabled) MarshalJSON() (data []byte, err error) {
-	return []byte("false"), nil
-}
-
-func (r McpAddParamsConfigRemoteOAuthDisabled) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
+func (r McpAddParamsConfigRemoteOAuth) ImplementsMcpAddParamsConfigRemoteOAuthUnion() {}
 
 // Satisfied by [McpAddParamsConfigRemoteOAuth],
 // [McpAddParamsConfigRemoteOAuthDisabled].
 type McpAddParamsConfigRemoteOAuthUnion interface {
-	implementsMcpAddParamsConfigRemoteOAuthUnion()
+	ImplementsMcpAddParamsConfigRemoteOAuthUnion()
 }
 
 func init() {
@@ -527,8 +518,8 @@ func init() {
 			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuth{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuthDisabled{}),
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeOf(shared.UnionBool(false)),
 		},
 	)
 }

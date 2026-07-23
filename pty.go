@@ -160,10 +160,10 @@ func (r PtyGetParams) URLQuery() (v url.Values) {
 }
 
 type PtyUpdateParams struct {
-	Title     param.Field[string]  `json:"title"`
-	Size      param.Field[PtySize] `json:"size"`
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
+	Title     param.Field[string]         `json:"title"`
+	Size      param.Field[V2PtySizeParam] `json:"size"`
+	Directory param.Field[string]         `query:"directory"`
+	Workspace param.Field[string]         `query:"workspace"`
 }
 
 func (r PtyUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -176,28 +176,6 @@ func (r PtyUpdateParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-type PtySize struct {
-	Rows int64       `json:"rows,required"`
-	Cols int64       `json:"cols,required"`
-	JSON ptySizeJSON `json:"-"`
-}
-
-// ptySizeJSON contains the JSON metadata for the struct [PtySize]
-type ptySizeJSON struct {
-	Rows        apijson.Field
-	Cols        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PtySize) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptySizeJSON) RawJSON() string {
-	return r.raw
 }
 
 type PtyRemoveParams struct {

@@ -111,6 +111,8 @@ func (r WorktreeNewParams) URLQuery() (v url.Values) {
 	})
 }
 
+// WorktreeRemoveParams — Directory is sent both as a JSON body field and as a
+// URL query parameter; the OpenAPI endpoint accepts the same value from either location.
 type WorktreeRemoveParams struct {
 	Directory param.Field[string] `json:"directory,required" query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
@@ -128,6 +130,8 @@ func (r WorktreeRemoveParams) URLQuery() (v url.Values) {
 	})
 }
 
+// WorktreeResetParams — Directory is sent both as a JSON body field and as a
+// URL query parameter; the OpenAPI endpoint accepts the same value from either location.
 type WorktreeResetParams struct {
 	Directory param.Field[string] `json:"directory,required" query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`

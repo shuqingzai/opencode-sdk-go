@@ -217,10 +217,9 @@ func (r modelRefJSON) RawJSON() string {
 }
 
 type ProviderRequest struct {
-	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Body interface{}         `json:"body,required"`
-	JSON providerRequestJSON `json:"-"`
+	Headers map[string]string      `json:"headers,required"`
+	Body    map[string]interface{} `json:"body,required"`
+	JSON    providerRequestJSON    `json:"-"`
 }
 
 type providerRequestJSON struct {

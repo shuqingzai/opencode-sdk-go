@@ -192,13 +192,47 @@ func (r ProjectUpdateParams) URLQuery() (v url.Values) {
 }
 
 type ProjectIcon struct {
-	URL      string `json:"url"`
-	Override string `json:"override"`
-	Color    string `json:"color"`
+	URL      string          `json:"url"`
+	Override string          `json:"override"`
+	Color    string          `json:"color"`
+	JSON     projectIconJSON `json:"-"`
+}
+
+// projectIconJSON contains the JSON metadata for the struct [ProjectIcon]
+type projectIconJSON struct {
+	URL         apijson.Field
+	Override    apijson.Field
+	Color       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectIcon) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectIconJSON) RawJSON() string {
+	return r.raw
 }
 
 type ProjectCommands struct {
-	Start string `json:"start"`
+	Start string              `json:"start"`
+	JSON  projectCommandsJSON `json:"-"`
+}
+
+// projectCommandsJSON contains the JSON metadata for the struct [ProjectCommands]
+type projectCommandsJSON struct {
+	Start       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectCommands) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectCommandsJSON) RawJSON() string {
+	return r.raw
 }
 
 // List known local absolute directories for a project.

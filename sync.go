@@ -177,10 +177,7 @@ type SyncReplayParams struct {
 }
 
 func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.Directory.Present || len(r.Body.Events.Value) > 0 {
-		return apijson.MarshalRoot(r.Body)
-	}
-	return nil, nil
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [SyncReplayParams]'s query parameters as `url.Values`.
@@ -219,10 +216,7 @@ type SyncStealParams struct {
 }
 
 func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.SessionID.Present {
-		return apijson.MarshalRoot(r.Body)
-	}
-	return nil, nil
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [SyncStealParams]'s query parameters as `url.Values`.
