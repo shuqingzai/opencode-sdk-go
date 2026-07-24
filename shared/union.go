@@ -4,7 +4,8 @@ package shared
 
 type UnionString string
 
-func (UnionString) ImplementsPermissionPatternUnion() {}
+func (UnionString) ImplementsPermissionPatternUnion()      {}
+func (UnionString) ImplementsConfigV2ReferenceUnionParam() {}
 
 type UnionBool bool
 
