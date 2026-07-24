@@ -106,8 +106,8 @@ type V2SessionPermissionNewParams struct {
 	Action    param.Field[string]   `json:"action,required"`
 	Resources param.Field[[]string] `json:"resources,required"`
 	Save      param.Field[[]string] `json:"save"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata param.Field[interface{}]             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata param.Field[any]                     `json:"metadata"`
 	Source   param.Field[PermissionV2SourceParam] `json:"source"`
 	Agent    param.Field[string]                  `json:"agent"`
 }

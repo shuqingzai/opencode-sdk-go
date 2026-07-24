@@ -143,7 +143,7 @@ type ProviderInfo struct {
 	Source  ProviderInfoSource       `json:"source,required"`
 	Env     []string                 `json:"env,required"`
 	Key     string                   `json:"key"`
-	Options map[string]interface{}   `json:"options,required"`
+	Options map[string]any           `json:"options,required"`
 	Models  map[string]ProviderModel `json:"models,required"`
 	JSON    providerInfoJSON         `json:"-"`
 }
@@ -198,10 +198,10 @@ type ProviderModel struct {
 	Cost         ProviderModelCost         `json:"cost,required"`
 	Limit        ProviderModelLimit        `json:"limit,required"`
 	Status       ProviderModelStatus       `json:"status,required"`
-	Options      map[string]interface{}    `json:"options,required"`
+	Options      map[string]any            `json:"options,required"`
 	Headers      map[string]string         `json:"headers,required"`
 	ReleaseDate  string                    `json:"release_date,required"`
-	Variants     map[string]interface{}    `json:"variants"`
+	Variants     map[string]any            `json:"variants"`
 	JSON         providerModelJSON         `json:"-"`
 }
 
@@ -285,7 +285,7 @@ type ProviderModelCapabilities struct {
 	Output      ProviderModelCapabilitiesModalities `json:"output,required"`
 	// This field can have the runtime type of [shared.UnionBool],
 	// [ProviderModelCapabilitiesInterleavedField].
-	Interleaved interface{}                   `json:"interleaved,required"`
+	Interleaved any                           `json:"interleaved,required"`
 	JSON        providerModelCapabilitiesJSON `json:"-"`
 }
 
@@ -394,19 +394,19 @@ type ProviderModelCapabilitiesInterleavedUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ProviderModelCapabilitiesInterleavedUnion)(nil)).Elem(),
+		reflect.TypeFor[ProviderModelCapabilitiesInterleavedUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.True,
-			Type:       reflect.TypeOf(shared.UnionBool(false)),
+			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.False,
-			Type:       reflect.TypeOf(shared.UnionBool(false)),
+			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ProviderModelCapabilitiesInterleavedField{}),
+			Type:       reflect.TypeFor[ProviderModelCapabilitiesInterleavedField](),
 		},
 	)
 }
@@ -588,7 +588,7 @@ type ProviderAuthMethod struct {
 	Label string                 `json:"label,required"`
 	// This field can have the runtime type of [[]ProviderAuthMethodPromptText],
 	// [[]ProviderAuthMethodPromptSelect].
-	Prompts interface{}            `json:"prompts"`
+	Prompts any                    `json:"prompts"`
 	JSON    providerAuthMethodJSON `json:"-"`
 }
 
@@ -633,17 +633,17 @@ type ProviderAuthMethodPrompt interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ProviderAuthMethodPrompt)(nil)).Elem(),
+		reflect.TypeFor[ProviderAuthMethodPrompt](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "text",
-			Type:               reflect.TypeOf(ProviderAuthMethodPromptText{}),
+			Type:               reflect.TypeFor[ProviderAuthMethodPromptText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "select",
-			Type:               reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
+			Type:               reflect.TypeFor[ProviderAuthMethodPromptSelect](),
 		},
 	)
 }

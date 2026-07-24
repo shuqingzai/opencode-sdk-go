@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func MarshalWithSettings(value interface{}, settings QuerySettings) url.Values {
+func MarshalWithSettings(value any, settings QuerySettings) url.Values {
 	e := encoder{time.RFC3339, true, settings}
 	kv := url.Values{}
 	val := reflect.ValueOf(value)
@@ -20,7 +20,7 @@ func MarshalWithSettings(value interface{}, settings QuerySettings) url.Values {
 	return kv
 }
 
-func Marshal(value interface{}) url.Values {
+func Marshal(value any) url.Values {
 	return MarshalWithSettings(value, QuerySettings{})
 }
 

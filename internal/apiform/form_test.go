@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-func P[T any](v T) *T { return &v }
+//go:fix inline
+func P[T any](v T) *T { return new(v) }
 
 type Primitives struct {
 	A bool    `form:"a"`
@@ -38,8 +39,8 @@ type DateTime struct {
 }
 
 type AdditionalProperties struct {
-	A      bool                   `form:"a"`
-	Extras map[string]interface{} `form:"-,extras"`
+	A      bool           `form:"a"`
+	Extras map[string]any `form:"-,extras"`
 }
 
 type TypedAdditionalProperties struct {
@@ -49,8 +50,8 @@ type TypedAdditionalProperties struct {
 
 type EmbeddedStructs struct {
 	AdditionalProperties
-	A      *int                   `form:"number2"`
-	Extras map[string]interface{} `form:"-,extras"`
+	A      *int           `form:"number2"`
+	Extras map[string]any `form:"-,extras"`
 }
 
 type Recursive struct {
@@ -59,7 +60,7 @@ type Recursive struct {
 }
 
 type UnknownStruct struct {
-	Unknown interface{} `form:"unknown"`
+	Unknown any `form:"unknown"`
 }
 
 type UnionStruct struct {
@@ -98,7 +99,7 @@ type ReaderStruct struct {
 
 var tests = map[string]struct {
 	buf string
-	val interface{}
+	val any
 }{
 	"map_string": {
 		`--xxx
@@ -125,7 +126,7 @@ Content-Disposition: form-data; name="c"
 false
 --xxx--
 `,
-		map[string]interface{}{"a": float64(1), "b": "str", "c": false},
+		map[string]any{"a": float64(1), "b": "str", "c": false},
 	},
 
 	"primitive_struct": {
@@ -258,11 +259,11 @@ Content-Disposition: form-data; name="f.4"
 --xxx--
 `,
 		PrimitivePointers{
-			A: P(false),
-			B: P(237628372683),
-			C: P(uint(654)),
-			D: P(9999.43),
-			E: P(float32(43.76)),
+			A: new(false),
+			B: new(237628372683),
+			C: new(uint(654)),
+			D: new(9999.43),
+			E: new(float32(43.76)),
 			F: &[]int{1, 2, 3, 4, 5},
 		},
 	},
@@ -301,7 +302,7 @@ true
 `,
 		AdditionalProperties{
 			A: true,
-			Extras: map[string]interface{}{
+			Extras: map[string]any{
 				"bar": "value",
 				"foo": true,
 			},
@@ -342,7 +343,7 @@ bar
 --xxx--
 `,
 		UnknownStruct{
-			Unknown: map[string]interface{}{
+			Unknown: map[string]any{
 				"foo": "bar",
 			},
 		},

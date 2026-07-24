@@ -250,15 +250,15 @@ func (r ReferenceGitSource) implementsReferenceSourceUnion() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ReferenceSourceUnion)(nil)).Elem(),
+		reflect.TypeFor[ReferenceSourceUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ReferenceLocalSource{}),
+			Type:       reflect.TypeFor[ReferenceLocalSource](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ReferenceGitSource{}),
+			Type:       reflect.TypeFor[ReferenceGitSource](),
 		},
 	)
 }

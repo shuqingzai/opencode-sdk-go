@@ -23,7 +23,7 @@ type FieldStruct struct {
 
 func TestFieldMarshal(t *testing.T) {
 	tests := map[string]struct {
-		value    interface{}
+		value    any
 		expected string
 	}{
 		"null_string": {param.Field[string]{Present: true, Null: true}, "null"},

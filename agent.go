@@ -13,21 +13,21 @@ import (
 // Agent represents an agent definition.
 
 type Agent struct {
-	Mode        AgentMode              `json:"mode,required"`
-	Name        string                 `json:"name,required"`
-	Options     map[string]interface{} `json:"options,required"`
-	Permission  PermissionRuleset      `json:"permission,required"`
-	Description string                 `json:"description"`
-	Model       AgentModel             `json:"model"`
-	Prompt      string                 `json:"prompt"`
-	Temperature float64                `json:"temperature"`
-	TopP        float64                `json:"topP"`
-	Native      bool                   `json:"native"`
-	Hidden      bool                   `json:"hidden"`
-	Color       string                 `json:"color"`
-	Variant     string                 `json:"variant"`
-	Steps       int64                  `json:"steps"`
-	JSON        agentJSON              `json:"-"`
+	Mode        AgentMode         `json:"mode,required"`
+	Name        string            `json:"name,required"`
+	Options     map[string]any    `json:"options,required"`
+	Permission  PermissionRuleset `json:"permission,required"`
+	Description string            `json:"description"`
+	Model       AgentModel        `json:"model"`
+	Prompt      string            `json:"prompt"`
+	Temperature float64           `json:"temperature"`
+	TopP        float64           `json:"topP"`
+	Native      bool              `json:"native"`
+	Hidden      bool              `json:"hidden"`
+	Color       string            `json:"color"`
+	Variant     string            `json:"variant"`
+	Steps       int64             `json:"steps"`
+	JSON        agentJSON         `json:"-"`
 }
 
 // agentJSON contains the JSON metadata for the struct [Agent]

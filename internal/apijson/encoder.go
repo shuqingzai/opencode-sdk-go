@@ -22,12 +22,12 @@ var encoders sync.Map // map[encoderEntry]encoderFunc
 // special characters that sjson interprets as a path.
 var EscapeSJSONKey = strings.NewReplacer("\\", "\\\\", "|", "\\|", "#", "\\#", "@", "\\@", "*", "\\*", ".", "\\.", ":", "\\:", "?", "\\?").Replace
 
-func Marshal(value interface{}) ([]byte, error) {
+func Marshal(value any) ([]byte, error) {
 	e := &encoder{dateFormat: time.RFC3339}
 	return e.marshal(value)
 }
 
-func MarshalRoot(value interface{}) ([]byte, error) {
+func MarshalRoot(value any) ([]byte, error) {
 	e := &encoder{root: true, dateFormat: time.RFC3339}
 	return e.marshal(value)
 }
@@ -51,7 +51,7 @@ type encoderEntry struct {
 	root       bool
 }
 
-func (e *encoder) marshal(value interface{}) ([]byte, error) {
+func (e *encoder) marshal(value any) ([]byte, error) {
 	val := reflect.ValueOf(value)
 	if !val.IsValid() {
 		return nil, nil
@@ -105,13 +105,13 @@ func indirectMarshalerEncoder(v reflect.Value) ([]byte, error) {
 }
 
 func (e *encoder) newTypeEncoder(t reflect.Type) encoderFunc {
-	if t.ConvertibleTo(reflect.TypeOf(time.Time{})) {
+	if t.ConvertibleTo(reflect.TypeFor[time.Time]()) {
 		return e.newTimeTypeEncoder()
 	}
-	if !e.root && t.Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()) {
+	if !e.root && t.Implements(reflect.TypeFor[json.Marshaler]()) {
 		return marshalerEncoder
 	}
-	if !e.root && reflect.PointerTo(t).Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()) {
+	if !e.root && reflect.PointerTo(t).Implements(reflect.TypeFor[json.Marshaler]()) {
 		return indirectMarshalerEncoder
 	}
 	e.root = false
@@ -206,7 +206,7 @@ func (e *encoder) newArrayTypeEncoder(t reflect.Type) encoderFunc {
 }
 
 func (e *encoder) newStructTypeEncoder(t reflect.Type) encoderFunc {
-	if t.Implements(reflect.TypeOf((*param.FieldLike)(nil)).Elem()) {
+	if t.Implements(reflect.TypeFor[param.FieldLike]()) {
 		return e.newFieldTypeEncoder(t)
 	}
 
@@ -320,7 +320,7 @@ func (e *encoder) newFieldTypeEncoder(t reflect.Type) encoderFunc {
 func (e *encoder) newTimeTypeEncoder() encoderFunc {
 	format := e.dateFormat
 	return func(value reflect.Value) (json []byte, err error) {
-		return []byte(`"` + value.Convert(reflect.TypeOf(time.Time{})).Interface().(time.Time).Format(format) + `"`), nil
+		return []byte(`"` + value.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time).Format(format) + `"`), nil
 	}
 }
 

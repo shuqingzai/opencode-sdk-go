@@ -82,10 +82,10 @@ func marshalerEncoder(key string, value reflect.Value) []Pair {
 }
 
 func (e *encoder) newTypeEncoder(t reflect.Type) encoderFunc {
-	if t.ConvertibleTo(reflect.TypeOf(time.Time{})) {
+	if t.ConvertibleTo(reflect.TypeFor[time.Time]()) {
 		return e.newTimeTypeEncoder(t)
 	}
-	if !e.root && t.Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()) {
+	if !e.root && t.Implements(reflect.TypeFor[json.Marshaler]()) {
 		return marshalerEncoder
 	}
 	e.root = false
@@ -115,7 +115,7 @@ func (e *encoder) newTypeEncoder(t reflect.Type) encoderFunc {
 }
 
 func (e *encoder) newStructTypeEncoder(t reflect.Type) encoderFunc {
-	if t.Implements(reflect.TypeOf((*param.FieldLike)(nil)).Elem()) {
+	if t.Implements(reflect.TypeFor[param.FieldLike]()) {
 		return e.newFieldTypeEncoder(t)
 	}
 
@@ -324,7 +324,7 @@ func (e *encoder) newTimeTypeEncoder(t reflect.Type) encoderFunc {
 	return func(key string, value reflect.Value) []Pair {
 		return []Pair{{
 			key,
-			value.Convert(reflect.TypeOf(time.Time{})).Interface().(time.Time).Format(format),
+			value.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time).Format(format),
 		}}
 	}
 }

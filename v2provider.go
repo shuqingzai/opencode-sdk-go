@@ -11,12 +11,13 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
-	"github.com/tidwall/gjson"
 )
 
 // V2ProviderService contains methods and other services that help with interacting
@@ -112,7 +113,7 @@ type V2ProviderInfo struct {
 	Name          string `json:"name,required"`
 	Disabled      bool   `json:"disabled"`
 	// This field can have the runtime type of [V2ProviderInfoAPIAisdk], [V2ProviderInfoAPINative].
-	API      interface{}        `json:"api,required"`
+	API      any                `json:"api,required"`
 	Request  ProviderRequest    `json:"request,required"`
 	JSON     v2ProviderInfoJSON `json:"-"`
 	apiUnion V2ProviderInfoAPIUnion
@@ -166,8 +167,8 @@ type V2ProviderInfoAPIAisdk struct {
 	Type    V2ProviderInfoAPIAisdkType `json:"type,required"`
 	Package string                     `json:"package,required"`
 	URL     string                     `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}                `json:"settings"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                        `json:"settings"`
 	JSON     v2ProviderInfoAPIAisdkJSON `json:"-"`
 }
 
@@ -193,8 +194,8 @@ func (r V2ProviderInfoAPIAisdk) implementsV2ProviderInfoAPIUnion() {}
 type V2ProviderInfoAPINative struct {
 	Type V2ProviderInfoAPINativeType `json:"type,required"`
 	URL  string                      `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}                 `json:"settings,required"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                         `json:"settings,required"`
 	JSON     v2ProviderInfoAPINativeJSON `json:"-"`
 }
 
@@ -246,15 +247,15 @@ func (r V2ProviderInfoAPINativeType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ProviderInfoAPIUnion)(nil)).Elem(),
+		reflect.TypeFor[V2ProviderInfoAPIUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoAPIAisdk{}),
+			Type:       reflect.TypeFor[V2ProviderInfoAPIAisdk](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoAPINative{}),
+			Type:       reflect.TypeFor[V2ProviderInfoAPINative](),
 		},
 	)
 }

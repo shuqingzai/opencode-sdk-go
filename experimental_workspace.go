@@ -124,15 +124,15 @@ type Workspace struct {
 	Type string `json:"type,required"`
 	Name string `json:"name,required"`
 	// This field can have the runtime type of [string].
-	Branch interface{} `json:"branch"`
+	Branch any `json:"branch"`
 	// This field can have the runtime type of [string].
-	Directory interface{} `json:"directory"`
-	Extra     any         `json:"extra"`
-	ProjectID string      `json:"projectID,required"`
+	Directory any    `json:"directory"`
+	Extra     any    `json:"extra"`
+	ProjectID string `json:"projectID,required"`
 	// The amount of time in milliseconds that this workspace has been used.
 	// This field can have the runtime type of [float64], [string] (one of "NaN",
 	// "Infinity", "-Infinity").
-	TimeUsed interface{}   `json:"timeUsed,required"`
+	TimeUsed any           `json:"timeUsed,required"`
 	JSON     workspaceJSON `json:"-"`
 }
 
@@ -308,9 +308,9 @@ type ExperimentalWarpParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 	// ID is the workspace ID to warp into, or null to detach the session from its workspace.
 	// This field can have the value of a workspace ID string or nil.
-	ID          param.Field[interface{}] `json:"id,required"`
-	SessionID   param.Field[string]      `json:"sessionID,required"`
-	CopyChanges param.Field[bool]        `json:"copyChanges"`
+	ID          param.Field[any]    `json:"id,required"`
+	SessionID   param.Field[string] `json:"sessionID,required"`
+	CopyChanges param.Field[bool]   `json:"copyChanges"`
 }
 
 func (r ExperimentalWarpParams) MarshalJSON() (data []byte, err error) {

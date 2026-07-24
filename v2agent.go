@@ -79,7 +79,7 @@ type V2AgentInfo struct {
 	// preset name ("primary"|"secondary"|"accent"|"success"|"warning"|"error"|
 	// "info").
 	// This field can have the runtime type of [string], [AgentColor].
-	Color       interface{}        `json:"color"`
+	Color       any                `json:"color"`
 	Steps       int64              `json:"steps"`
 	Permissions []PermissionV2Rule `json:"permissions,required"`
 	JSON        v2AgentInfoJSON    `json:"-"`
@@ -183,11 +183,11 @@ type AgentColorUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*AgentColorUnion)(nil)).Elem(),
+		reflect.TypeFor[AgentColorUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(AgentColor("")),
+			Type:       reflect.TypeFor[AgentColor](),
 		},
 	)
 }
@@ -217,9 +217,9 @@ func (r modelRefJSON) RawJSON() string {
 }
 
 type ProviderRequest struct {
-	Headers map[string]string      `json:"headers,required"`
-	Body    map[string]interface{} `json:"body,required"`
-	JSON    providerRequestJSON    `json:"-"`
+	Headers map[string]string   `json:"headers,required"`
+	Body    map[string]any      `json:"body,required"`
+	JSON    providerRequestJSON `json:"-"`
 }
 
 type providerRequestJSON struct {

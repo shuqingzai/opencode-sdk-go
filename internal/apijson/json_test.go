@@ -9,7 +9,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func P[T any](v T) *T { return &v }
+//go:fix inline
+func P[T any](v T) *T { return new(v) }
 
 type Primitives struct {
 	A bool    `json:"a"`
@@ -39,8 +40,8 @@ type DateTime struct {
 }
 
 type AdditionalProperties struct {
-	A           bool                   `json:"a"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
+	A           bool           `json:"a"`
+	ExtraFields map[string]any `json:"-,extras"`
 }
 
 type TypedAdditionalProperties struct {
@@ -64,8 +65,8 @@ type EmbeddedStructJSON struct {
 
 type EmbeddedStructs struct {
 	EmbeddedStruct
-	A           *int                   `json:"a"`
-	ExtraFields map[string]interface{} `json:"-,extras"`
+	A           *int           `json:"a"`
+	ExtraFields map[string]any `json:"-,extras"`
 
 	JSON EmbeddedStructsJSON
 }
@@ -100,7 +101,7 @@ type JSONFieldStructJSON struct {
 }
 
 type UnknownStruct struct {
-	Unknown interface{} `json:"unknown"`
+	Unknown any `json:"unknown"`
 }
 
 type UnionStruct struct {
@@ -150,24 +151,24 @@ type UnionTime time.Time
 func (UnionTime) union() {}
 
 func init() {
-	RegisterUnion(reflect.TypeOf((*Union)(nil)).Elem(), "type",
+	RegisterUnion(reflect.TypeFor[Union](), "type",
 		UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(UnionTime{}),
+			Type:       reflect.TypeFor[UnionTime](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.Number,
-			Type:       reflect.TypeOf(UnionInteger(0)),
+			Type:       reflect.TypeFor[UnionInteger](),
 		},
 		UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "typeA",
-			Type:               reflect.TypeOf(UnionStructA{}),
+			Type:               reflect.TypeFor[UnionStructA](),
 		},
 		UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "typeB",
-			Type:               reflect.TypeOf(UnionStructB{}),
+			Type:               reflect.TypeFor[UnionStructB](),
 		},
 	)
 }
@@ -237,26 +238,26 @@ func (r *UnmarshalStruct) UnmarshalJSON(json []byte) error {
 func (ComplexUnionTypeB) complexUnion() {}
 
 func init() {
-	RegisterUnion(reflect.TypeOf((*ComplexUnion)(nil)).Elem(), "",
+	RegisterUnion(reflect.TypeFor[ComplexUnion](), "",
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ComplexUnionA{}),
+			Type:       reflect.TypeFor[ComplexUnionA](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ComplexUnionB{}),
+			Type:       reflect.TypeFor[ComplexUnionB](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ComplexUnionC{}),
+			Type:       reflect.TypeFor[ComplexUnionC](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ComplexUnionTypeA{}),
+			Type:       reflect.TypeFor[ComplexUnionTypeA](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ComplexUnionTypeB{}),
+			Type:       reflect.TypeFor[ComplexUnionTypeB](),
 		},
 	)
 }
@@ -301,22 +302,22 @@ func (r *MarshallingUnionB) UnmarshalJSON(data []byte) (err error) {
 
 func init() {
 	RegisterUnion(
-		reflect.TypeOf((*MarshallingUnion)(nil)).Elem(),
+		reflect.TypeFor[MarshallingUnion](),
 		"",
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MarshallingUnionA{}),
+			Type:       reflect.TypeFor[MarshallingUnionA](),
 		},
 		UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(MarshallingUnionB{}),
+			Type:       reflect.TypeFor[MarshallingUnionB](),
 		},
 	)
 }
 
 var tests = map[string]struct {
 	buf string
-	val interface{}
+	val any
 }{
 	"true":               {"true", true},
 	"false":              {"false", false},
@@ -337,19 +338,19 @@ var tests = map[string]struct {
 	"array_int":          {`[1,2]`, []int{1, 2}},
 	"array_int_coerce":   {`["1",2]`, []int{1, 2}},
 
-	"ptr_true":               {"true", P(true)},
-	"ptr_false":              {"false", P(false)},
-	"ptr_int":                {"1", P(1)},
-	"ptr_int_bigger":         {"12324", P(12324)},
-	"ptr_int_string_coerce":  {`"65"`, P(65)},
-	"ptr_int_boolean_coerce": {"true", P(1)},
-	"ptr_int64":              {"1", P(int64(1))},
-	"ptr_int64_huge":         {"123456789123456789", P(int64(123456789123456789))},
-	"ptr_uint":               {"1", P(uint(1))},
-	"ptr_uint_bigger":        {"12324", P(uint(12324))},
-	"ptr_uint_coerce":        {`"65"`, P(uint(65))},
-	"ptr_float_1.54":         {"1.54", P(float32(1.54))},
-	"ptr_float_1.89":         {"1.89", P(float64(1.89))},
+	"ptr_true":               {"true", new(true)},
+	"ptr_false":              {"false", new(false)},
+	"ptr_int":                {"1", new(1)},
+	"ptr_int_bigger":         {"12324", new(12324)},
+	"ptr_int_string_coerce":  {`"65"`, new(65)},
+	"ptr_int_boolean_coerce": {"true", new(1)},
+	"ptr_int64":              {"1", new(int64(1))},
+	"ptr_int64_huge":         {"123456789123456789", new(int64(123456789123456789))},
+	"ptr_uint":               {"1", new(uint(1))},
+	"ptr_uint_bigger":        {"12324", new(uint(12324))},
+	"ptr_uint_coerce":        {`"65"`, new(uint(65))},
+	"ptr_float_1.54":         {"1.54", new(float32(1.54))},
+	"ptr_float_1.89":         {"1.89", new(float64(1.89))},
 
 	"date_time":             {`"2007-03-01T13:00:00Z"`, time.Date(2007, time.March, 1, 13, 0, 0, 0, time.UTC)},
 	"date_time_nano_coerce": {`"2007-03-01T13:03:05.123456789Z"`, time.Date(2007, time.March, 1, 13, 3, 5, 123456789, time.UTC)},
@@ -363,7 +364,7 @@ var tests = map[string]struct {
 
 	"map_string":                       {`{"foo":"bar"}`, map[string]string{"foo": "bar"}},
 	"map_string_with_sjson_path_chars": {`{":a.b.c*:d*-1e.f@g?h":"bar"}`, map[string]string{":a.b.c*:d*-1e.f@g?h": "bar"}},
-	"map_interface":                    {`{"a":1,"b":"str","c":false}`, map[string]interface{}{"a": float64(1), "b": "str", "c": false}},
+	"map_interface":                    {`{"a":1,"b":"str","c":false}`, map[string]any{"a": float64(1), "b": "str", "c": false}},
 
 	"primitive_struct": {
 		`{"a":false,"b":237628372683,"c":654,"d":9999.43,"e":43.76,"f":[1,2,3,4]}`,
@@ -380,11 +381,11 @@ var tests = map[string]struct {
 	"primitive_pointer_struct": {
 		`{"a":false,"b":237628372683,"c":654,"d":9999.43,"e":43.76,"f":[1,2,3,4,5]}`,
 		PrimitivePointers{
-			A: P(false),
-			B: P(237628372683),
-			C: P(uint(654)),
-			D: P(9999.43),
-			E: P(float32(43.76)),
+			A: new(false),
+			B: new(237628372683),
+			C: new(uint(654)),
+			D: new(9999.43),
+			E: new(float32(43.76)),
 			F: &[]int{1, 2, 3, 4, 5},
 		},
 	},
@@ -401,7 +402,7 @@ var tests = map[string]struct {
 		`{"a":true,"bar":"value","foo":true}`,
 		AdditionalProperties{
 			A: true,
-			ExtraFields: map[string]interface{}{
+			ExtraFields: map[string]any{
 				"bar": "value",
 				"foo": true,
 			},
@@ -420,8 +421,8 @@ var tests = map[string]struct {
 					raw: `{"a":1,"b":"bar"}`,
 				},
 			},
-			A:           P(1),
-			ExtraFields: map[string]interface{}{"b": "bar"},
+			A:           new(1),
+			ExtraFields: map[string]any{"b": "bar"},
 			JSON: EmbeddedStructsJSON{
 				A: Field{raw: `1`, status: valid},
 				ExtraFields: map[string]Field{
@@ -477,7 +478,7 @@ var tests = map[string]struct {
 	"unknown_struct_map": {
 		`{"unknown":{"foo":"bar"}}`,
 		UnknownStruct{
-			Unknown: map[string]interface{}{
+			Unknown: map[string]any{
 				"foo": "bar",
 			},
 		},

@@ -136,13 +136,13 @@ func unmarshalerDecoder(n gjson.Result, v reflect.Value, state *decoderState) er
 }
 
 func (d *decoderBuilder) newTypeDecoder(t reflect.Type) decoderFunc {
-	if t.ConvertibleTo(reflect.TypeOf(time.Time{})) {
+	if t.ConvertibleTo(reflect.TypeFor[time.Time]()) {
 		return d.newTimeTypeDecoder(t)
 	}
-	if !d.root && t.Implements(reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()) {
+	if !d.root && t.Implements(reflect.TypeFor[json.Unmarshaler]()) {
 		return unmarshalerDecoder
 	}
-	if !d.root && reflect.PointerTo(t).Implements(reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()) {
+	if !d.root && reflect.PointerTo(t).Implements(reflect.TypeFor[json.Unmarshaler]()) {
 		if _, ok := unionVariants[t]; !ok {
 			return indirectUnmarshalerDecoder
 		}
@@ -640,7 +640,7 @@ func (d *decoderBuilder) newTimeTypeDecoder(t reflect.Type) decoderFunc {
 	}
 }
 
-func setUnexportedField(field reflect.Value, value interface{}) {
+func setUnexportedField(field reflect.Value, value any) {
 	reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Set(reflect.ValueOf(value))
 }
 

@@ -30,7 +30,7 @@ func TestAppLogWithOptionalParams(t *testing.T) {
 		Message:   opencode.F("message"),
 		Service:   opencode.F("service"),
 		Directory: opencode.F("directory"),
-		Extra: opencode.F(map[string]interface{}{
+		Extra: opencode.F(map[string]any{
 			"foo": "bar",
 		}),
 	})

@@ -215,27 +215,27 @@ type McpStatusUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*McpStatusUnion)(nil)).Elem(),
+		reflect.TypeFor[McpStatusUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusConnected{}),
+			Type:       reflect.TypeFor[McpStatusConnected](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusDisabled{}),
+			Type:       reflect.TypeFor[McpStatusDisabled](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusFailed{}),
+			Type:       reflect.TypeFor[McpStatusFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusNeedsAuth{}),
+			Type:       reflect.TypeFor[McpStatusNeedsAuth](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusNeedsClientRegistration{}),
+			Type:       reflect.TypeFor[McpStatusNeedsClientRegistration](),
 		},
 	)
 }
@@ -419,15 +419,15 @@ type McpAddParamsConfigUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*McpAddParamsConfigUnion)(nil)).Elem(),
+		reflect.TypeFor[McpAddParamsConfigUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddParamsConfigLocal{}),
+			Type:       reflect.TypeFor[McpAddParamsConfigLocal](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddParamsConfigRemote{}),
+			Type:       reflect.TypeFor[McpAddParamsConfigRemote](),
 		},
 	)
 }
@@ -511,15 +511,15 @@ type McpAddParamsConfigRemoteOAuthUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*McpAddParamsConfigRemoteOAuthUnion)(nil)).Elem(),
+		reflect.TypeFor[McpAddParamsConfigRemoteOAuthUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpAddParamsConfigRemoteOAuth{}),
+			Type:       reflect.TypeFor[McpAddParamsConfigRemoteOAuth](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.False,
-			Type:       reflect.TypeOf(shared.UnionBool(false)),
+			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 	)
 }

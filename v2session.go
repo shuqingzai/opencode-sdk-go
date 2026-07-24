@@ -12,13 +12,14 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/sst/opencode-sdk-go/packages/ssestream"
-	"github.com/tidwall/gjson"
 )
 
 // V2SessionService contains methods and other services that help with interacting
@@ -543,8 +544,8 @@ type V2SessionMessageAgentSwitched struct {
 	Time  V2SessionMessageTime `json:"time,required"`
 	Type  string               `json:"type,required"`
 	Agent string               `json:"agent,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                       `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                               `json:"metadata"`
 	JSON     v2SessionMessageAgentSwitchedJSON `json:"-"`
 }
 
@@ -571,8 +572,8 @@ type V2SessionMessageModelSwitched struct {
 	Time  V2SessionMessageTime  `json:"time,required"`
 	Type  string                `json:"type,required"`
 	Model V2SessionMessageModel `json:"model,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                       `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                               `json:"metadata"`
 	JSON     v2SessionMessageModelSwitchedJSON `json:"-"`
 }
 
@@ -601,8 +602,8 @@ type V2SessionMessageUser struct {
 	Type   string                    `json:"type,required"`
 	Files  []V2PromptFileAttachment  `json:"files"`
 	Agents []V2PromptAgentAttachment `json:"agents"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}              `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                      `json:"metadata"`
 	JSON     v2SessionMessageUserJSON `json:"-"`
 }
 
@@ -632,8 +633,8 @@ type V2SessionMessageSynthetic struct {
 	SessionID string               `json:"sessionID,required"`
 	Text      string               `json:"text,required"`
 	Type      string               `json:"type,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                   `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                           `json:"metadata"`
 	JSON     v2SessionMessageSyntheticJSON `json:"-"`
 }
 
@@ -663,8 +664,8 @@ type V2SessionMessageShell struct {
 	CallID  string                    `json:"callID,required"`
 	Command string                    `json:"command,required"`
 	Output  string                    `json:"output,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}               `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                       `json:"metadata"`
 	JSON     v2SessionMessageShellJSON `json:"-"`
 }
 
@@ -704,8 +705,8 @@ type V2SessionMessageAssistant struct {
 	Cost     float64                            `json:"cost"`
 	Tokens   V2SessionMessageTokens             `json:"tokens"`
 	Error    SessionErrorUnknown                `json:"error"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                   `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                           `json:"metadata"`
 	JSON     v2SessionMessageAssistantJSON `json:"-"`
 }
 
@@ -741,8 +742,8 @@ type V2SessionMessageCompaction struct {
 	Reason  V2SessionMessageCompactionReason `json:"reason,required"`
 	Summary string                           `json:"summary,required"`
 	Recent  string                           `json:"recent,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                    `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                            `json:"metadata"`
 	JSON     v2SessionMessageCompactionJSON `json:"-"`
 }
 
@@ -1027,10 +1028,10 @@ func (r v2SessionMessageAssistantSnapshotJSON) RawJSON() string {
 
 type V2SessionMessageToolProvider struct {
 	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
-	// This field can have the runtime type of [map[string]interface{}].
-	ResultMetadata interface{}                      `json:"resultMetadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	ResultMetadata any                              `json:"resultMetadata"`
 	JSON           v2SessionMessageToolProviderJSON `json:"-"`
 }
 
@@ -1260,10 +1261,10 @@ type V2SessionMessageAssistantReasoningContent struct {
 	Type string `json:"type,required"`
 	ID   string `json:"id,required"`
 	Text string `json:"text,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	ProviderMetadata interface{} `json:"providerMetadata"`
+	// This field can have the runtime type of [map[string]any].
+	ProviderMetadata any `json:"providerMetadata"`
 	// This field can have the runtime type of [V2SessionMessageAssistantReasoningContentTime].
-	Time interface{}                                   `json:"time"`
+	Time any                                           `json:"time"`
 	JSON v2SessionMessageAssistantReasoningContentJSON `json:"-"`
 }
 
@@ -1474,10 +1475,10 @@ func (r V2SessionMessageToolStatePending) implementsV2SessionMessageToolStateUni
 
 type V2SessionMessageToolStateRunning struct {
 	Status     V2SessionMessageToolStateRunningStatus `json:"status,required"`
-	Input      map[string]interface{}                 `json:"input,required"`
-	Structured map[string]interface{}                 `json:"structured,required"`
+	Input      map[string]any                         `json:"input,required"`
+	Structured map[string]any                         `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content interface{}                          `json:"content,required"`
+	Content any                                  `json:"content,required"`
 	JSON    v2SessionMessageToolStateRunningJSON `json:"-"`
 }
 
@@ -1516,15 +1517,15 @@ func (r V2SessionMessageToolStateRunning) implementsV2SessionMessageToolStateUni
 
 type V2SessionMessageToolStateCompleted struct {
 	Status     V2SessionMessageToolStateCompletedStatus `json:"status,required"`
-	Input      map[string]interface{}                   `json:"input,required"`
-	Structured map[string]interface{}                   `json:"structured,required"`
+	Input      map[string]any                           `json:"input,required"`
+	Structured map[string]any                           `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     interface{}              `json:"content,required"`
+	Content     any                      `json:"content,required"`
 	Attachments []V2PromptFileAttachment `json:"attachments"`
 	// This field can have the runtime type of [[]string].
-	OutputPaths interface{} `json:"outputPaths"`
-	// This field can have the runtime type of [interface{}].
-	Result interface{}                            `json:"result"`
+	OutputPaths any `json:"outputPaths"`
+	// This field can have the runtime type of [any].
+	Result any                                    `json:"result"`
 	JSON   v2SessionMessageToolStateCompletedJSON `json:"-"`
 }
 
@@ -1566,13 +1567,13 @@ func (r V2SessionMessageToolStateCompleted) implementsV2SessionMessageToolStateU
 
 type V2SessionMessageToolStateError struct {
 	Status     V2SessionMessageToolStateErrorStatus `json:"status,required"`
-	Input      map[string]interface{}               `json:"input,required"`
-	Structured map[string]interface{}               `json:"structured,required"`
+	Input      map[string]any                       `json:"input,required"`
+	Structured map[string]any                       `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content interface{}         `json:"content,required"`
+	Content any                 `json:"content,required"`
 	Error   SessionErrorUnknown `json:"error,required"`
-	// This field can have the runtime type of [interface{}].
-	Result interface{}                        `json:"result"`
+	// This field can have the runtime type of [any].
+	Result any                                `json:"result"`
 	JSON   v2SessionMessageToolStateErrorJSON `json:"-"`
 }
 
@@ -1699,8 +1700,8 @@ type V2SessionDurableEventUnion interface {
 
 type V2SessionDurableEventAgentSwitched struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                            `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                    `json:"metadata"`
 	Type     string                                 `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
@@ -1731,8 +1732,8 @@ func (V2SessionDurableEventAgentSwitched) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventModelSwitched struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                            `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                    `json:"metadata"`
 	Type     string                                 `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
@@ -1763,8 +1764,8 @@ func (V2SessionDurableEventModelSwitched) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventMoved struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                    `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                            `json:"metadata"`
 	Type     string                         `json:"type,required"`
 	Durable  V2EventDurable                 `json:"durable"`
 	Location LocationRef                    `json:"location"`
@@ -1795,8 +1796,8 @@ func (V2SessionDurableEventMoved) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventPrompted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                       `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                               `json:"metadata"`
 	Type     string                            `json:"type,required"`
 	Durable  V2EventDurable                    `json:"durable"`
 	Location LocationRef                       `json:"location"`
@@ -1827,8 +1828,8 @@ func (V2SessionDurableEventPrompted) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventPromptAdmitted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                     `json:"metadata"`
 	Type     string                                  `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
@@ -1859,8 +1860,8 @@ func (V2SessionDurableEventPromptAdmitted) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventContextUpdated struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                     `json:"metadata"`
 	Type     string                                  `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
@@ -1891,8 +1892,8 @@ func (V2SessionDurableEventContextUpdated) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventSynthetic struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                        `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                `json:"metadata"`
 	Type     string                             `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
@@ -1923,8 +1924,8 @@ func (V2SessionDurableEventSynthetic) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventShellStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                           `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                   `json:"metadata"`
 	Type     string                                `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
@@ -1955,8 +1956,8 @@ func (V2SessionDurableEventShellStarted) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventShellEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                         `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                 `json:"metadata"`
 	Type     string                              `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
@@ -1987,8 +1988,8 @@ func (V2SessionDurableEventShellEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventStepStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                          `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                  `json:"metadata"`
 	Type     string                               `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
@@ -2019,8 +2020,8 @@ func (V2SessionDurableEventStepStarted) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventStepEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                        `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                `json:"metadata"`
 	Type     string                             `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
@@ -2051,8 +2052,8 @@ func (V2SessionDurableEventStepEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventStepFailed struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                         `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                 `json:"metadata"`
 	Type     string                              `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
@@ -2083,8 +2084,8 @@ func (V2SessionDurableEventStepFailed) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventTextStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                          `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                  `json:"metadata"`
 	Type     string                               `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
@@ -2115,8 +2116,8 @@ func (V2SessionDurableEventTextStarted) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventTextEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                        `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                `json:"metadata"`
 	Type     string                             `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
@@ -2147,8 +2148,8 @@ func (V2SessionDurableEventTextEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventToolInputStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                               `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                       `json:"metadata"`
 	Type     string                                    `json:"type,required"`
 	Durable  V2EventDurable                            `json:"durable"`
 	Location LocationRef                               `json:"location"`
@@ -2179,8 +2180,8 @@ func (V2SessionDurableEventToolInputStarted) implementsV2SessionDurableEvent() {
 
 type V2SessionDurableEventToolInputEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                     `json:"metadata"`
 	Type     string                                  `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
@@ -2211,8 +2212,8 @@ func (V2SessionDurableEventToolInputEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventToolCalled struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                         `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                 `json:"metadata"`
 	Type     string                              `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
@@ -2243,8 +2244,8 @@ func (V2SessionDurableEventToolCalled) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventToolProgress struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                           `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                   `json:"metadata"`
 	Type     string                                `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
@@ -2275,8 +2276,8 @@ func (V2SessionDurableEventToolProgress) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventToolSuccess struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                          `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                  `json:"metadata"`
 	Type     string                               `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
@@ -2307,8 +2308,8 @@ func (V2SessionDurableEventToolSuccess) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventToolFailed struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                         `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                 `json:"metadata"`
 	Type     string                              `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
@@ -2339,8 +2340,8 @@ func (V2SessionDurableEventToolFailed) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventReasoningStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                               `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                       `json:"metadata"`
 	Type     string                                    `json:"type,required"`
 	Durable  V2EventDurable                            `json:"durable"`
 	Location LocationRef                               `json:"location"`
@@ -2371,8 +2372,8 @@ func (V2SessionDurableEventReasoningStarted) implementsV2SessionDurableEvent() {
 
 type V2SessionDurableEventReasoningEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                     `json:"metadata"`
 	Type     string                                  `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
@@ -2403,8 +2404,8 @@ func (V2SessionDurableEventReasoningEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventRetried struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                      `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                              `json:"metadata"`
 	Type     string                           `json:"type,required"`
 	Durable  V2EventDurable                   `json:"durable"`
 	Location LocationRef                      `json:"location"`
@@ -2435,8 +2436,8 @@ func (V2SessionDurableEventRetried) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventCompactionStarted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                                `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                        `json:"metadata"`
 	Type     string                                     `json:"type,required"`
 	Durable  V2EventDurable                             `json:"durable"`
 	Location LocationRef                                `json:"location"`
@@ -2467,8 +2468,8 @@ func (V2SessionDurableEventCompactionStarted) implementsV2SessionDurableEvent() 
 
 type V2SessionDurableEventCompactionEnded struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                              `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                      `json:"metadata"`
 	Type     string                                   `json:"type,required"`
 	Durable  V2EventDurable                           `json:"durable"`
 	Location LocationRef                              `json:"location"`
@@ -2499,8 +2500,8 @@ func (V2SessionDurableEventCompactionEnded) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventRevertStaged struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                           `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                   `json:"metadata"`
 	Type     string                                `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
@@ -2531,8 +2532,8 @@ func (V2SessionDurableEventRevertStaged) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventRevertCleared struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                            `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                    `json:"metadata"`
 	Type     string                                 `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
@@ -2563,8 +2564,8 @@ func (V2SessionDurableEventRevertCleared) implementsV2SessionDurableEvent() {}
 
 type V2SessionDurableEventRevertCommitted struct {
 	ID string `json:"id,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                              `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                      `json:"metadata"`
 	Type     string                                   `json:"type,required"`
 	Durable  V2EventDurable                           `json:"durable"`
 	Location LocationRef                              `json:"location"`
@@ -2595,191 +2596,191 @@ func (V2SessionDurableEventRevertCommitted) implementsV2SessionDurableEvent() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2SessionMessageToolStateUnion)(nil)).Elem(),
+		reflect.TypeFor[V2SessionMessageToolStateUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageToolStatePending{}),
+			Type:       reflect.TypeFor[V2SessionMessageToolStatePending](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageToolStateRunning{}),
+			Type:       reflect.TypeFor[V2SessionMessageToolStateRunning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageToolStateCompleted{}),
+			Type:       reflect.TypeFor[V2SessionMessageToolStateCompleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageToolStateError{}),
+			Type:       reflect.TypeFor[V2SessionMessageToolStateError](),
 		},
 	)
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2SessionMessageAssistantContentUnion)(nil)).Elem(),
+		reflect.TypeFor[V2SessionMessageAssistantContentUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageAssistantTextContent{}),
+			Type:       reflect.TypeFor[V2SessionMessageAssistantTextContent](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageAssistantReasoningContent{}),
+			Type:       reflect.TypeFor[V2SessionMessageAssistantReasoningContent](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageAssistantToolContent{}),
+			Type:       reflect.TypeFor[V2SessionMessageAssistantToolContent](),
 		},
 	)
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2SessionMessageUnion)(nil)).Elem(),
+		reflect.TypeFor[V2SessionMessageUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageAgentSwitched{}),
+			Type:       reflect.TypeFor[V2SessionMessageAgentSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageModelSwitched{}),
+			Type:       reflect.TypeFor[V2SessionMessageModelSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageUser{}),
+			Type:       reflect.TypeFor[V2SessionMessageUser](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageSynthetic{}),
+			Type:       reflect.TypeFor[V2SessionMessageSynthetic](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageShell{}),
+			Type:       reflect.TypeFor[V2SessionMessageShell](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageAssistant{}),
+			Type:       reflect.TypeFor[V2SessionMessageAssistant](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageCompaction{}),
+			Type:       reflect.TypeFor[V2SessionMessageCompaction](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionMessageSystem{}),
+			Type:       reflect.TypeFor[V2SessionMessageSystem](),
 		},
 	)
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2SessionDurableEventUnion)(nil)).Elem(),
+		reflect.TypeFor[V2SessionDurableEventUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventAgentSwitched{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventAgentSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventModelSwitched{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventModelSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventMoved{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventMoved](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventPrompted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventPrompted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventPromptAdmitted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventPromptAdmitted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventContextUpdated{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventContextUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventSynthetic{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventSynthetic](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventShellStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventShellStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventShellEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventShellEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventStepStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventStepStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventStepEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventStepEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventStepFailed{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventStepFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventTextStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventTextStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventTextEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventTextEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolInputStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolInputStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolInputEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolInputEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolCalled{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolCalled](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolProgress{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolProgress](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolSuccess{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolSuccess](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventToolFailed{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventToolFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventReasoningStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventReasoningStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventReasoningEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventReasoningEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventRetried{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventRetried](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventCompactionStarted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventCompactionStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventCompactionEnded{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventCompactionEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventRevertStaged{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventRevertStaged](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventRevertCleared{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventRevertCleared](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2SessionDurableEventRevertCommitted{}),
+			Type:       reflect.TypeFor[V2SessionDurableEventRevertCommitted](),
 		},
 	)
 }
@@ -3240,8 +3241,8 @@ type V2SessionMessageSystem struct {
 	Time V2SessionMessageTime `json:"time,required"`
 	Type string               `json:"type,required"`
 	Text string               `json:"text,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                        `json:"metadata"`
 	JSON     v2SessionMessageSystemJSON `json:"-"`
 }
 

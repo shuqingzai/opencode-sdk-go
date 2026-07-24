@@ -402,7 +402,7 @@ func (r ContextOverflowErrorName) IsKnown() bool {
 }
 
 type MessageOutputLengthError struct {
-	Data interface{}                  `json:"data,required"`
+	Data any                          `json:"data,required"`
 	Name MessageOutputLengthErrorName `json:"name,required"`
 	JSON messageOutputLengthErrorJSON `json:"-"`
 }
@@ -1780,7 +1780,7 @@ func (r projectCopyErrorJSON) RawJSON() string {
 type ProjectCopyErrorData struct {
 	Message string `json:"message,required"`
 	// This field can have the runtime type of [bool].
-	ForceRequired interface{}              `json:"forceRequired"`
+	ForceRequired any                      `json:"forceRequired"`
 	JSON          projectCopyErrorDataJSON `json:"-"`
 }
 

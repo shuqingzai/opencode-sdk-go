@@ -345,7 +345,7 @@ func TestSessionPromptWithOptionalParams(t *testing.T) {
 				Text: opencode.F("text"),
 				Type: opencode.F(opencode.TextPartInputTypeText),
 				ID:   opencode.F("id"),
-				Metadata: opencode.F(map[string]interface{}{
+				Metadata: opencode.F(map[string]any{
 					"foo": "bar",
 				}),
 				Synthetic: opencode.F(true),

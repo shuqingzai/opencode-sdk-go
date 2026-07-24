@@ -74,7 +74,7 @@ type V2ModelInfo struct {
 	Family     string `json:"family"`
 	Name       string `json:"name,required"`
 	// This field can have the runtime type of [V2ModelInfoAPIAisdk], [V2ModelInfoAPINative].
-	API          interface{}             `json:"api,required"`
+	API          any                     `json:"api,required"`
 	Capabilities V2ModelInfoCapabilities `json:"capabilities,required"`
 	Request      V2ModelInfoRequest      `json:"request,required"`
 	Variants     []V2ModelInfoVariant    `json:"variants,required"`
@@ -145,8 +145,8 @@ type V2ModelInfoAPIAisdk struct {
 	Type    V2ModelInfoAPIAisdkType `json:"type,required"`
 	Package string                  `json:"package,required"`
 	URL     string                  `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}             `json:"settings"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                     `json:"settings"`
 	JSON     v2ModelInfoAPIAisdkJSON `json:"-"`
 }
 
@@ -174,8 +174,8 @@ type V2ModelInfoAPINative struct {
 	ID   string                   `json:"id,required"`
 	Type V2ModelInfoAPINativeType `json:"type,required"`
 	URL  string                   `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}              `json:"settings,required"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                      `json:"settings,required"`
 	JSON     v2ModelInfoAPINativeJSON `json:"-"`
 }
 
@@ -228,23 +228,23 @@ func (r V2ModelInfoAPINativeType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ModelInfoAPIUnion)(nil)).Elem(),
+		reflect.TypeFor[V2ModelInfoAPIUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoAPIAisdk{}),
+			Type:       reflect.TypeFor[V2ModelInfoAPIAisdk](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ModelInfoAPINative{}),
+			Type:       reflect.TypeFor[V2ModelInfoAPINative](),
 		},
 	)
 }
 
 type V2ModelInfoRequest struct {
 	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Body    interface{}            `json:"body,required"`
+	// This field can have the runtime type of [map[string]any].
+	Body    any                    `json:"body,required"`
 	Variant string                 `json:"variant"`
 	JSON    v2ModelInfoRequestJSON `json:"-"`
 }
@@ -268,8 +268,8 @@ func (r v2ModelInfoRequestJSON) RawJSON() string {
 type V2ModelInfoVariant struct {
 	ID      string            `json:"id,required"`
 	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Body interface{}            `json:"body,required"`
+	// This field can have the runtime type of [map[string]any].
+	Body any                    `json:"body,required"`
 	JSON v2ModelInfoVariantJSON `json:"-"`
 }
 
