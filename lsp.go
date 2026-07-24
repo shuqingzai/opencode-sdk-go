@@ -34,6 +34,7 @@ func NewLspService(opts ...option.RequestOption) (r *LspService) {
 	return
 }
 
+// Get LSP server status
 func (r *LspService) Status(ctx context.Context, query LspStatusParams, opts ...option.RequestOption) (res *[]LspStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "lsp"
@@ -65,6 +66,7 @@ func (r LspStatusStatus) IsKnown() bool {
 	return false
 }
 
+// lspStatusJSON contains the JSON metadata for the struct [LspStatus]
 type lspStatusJSON struct {
 	ID          apijson.Field
 	Name        apijson.Field
@@ -87,6 +89,7 @@ type LspStatusParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [LspStatusParams]'s query parameters as `url.Values`.
 func (r LspStatusParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

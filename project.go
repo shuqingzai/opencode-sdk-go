@@ -171,11 +171,11 @@ func (r ProjectCurrentParams) URLQuery() (v url.Values) {
 }
 
 type ProjectUpdateParams struct {
-	Directory param.Field[string]          `query:"directory"`
-	Workspace param.Field[string]          `query:"workspace"`
-	Name      param.Field[string]          `json:"name"`
-	Icon      param.Field[ProjectIcon]     `json:"icon"`
-	Commands  param.Field[ProjectCommands] `json:"commands"`
+	Directory param.Field[string]                      `query:"directory"`
+	Workspace param.Field[string]                      `query:"workspace"`
+	Name      param.Field[string]                      `json:"name"`
+	Icon      param.Field[ProjectUpdateParamsIcon]     `json:"icon"`
+	Commands  param.Field[ProjectUpdateParamsCommands] `json:"commands"`
 }
 
 // MarshalJSON serializes [ProjectUpdateParams] omitting query parameters.
@@ -189,6 +189,24 @@ func (r ProjectUpdateParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type ProjectUpdateParamsIcon struct {
+	URL      param.Field[string] `json:"url"`
+	Override param.Field[string] `json:"override"`
+	Color    param.Field[string] `json:"color"`
+}
+
+func (r ProjectUpdateParamsIcon) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type ProjectUpdateParamsCommands struct {
+	Start param.Field[string] `json:"start"`
+}
+
+func (r ProjectUpdateParamsCommands) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type ProjectIcon struct {

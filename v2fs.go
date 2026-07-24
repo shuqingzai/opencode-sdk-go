@@ -4,6 +4,7 @@ package opencode
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -57,6 +58,10 @@ func (r *V2FsService) Find(ctx context.Context, query V2FsFindParams, opts ...op
 // the `/api/fs/read/` URL.
 func (r *V2FsService) Read(ctx context.Context, path string, query V2FsReadParams, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
+	if path == "" {
+		err = errors.New("missing required path parameter")
+		return
+	}
 	urlPath := fmt.Sprintf("api/fs/read/%s", path)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, urlPath, query, &res, opts...)
 	return

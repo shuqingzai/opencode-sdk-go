@@ -34,6 +34,7 @@ func NewFormatterService(opts ...option.RequestOption) (r *FormatterService) {
 	return
 }
 
+// Get formatter status
 func (r *FormatterService) Status(ctx context.Context, query FormatterStatusParams, opts ...option.RequestOption) (res *[]FormatterStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "formatter"
@@ -48,6 +49,7 @@ type FormatterStatus struct {
 	JSON       formatterStatusJSON `json:"-"`
 }
 
+// formatterStatusJSON contains the JSON metadata for the struct [FormatterStatus]
 type formatterStatusJSON struct {
 	Name        apijson.Field
 	Extensions  apijson.Field
@@ -69,6 +71,7 @@ type FormatterStatusParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [FormatterStatusParams]'s query parameters as `url.Values`.
 func (r FormatterStatusParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

@@ -16,6 +16,8 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/shared"
+	"github.com/tidwall/gjson"
 )
 
 // ProviderService contains methods and other services that help with interacting with
@@ -281,7 +283,8 @@ type ProviderModelCapabilities struct {
 	ToolCall    bool                                `json:"toolcall,required"`
 	Input       ProviderModelCapabilitiesModalities `json:"input,required"`
 	Output      ProviderModelCapabilitiesModalities `json:"output,required"`
-	// This field can have the runtime type of [bool], [ProviderModelCapabilitiesInterleavedField].
+	// This field can have the runtime type of [shared.UnionBool],
+	// [ProviderModelCapabilitiesInterleavedField].
 	Interleaved interface{}                   `json:"interleaved,required"`
 	JSON        providerModelCapabilitiesJSON `json:"-"`
 }
@@ -381,6 +384,33 @@ func (r ProviderModelCapabilitiesInterleavedFieldField) IsKnown() bool {
 	return false
 }
 
+func (r ProviderModelCapabilitiesInterleavedField) ImplementsProviderModelCapabilitiesInterleavedUnion() {
+}
+
+// Satisfied by [shared.UnionBool], [ProviderModelCapabilitiesInterleavedField].
+type ProviderModelCapabilitiesInterleavedUnion interface {
+	ImplementsProviderModelCapabilitiesInterleavedUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ProviderModelCapabilitiesInterleavedUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeOf(shared.UnionBool(false)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeOf(shared.UnionBool(false)),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ProviderModelCapabilitiesInterleavedField{}),
+		},
+	)
+}
+
 // ProviderModelCost represents the cost structure for a model.
 type ProviderModelCost struct {
 	Input                float64                               `json:"input,required"`
@@ -465,7 +495,7 @@ func (r providerModelCostTierJSON) RawJSON() string {
 // ProviderModelCostTierContext represents the tier context threshold for a cost tier.
 type ProviderModelCostTierContext struct {
 	Type ProviderModelCostTierContextType `json:"type,required"`
-	Size float64                          `json:"size,required"`
+	Size int64                            `json:"size,required"`
 	JSON providerModelCostTierContextJSON `json:"-"`
 }
 
@@ -529,9 +559,9 @@ func (r providerModelCostExperimentalOver200KJSON) RawJSON() string {
 
 // ProviderModelLimit represents limits for a model.
 type ProviderModelLimit struct {
-	Context float64                `json:"context,required"`
-	Input   float64                `json:"input"`
-	Output  float64                `json:"output,required"`
+	Context int64                  `json:"context,required"`
+	Input   int64                  `json:"input"`
+	Output  int64                  `json:"output,required"`
 	JSON    providerModelLimitJSON `json:"-"`
 }
 
@@ -606,10 +636,12 @@ func init() {
 		reflect.TypeOf((*ProviderAuthMethodPrompt)(nil)).Elem(),
 		"type",
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "text",
 			Type:               reflect.TypeOf(ProviderAuthMethodPromptText{}),
 		},
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "select",
 			Type:               reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
 		},
@@ -851,7 +883,7 @@ func (r ProviderAuthParams) URLQuery() (v url.Values) {
 type ProviderOauthAuthorizeParams struct {
 	Directory param.Field[string]            `query:"directory"`
 	Workspace param.Field[string]            `query:"workspace"`
-	Method    param.Field[float64]           `json:"method,required"`
+	Method    param.Field[int64]             `json:"method,required"`
 	Inputs    param.Field[map[string]string] `json:"inputs"`
 }
 
@@ -870,10 +902,10 @@ func (r ProviderOauthAuthorizeParams) URLQuery() (v url.Values) {
 
 // ProviderOauthCallbackParams contains the parameters for OAuth callback.
 type ProviderOauthCallbackParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Method    param.Field[float64] `json:"method,required"`
-	Code      param.Field[string]  `json:"code"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Method    param.Field[int64]  `json:"method,required"`
+	Code      param.Field[string] `json:"code"`
 }
 
 // MarshalJSON serializes [ProviderOauthCallbackParams] omitting query parameters.

@@ -71,15 +71,12 @@ func (r v2ReferenceListResponseJSON) RawJSON() string {
 
 // V2ReferenceInfo represents a reference entry.
 type V2ReferenceInfo struct {
-	Name        string `json:"name,required"`
-	Path        string `json:"path,required"`
-	Description string `json:"description"`
-	Hidden      bool   `json:"hidden"`
-	// This field can have the runtime type of [ReferenceLocalSource],
-	// [ReferenceGitSource].
-	Source      interface{}         `json:"source,required"`
+	Name        string              `json:"name,required"`
+	Path        string              `json:"path,required"`
+	Description string              `json:"description"`
+	Hidden      bool                `json:"hidden"`
+	Source      ReferenceSource     `json:"source,required"`
 	JSON        v2ReferenceInfoJSON `json:"-"`
-	sourceUnion ReferenceSourceUnion
 }
 
 // v2ReferenceInfoJSON contains the JSON metadata for the struct [V2ReferenceInfo]
@@ -94,28 +91,65 @@ type v2ReferenceInfoJSON struct {
 }
 
 func (r *V2ReferenceInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ReferenceInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	sourceData := gjson.GetBytes(data, "source").Raw
-	if sourceData != "" {
-		err = apijson.UnmarshalRoot([]byte(sourceData), &r.sourceUnion)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ReferenceInfoJSON) RawJSON() string {
 	return r.raw
 }
 
-// AsSourceUnion returns the source field as a typed union.
-func (r *V2ReferenceInfo) AsSourceUnion() ReferenceSourceUnion {
-	return r.sourceUnion
+// ReferenceSource is a concrete wrapper for the ReferenceSource union
+// (OpenAPI: ReferenceLocalSource | ReferenceGitSource).
+// It flattens the fields from both variants and exposes an AsUnion() method
+// for more type-safe access.
+type ReferenceSource struct {
+	// Type is the discriminator field. "local" for [ReferenceLocalSource], "git"
+	// for [ReferenceGitSource].
+	Type string `json:"type,required"`
+	// Path is present when Type is "local".
+	Path string `json:"path"`
+	// Repository is present when Type is "git".
+	Repository string `json:"repository"`
+	// Branch is present when Type is "git".
+	Branch      string              `json:"branch"`
+	Description string              `json:"description"`
+	Hidden      bool                `json:"hidden"`
+	JSON        referenceSourceJSON `json:"-"`
+	union       ReferenceSourceUnion
+}
+
+// referenceSourceJSON contains the JSON metadata for the struct [ReferenceSource]
+type referenceSourceJSON struct {
+	Type        apijson.Field
+	Path        apijson.Field
+	Repository  apijson.Field
+	Branch      apijson.Field
+	Description apijson.Field
+	Hidden      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r referenceSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ReferenceSource) UnmarshalJSON(data []byte) (err error) {
+	*r = ReferenceSource{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ReferenceSourceUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [ReferenceLocalSource],
+// [ReferenceGitSource].
+func (r ReferenceSource) AsUnion() ReferenceSourceUnion {
+	return r.union
 }
 
 // ReferenceSourceUnion represents the source of a reference.
@@ -240,3 +274,6 @@ func (r V2ReferenceListParams) URLQuery() (v url.Values) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+// ReferenceInfo is an alias matching the OpenAPI schema name for [V2ReferenceInfo].
+type ReferenceInfo = V2ReferenceInfo

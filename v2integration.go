@@ -274,11 +274,9 @@ func (r v2IntegrationAttemptStatusResponseJSON) RawJSON() string {
 type IntegrationInfo struct {
 	ID   string `json:"id,required"`
 	Name string `json:"name,required"`
-	// This field can have the runtime type of []IntegrationOAuthMethod,
-	// []IntegrationKeyMethod, []IntegrationEnvMethod.
+	// This field can have the runtime type of [[]IntegrationMethodUnion].
 	Methods interface{} `json:"methods,required"`
-	// This field can have the runtime type of []ConnectionCredentialInfo,
-	// []ConnectionEnvInfo.
+	// This field can have the runtime type of [[]ConnectionInfoUnion].
 	Connections interface{}         `json:"connections,required"`
 	JSON        integrationInfoJSON `json:"-"`
 }

@@ -304,11 +304,13 @@ func (r ExperimentalWorkspaceStatusParams) URLQuery() (v url.Values) {
 }
 
 type ExperimentalWarpParams struct {
-	Directory   param.Field[string] `query:"directory"`
-	Workspace   param.Field[string] `query:"workspace"`
-	ID          param.Field[string] `json:"id,required"`
-	SessionID   param.Field[string] `json:"sessionID,required"`
-	CopyChanges param.Field[bool]   `json:"copyChanges"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	// ID is the workspace ID to warp into, or null to detach the session from its workspace.
+	// This field can have the value of a workspace ID string or nil.
+	ID          param.Field[interface{}] `json:"id,required"`
+	SessionID   param.Field[string]      `json:"sessionID,required"`
+	CopyChanges param.Field[bool]        `json:"copyChanges"`
 }
 
 func (r ExperimentalWarpParams) MarshalJSON() (data []byte, err error) {

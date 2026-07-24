@@ -8,8 +8,9 @@ func (UnionString) ImplementsPermissionPatternUnion() {}
 
 type UnionBool bool
 
-func (UnionBool) ImplementsConfigProviderOptionsTimeoutUnion()  {}
-func (UnionBool) ImplementsMcpAddParamsConfigRemoteOAuthUnion() {}
+func (UnionBool) ImplementsConfigProviderOptionsTimeoutUnion()         {}
+func (UnionBool) ImplementsMcpAddParamsConfigRemoteOAuthUnion()        {}
+func (UnionBool) ImplementsProviderModelCapabilitiesInterleavedUnion() {}
 
 type UnionInt int64
 

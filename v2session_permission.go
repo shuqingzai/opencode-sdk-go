@@ -107,9 +107,9 @@ type V2SessionPermissionNewParams struct {
 	Resources param.Field[[]string] `json:"resources,required"`
 	Save      param.Field[[]string] `json:"save"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata param.Field[interface{}]        `json:"metadata"`
-	Source   param.Field[PermissionV2Source] `json:"source"`
-	Agent    param.Field[string]             `json:"agent"`
+	Metadata param.Field[interface{}]             `json:"metadata"`
+	Source   param.Field[PermissionV2SourceParam] `json:"source"`
+	Agent    param.Field[string]                  `json:"agent"`
 }
 
 func (r V2SessionPermissionNewParams) MarshalJSON() (data []byte, err error) {
@@ -122,6 +122,19 @@ type V2SessionPermissionReplyParams struct {
 }
 
 func (r V2SessionPermissionReplyParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// PermissionV2SourceParam is the request param struct for the source field of a
+// permission v2 create request. It mirrors [PermissionV2Source] but uses
+// param.Field for request serialization.
+type PermissionV2SourceParam struct {
+	Type      param.Field[PermissionV2SourceType] `json:"type,required"`
+	MessageID param.Field[string]                 `json:"messageID,required"`
+	CallID    param.Field[string]                 `json:"callID,required"`
+}
+
+func (r PermissionV2SourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

@@ -45,11 +45,11 @@ func (r *QuestionService) List(ctx context.Context, query QuestionListParams, op
 
 // Reply to a question request
 func (r *QuestionService) Reply(ctx context.Context, requestID string, params QuestionReplyParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
 	if requestID == "" {
 		err = errors.New("missing required requestID parameter")
 		return
 	}
-	opts = slices.Concat(r.Options, opts)
 	path := "question/" + requestID + "/reply"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
@@ -57,11 +57,11 @@ func (r *QuestionService) Reply(ctx context.Context, requestID string, params Qu
 
 // Reject a question request
 func (r *QuestionService) Reject(ctx context.Context, requestID string, query QuestionRejectParams, opts ...option.RequestOption) (res *bool, err error) {
+	opts = slices.Concat(r.Options, opts)
 	if requestID == "" {
 		err = errors.New("missing required requestID parameter")
 		return
 	}
-	opts = slices.Concat(r.Options, opts)
 	path := "question/" + requestID + "/reject"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return

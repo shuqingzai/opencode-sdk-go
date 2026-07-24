@@ -533,6 +533,7 @@ func (V2SessionMessageAgentSwitched) implementsV2SessionMessageUnion() {}
 func (V2SessionMessageModelSwitched) implementsV2SessionMessageUnion() {}
 func (V2SessionMessageUser) implementsV2SessionMessageUnion()          {}
 func (V2SessionMessageSynthetic) implementsV2SessionMessageUnion()     {}
+func (V2SessionMessageSystem) implementsV2SessionMessageUnion()        {}
 func (V2SessionMessageShell) implementsV2SessionMessageUnion()         {}
 func (V2SessionMessageAssistant) implementsV2SessionMessageUnion()     {}
 func (V2SessionMessageCompaction) implementsV2SessionMessageUnion()    {}
@@ -594,14 +595,15 @@ func (r v2SessionMessageModelSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageUser struct {
-	ID       string                    `json:"id,required"`
-	Time     V2SessionMessageTime      `json:"time,required"`
-	Text     string                    `json:"text,required"`
-	Type     string                    `json:"type,required"`
-	Files    []V2PromptFileAttachment  `json:"files"`
-	Agents   []V2PromptAgentAttachment `json:"agents"`
-	Metadata interface{}               `json:"metadata"`
-	JSON     v2SessionMessageUserJSON  `json:"-"`
+	ID     string                    `json:"id,required"`
+	Time   V2SessionMessageTime      `json:"time,required"`
+	Text   string                    `json:"text,required"`
+	Type   string                    `json:"type,required"`
+	Files  []V2PromptFileAttachment  `json:"files"`
+	Agents []V2PromptAgentAttachment `json:"agents"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}              `json:"metadata"`
+	JSON     v2SessionMessageUserJSON `json:"-"`
 }
 
 type v2SessionMessageUserJSON struct {
@@ -625,13 +627,14 @@ func (r v2SessionMessageUserJSON) RawJSON() string {
 }
 
 type V2SessionMessageSynthetic struct {
-	ID        string                        `json:"id,required"`
-	Time      V2SessionMessageTime          `json:"time,required"`
-	SessionID string                        `json:"sessionID,required"`
-	Text      string                        `json:"text,required"`
-	Type      string                        `json:"type,required"`
-	Metadata  interface{}                   `json:"metadata"`
-	JSON      v2SessionMessageSyntheticJSON `json:"-"`
+	ID        string               `json:"id,required"`
+	Time      V2SessionMessageTime `json:"time,required"`
+	SessionID string               `json:"sessionID,required"`
+	Text      string               `json:"text,required"`
+	Type      string               `json:"type,required"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                   `json:"metadata"`
+	JSON     v2SessionMessageSyntheticJSON `json:"-"`
 }
 
 type v2SessionMessageSyntheticJSON struct {
@@ -701,8 +704,9 @@ type V2SessionMessageAssistant struct {
 	Cost     float64                            `json:"cost"`
 	Tokens   V2SessionMessageTokens             `json:"tokens"`
 	Error    SessionErrorUnknown                `json:"error"`
-	Metadata interface{}                        `json:"metadata"`
-	JSON     v2SessionMessageAssistantJSON      `json:"-"`
+	// This field can have the runtime type of [map[string]interface{}].
+	Metadata interface{}                   `json:"metadata"`
+	JSON     v2SessionMessageAssistantJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantJSON struct {
@@ -778,7 +782,7 @@ func (r V2SessionMessageCompactionReason) IsKnown() bool {
 }
 
 type SessionErrorUnknown struct {
-	Type    string                  `json:"type,required"`
+	Type    SessionErrorUnknownType `json:"type,required"`
 	Message string                  `json:"message,required"`
 	JSON    sessionErrorUnknownJSON `json:"-"`
 }
@@ -797,6 +801,21 @@ func (r *SessionErrorUnknown) UnmarshalJSON(data []byte) (err error) {
 
 func (r sessionErrorUnknownJSON) RawJSON() string {
 	return r.raw
+}
+
+// SessionErrorUnknownType represents the type discriminator of [SessionErrorUnknown].
+type SessionErrorUnknownType string
+
+const (
+	SessionErrorUnknownTypeUnknown SessionErrorUnknownType = "unknown"
+)
+
+func (r SessionErrorUnknownType) IsKnown() bool {
+	switch r {
+	case SessionErrorUnknownTypeUnknown:
+		return true
+	}
+	return false
 }
 
 // Shared sub-types
@@ -3243,8 +3262,6 @@ func (r *V2SessionMessageSystem) UnmarshalJSON(data []byte) (err error) {
 func (r v2SessionMessageSystemJSON) RawJSON() string {
 	return r.raw
 }
-
-func (V2SessionMessageSystem) implementsV2SessionMessageUnion() {}
 
 // ===== V2SessionActiveResponse =====
 

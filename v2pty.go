@@ -248,7 +248,7 @@ func (r v2PtyUpdateResponseJSON) RawJSON() string {
 // connect token in the OpenAPI {location, data} envelope.
 type V2PtyConnectTokenResponse struct {
 	Location LocationInfo                  `json:"location,required"`
-	Data     PtyConnectToken               `json:"data,required"`
+	Data     PtyTicketConnectToken         `json:"data,required"`
 	JSON     v2PtyConnectTokenResponseJSON `json:"-"`
 }
 

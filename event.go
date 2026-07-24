@@ -1260,7 +1260,7 @@ func (r EventListResponseEventSessionError) implementsEventListResponse() {}
 func (r EventListResponseEventSessionError) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionErrorProperties struct {
-	Error     EventListResponseEventSessionErrorPropertiesError `json:"error,required"`
+	Error     EventListResponseEventSessionErrorPropertiesError `json:"error"`
 	SessionID string                                            `json:"sessionID"`
 	JSON      eventListResponseEventSessionErrorPropertiesJSON  `json:"-"`
 }

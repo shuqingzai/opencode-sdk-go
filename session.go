@@ -503,13 +503,13 @@ func (r AgentPartInputType) IsKnown() bool {
 }
 
 type SubtaskPartInputParam struct {
-	ID          param.Field[string]               `json:"id"`
-	Type        param.Field[SubtaskPartInputType] `json:"type,required"`
-	Prompt      param.Field[string]               `json:"prompt,required"`
-	Description param.Field[string]               `json:"description,required"`
-	Agent       param.Field[string]               `json:"agent,required"`
-	Model       param.Field[SubtaskPartModel]     `json:"model"`
-	Command     param.Field[string]               `json:"command"`
+	ID          param.Field[string]                `json:"id"`
+	Type        param.Field[SubtaskPartInputType]  `json:"type,required"`
+	Prompt      param.Field[string]                `json:"prompt,required"`
+	Description param.Field[string]                `json:"description,required"`
+	Agent       param.Field[string]                `json:"agent,required"`
+	Model       param.Field[SubtaskPartModelParam] `json:"model"`
+	Command     param.Field[string]                `json:"command"`
 }
 
 func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
@@ -517,6 +517,15 @@ func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r SubtaskPartInputParam) implementsSessionPromptParamsPartUnion() {}
+
+type SubtaskPartModelParam struct {
+	ModelID    param.Field[string] `json:"modelID,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
+}
+
+func (r SubtaskPartModelParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
 
 type SubtaskPartInputType string
 
@@ -1294,22 +1303,22 @@ func (r MessageRole) IsKnown() bool {
 }
 
 type Part struct {
-	ID          string             `json:"id,required"`
-	MessageID   string             `json:"messageID,required"`
-	SessionID   string             `json:"sessionID,required"`
-	Type        PartType           `json:"type,required"`
-	Agent       string             `json:"agent"`
-	Auto        bool               `json:"auto"`
-	Attempt     int64              `json:"attempt"`
-	CallID      string             `json:"callID"`
-	Command     string             `json:"command"`
-	Cost        float64            `json:"cost"`
-	Description string             `json:"description"`
-	Error       PartRetryPartError `json:"error"`
-	Filename    string             `json:"filename"`
-	Files       []string           `json:"files"`
-	Hash        string             `json:"hash"`
-	Ignored     bool               `json:"ignored"`
+	ID          string          `json:"id,required"`
+	MessageID   string          `json:"messageID,required"`
+	SessionID   string          `json:"sessionID,required"`
+	Type        PartType        `json:"type,required"`
+	Agent       string          `json:"agent"`
+	Auto        bool            `json:"auto"`
+	Attempt     int64           `json:"attempt"`
+	CallID      string          `json:"callID"`
+	Command     string          `json:"command"`
+	Cost        float64         `json:"cost"`
+	Description string          `json:"description"`
+	Error       shared.APIError `json:"error"`
+	Filename    string          `json:"filename"`
+	Files       []string        `json:"files"`
+	Hash        string          `json:"hash"`
+	Ignored     bool            `json:"ignored"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}      `json:"metadata"`
 	Mime     string           `json:"mime"`
@@ -1509,14 +1518,14 @@ func (r PartPatchPartType) IsKnown() bool {
 }
 
 type PartRetryPart struct {
-	ID        string             `json:"id,required"`
-	Attempt   int64              `json:"attempt,required"`
-	Error     PartRetryPartError `json:"error,required"`
-	MessageID string             `json:"messageID,required"`
-	SessionID string             `json:"sessionID,required"`
-	Time      PartRetryPartTime  `json:"time,required"`
-	Type      PartRetryPartType  `json:"type,required"`
-	JSON      partRetryPartJSON  `json:"-"`
+	ID        string            `json:"id,required"`
+	Attempt   int64             `json:"attempt,required"`
+	Error     shared.APIError   `json:"error,required"`
+	MessageID string            `json:"messageID,required"`
+	SessionID string            `json:"sessionID,required"`
+	Time      PartRetryPartTime `json:"time,required"`
+	Type      PartRetryPartType `json:"type,required"`
+	JSON      partRetryPartJSON `json:"-"`
 }
 
 // partRetryPartJSON contains the JSON metadata for the struct [PartRetryPart]
@@ -1541,74 +1550,6 @@ func (r partRetryPartJSON) RawJSON() string {
 }
 
 func (r PartRetryPart) implementsPart() {}
-
-type PartRetryPartError struct {
-	Data PartRetryPartErrorData `json:"data,required"`
-	Name PartRetryPartErrorName `json:"name,required"`
-	JSON partRetryPartErrorJSON `json:"-"`
-}
-
-// partRetryPartErrorJSON contains the JSON metadata for the struct
-// [PartRetryPartError]
-type partRetryPartErrorJSON struct {
-	Data        apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PartRetryPartError) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r partRetryPartErrorJSON) RawJSON() string {
-	return r.raw
-}
-
-type PartRetryPartErrorData struct {
-	IsRetryable     bool                       `json:"isRetryable,required"`
-	Message         string                     `json:"message,required"`
-	Metadata        map[string]string          `json:"metadata"`
-	ResponseBody    string                     `json:"responseBody"`
-	ResponseHeaders map[string]string          `json:"responseHeaders"`
-	StatusCode      int64                      `json:"statusCode"`
-	JSON            partRetryPartErrorDataJSON `json:"-"`
-}
-
-// partRetryPartErrorDataJSON contains the JSON metadata for the struct
-// [PartRetryPartErrorData]
-type partRetryPartErrorDataJSON struct {
-	IsRetryable     apijson.Field
-	Message         apijson.Field
-	Metadata        apijson.Field
-	ResponseBody    apijson.Field
-	ResponseHeaders apijson.Field
-	StatusCode      apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
-}
-
-func (r *PartRetryPartErrorData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r partRetryPartErrorDataJSON) RawJSON() string {
-	return r.raw
-}
-
-type PartRetryPartErrorName string
-
-const (
-	PartRetryPartErrorNameAPIError PartRetryPartErrorName = "APIError"
-)
-
-func (r PartRetryPartErrorName) IsKnown() bool {
-	switch r {
-	case PartRetryPartErrorNameAPIError:
-		return true
-	}
-	return false
-}
 
 type PartRetryPartTime struct {
 	Created int64                 `json:"created,required"`
@@ -2934,8 +2875,7 @@ func (r ToolStatePendingStatus) IsKnown() bool {
 }
 
 type ToolStateRunning struct {
-	// This field can have the runtime type of map[string]interface{}.
-	Input    interface{}            `json:"input,required"`
+	Input    map[string]interface{} `json:"input,required"`
 	Status   ToolStateRunningStatus `json:"status,required"`
 	Time     ToolStateRunningTime   `json:"time,required"`
 	Metadata map[string]interface{} `json:"metadata"`
@@ -3359,16 +3299,30 @@ type SessionCommandParams struct {
 }
 
 type SessionCommandParamsPart struct {
-	ID       param.Field[string]                   `json:"id"`
-	Type     param.Field[string]                   `json:"type,required"`
-	Mime     param.Field[string]                   `json:"mime,required"`
-	Filename param.Field[string]                   `json:"filename"`
-	URL      param.Field[string]                   `json:"url,required"`
-	Source   param.Field[FilePartSourceUnionParam] `json:"source"`
+	ID       param.Field[string]                       `json:"id"`
+	Type     param.Field[SessionCommandParamsPartType] `json:"type,required"`
+	Mime     param.Field[string]                       `json:"mime,required"`
+	Filename param.Field[string]                       `json:"filename"`
+	URL      param.Field[string]                       `json:"url,required"`
+	Source   param.Field[FilePartSourceUnionParam]     `json:"source"`
 }
 
 func (r SessionCommandParamsPart) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type SessionCommandParamsPartType string
+
+const (
+	SessionCommandParamsPartTypeFile SessionCommandParamsPartType = "file"
+)
+
+func (r SessionCommandParamsPartType) IsKnown() bool {
+	switch r {
+	case SessionCommandParamsPartTypeFile:
+		return true
+	}
+	return false
 }
 
 func (r SessionCommandParams) MarshalJSON() (data []byte, err error) {

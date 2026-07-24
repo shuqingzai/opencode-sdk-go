@@ -96,7 +96,7 @@ type GlobalSession struct {
 	Title     string            `json:"title,required"`
 	Version   string            `json:"version,required"`
 	Time      GlobalSessionTime `json:"time,required"`
-	// This field can have the runtime type of [ProjectSummary].
+	// This field can have the runtime type of [ProjectSummary] or nil.
 	Project     interface{}          `json:"project,required"`
 	WorkspaceID string               `json:"workspaceID,omitempty"`
 	Path        string               `json:"path,omitempty"`
@@ -153,7 +153,7 @@ type GlobalSessionTime struct {
 	Created    int64                 `json:"created,required"`
 	Updated    int64                 `json:"updated,required"`
 	Compacting int64                 `json:"compacting,omitempty"`
-	Archived   int64                 `json:"archived,omitempty"`
+	Archived   float64               `json:"archived,omitempty"`
 	JSON       globalSessionTimeJSON `json:"-"`
 }
 
