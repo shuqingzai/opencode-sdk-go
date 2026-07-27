@@ -176,12 +176,12 @@ const (
 	ProviderInfoSourceEnv    ProviderInfoSource = "env"
 	ProviderInfoSourceConfig ProviderInfoSource = "config"
 	ProviderInfoSourceCustom ProviderInfoSource = "custom"
-	ProviderInfoSourceApi    ProviderInfoSource = "api"
+	ProviderInfoSourceAPI    ProviderInfoSource = "api"
 )
 
 func (r ProviderInfoSource) IsKnown() bool {
 	switch r {
-	case ProviderInfoSourceEnv, ProviderInfoSourceConfig, ProviderInfoSourceCustom, ProviderInfoSourceApi:
+	case ProviderInfoSourceEnv, ProviderInfoSourceConfig, ProviderInfoSourceCustom, ProviderInfoSourceAPI:
 		return true
 	}
 	return false
@@ -587,7 +587,8 @@ type ProviderAuthMethod struct {
 	Type  ProviderAuthMethodType `json:"type,required"`
 	Label string                 `json:"label,required"`
 	// This field can have the runtime type of [[]ProviderAuthMethodPromptText],
-	// [[]ProviderAuthMethodPromptSelect].
+	// [[]ProviderAuthMethodPromptSelect], or a mixed array where each element is
+	// one of those types (per OpenAPI anyOf per element).
 	Prompts any                    `json:"prompts"`
 	JSON    providerAuthMethodJSON `json:"-"`
 }
@@ -614,12 +615,12 @@ type ProviderAuthMethodType string
 
 const (
 	ProviderAuthMethodTypeOauth ProviderAuthMethodType = "oauth"
-	ProviderAuthMethodTypeApi   ProviderAuthMethodType = "api"
+	ProviderAuthMethodTypeAPI   ProviderAuthMethodType = "api"
 )
 
 func (r ProviderAuthMethodType) IsKnown() bool {
 	switch r {
-	case ProviderAuthMethodTypeOauth, ProviderAuthMethodTypeApi:
+	case ProviderAuthMethodTypeOauth, ProviderAuthMethodTypeAPI:
 		return true
 	}
 	return false

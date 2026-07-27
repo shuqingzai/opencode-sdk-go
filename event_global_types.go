@@ -541,7 +541,7 @@ type EventListResponseEventSessionNextModelSwitchedProperties struct {
 	Timestamp int64                                                        `json:"timestamp,required"`
 	MessageID string                                                       `json:"messageID,required"`
 	SessionID string                                                       `json:"sessionID,required"`
-	Model     EventListResponseEventSessionNextModelSwitchedModel          `json:"model,required"`
+	Model     ModelRef                                                     `json:"model,required"`
 	JSON      eventListResponseEventSessionNextModelSwitchedPropertiesJSON `json:"-"`
 }
 
@@ -893,7 +893,7 @@ type EventListResponseEventSessionNextStepStartedProperties struct {
 	AssistantMessageID string                                                     `json:"assistantMessageID,required"`
 	SessionID          string                                                     `json:"sessionID,required"`
 	Agent              string                                                     `json:"agent,required"`
-	Model              EventListResponseEventSessionNextModelSwitchedModel        `json:"model,required"`
+	Model              ModelRef                                                   `json:"model,required"`
 	Snapshot           string                                                     `json:"snapshot"`
 	JSON               eventListResponseEventSessionNextStepStartedPropertiesJSON `json:"-"`
 }
@@ -2263,30 +2263,6 @@ func (r EventListResponseEventSessionNextCompactionEndedType) IsKnown() bool {
 	return false
 }
 
-// EventListResponseEventSessionNextModelSwitchedModel
-type EventListResponseEventSessionNextModelSwitchedModel struct {
-	ID         string                                                  `json:"id,required"`
-	ProviderID string                                                  `json:"providerID,required"`
-	Variant    string                                                  `json:"variant"`
-	JSON       eventListResponseEventSessionNextModelSwitchedModelJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextModelSwitchedModelJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextModelSwitchedModel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextModelSwitchedModelJSON) RawJSON() string {
-	return r.raw
-}
-
 // EventListResponseEventSessionNextToolCalledProvider
 type EventListResponseEventSessionNextToolCalledProvider struct {
 	Executed bool `json:"executed,required"`
@@ -2492,28 +2468,6 @@ func (r EventListResponseEventPluginAddedType) IsKnown() bool {
 // Shared sub-types for new Event variants
 // =============================================================================
 
-// LocationRef represents a reference to a location in a workspace.
-type EventListResponseEventSessionNextMovedPropertiesLocation struct {
-	Directory   string                                                       `json:"directory,required"`
-	WorkspaceID string                                                       `json:"workspaceID"`
-	JSON        eventListResponseEventSessionNextMovedPropertiesLocationJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextMovedPropertiesLocationJSON struct {
-	Directory   apijson.Field
-	WorkspaceID apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextMovedPropertiesLocation) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextMovedPropertiesLocationJSON) RawJSON() string {
-	return r.raw
-}
-
 // RevertState represents a revert state for session.next.revert.staged.
 type EventListResponseEventSessionNextRevertStagedPropertiesRevert struct {
 	MessageID string                                                            `json:"messageID,required"`
@@ -2564,25 +2518,6 @@ func (r *EventListResponseEventPermissionV2AskedPropertiesSource) UnmarshalJSON(
 
 func (r eventListResponseEventPermissionV2AskedPropertiesSourceJSON) RawJSON() string {
 	return r.raw
-}
-
-// PermissionV2ReplyType represents the reply type for permission v2 requests.
-type EventListResponseEventPermissionV2RepliedPropertiesReply string
-
-const (
-	EventListResponseEventPermissionV2RepliedPropertiesReplyOnce   EventListResponseEventPermissionV2RepliedPropertiesReply = "once"
-	EventListResponseEventPermissionV2RepliedPropertiesReplyAlways EventListResponseEventPermissionV2RepliedPropertiesReply = "always"
-	EventListResponseEventPermissionV2RepliedPropertiesReplyReject EventListResponseEventPermissionV2RepliedPropertiesReply = "reject"
-)
-
-func (r EventListResponseEventPermissionV2RepliedPropertiesReply) IsKnown() bool {
-	switch r {
-	case EventListResponseEventPermissionV2RepliedPropertiesReplyOnce,
-		EventListResponseEventPermissionV2RepliedPropertiesReplyAlways,
-		EventListResponseEventPermissionV2RepliedPropertiesReplyReject:
-		return true
-	}
-	return false
 }
 
 // QuestionV2Option represents an option in a v2 question.
@@ -2949,10 +2884,10 @@ func (r EventListResponseEventPermissionV2Replied) implementsEventListResponse()
 func (r EventListResponseEventPermissionV2Replied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionV2RepliedProperties struct {
-	SessionID string                                                   `json:"sessionID,required"`
-	RequestID string                                                   `json:"requestID,required"`
-	Reply     EventListResponseEventPermissionV2RepliedPropertiesReply `json:"reply,required"`
-	JSON      eventListResponseEventPermissionV2RepliedPropertiesJSON  `json:"-"`
+	SessionID string                                                  `json:"sessionID,required"`
+	RequestID string                                                  `json:"requestID,required"`
+	Reply     PermissionV2Reply                                       `json:"reply,required"`
+	JSON      eventListResponseEventPermissionV2RepliedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventPermissionV2RepliedPropertiesJSON struct {
@@ -3279,11 +3214,11 @@ func (r EventListResponseEventSessionNextMoved) implementsEventListResponse()  {
 func (r EventListResponseEventSessionNextMoved) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextMovedProperties struct {
-	Timestamp    int64                                                    `json:"timestamp,required"`
-	SessionID    string                                                   `json:"sessionID,required"`
-	Location     EventListResponseEventSessionNextMovedPropertiesLocation `json:"location,required"`
-	Subdirectory string                                                   `json:"subdirectory"`
-	JSON         eventListResponseEventSessionNextMovedPropertiesJSON     `json:"-"`
+	Timestamp    int64                                                `json:"timestamp,required"`
+	SessionID    string                                               `json:"sessionID,required"`
+	Location     LocationRef                                          `json:"location,required"`
+	Subdirectory string                                               `json:"subdirectory"`
+	JSON         eventListResponseEventSessionNextMovedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextMovedPropertiesJSON struct {

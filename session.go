@@ -2948,7 +2948,8 @@ type UserMessage struct {
 	Role      UserMessageRole  `json:"role,required"`
 	SessionID string           `json:"sessionID,required"`
 	Time      UserMessageTime  `json:"time,required"`
-	// This field can have the runtime type of [OutputFormatUnion].
+	// This field can have the runtime type of [OutputFormatText],
+	// [OutputFormatJsonSchema].
 	Format  any                `json:"format,omitzero"`
 	System  string             `json:"system,omitzero"`
 	Tools   map[string]bool    `json:"tools,omitzero"`
@@ -3217,14 +3218,14 @@ func (r SessionUpdateParams) URLQuery() (v url.Values) {
 }
 
 type SessionListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Scope     param.Field[string] `query:"scope"`
-	Path      param.Field[string] `query:"path"`
-	Roots     param.Field[bool]   `query:"roots"`
-	Start     param.Field[int64]  `query:"start"`
-	Search    param.Field[string] `query:"search"`
-	Limit     param.Field[int64]  `query:"limit"`
+	Directory param.Field[string]                 `query:"directory"`
+	Workspace param.Field[string]                 `query:"workspace"`
+	Scope     param.Field[SessionListParamsScope] `query:"scope"`
+	Path      param.Field[string]                 `query:"path"`
+	Roots     param.Field[bool]                   `query:"roots"`
+	Start     param.Field[int64]                  `query:"start"`
+	Search    param.Field[string]                 `query:"search"`
+	Limit     param.Field[int64]                  `query:"limit"`
 }
 
 // URLQuery serializes [SessionListParams]'s query parameters as `url.Values`.
@@ -3233,6 +3234,20 @@ func (r SessionListParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type SessionListParamsScope string
+
+const (
+	SessionListParamsScopeProject SessionListParamsScope = "project"
+)
+
+func (r SessionListParamsScope) IsKnown() bool {
+	switch r {
+	case SessionListParamsScopeProject:
+		return true
+	}
+	return false
 }
 
 type SessionDeleteParams struct {

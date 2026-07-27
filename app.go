@@ -61,6 +61,9 @@ func (r *AppService) Skills(ctx context.Context, query AppSkillsParams, opts ...
 // This is an alias to an internal type.
 type Model = ProviderModel
 
+// This is an alias to an internal type.
+type Provider = ProviderInfo
+
 type AppLogParams struct {
 	// Log level
 	Level param.Field[AppLogParamsLevel] `json:"level,required"`

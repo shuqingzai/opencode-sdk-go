@@ -1565,12 +1565,26 @@ func (r EventListResponseEventProjectUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventProjectUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventProjectUpdatedProperties struct {
-	Project Project                                            `json:"project,required"`
-	JSON    eventListResponseEventProjectUpdatedPropertiesJSON `json:"-"`
+	ID        string                                             `json:"id,required"`
+	Worktree  string                                             `json:"worktree,required"`
+	Time      ProjectTime                                        `json:"time,required"`
+	Sandboxes []string                                           `json:"sandboxes,required"`
+	Name      string                                             `json:"name"`
+	Vcs       ProjectVcs                                         `json:"vcs"`
+	Icon      ProjectIcon                                        `json:"icon"`
+	Commands  ProjectCommands                                    `json:"commands"`
+	JSON      eventListResponseEventProjectUpdatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventProjectUpdatedPropertiesJSON struct {
-	Project     apijson.Field
+	ID          apijson.Field
+	Worktree    apijson.Field
+	Time        apijson.Field
+	Sandboxes   apijson.Field
+	Name        apijson.Field
+	Vcs         apijson.Field
+	Icon        apijson.Field
+	Commands    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2475,13 +2489,11 @@ func (r EventListResponseEventTuiToastShow) implementsEventListResponse() {}
 func (r EventListResponseEventTuiToastShow) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTuiToastShowProperties struct {
-	// This field can have the runtime type of [int64].
-	Duration any    `json:"duration"`
-	Message  string `json:"message,required"`
-	// This field can have the runtime type of [string].
-	Title   any                                              `json:"title"`
-	Variant TuiToastShowVariant                              `json:"variant,required"`
-	JSON    eventListResponseEventTuiToastShowPropertiesJSON `json:"-"`
+	Duration int64                                            `json:"duration"`
+	Message  string                                           `json:"message,required"`
+	Title    string                                           `json:"title"`
+	Variant  TuiToastShowVariant                              `json:"variant,required"`
+	JSON     eventListResponseEventTuiToastShowPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventTuiToastShowPropertiesJSON struct {
@@ -3214,7 +3226,7 @@ func (r EventListResponseEventPtyExited) implementsEventListResponse() {}
 func (r EventListResponseEventPtyExited) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPtyExitedProperties struct {
-	ExitCode int                                           `json:"exitCode,required"`
+	ExitCode int64                                         `json:"exitCode,required"`
 	ID       string                                        `json:"id,required"`
 	JSON     eventListResponseEventPtyExitedPropertiesJSON `json:"-"`
 }
