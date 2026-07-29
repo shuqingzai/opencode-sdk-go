@@ -402,6 +402,9 @@ func (r ContextOverflowErrorName) IsKnown() bool {
 }
 
 type MessageOutputLengthError struct {
+	// Per OpenAPI `MessageOutputLengthError.data` is an object with no declared
+	// properties, so the server may return any JSON object here.
+	// This field can have the runtime type of [map[string]any].
 	Data any                          `json:"data,required"`
 	Name MessageOutputLengthErrorName `json:"name,required"`
 	JSON messageOutputLengthErrorJSON `json:"-"`
@@ -475,10 +478,10 @@ func (r APIError) ImplementsAssistantMessageError() {}
 type APIErrorData struct {
 	IsRetryable     bool              `json:"isRetryable,required"`
 	Message         string            `json:"message,required"`
-	Metadata        map[string]string `json:"metadata,omitempty"`
-	ResponseBody    string            `json:"responseBody,omitempty"`
-	ResponseHeaders map[string]string `json:"responseHeaders,omitempty"`
-	StatusCode      int64             `json:"statusCode,omitempty"`
+	Metadata        map[string]string `json:"metadata"`
+	ResponseBody    string            `json:"responseBody"`
+	ResponseHeaders map[string]string `json:"responseHeaders"`
+	StatusCode      int64             `json:"statusCode"`
 	JSON            apiErrorDataJSON  `json:"-"`
 }
 
@@ -1778,9 +1781,8 @@ func (r projectCopyErrorJSON) RawJSON() string {
 }
 
 type ProjectCopyErrorData struct {
-	Message string `json:"message,required"`
-	// This field can have the runtime type of [bool].
-	ForceRequired any                      `json:"forceRequired"`
+	Message       string                   `json:"message,required"`
+	ForceRequired bool                     `json:"forceRequired"`
 	JSON          projectCopyErrorDataJSON `json:"-"`
 }
 

@@ -71,12 +71,16 @@ func (r v2ReferenceListResponseJSON) RawJSON() string {
 
 // V2ReferenceInfo represents a reference entry.
 type V2ReferenceInfo struct {
-	Name        string              `json:"name,required"`
-	Path        string              `json:"path,required"`
-	Description string              `json:"description"`
-	Hidden      bool                `json:"hidden"`
-	Source      ReferenceSource     `json:"source,required"`
-	JSON        v2ReferenceInfoJSON `json:"-"`
+	Name        string `json:"name,required"`
+	Path        string `json:"path,required"`
+	Description string `json:"description"`
+	Hidden      bool   `json:"hidden"`
+	// Source carries the OpenAPI `ReferenceSource` union
+	// (`anyOf [ReferenceLocalSource, ReferenceGitSource]`). Possible runtime types
+	// of the union are [ReferenceLocalSource], [ReferenceGitSource]; use
+	// [ReferenceSource.AsUnion] for type-safe access.
+	Source ReferenceSource     `json:"source,required"`
+	JSON   v2ReferenceInfoJSON `json:"-"`
 }
 
 // v2ReferenceInfoJSON contains the JSON metadata for the struct [V2ReferenceInfo]

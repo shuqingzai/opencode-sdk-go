@@ -33,9 +33,9 @@ func TestToolListParamsQuery(t *testing.T) {
 
 // Aligned with OpenAPI GET /experimental/tool/ids + JS SDK(v2) Tool.ids.
 // query all optional: directory, workspace
-func TestToolIdsParamsQuery(t *testing.T) {
+func TestToolIDsParamsQuery(t *testing.T) {
 	t.Run("both fields", func(t *testing.T) {
-		p := ToolIdsParams{Directory: F("d"), Workspace: F("w")}
+		p := ToolIDsParams{Directory: F("d"), Workspace: F("w")}
 		got := p.URLQuery().Encode()
 		want := "directory=d&workspace=w"
 		if got != want {
@@ -43,7 +43,7 @@ func TestToolIdsParamsQuery(t *testing.T) {
 		}
 	})
 	t.Run("empty", func(t *testing.T) {
-		p := ToolIdsParams{}
+		p := ToolIDsParams{}
 		if got := p.URLQuery().Encode(); got != "" {
 			t.Errorf("expected empty, got %q", got)
 		}

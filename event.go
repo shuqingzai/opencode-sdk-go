@@ -1903,15 +1903,14 @@ func (r EventListResponseEventPermissionAsked) implementsEventListResponse() {}
 func (r EventListResponseEventPermissionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionAskedProperties struct {
-	Always     []string       `json:"always,required"`
-	ID         string         `json:"id,required"`
-	Metadata   map[string]any `json:"metadata,required"`
-	Patterns   []string       `json:"patterns,required"`
-	Permission string         `json:"permission,required"`
-	SessionID  string         `json:"sessionID,required"`
-	// This field can have the runtime type of [EventListResponseEventPermissionAskedPropertiesTool].
-	Tool any                                                 `json:"tool"`
-	JSON eventListResponseEventPermissionAskedPropertiesJSON `json:"-"`
+	Always     []string                                            `json:"always,required"`
+	ID         string                                              `json:"id,required"`
+	Metadata   map[string]any                                      `json:"metadata,required"`
+	Patterns   []string                                            `json:"patterns,required"`
+	Permission string                                              `json:"permission,required"`
+	SessionID  string                                              `json:"sessionID,required"`
+	Tool       EventListResponseEventPermissionAskedPropertiesTool `json:"tool"`
+	JSON       eventListResponseEventPermissionAskedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventPermissionAskedPropertiesJSON struct {
@@ -2020,11 +2019,18 @@ type eventListResponseEventSessionStatusPropertiesJSON struct {
 
 func (r *EventListResponseEventSessionStatusProperties) UnmarshalJSON(data []byte) (err error) {
 	*r = EventListResponseEventSessionStatusProperties{}
-	if err = apijson.UnmarshalRoot(data, &r.statusUnion); err != nil {
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
 		return err
 	}
-	r.Status = r.statusUnion
-	return apijson.Port(r.statusUnion, r)
+	// Decode the "status" sub-JSON into the union so that AsStatus() returns
+	// the correctly-typed variant.
+	if statusResult := gjson.ParseBytes(data).Get("status"); statusResult.Exists() && statusResult.Type != gjson.Null {
+		if err = apijson.UnmarshalRoot([]byte(statusResult.Raw), &r.statusUnion); err != nil {
+			return err
+		}
+		r.Status = r.statusUnion
+	}
+	return nil
 }
 
 func (r eventListResponseEventSessionStatusPropertiesJSON) RawJSON() string {
@@ -2035,7 +2041,7 @@ func (r eventListResponseEventSessionStatusPropertiesJSON) RawJSON() string {
 //
 // Possible runtime types of the union are [SessionStatusIdle], [SessionStatusRetry]
 // or [SessionStatusBusy].
-func (r *EventListResponseEventSessionStatusProperties) AsStatus() SessionStatus {
+func (r EventListResponseEventSessionStatusProperties) AsStatus() SessionStatus {
 	return r.statusUnion
 }
 
@@ -2085,12 +2091,11 @@ func (r EventListResponseEventQuestionAsked) implementsEventListResponse() {}
 func (r EventListResponseEventQuestionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventQuestionAskedProperties struct {
-	ID        string                                                   `json:"id,required"`
-	Questions []EventListResponseEventQuestionAskedPropertiesQuestions `json:"questions,required"`
-	SessionID string                                                   `json:"sessionID,required"`
-	// This field can have the runtime type of [EventListResponseEventQuestionAskedPropertiesTool].
-	Tool any                                               `json:"tool"`
-	JSON eventListResponseEventQuestionAskedPropertiesJSON `json:"-"`
+	ID        string                                            `json:"id,required"`
+	Questions []QuestionInfo                                    `json:"questions,required"`
+	SessionID string                                            `json:"sessionID,required"`
+	Tool      QuestionTool                                      `json:"tool"`
+	JSON      eventListResponseEventQuestionAskedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventQuestionAskedPropertiesJSON struct {
@@ -2107,77 +2112,6 @@ func (r *EventListResponseEventQuestionAskedProperties) UnmarshalJSON(data []byt
 }
 
 func (r eventListResponseEventQuestionAskedPropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventQuestionAskedPropertiesQuestions struct {
-	// This field can have the runtime type of [bool].
-	Custom any    `json:"custom"`
-	Header string `json:"header,required"`
-	// This field can have the runtime type of [bool].
-	Multiple any                                                             `json:"multiple"`
-	Options  []EventListResponseEventQuestionAskedPropertiesQuestionsOptions `json:"options,required"`
-	Question string                                                          `json:"question,required"`
-	JSON     eventListResponseEventQuestionAskedPropertiesQuestionsJSON      `json:"-"`
-}
-
-type eventListResponseEventQuestionAskedPropertiesQuestionsJSON struct {
-	Custom      apijson.Field
-	Header      apijson.Field
-	Multiple    apijson.Field
-	Options     apijson.Field
-	Question    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionAskedPropertiesQuestions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesQuestionsJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventQuestionAskedPropertiesQuestionsOptions struct {
-	Description string                                                            `json:"description,required"`
-	Label       string                                                            `json:"label,required"`
-	JSON        eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON struct {
-	Description apijson.Field
-	Label       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionAskedPropertiesQuestionsOptions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventQuestionAskedPropertiesTool struct {
-	CallID    string                                                `json:"callID,required"`
-	MessageID string                                                `json:"messageID,required"`
-	JSON      eventListResponseEventQuestionAskedPropertiesToolJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionAskedPropertiesToolJSON struct {
-	CallID      apijson.Field
-	MessageID   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionAskedPropertiesTool) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesToolJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -3449,55 +3383,6 @@ const (
 func (r EventListResponseEventWorktreeFailedType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventWorktreeFailedTypeWorktreeFailed:
-		return true
-	}
-	return false
-}
-
-type Pty struct {
-	Args    []string `json:"args,required"`
-	Command string   `json:"command,required"`
-	Cwd     string   `json:"cwd,required"`
-	// ExitCode is the exit code of the PTY process if it has exited.
-	ExitCode int64     `json:"exitCode"`
-	ID       string    `json:"id,required"`
-	Pid      int64     `json:"pid,required"`
-	Status   PtyStatus `json:"status,required"`
-	Title    string    `json:"title,required"`
-	JSON     ptyJSON   `json:"-"`
-}
-
-type ptyJSON struct {
-	Args        apijson.Field
-	Command     apijson.Field
-	Cwd         apijson.Field
-	ExitCode    apijson.Field
-	ID          apijson.Field
-	Pid         apijson.Field
-	Status      apijson.Field
-	Title       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *Pty) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptyJSON) RawJSON() string {
-	return r.raw
-}
-
-type PtyStatus string
-
-const (
-	PtyStatusRunning PtyStatus = "running"
-	PtyStatusExited  PtyStatus = "exited"
-)
-
-func (r PtyStatus) IsKnown() bool {
-	switch r {
-	case PtyStatusRunning, PtyStatusExited:
 		return true
 	}
 	return false

@@ -171,9 +171,9 @@ func (r SyncStartParams) URLQuery() (v url.Values) {
 }
 
 type SyncReplayParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Body      SyncReplayParamsBody `json:"-"`
+	Directory param.Field[string]               `query:"directory"`
+	Workspace param.Field[string]               `query:"workspace"`
+	Body      param.Field[SyncReplayParamsBody] `json:"-"`
 }
 
 func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
@@ -210,9 +210,9 @@ func (r SyncReplayParamsBodyEvent) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncStealParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Body      SyncStealParamsBody `json:"-"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
+	Body      param.Field[SyncStealParamsBody] `json:"-"`
 }
 
 func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
@@ -236,16 +236,13 @@ func (r SyncStealParamsBody) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncHistoryListParams struct {
-	Directory param.Field[string]       `query:"directory"`
-	Workspace param.Field[string]       `query:"workspace"`
-	Body      SyncHistoryListParamsBody `json:"-"`
+	Directory param.Field[string]                    `query:"directory"`
+	Workspace param.Field[string]                    `query:"workspace"`
+	Body      param.Field[SyncHistoryListParamsBody] `json:"-"`
 }
 
 func (r SyncHistoryListParams) MarshalJSON() (data []byte, err error) {
-	if len(r.Body) > 0 {
-		return apijson.MarshalRoot(r.Body)
-	}
-	return nil, nil
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [SyncHistoryListParams]'s query parameters as `url.Values`.

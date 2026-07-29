@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"slices"
 
+	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
@@ -59,4 +60,52 @@ func (r V2LocationGetParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// LocationInfo represents location metadata returned in list responses.
+type LocationInfo struct {
+	Directory   string              `json:"directory,required"`
+	WorkspaceID string              `json:"workspaceID"`
+	Project     LocationInfoProject `json:"project,required"`
+	JSON        locationInfoJSON    `json:"-"`
+}
+
+// locationInfoJSON contains the JSON metadata for the struct [LocationInfo]
+type locationInfoJSON struct {
+	Directory   apijson.Field
+	WorkspaceID apijson.Field
+	Project     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LocationInfo) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r locationInfoJSON) RawJSON() string {
+	return r.raw
+}
+
+// LocationInfoProject represents project information within a location.
+type LocationInfoProject struct {
+	ID        string                  `json:"id,required"`
+	Directory string                  `json:"directory,required"`
+	JSON      locationInfoProjectJSON `json:"-"`
+}
+
+// locationInfoProjectJSON contains the JSON metadata for the struct [LocationInfoProject]
+type locationInfoProjectJSON struct {
+	ID          apijson.Field
+	Directory   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LocationInfoProject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r locationInfoProjectJSON) RawJSON() string {
+	return r.raw
 }

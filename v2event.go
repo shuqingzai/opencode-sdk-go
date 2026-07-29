@@ -49,13 +49,6 @@ func (r *V2EventService) ListStreaming(ctx context.Context, opts ...option.Reque
 	return ssestream.NewStream[V2Event](ssestream.NewDecoder(raw), err)
 }
 
-// Subscribe is an alias for [V2EventService.ListStreaming].
-//
-// Deprecated: Use ListStreaming instead.
-func (r *V2EventService) Subscribe(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
-	return r.ListStreaming(ctx, opts...)
-}
-
 // V2Event represents a native event payload from the V2 /api/event endpoint.
 // The V2 format differs from V1: it uses "data" instead of "properties", and
 // includes optional "durable", "location", and "metadata" fields.
@@ -2366,7 +2359,7 @@ type V2EventQuestionAskedData struct {
 	ID        string                       `json:"id,required"`
 	Questions []QuestionInfo               `json:"questions,required"`
 	SessionID string                       `json:"sessionID,required"`
-	Tool      QuestionRequestTool          `json:"tool"`
+	Tool      QuestionTool                 `json:"tool"`
 	JSON      v2EventQuestionAskedDataJSON `json:"-"`
 }
 
@@ -3888,8 +3881,7 @@ func (r V2EventSessionNextPromptAdmittedType) IsKnown() bool {
 type V2EventSessionNextPromptAdmittedData struct {
 	Delivery  V2EventSessionNextPromptAdmittedDelivery `json:"delivery,required"`
 	MessageID string                                   `json:"messageID,required"`
-	// This field can have the runtime type of [V2SessionInputPrompt].
-	Prompt    any                                      `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt                     `json:"prompt,required"`
 	SessionID string                                   `json:"sessionID,required"`
 	Timestamp int64                                    `json:"timestamp,required"`
 	JSON      v2EventSessionNextPromptAdmittedDataJSON `json:"-"`
@@ -3977,8 +3969,7 @@ func (r V2EventSessionNextPromptedType) IsKnown() bool {
 type V2EventSessionNextPromptedData struct {
 	Delivery  V2EventSessionNextPromptedDelivery `json:"delivery,required"`
 	MessageID string                             `json:"messageID,required"`
-	// This field can have the runtime type of [V2SessionInputPrompt].
-	Prompt    any                                `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt               `json:"prompt,required"`
 	SessionID string                             `json:"sessionID,required"`
 	Timestamp int64                              `json:"timestamp,required"`
 	JSON      v2EventSessionNextPromptedDataJSON `json:"-"`
@@ -4272,12 +4263,11 @@ func (r V2EventSessionNextRetriedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRetriedData struct {
-	Attempt int64 `json:"attempt,required"`
-	// This field can have the runtime type of [EventListResponseEventSessionNextRetriedError].
-	Error     any                               `json:"error,required"`
-	SessionID string                            `json:"sessionID,required"`
-	Timestamp int64                             `json:"timestamp,required"`
-	JSON      v2EventSessionNextRetriedDataJSON `json:"-"`
+	Attempt   int64                                         `json:"attempt,required"`
+	Error     EventListResponseEventSessionNextRetriedError `json:"error,required"`
+	SessionID string                                        `json:"sessionID,required"`
+	Timestamp int64                                         `json:"timestamp,required"`
+	JSON      v2EventSessionNextRetriedDataJSON             `json:"-"`
 }
 
 type v2EventSessionNextRetriedDataJSON struct {
@@ -5854,9 +5844,12 @@ func (r V2EventSessionStatusType) IsKnown() bool {
 }
 
 type V2EventSessionStatusData struct {
-	SessionID string                       `json:"sessionID,required"`
-	Status    SessionStatus                `json:"status,required"`
-	JSON      v2EventSessionStatusDataJSON `json:"-"`
+	SessionID string `json:"sessionID,required"`
+	// This field can have the runtime type of [SessionStatusIdle],
+	// [SessionStatusRetry], [SessionStatusBusy].
+	Status any                          `json:"status,required"`
+	JSON   v2EventSessionStatusDataJSON `json:"-"`
+	union  SessionStatus
 }
 
 type v2EventSessionStatusDataJSON struct {
@@ -5867,11 +5860,34 @@ type v2EventSessionStatusDataJSON struct {
 }
 
 func (r *V2EventSessionStatusData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = V2EventSessionStatusData{}
+	err = apijson.UnmarshalRoot(data, r)
+	if err != nil {
+		return err
+	}
+	// Decode the "status" sub-JSON into the union so that AsStatus() returns
+	// the correctly-typed variant.
+	if statusResult := gjson.ParseBytes(data).Get("status"); statusResult.Exists() && statusResult.Type != gjson.Null {
+		err = apijson.UnmarshalRoot([]byte(statusResult.Raw), &r.union)
+		if err != nil {
+			return err
+		}
+		r.Status = r.union
+	}
+	return nil
 }
 
 func (r v2EventSessionStatusDataJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsStatus returns a [SessionStatus] interface which you can cast to the specific
+// types for more type safety.
+//
+// Possible runtime types of the union are [SessionStatusIdle],
+// [SessionStatusRetry], [SessionStatusBusy].
+func (r V2EventSessionStatusData) AsStatus() SessionStatus {
+	return r.union
 }
 
 type V2EventSessionUpdated struct {

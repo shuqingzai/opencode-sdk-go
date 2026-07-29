@@ -45,8 +45,8 @@ func (r *ExperimentalResourceService) List(ctx context.Context, query Experiment
 type McpResource struct {
 	Name        string          `json:"name,required"`
 	URI         string          `json:"uri,required"`
-	Description string          `json:"description,omitempty"`
-	MIMEType    string          `json:"mimeType,omitempty"`
+	Description string          `json:"description"`
+	MIMEType    string          `json:"mimeType"`
 	Client      string          `json:"client,required"`
 	JSON        mcpResourceJSON `json:"-"`
 }

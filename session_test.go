@@ -4,6 +4,7 @@ package opencode_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -548,5 +549,43 @@ func TestSessionUnshareWithOptionalParams(t *testing.T) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
 		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+// --- Unit tests (no server required) ---
+
+// TestSessionUpdateParamsTimeMarshalJSON is a regression test for 🔴-1:
+// SessionUpdateParamsTime.MarshalJSON must serialize correctly so PATCH /session/{id}
+// can send the `time` object with `archived` field.
+// OpenAPI: PATCH /session/{sessionID} requestBody.properties.time = {archived: number}
+func TestSessionUpdateParamsTimeMarshalJSON(t *testing.T) {
+	params := opencode.SessionUpdateParams{
+		Time: opencode.F(opencode.SessionUpdateParamsTime{
+			Archived: opencode.F(int64(123)),
+		}),
+	}
+
+	data, err := params.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON failed: %v", err)
+	}
+
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		t.Fatalf("JSON is invalid: %v", err)
+	}
+
+	// Verify `time` field is present and contains `archived`
+	timeVal, ok := m["time"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected time to be a map, got %T: %v", m["time"], m["time"])
+	}
+	archived, ok := timeVal["archived"]
+	if !ok {
+		t.Fatal("expected time.archived to be present")
+	}
+	// JSON numbers unmarshal as float64
+	if archived != float64(123) {
+		t.Errorf("expected time.archived=123, got %v", archived)
 	}
 }

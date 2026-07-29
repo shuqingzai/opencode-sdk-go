@@ -552,17 +552,43 @@ func (r AgentPartInputSourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Satisfied by [OutputFormatText], [OutputFormatJsonSchema].
+// OutputFormatUnion is the response-side view of the OpenAPI `OutputFormat`
+// union (`anyOf [OutputFormatText, OutputFormatJsonSchema]`), which JS SDK v2
+// spells `OutputFormat = OutputFormatText | OutputFormatJsonSchema`. It is
+// reached through [UserMessage.AsFormat].
+//
+// OpenAPI references `OutputFormat` from three places: the request bodies of
+// `POST /session/{sessionID}/message` and `POST /session/{sessionID}/prompt_async`,
+// and the response schema `UserMessage.format`. Request and Response are modelled
+// by separate Go types because the former wraps every field in param.Field, so the
+// request-side spelling of this same schema is [SessionPromptParamsFormatUnion].
+//
+// Satisfied by [OutputFormatText] or [OutputFormatJsonSchema].
 type OutputFormatUnion interface {
 	implementsOutputFormatUnion()
 }
 
+// OutputFormatText is the `{type: "text"}` variant of the OpenAPI `OutputFormat`
+// union, requesting plain-text output.
 type OutputFormatText struct {
-	Type param.Field[OutputFormatTextType] `json:"type,required"`
+	Type OutputFormatTextType `json:"type,required"`
+	JSON outputFormatTextJSON `json:"-"`
 }
 
-func (r OutputFormatText) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+// outputFormatTextJSON contains the JSON metadata for the struct
+// [OutputFormatText]
+type outputFormatTextJSON struct {
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OutputFormatText) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r outputFormatTextJSON) RawJSON() string {
+	return r.raw
 }
 
 func (r OutputFormatText) implementsOutputFormatUnion() {}
@@ -581,14 +607,38 @@ func (r OutputFormatTextType) IsKnown() bool {
 	return false
 }
 
+// OutputFormatJsonSchema is the `{type: "json_schema", schema, retryCount?}`
+// variant of the OpenAPI `OutputFormat` union, requesting structured output that
+// conforms to a JSON Schema.
 type OutputFormatJsonSchema struct {
-	Type       param.Field[OutputFormatJsonSchemaType] `json:"type,required"`
-	Schema     param.Field[any]                        `json:"schema,required"`
-	RetryCount param.Field[int64]                      `json:"retryCount"`
+	Type OutputFormatJsonSchemaType `json:"type,required"`
+	// JSON Schema the structured output must conform to. OpenAPI types it as
+	// `$ref JSONSchema`, which is the open object `{"type": "object"}` (JS SDK v2:
+	// `JsonSchema = { [key: string]: unknown }`), so it declares no fixed shape.
+	Schema map[string]any `json:"schema,required"`
+	// Number of retries allowed when the model fails to produce conforming output.
+	// OpenAPI declares it as `integer` with `minimum: 0` and it is optional, so an
+	// absent value decodes to 0.
+	RetryCount int64                      `json:"retryCount"`
+	JSON       outputFormatJsonSchemaJSON `json:"-"`
 }
 
-func (r OutputFormatJsonSchema) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+// outputFormatJsonSchemaJSON contains the JSON metadata for the struct
+// [OutputFormatJsonSchema]
+type outputFormatJsonSchemaJSON struct {
+	Type        apijson.Field
+	Schema      apijson.Field
+	RetryCount  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OutputFormatJsonSchema) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r outputFormatJsonSchemaJSON) RawJSON() string {
+	return r.raw
 }
 
 func (r OutputFormatJsonSchema) implementsOutputFormatUnion() {}
@@ -607,17 +657,36 @@ func (r OutputFormatJsonSchemaType) IsKnown() bool {
 	return false
 }
 
+// The union is discriminated on `type`, which OpenAPI pins to `enum: ["text"]` on
+// OutputFormatText and `enum: ["json_schema"]` on OutputFormatJsonSchema.
+//
+// Registering the key explicitly makes the routing independent of the exactness
+// heuristic (internal/apijson/decoder.go, newUnionDecoder). Both variants would in
+// fact still be reachable without it, because each types its `Type` field as its own
+// single-value enum and guardUnknown downgrades a variant whose enum rejects the
+// incoming value — the same implicit mechanism the non-discriminated unions below
+// (PartUnion, ToolPartStateUnion, ...) rely on. The explicit key removes that
+// dependency: the heuristic never penalises a *missing* `required` field, so were
+// either `Type` ever widened to a plain string or to a multi-value enum, the
+// left-most variant would silently win for both payloads.
+//
+// DiscriminatorValue must stay an untyped string constant ("text"/"json_schema"):
+// the decoder compares it against the `any` gjson value with `==`, so a typed enum
+// constant such as [OutputFormatTextTypeText] would never match. A `type` that
+// matches neither value still falls through to the heuristic.
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[OutputFormatUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[OutputFormatText](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeFor[OutputFormatText](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[OutputFormatJsonSchema](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "json_schema",
+			Type:               reflect.TypeFor[OutputFormatJsonSchema](),
 		},
 	)
 }
@@ -635,10 +704,12 @@ type AssistantMessage struct {
 	SessionID  string                 `json:"sessionID,required"`
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
-	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
-	Structured any                   `json:"structured,omitzero"`
-	Variant    string                `json:"variant,omitzero"`
-	Finish     string                `json:"finish,omitzero"`
+	// Arbitrary JSON value holding the assistant's structured output. Per OpenAPI
+	// `AssistantMessage.structured` is an unconstrained schema (`{}`), so no fixed
+	// set of runtime types applies.
+	Structured any                   `json:"structured"`
+	Variant    string                `json:"variant"`
+	Finish     string                `json:"finish"`
 	Error      AssistantMessageError `json:"error"`
 	Summary    bool                  `json:"summary"`
 	JSON       assistantMessageJSON  `json:"-"`
@@ -983,25 +1054,34 @@ func (r FilePartInputType) IsKnown() bool {
 }
 
 type FilePartSource struct {
-	Path string             `json:"path,required"`
+	// Text is the only property OpenAPI marks required on all three members of the
+	// `FilePartSource` anyOf; `path` is absent from [ResourceSource] and
+	// `clientName`/`uri` are absent from [FileSource] and [SymbolSource], so any
+	// individual field may be zero depending on which variant arrived. Use
+	// [FilePartSource.AsUnion] for the variant-exact view.
 	Text FilePartSourceText `json:"text,required"`
 	Type FilePartSourceType `json:"type,required"`
+	Path string             `json:"path"`
 	Kind int64              `json:"kind"`
 	Name string             `json:"name"`
 	// This field can have the runtime type of [SymbolSourceRange].
-	Range any                `json:"range"`
-	JSON  filePartSourceJSON `json:"-"`
-	union FilePartSourceUnion
+	Range      any                `json:"range"`
+	ClientName string             `json:"clientName"`
+	URI        string             `json:"uri"`
+	JSON       filePartSourceJSON `json:"-"`
+	union      FilePartSourceUnion
 }
 
 // filePartSourceJSON contains the JSON metadata for the struct [FilePartSource]
 type filePartSourceJSON struct {
-	Path        apijson.Field
 	Text        apijson.Field
 	Type        apijson.Field
+	Path        apijson.Field
 	Kind        apijson.Field
 	Name        apijson.Field
 	Range       apijson.Field
+	ClientName  apijson.Field
+	URI         apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1022,12 +1102,13 @@ func (r *FilePartSource) UnmarshalJSON(data []byte) (err error) {
 // AsUnion returns a [FilePartSourceUnion] interface which you can cast to the
 // specific types for more type safety.
 //
-// Possible runtime types of the union are [FileSource], [SymbolSource].
+// Possible runtime types of the union are [FileSource], [SymbolSource],
+// [ResourceSource].
 func (r FilePartSource) AsUnion() FilePartSourceUnion {
 	return r.union
 }
 
-// Union satisfied by [FileSource] or [SymbolSource].
+// Union satisfied by [FileSource], [SymbolSource] or [ResourceSource].
 type FilePartSourceUnion interface {
 	implementsFilePartSource()
 }
@@ -1067,13 +1148,21 @@ func (r FilePartSourceType) IsKnown() bool {
 	return false
 }
 
+// FilePartSourceParam is the catch-all request-side member of the OpenAPI
+// `FilePartSource` anyOf: it carries the union of every property declared by
+// [FileSourceParam], [SymbolSourceParam] and [ResourceSourceParam], so callers can
+// build a source whose shape this SDK does not model as its own variant yet. Only
+// `text` and `type` are required by all three members; set the subset that belongs
+// to the variant named by Type.
 type FilePartSourceParam struct {
-	Path  param.Field[string]                  `json:"path,required"`
-	Text  param.Field[FilePartSourceTextParam] `json:"text,required"`
-	Type  param.Field[FilePartSourceType]      `json:"type,required"`
-	Kind  param.Field[int64]                   `json:"kind"`
-	Name  param.Field[string]                  `json:"name"`
-	Range param.Field[any]                     `json:"range"`
+	Text       param.Field[FilePartSourceTextParam] `json:"text,required"`
+	Type       param.Field[FilePartSourceType]      `json:"type,required"`
+	Path       param.Field[string]                  `json:"path"`
+	Kind       param.Field[int64]                   `json:"kind"`
+	Name       param.Field[string]                  `json:"name"`
+	Range      param.Field[any]                     `json:"range"`
+	ClientName param.Field[string]                  `json:"clientName"`
+	URI        param.Field[string]                  `json:"uri"`
 }
 
 func (r FilePartSourceParam) MarshalJSON() (data []byte, err error) {
@@ -1082,7 +1171,8 @@ func (r FilePartSourceParam) MarshalJSON() (data []byte, err error) {
 
 func (r FilePartSourceParam) implementsFilePartSourceUnionParam() {}
 
-// Satisfied by [FileSourceParam], [SymbolSourceParam], [FilePartSourceParam].
+// Satisfied by [FileSourceParam], [SymbolSourceParam], [ResourceSourceParam],
+// [FilePartSourceParam].
 type FilePartSourceUnionParam interface {
 	implementsFilePartSourceUnionParam()
 }
@@ -1220,9 +1310,21 @@ type Message struct {
 	// This field can have the runtime type of [string].
 	System any `json:"system"`
 	// This field can have the runtime type of [AssistantMessageTokens].
-	Tokens any         `json:"tokens"`
-	JSON   messageJSON `json:"-"`
-	union  MessageUnion
+	Tokens any `json:"tokens"`
+	// This field can have the runtime type of [OutputFormatText],
+	// [OutputFormatJsonSchema].
+	Format any `json:"format"`
+	// This field can have the runtime type of [UserMessageModel].
+	Model any `json:"model"`
+	// Arbitrary JSON value holding the assistant's structured output. Per OpenAPI
+	// `AssistantMessage.structured` is an unconstrained schema (`{}`), so no fixed
+	// set of runtime types applies.
+	Structured any `json:"structured"`
+	// This field can have the runtime type of [map[string]bool].
+	Tools   any         `json:"tools"`
+	Variant string      `json:"variant"`
+	JSON    messageJSON `json:"-"`
+	union   MessageUnion
 }
 
 // messageJSON contains the JSON metadata for the struct [Message]
@@ -1243,6 +1345,11 @@ type messageJSON struct {
 	Finish      apijson.Field
 	System      apijson.Field
 	Tokens      apijson.Field
+	Format      apijson.Field
+	Model       apijson.Field
+	Structured  apijson.Field
+	Tools       apijson.Field
+	Variant     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1701,8 +1808,9 @@ type Session struct {
 	Summary     SessionSummary `json:"summary"`
 	Tokens      SessionTokens  `json:"tokens"`
 	WorkspaceID string         `json:"workspaceID"`
-	// This field can have the runtime type of [[]PermissionRuleResponse].
-	Permission any `json:"permission"`
+	// Permission is the session's permission ruleset, matching the OpenAPI
+	// `PermissionRuleset` schema (an array of `PermissionRule`).
+	Permission PermissionRuleset `json:"permission"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any         `json:"metadata"`
 	JSON     sessionJSON `json:"-"`
@@ -2584,11 +2692,14 @@ type ToolPartState struct {
 	// This field can have the runtime type of [[]FilePart].
 	Attachments any    `json:"attachments"`
 	Error       string `json:"error"`
-	// This field can have the runtime type of [any], [map[string]any].
-	Input any `json:"input"`
+	// This field can have the runtime type of [map[string]any].
+	Input any `json:"input,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any    `json:"metadata"`
 	Output   string `json:"output"`
+	// Raw is the unparsed tool input; OpenAPI declares it only on
+	// `ToolStatePending`, where it is required.
+	Raw string `json:"raw"`
 	// This field can have the runtime type of [ToolStateRunningTime],
 	// [ToolStateCompletedTime], [ToolStateErrorTime].
 	Time  any               `json:"time"`
@@ -2605,6 +2716,7 @@ type toolPartStateJSON struct {
 	Input       apijson.Field
 	Metadata    apijson.Field
 	Output      apijson.Field
+	Raw         apijson.Field
 	Time        apijson.Field
 	Title       apijson.Field
 	raw         string
@@ -2948,11 +3060,21 @@ type UserMessage struct {
 	Role      UserMessageRole  `json:"role,required"`
 	SessionID string           `json:"sessionID,required"`
 	Time      UserMessageTime  `json:"time,required"`
-	// This field can have the runtime type of [OutputFormatText],
-	// [OutputFormatJsonSchema].
-	Format  any                `json:"format,omitzero"`
-	System  string             `json:"system,omitzero"`
-	Tools   map[string]bool    `json:"tools,omitzero"`
+	// Structured-output format requested for this message. Per OpenAPI
+	// `UserMessage.format` is `OutputFormat` (`anyOf [OutputFormatText,
+	// OutputFormatJsonSchema]`), so the field is declared as the registered
+	// [OutputFormatUnion] and internal/apijson routes it natively: typeDecoder finds
+	// the interface in its union registry and installs newUnionDecoder for this field
+	// (internal/apijson/decoder.go).
+	//
+	// The concrete runtime type is [OutputFormatText] or [OutputFormatJsonSchema].
+	// `format` is not in `UserMessage.required`, so it is nil when absent or null; it
+	// is also nil for a payload no registered variant accepts (a scalar, an array, or
+	// a future shape), in which case the value stays reachable through
+	// [userMessageJSON.RawJSON] and the per-field `JSON.Format` metadata.
+	Format  OutputFormatUnion  `json:"format"`
+	System  string             `json:"system"`
+	Tools   map[string]bool    `json:"tools"`
 	Summary UserMessageSummary `json:"summary"`
 	JSON    userMessageJSON    `json:"-"`
 }
@@ -2979,6 +3101,23 @@ func (r *UserMessage) UnmarshalJSON(data []byte) (err error) {
 
 func (r userMessageJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsFormat returns the format field as a typed union.
+//
+// Possible runtime types of the union are [OutputFormatText] or
+// [OutputFormatJsonSchema]. It is nil when `format` is absent or null, which
+// OpenAPI allows because `format` is not in `UserMessage.required`, and also when no
+// registered variant accepts the payload.
+//
+// [UserMessage.Format] is declared as [OutputFormatUnion] and routed by
+// internal/apijson as an ordinary struct field, so it is already typed on every
+// decode path -- including through [MessageUnion], where internal/apijson skips the
+// indirect unmarshaler for registered variants (internal/apijson/decoder.go) and
+// [UnmarshalJSON] therefore never runs. This accessor is the named, documented view
+// of that field and needs no recovery step.
+func (r UserMessage) AsFormat() OutputFormatUnion {
+	return r.Format
 }
 
 func (r UserMessage) implementsMessage() {}
@@ -3203,6 +3342,10 @@ type SessionUpdateParams struct {
 
 type SessionUpdateParamsTime struct {
 	Archived param.Field[int64] `json:"archived"`
+}
+
+func (r SessionUpdateParamsTime) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 func (r SessionUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3709,14 +3852,14 @@ func (r sessionStatusIdleJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r SessionStatusIdle) ImplementsSessionStatus() {}
+func (r SessionStatusIdle) implementsSessionStatus() {}
 
 // SessionStatusRetry represents a retry session status
 type SessionStatusRetry struct {
 	Type    string                   `json:"type,required"`
 	Attempt int64                    `json:"attempt,required"`
 	Message string                   `json:"message,required"`
-	Action  SessionStatusRetryAction `json:"action,omitzero"`
+	Action  SessionStatusRetryAction `json:"action"`
 	Next    int64                    `json:"next,required"`
 	JSON    sessionStatusRetryJSON   `json:"-"`
 }
@@ -3738,7 +3881,7 @@ type SessionStatusRetryAction struct {
 	Title    string                       `json:"title,required"`
 	Message  string                       `json:"message,required"`
 	Label    string                       `json:"label,required"`
-	Link     string                       `json:"link,omitzero"`
+	Link     string                       `json:"link"`
 	JSON     sessionStatusRetryActionJSON `json:"-"`
 }
 
@@ -3769,7 +3912,7 @@ func (r sessionStatusRetryJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r SessionStatusRetry) ImplementsSessionStatus() {}
+func (r SessionStatusRetry) implementsSessionStatus() {}
 
 // SessionStatusBusy represents a busy session status
 type SessionStatusBusy struct {
@@ -3791,11 +3934,17 @@ func (r sessionStatusBusyJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r SessionStatusBusy) ImplementsSessionStatus() {}
+func (r SessionStatusBusy) implementsSessionStatus() {}
 
 // Union satisfied by [SessionStatusIdle], [SessionStatusRetry], [SessionStatusBusy].
+//
+// The marker method is unexported, which seals the union to this package -- the
+// same convention every other union in the SDK follows. Only the unions whose
+// variants live in package shared (see shared/union.go and the
+// ImplementsAssistantMessageError family) need an exported marker, and all three
+// variants of this one are declared here.
 type SessionStatus interface {
-	ImplementsSessionStatus()
+	implementsSessionStatus()
 }
 
 // SessionStatusMap is a map of session IDs to their status, returned by [SessionService.Status].

@@ -3,11 +3,7 @@
 package opencode
 
 import (
-	"net/url"
-
 	"github.com/sst/opencode-sdk-go/internal/apijson"
-	"github.com/sst/opencode-sdk-go/internal/apiquery"
-	"github.com/sst/opencode-sdk-go/internal/param"
 )
 
 // Agent represents an agent definition.
@@ -94,56 +90,4 @@ func (r *AgentModel) UnmarshalJSON(data []byte) (err error) {
 
 func (r agentModelJSON) RawJSON() string {
 	return r.raw
-}
-
-type AgentListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [AgentListParams]'s query parameters as `url.Values`.
-func (r AgentListParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type Skill struct {
-	Name        string    `json:"name,required"`
-	Description string    `json:"description"`
-	Location    string    `json:"location,required"`
-	Content     string    `json:"content,required"`
-	JSON        skillJSON `json:"-"`
-}
-
-// skillJSON contains the JSON metadata for the struct [Skill]
-type skillJSON struct {
-	Name        apijson.Field
-	Description apijson.Field
-	Location    apijson.Field
-	Content     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *Skill) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r skillJSON) RawJSON() string {
-	return r.raw
-}
-
-type AppSkillsParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-}
-
-// URLQuery serializes [AppSkillsParams]'s query parameters as `url.Values`.
-func (r AppSkillsParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }

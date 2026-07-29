@@ -161,9 +161,9 @@ func TestSkillResponseDeserialization(t *testing.T) {
 }
 
 // Aligned with OpenAPI /agent query params (directory, workspace).
-func TestAgentListParamsQuery(t *testing.T) {
+func TestAppAgentsParamsQuery(t *testing.T) {
 	t.Run("both params", func(t *testing.T) {
-		p := AgentListParams{Directory: F("d"), Workspace: F("w")}
+		p := AppAgentsParams{Directory: F("d"), Workspace: F("w")}
 		got := p.URLQuery().Encode()
 		want := "directory=d&workspace=w"
 		if got != want {
@@ -172,14 +172,14 @@ func TestAgentListParamsQuery(t *testing.T) {
 	})
 
 	t.Run("empty params", func(t *testing.T) {
-		p := AgentListParams{}
+		p := AppAgentsParams{}
 		if got := p.URLQuery().Encode(); got != "" {
 			t.Errorf("got %q, want empty", got)
 		}
 	})
 
 	t.Run("only directory", func(t *testing.T) {
-		p := AgentListParams{Directory: F("d")}
+		p := AppAgentsParams{Directory: F("d")}
 		if got := p.URLQuery().Encode(); got != "directory=d" {
 			t.Errorf("got %q, want directory=d", got)
 		}

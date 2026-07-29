@@ -73,8 +73,9 @@ type V2ModelInfo struct {
 	ProviderID string `json:"providerID,required"`
 	Family     string `json:"family"`
 	Name       string `json:"name,required"`
-	// This field can have the runtime type of [V2ModelInfoAPIAisdk], [V2ModelInfoAPINative].
-	API          any                     `json:"api,required"`
+	// API is the OpenAPI [ModelApi] anyOf; the decoder selects the concrete variant
+	// structurally, so a nil value means the field was absent, null or malformed.
+	API          V2ModelInfoAPIUnion     `json:"api,required"`
 	Capabilities V2ModelInfoCapabilities `json:"capabilities,required"`
 	Request      V2ModelInfoRequest      `json:"request,required"`
 	Variants     []V2ModelInfoVariant    `json:"variants,required"`
@@ -84,7 +85,6 @@ type V2ModelInfo struct {
 	Enabled      bool                    `json:"enabled,required"`
 	Limit        V2ModelInfoLimit        `json:"limit,required"`
 	JSON         v2ModelInfoJSON         `json:"-"`
-	apiUnion     V2ModelInfoAPIUnion
 }
 
 // v2ModelInfoJSON contains the JSON metadata for the struct [V2ModelInfo]
@@ -107,20 +107,7 @@ type v2ModelInfoJSON struct {
 }
 
 func (r *V2ModelInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ModelInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	apiData := gjson.GetBytes(data, "api").Raw
-	if apiData != "" {
-		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
-		if err != nil {
-			return err
-		}
-		r.API = r.apiUnion
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ModelInfoJSON) RawJSON() string {
@@ -129,7 +116,7 @@ func (r v2ModelInfoJSON) RawJSON() string {
 
 // AsAPIUnion returns the api field as a typed union.
 func (r *V2ModelInfo) AsAPIUnion() V2ModelInfoAPIUnion {
-	return r.apiUnion
+	return r.API
 }
 
 // V2ModelInfoAPIUnion represents the api configuration of a model.
@@ -141,12 +128,11 @@ type V2ModelInfoAPIUnion interface {
 }
 
 type V2ModelInfoAPIAisdk struct {
-	ID      string                  `json:"id,required"`
-	Type    V2ModelInfoAPIAisdkType `json:"type,required"`
-	Package string                  `json:"package,required"`
-	URL     string                  `json:"url"`
-	// This field can have the runtime type of [map[string]any].
-	Settings any                     `json:"settings"`
+	ID       string                  `json:"id,required"`
+	Type     V2ModelInfoAPIAisdkType `json:"type,required"`
+	Package  string                  `json:"package,required"`
+	URL      string                  `json:"url"`
+	Settings map[string]any          `json:"settings"`
 	JSON     v2ModelInfoAPIAisdkJSON `json:"-"`
 }
 
@@ -171,11 +157,10 @@ func (r v2ModelInfoAPIAisdkJSON) RawJSON() string {
 func (r V2ModelInfoAPIAisdk) implementsV2ModelInfoAPIUnion() {}
 
 type V2ModelInfoAPINative struct {
-	ID   string                   `json:"id,required"`
-	Type V2ModelInfoAPINativeType `json:"type,required"`
-	URL  string                   `json:"url"`
-	// This field can have the runtime type of [map[string]any].
-	Settings any                      `json:"settings,required"`
+	ID       string                   `json:"id,required"`
+	Type     V2ModelInfoAPINativeType `json:"type,required"`
+	URL      string                   `json:"url"`
+	Settings map[string]any           `json:"settings,required"`
 	JSON     v2ModelInfoAPINativeJSON `json:"-"`
 }
 
@@ -242,9 +227,8 @@ func init() {
 }
 
 type V2ModelInfoRequest struct {
-	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]any].
-	Body    any                    `json:"body,required"`
+	Headers map[string]string      `json:"headers,required"`
+	Body    map[string]any         `json:"body,required"`
 	Variant string                 `json:"variant"`
 	JSON    v2ModelInfoRequestJSON `json:"-"`
 }
@@ -266,11 +250,10 @@ func (r v2ModelInfoRequestJSON) RawJSON() string {
 }
 
 type V2ModelInfoVariant struct {
-	ID      string            `json:"id,required"`
-	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]any].
-	Body any                    `json:"body,required"`
-	JSON v2ModelInfoVariantJSON `json:"-"`
+	ID      string                 `json:"id,required"`
+	Headers map[string]string      `json:"headers,required"`
+	Body    map[string]any         `json:"body,required"`
+	JSON    v2ModelInfoVariantJSON `json:"-"`
 }
 
 type v2ModelInfoVariantJSON struct {
@@ -450,6 +433,30 @@ func (r *V2ModelInfoLimit) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2ModelInfoLimitJSON) RawJSON() string {
+	return r.raw
+}
+
+type ModelRef struct {
+	ID         string       `json:"id,required"`
+	ProviderID string       `json:"providerID,required"`
+	Variant    string       `json:"variant"`
+	JSON       modelRefJSON `json:"-"`
+}
+
+// modelRefJSON contains the JSON metadata for the struct [ModelRef]
+type modelRefJSON struct {
+	ID          apijson.Field
+	ProviderID  apijson.Field
+	Variant     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ModelRef) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r modelRefJSON) RawJSON() string {
 	return r.raw
 }
 

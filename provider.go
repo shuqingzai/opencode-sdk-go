@@ -11,13 +11,14 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/sst/opencode-sdk-go/shared"
-	"github.com/tidwall/gjson"
 )
 
 // ProviderService contains methods and other services that help with interacting with
@@ -88,11 +89,6 @@ func (r *ProviderOauthService) Authorize(ctx context.Context, providerID string,
 	return
 }
 
-// Deprecated: Use [ProviderOauthService.Authorize] instead.
-func (r *ProviderService) OauthAuthorize(ctx context.Context, providerID string, params ProviderOauthAuthorizeParams, opts ...option.RequestOption) (res *ProviderOauthAuthorizeResponse, err error) {
-	return r.Oauth.Authorize(ctx, providerID, params, opts...)
-}
-
 // OAuth callback
 func (r *ProviderOauthService) Callback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -103,11 +99,6 @@ func (r *ProviderOauthService) Callback(ctx context.Context, providerID string, 
 	path := fmt.Sprintf("provider/%s/oauth/callback", providerID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
-}
-
-// Deprecated: Use [ProviderOauthService.Callback] instead.
-func (r *ProviderService) OauthCallback(ctx context.Context, providerID string, params ProviderOauthCallbackParams, opts ...option.RequestOption) (res *bool, err error) {
-	return r.Oauth.Callback(ctx, providerID, params, opts...)
 }
 
 // ProviderListResponse represents the response from listing providers.
@@ -201,8 +192,12 @@ type ProviderModel struct {
 	Options      map[string]any            `json:"options,required"`
 	Headers      map[string]string         `json:"headers,required"`
 	ReleaseDate  string                    `json:"release_date,required"`
-	Variants     map[string]any            `json:"variants"`
-	JSON         providerModelJSON         `json:"-"`
+	// Per OpenAPI `Model.variants` is `{"type":"object","additionalProperties":
+	// {"type":"object"}}` and JS SDK(v2) types it as
+	// `{[key: string]: {[key: string]: unknown}}`: a map of variant name to a
+	// free-form object, so the value type is itself a map rather than a bare `any`.
+	Variants map[string]map[string]any `json:"variants"`
+	JSON     providerModelJSON         `json:"-"`
 }
 
 // providerModelJSON contains the JSON metadata for the struct [ProviderModel]
@@ -283,10 +278,11 @@ type ProviderModelCapabilities struct {
 	ToolCall    bool                                `json:"toolcall,required"`
 	Input       ProviderModelCapabilitiesModalities `json:"input,required"`
 	Output      ProviderModelCapabilitiesModalities `json:"output,required"`
-	// This field can have the runtime type of [shared.UnionBool],
-	// [ProviderModelCapabilitiesInterleavedField].
-	Interleaved any                           `json:"interleaved,required"`
-	JSON        providerModelCapabilitiesJSON `json:"-"`
+	// Interleaved is the OpenAPI `anyOf [boolean, {field: enum}]`; the decoder routes
+	// it to one of the registered [ProviderModelCapabilitiesInterleavedUnion]
+	// variants.
+	Interleaved ProviderModelCapabilitiesInterleavedUnion `json:"interleaved,required"`
+	JSON        providerModelCapabilitiesJSON             `json:"-"`
 }
 
 // providerModelCapabilitiesJSON contains the JSON metadata for the struct
@@ -309,6 +305,16 @@ func (r *ProviderModelCapabilities) UnmarshalJSON(data []byte) (err error) {
 
 func (r providerModelCapabilitiesJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsInterleavedUnion returns the interleaved field as a typed union.
+//
+// Possible runtime types of the union are [shared.UnionBool] (the scalar `true` /
+// `false` form) or [ProviderModelCapabilitiesInterleavedField] (the object form
+// naming the field that carries interleaved reasoning content). It is nil when
+// `interleaved` is absent.
+func (r *ProviderModelCapabilities) AsInterleavedUnion() ProviderModelCapabilitiesInterleavedUnion {
+	return r.Interleaved
 }
 
 // ProviderModelCapabilitiesModalities represents input/output modality support for a model.
@@ -586,11 +592,11 @@ func (r providerModelLimitJSON) RawJSON() string {
 type ProviderAuthMethod struct {
 	Type  ProviderAuthMethodType `json:"type,required"`
 	Label string                 `json:"label,required"`
-	// This field can have the runtime type of [[]ProviderAuthMethodPromptText],
-	// [[]ProviderAuthMethodPromptSelect], or a mixed array where each element is
-	// one of those types (per OpenAPI anyOf per element).
-	Prompts any                    `json:"prompts"`
-	JSON    providerAuthMethodJSON `json:"-"`
+	// Prompts is the OpenAPI array whose item schema is an inline `anyOf` of the text
+	// and select prompt objects; the decoder routes each element to one of the
+	// registered [ProviderAuthMethodPrompt] variants.
+	Prompts []ProviderAuthMethodPrompt `json:"prompts"`
+	JSON    providerAuthMethodJSON     `json:"-"`
 }
 
 // providerAuthMethodJSON contains the JSON metadata for the struct [ProviderAuthMethod]
@@ -608,6 +614,14 @@ func (r *ProviderAuthMethod) UnmarshalJSON(data []byte) (err error) {
 
 func (r providerAuthMethodJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsPromptsUnion returns the prompts field as a typed slice of union values.
+//
+// Possible runtime types of each element are [ProviderAuthMethodPromptText] or
+// [ProviderAuthMethodPromptSelect]. It is nil when `prompts` is absent.
+func (r *ProviderAuthMethod) AsPromptsUnion() []ProviderAuthMethodPrompt {
+	return r.Prompts
 }
 
 // ProviderAuthMethodType represents the type of an authentication method.

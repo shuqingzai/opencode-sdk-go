@@ -1441,31 +1441,6 @@ func (r *SyncEventSessionNextRevertCommitted) UnmarshalJSON(data []byte) (err er
 
 func (r SyncEventSessionNextRevertCommitted) implementsSyncEventResponseSyncEventDataUnion() {}
 
-// SyncEventPrompt represents a prompt input, matching OpenAPI's Prompt schema
-// used by SyncEventSessionNextPromptAdmitted.
-type SyncEventPrompt struct {
-	Text   string                    `json:"text,required"`
-	Files  []V2PromptFileAttachment  `json:"files"`
-	Agents []V2PromptAgentAttachment `json:"agents"`
-	JSON   syncEventPromptJSON       `json:"-"`
-}
-
-type syncEventPromptJSON struct {
-	Text        apijson.Field
-	Files       apijson.Field
-	Agents      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventPromptJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventPrompt) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 type SyncEventSessionNextContextUpdatedType string
 
 const (
@@ -1568,7 +1543,7 @@ type SyncEventSessionNextPromptAdmittedProperties struct {
 	Timestamp int64                                            `json:"timestamp,required"`
 	SessionID string                                           `json:"sessionID,required"`
 	MessageID string                                           `json:"messageID,required"`
-	Prompt    SyncEventPrompt                                  `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt                             `json:"prompt,required"`
 	Delivery  SyncEventSessionNextPromptAdmittedDelivery       `json:"delivery,required"`
 	JSON      syncEventSessionNextPromptAdmittedPropertiesJSON `json:"-"`
 }

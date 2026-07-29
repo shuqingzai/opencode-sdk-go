@@ -60,7 +60,7 @@ func (r *ExperimentalConsoleService) SwitchOrg(ctx context.Context, body Console
 
 type ConsoleState struct {
 	ConsoleManagedProviders []string         `json:"consoleManagedProviders,required"`
-	ActiveOrgName           string           `json:"activeOrgName,omitempty"`
+	ActiveOrgName           string           `json:"activeOrgName"`
 	SwitchableOrgCount      int64            `json:"switchableOrgCount,required"`
 	JSON                    consoleStateJSON `json:"-"`
 }
@@ -155,9 +155,9 @@ func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
 
 // ConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
 type ConsoleSwitchOrgParams struct {
-	Directory param.Field[string]   `query:"directory"`
-	Workspace param.Field[string]   `query:"workspace"`
-	Body      ConsoleSwitchOrgInput `json:"-"`
+	Directory param.Field[string]                      `query:"directory"`
+	Workspace param.Field[string]                      `query:"workspace"`
+	Body      param.Field[ConsoleSwitchOrgParamsInput] `json:"-"`
 }
 
 func (r ConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
@@ -172,11 +172,11 @@ func (r ConsoleSwitchOrgParams) URLQuery() (v url.Values) {
 	})
 }
 
-type ConsoleSwitchOrgInput struct {
+type ConsoleSwitchOrgParamsInput struct {
 	AccountID param.Field[string] `json:"accountID,required"`
 	OrgID     param.Field[string] `json:"orgID,required"`
 }
 
-func (r ConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
+func (r ConsoleSwitchOrgParamsInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

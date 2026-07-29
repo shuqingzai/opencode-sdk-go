@@ -118,11 +118,6 @@ func (r *V2PtyService) ConnectToken(ctx context.Context, ptyID string, query V2P
 
 // ===== Response Types =====
 
-// PtyConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
-//
-// Deprecated: Use [PtyTicketConnectToken] instead (matches OpenAPI schema name).
-type PtyConnectToken = PtyTicketConnectToken
-
 // PtyTicketConnectToken represents a short-lived ticket for opening a PTY WebSocket connection.
 type PtyTicketConnectToken struct {
 	Ticket    string                    `json:"ticket,required"`

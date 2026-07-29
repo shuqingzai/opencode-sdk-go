@@ -13,7 +13,7 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestToolIds(t *testing.T) {
+func TestToolIDs(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -25,7 +25,7 @@ func TestToolIds(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Tool.Ids(context.TODO(), opencode.ToolIdsParams{
+	_, err := client.Tool.IDs(context.TODO(), opencode.ToolIDsParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {

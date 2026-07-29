@@ -123,10 +123,17 @@ type Workspace struct {
 	ID   string `json:"id,required"`
 	Type string `json:"type,required"`
 	Name string `json:"name,required"`
+	// Branch is nil when the API returns null for this field or omits it.
 	// This field can have the runtime type of [string].
 	Branch any `json:"branch"`
+	// Directory is nil when the API returns null for this field or omits it.
 	// This field can have the runtime type of [string].
-	Directory any    `json:"directory"`
+	Directory any `json:"directory"`
+	// Extra carries adapter-specific data. Per OpenAPI `Workspace.extra` is
+	// `anyOf [{}, null]` — an unconstrained schema — so the server may return any
+	// JSON value here (objects decode to [map[string]any], arrays to [[]any]) and
+	// the field is nil when the API returns null or omits it. Callers should
+	// type-assert as needed.
 	Extra     any    `json:"extra"`
 	ProjectID string `json:"projectID,required"`
 	// The amount of time in milliseconds that this workspace has been used.
@@ -173,9 +180,9 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 
 // ExperimentalWorkspaceNewParams contains the request parameters for creating a workspace.
 type ExperimentalWorkspaceNewParams struct {
-	Directory param.Field[string]              `query:"directory"`
-	Workspace param.Field[string]              `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput `json:"-"`
+	Directory param.Field[string]                              `query:"directory"`
+	Workspace param.Field[string]                              `query:"workspace"`
+	Body      param.Field[ExperimentalWorkspaceNewParamsInput] `json:"-"`
 }
 
 func (r ExperimentalWorkspaceNewParams) MarshalJSON() (data []byte, err error) {
@@ -190,14 +197,14 @@ func (r ExperimentalWorkspaceNewParams) URLQuery() (v url.Values) {
 	})
 }
 
-type ExperimentalWorkspaceCreateInput struct {
+type ExperimentalWorkspaceNewParamsInput struct {
 	ID     param.Field[string] `json:"id"`
 	Type   param.Field[string] `json:"type,required"`
 	Branch param.Field[string] `json:"branch"`
 	Extra  param.Field[any]    `json:"extra"`
 }
 
-func (r ExperimentalWorkspaceCreateInput) MarshalJSON() (data []byte, err error) {
+func (r ExperimentalWorkspaceNewParamsInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

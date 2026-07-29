@@ -1,172 +1,218 @@
 package opencode
 
 import (
+	"context"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
-	"github.com/sst/opencode-sdk-go/internal/apijson"
+	"github.com/sst/opencode-sdk-go/option"
 )
 
-// Aligned with OpenAPI schema "Auth" (anyOf: OAuth | ApiAuth | WellKnownAuth)
-// used as the request body for auth.set (PUT /auth/{providerID}), and JS SDK(v2).
+// Aligned with OpenAPI schema "Auth" (anyOf: OAuth | ApiAuth | WellKnownAuth),
+// used exclusively as the request body for auth.set (PUT /auth/{providerID}).
+//
+// Auth never appears in any response, so the three variants are pure Request
+// types: every field is wrapped in param.Field[T] and serialization goes through
+// apijson.MarshalRoot, which omits fields that were never set. This matches the
+// JS SDK(v2), where optional properties are absent from the object and therefore
+// dropped by JSON.stringify.
+//
+// apijson.MarshalRoot sorts keys alphabetically by their JSON name.
 
 func TestAuthBodySerialization(t *testing.T) {
-	t.Run("OAuth variant — full fields", func(t *testing.T) {
-		// OpenAPI OAuth required: type, refresh, access, expires; optional accountId, enterpriseUrl
-		a := OAuth{
-			Type:          "oauth",
-			Refresh:       "r",
-			Access:        "a",
-			Expires:       3600,
-			AccountID:     "acc",
-			EnterpriseURL: "https://ghe.example.com",
+	t.Run("OAuth — all fields set", func(t *testing.T) {
+		a := AuthParamOAuth{
+			Type:          F(AuthParamOAuthTypeOAuth),
+			Refresh:       F("r"),
+			Access:        F("a"),
+			Expires:       F(int64(3600)),
+			AccountID:     F("acc"),
+			EnterpriseURL: F("https://ghe.example.com"),
 		}
 		b, err := json.Marshal(a)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got := string(b)
-		want := `{"type":"oauth","refresh":"r","access":"a","expires":3600,"accountId":"acc","enterpriseUrl":"https://ghe.example.com"}`
+		want := `{"access":"a","accountId":"acc","enterpriseUrl":"https://ghe.example.com","expires":3600,"refresh":"r","type":"oauth"}`
 		if got != want {
-			t.Errorf("got %s, want %s", got, want)
+			t.Errorf("got  %s\nwant %s", got, want)
 		}
 	})
 
-	t.Run("OAuth variant — required only (optional fields emitted empty)", func(t *testing.T) {
-		// Auth is a shared discriminated-union struct serialized via encoding/json,
-		// so optional string fields are emitted as empty strings (no omitempty).
-		a := OAuth{Type: "oauth", Refresh: "r", Access: "a", Expires: 0}
+	t.Run("OAuth — required only, optional fields omitted", func(t *testing.T) {
+		// JS SDK equivalent: JSON.stringify({type:"oauth",refresh:"r",access:"a",expires:0})
+		// accountId / enterpriseUrl must NOT appear on the wire.
+		a := AuthParamOAuth{
+			Type:    F(AuthParamOAuthTypeOAuth),
+			Refresh: F("r"),
+			Access:  F("a"),
+			Expires: F(int64(0)),
+		}
 		b, err := json.Marshal(a)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got := string(b)
-		want := `{"type":"oauth","refresh":"r","access":"a","expires":0,"accountId":"","enterpriseUrl":""}`
+		want := `{"access":"a","expires":0,"refresh":"r","type":"oauth"}`
 		if got != want {
-			t.Errorf("got %s, want %s", got, want)
+			t.Errorf("got  %s\nwant %s", got, want)
 		}
 	})
 
-	t.Run("ApiAuth variant with metadata", func(t *testing.T) {
-		a := ApiAuth{Type: "api", Key: "sk-123", Metadata: map[string]string{"region": "us"}}
+	t.Run("ApiAuth — with metadata", func(t *testing.T) {
+		a := AuthParamAPIAuth{
+			Type:     F(AuthParamAPIAuthTypeAPI),
+			Key:      F("sk-123"),
+			Metadata: F(map[string]string{"region": "us"}),
+		}
 		b, err := json.Marshal(a)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got := string(b)
-		want := `{"type":"api","key":"sk-123","metadata":{"region":"us"}}`
+		want := `{"key":"sk-123","metadata":{"region":"us"},"type":"api"}`
 		if got != want {
-			t.Errorf("got %s, want %s", got, want)
+			t.Errorf("got  %s\nwant %s", got, want)
 		}
 	})
 
-	t.Run("ApiAuth variant without optional metadata (emitted null)", func(t *testing.T) {
-		// metadata is an optional map without omitempty -> serialized as null.
-		a := ApiAuth{Type: "api", Key: "sk-123"}
+	t.Run("ApiAuth — metadata omitted when unset", func(t *testing.T) {
+		// OpenAPI declares metadata as a non-nullable optional object.
+		// Emitting null would violate the schema; emitting {} would assert an
+		// empty metadata map. The correct wire form is to omit the key.
+		a := AuthParamAPIAuth{Type: F(AuthParamAPIAuthTypeAPI), Key: F("sk-123")}
 		b, err := json.Marshal(a)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got := string(b)
-		want := `{"type":"api","key":"sk-123","metadata":null}`
+		want := `{"key":"sk-123","type":"api"}`
 		if got != want {
-			t.Errorf("got %s, want %s", got, want)
+			t.Errorf("got  %s\nwant %s", got, want)
 		}
 	})
 
-	t.Run("WellKnownAuth variant", func(t *testing.T) {
-		a := WellKnownAuth{Type: "wellknown", Key: "k", Token: "t"}
+	t.Run("ApiAuth — explicit empty metadata is preserved", func(t *testing.T) {
+		// Distinguishing "unset" from "explicitly empty" is exactly what
+		// param.Field[T] buys us.
+		a := AuthParamAPIAuth{
+			Type:     F(AuthParamAPIAuthTypeAPI),
+			Key:      F("sk-123"),
+			Metadata: F(map[string]string{}),
+		}
 		b, err := json.Marshal(a)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got := string(b)
-		want := `{"type":"wellknown","key":"k","token":"t"}`
+		want := `{"key":"sk-123","metadata":{},"type":"api"}`
 		if got != want {
-			t.Errorf("got %s, want %s", got, want)
+			t.Errorf("got  %s\nwant %s", got, want)
+		}
+	})
+
+	t.Run("WellKnownAuth — all required", func(t *testing.T) {
+		a := AuthParamWellKnownAuth{
+			Type:  F(AuthParamWellKnownAuthTypeWellKnown),
+			Key:   F("k"),
+			Token: F("t"),
+		}
+		b, err := json.Marshal(a)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		want := `{"key":"k","token":"t","type":"wellknown"}`
+		if got != want {
+			t.Errorf("got  %s\nwant %s", got, want)
 		}
 	})
 
 	t.Run("Auth interface accepts all three variants", func(t *testing.T) {
-		var _ Auth = OAuth{Type: "oauth"}
-		var _ Auth = ApiAuth{Type: "api"}
-		var _ Auth = WellKnownAuth{Type: "wellknown"}
+		var _ AuthParam = AuthParamOAuth{Type: F(AuthParamOAuthTypeOAuth)}
+		var _ AuthParam = AuthParamAPIAuth{Type: F(AuthParamAPIAuthTypeAPI)}
+		var _ AuthParam = AuthParamWellKnownAuth{Type: F(AuthParamWellKnownAuthTypeWellKnown)}
 	})
 }
 
-// Verifies the discriminated union registration ("type") dispatches to the
-// correct concrete variant on unmarshal, per apijson.RegisterUnion in auth.go.
-func TestAuthUnionDiscriminatorDispatch(t *testing.T) {
-	t.Run("oauth discriminator", func(t *testing.T) {
-		var a Auth
-		raw := []byte(`{"type":"oauth","refresh":"r","access":"a","expires":100}`)
-		if err := apijson.Unmarshal(raw, &a); err != nil {
-			t.Fatal(err)
-		}
-		o, ok := a.(OAuth)
-		if !ok {
-			t.Fatalf("expected OAuth, got %T", a)
-		}
-		if o.Refresh != "r" || o.Access != "a" || o.Expires != 100 {
-			t.Errorf("OAuth = %+v", o)
-		}
-	})
-
-	t.Run("api discriminator", func(t *testing.T) {
-		var a Auth
-		raw := []byte(`{"type":"api","key":"k","metadata":{"x":"y"}}`)
-		if err := apijson.Unmarshal(raw, &a); err != nil {
-			t.Fatal(err)
-		}
-		ap, ok := a.(ApiAuth)
-		if !ok {
-			t.Fatalf("expected ApiAuth, got %T", a)
-		}
-		if ap.Key != "k" || ap.Metadata["x"] != "y" {
-			t.Errorf("ApiAuth = %+v", ap)
-		}
-	})
-
-	t.Run("wellknown discriminator", func(t *testing.T) {
-		var a Auth
-		raw := []byte(`{"type":"wellknown","key":"k","token":"t"}`)
-		if err := apijson.Unmarshal(raw, &a); err != nil {
-			t.Fatal(err)
-		}
-		w, ok := a.(WellKnownAuth)
-		if !ok {
-			t.Fatalf("expected WellKnownAuth, got %T", a)
-		}
-		if w.Key != "k" || w.Token != "t" {
-			t.Errorf("WellKnownAuth = %+v", w)
-		}
-	})
+// Discriminator enum values must match the OpenAPI `type` enums exactly.
+func TestAuthTypeEnumsIsKnown(t *testing.T) {
+	if !AuthParamOAuthTypeOAuth.IsKnown() || string(AuthParamOAuthTypeOAuth) != "oauth" {
+		t.Errorf("AuthParamOAuthTypeOAuth = %q", AuthParamOAuthTypeOAuth)
+	}
+	if !AuthParamAPIAuthTypeAPI.IsKnown() || string(AuthParamAPIAuthTypeAPI) != "api" {
+		t.Errorf("AuthParamAPIAuthTypeAPI = %q", AuthParamAPIAuthTypeAPI)
+	}
+	if !AuthParamWellKnownAuthTypeWellKnown.IsKnown() || string(AuthParamWellKnownAuthTypeWellKnown) != "wellknown" {
+		t.Errorf("AuthParamWellKnownAuthTypeWellKnown = %q", AuthParamWellKnownAuthTypeWellKnown)
+	}
+	if AuthParamOAuthType("bogus").IsKnown() || AuthParamAPIAuthType("bogus").IsKnown() || AuthParamWellKnownAuthType("bogus").IsKnown() {
+		t.Error("IsKnown() must reject unknown values")
+	}
 }
 
-// Variant Response-side deserialization with JSON metadata / RawJSON.
-func TestAuthVariantDeserialization(t *testing.T) {
-	t.Run("OAuth expires is int64 (integer semantics)", func(t *testing.T) {
-		raw := `{"type":"oauth","refresh":"r","access":"a","expires":9999999999}`
-		var o OAuth
-		if err := json.Unmarshal([]byte(raw), &o); err != nil {
-			t.Fatal(err)
-		}
-		if o.Expires != 9999999999 {
-			t.Errorf("Expires = %d, want 9999999999", o.Expires)
-		}
-		if o.JSON.RawJSON() != raw {
-			t.Errorf("RawJSON mismatch: %s", o.JSON.RawJSON())
-		}
-	})
+// End-to-end guarantee: the bytes actually placed on the wire by
+// AuthService.Set must contain only the fields the caller set.
+func TestAuthSetRequestBodyOnTheWire(t *testing.T) {
+	cases := []struct {
+		name string
+		body AuthParam
+		want string
+	}{
+		{
+			name: "oauth required only",
+			body: AuthParamOAuth{
+				Type:    F(AuthParamOAuthTypeOAuth),
+				Refresh: F("r"),
+				Access:  F("a"),
+				Expires: F(int64(3600)),
+			},
+			want: `{"access":"a","expires":3600,"refresh":"r","type":"oauth"}`,
+		},
+		{
+			name: "api without metadata",
+			body: AuthParamAPIAuth{Type: F(AuthParamAPIAuthTypeAPI), Key: F("sk-123")},
+			want: `{"key":"sk-123","type":"api"}`,
+		},
+		{
+			name: "wellknown",
+			body: AuthParamWellKnownAuth{Type: F(AuthParamWellKnownAuthTypeWellKnown), Key: F("k"), Token: F("t")},
+			want: `{"key":"k","token":"t","type":"wellknown"}`,
+		},
+	}
 
-	t.Run("ApiAuth metadata map[string]string", func(t *testing.T) {
-		raw := `{"type":"api","key":"k","metadata":{"a":"1","b":"2"}}`
-		var ap ApiAuth
-		if err := json.Unmarshal([]byte(raw), &ap); err != nil {
-			t.Fatal(err)
-		}
-		if ap.Metadata["a"] != "1" || ap.Metadata["b"] != "2" {
-			t.Errorf("Metadata = %+v", ap.Metadata)
-		}
-	})
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var gotBody, gotPath, gotMethod string
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				raw, _ := io.ReadAll(r.Body)
+				gotBody, gotPath, gotMethod = string(raw), r.URL.Path, r.Method
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`true`))
+			}))
+			defer srv.Close()
+
+			client := NewClient(option.WithBaseURL(srv.URL))
+			res, err := client.Auth.Set(context.Background(), "anthropic", c.body)
+			if err != nil {
+				t.Fatalf("Set: %v", err)
+			}
+			if res == nil || !*res {
+				t.Errorf("res = %v, want true", res)
+			}
+			if gotMethod != http.MethodPut {
+				t.Errorf("method = %s, want PUT", gotMethod)
+			}
+			if gotPath != "/auth/anthropic" {
+				t.Errorf("path = %s, want /auth/anthropic", gotPath)
+			}
+			if gotBody != c.want {
+				t.Errorf("body\n got  %s\n want %s", gotBody, c.want)
+			}
+		})
+	}
 }

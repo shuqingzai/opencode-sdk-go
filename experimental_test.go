@@ -25,7 +25,7 @@ func TestExperimentalWorkspaceList(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.WorkspaceList(context.TODO(), opencode.ExperimentalWorkspaceListParams{
+	_, err := client.Experimental.Workspace.List(context.TODO(), opencode.ExperimentalWorkspaceListParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {
@@ -50,10 +50,10 @@ func TestExperimentalWorkspaceCreate(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Experimental.Workspace.New(context.TODO(), opencode.ExperimentalWorkspaceNewParams{
-		Body: opencode.ExperimentalWorkspaceCreateInput{
+		Body: opencode.F(opencode.ExperimentalWorkspaceNewParamsInput{
 			Type:   opencode.F("type"),
 			Branch: opencode.F("main"),
-		},
+		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -76,7 +76,7 @@ func TestExperimentalWorkspaceRemove(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Experimental.WorkspaceRemove(context.TODO(), "workspaceID", opencode.ExperimentalWorkspaceRemoveParams{
+	_, err := client.Experimental.Workspace.Remove(context.TODO(), "workspaceID", opencode.ExperimentalWorkspaceRemoveParams{
 		Directory: opencode.F("directory"),
 	})
 	if err != nil {

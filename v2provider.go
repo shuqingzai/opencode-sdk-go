@@ -112,11 +112,12 @@ type V2ProviderInfo struct {
 	IntegrationID string `json:"integrationID"`
 	Name          string `json:"name,required"`
 	Disabled      bool   `json:"disabled"`
-	// This field can have the runtime type of [V2ProviderInfoAPIAisdk], [V2ProviderInfoAPINative].
-	API      any                `json:"api,required"`
-	Request  ProviderRequest    `json:"request,required"`
-	JSON     v2ProviderInfoJSON `json:"-"`
-	apiUnion V2ProviderInfoAPIUnion
+	// API is the OpenAPI [ProviderApi] anyOf; the decoder selects the concrete
+	// variant structurally, so a nil value means the field was absent, null or
+	// malformed.
+	API     V2ProviderInfoAPIUnion `json:"api,required"`
+	Request ProviderRequest        `json:"request,required"`
+	JSON    v2ProviderInfoJSON     `json:"-"`
 }
 
 // v2ProviderInfoJSON contains the JSON metadata for the struct [V2ProviderInfo]
@@ -132,20 +133,7 @@ type v2ProviderInfoJSON struct {
 }
 
 func (r *V2ProviderInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ProviderInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	apiData := gjson.GetBytes(data, "api").Raw
-	if apiData != "" {
-		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
-		if err != nil {
-			return err
-		}
-		r.API = r.apiUnion
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ProviderInfoJSON) RawJSON() string {
@@ -154,7 +142,7 @@ func (r v2ProviderInfoJSON) RawJSON() string {
 
 // AsAPIUnion returns the api field as a typed union.
 func (r *V2ProviderInfo) AsAPIUnion() V2ProviderInfoAPIUnion {
-	return r.apiUnion
+	return r.API
 }
 
 // V2ProviderInfoAPIUnion represents the api configuration of a provider.
@@ -164,11 +152,10 @@ type V2ProviderInfoAPIUnion interface {
 }
 
 type V2ProviderInfoAPIAisdk struct {
-	Type    V2ProviderInfoAPIAisdkType `json:"type,required"`
-	Package string                     `json:"package,required"`
-	URL     string                     `json:"url"`
-	// This field can have the runtime type of [map[string]any].
-	Settings any                        `json:"settings"`
+	Type     V2ProviderInfoAPIAisdkType `json:"type,required"`
+	Package  string                     `json:"package,required"`
+	URL      string                     `json:"url"`
+	Settings map[string]any             `json:"settings"`
 	JSON     v2ProviderInfoAPIAisdkJSON `json:"-"`
 }
 
@@ -192,10 +179,9 @@ func (r v2ProviderInfoAPIAisdkJSON) RawJSON() string {
 func (r V2ProviderInfoAPIAisdk) implementsV2ProviderInfoAPIUnion() {}
 
 type V2ProviderInfoAPINative struct {
-	Type V2ProviderInfoAPINativeType `json:"type,required"`
-	URL  string                      `json:"url"`
-	// This field can have the runtime type of [map[string]any].
-	Settings any                         `json:"settings,required"`
+	Type     V2ProviderInfoAPINativeType `json:"type,required"`
+	URL      string                      `json:"url"`
+	Settings map[string]any              `json:"settings,required"`
 	JSON     v2ProviderInfoAPINativeJSON `json:"-"`
 }
 
@@ -258,6 +244,27 @@ func init() {
 			Type:       reflect.TypeFor[V2ProviderInfoAPINative](),
 		},
 	)
+}
+
+type ProviderRequest struct {
+	Headers map[string]string   `json:"headers,required"`
+	Body    map[string]any      `json:"body,required"`
+	JSON    providerRequestJSON `json:"-"`
+}
+
+type providerRequestJSON struct {
+	Headers     apijson.Field
+	Body        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProviderRequest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r providerRequestJSON) RawJSON() string {
+	return r.raw
 }
 
 type V2ProviderListParams struct {

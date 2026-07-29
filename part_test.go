@@ -9,12 +9,12 @@ import (
 func TestPartUpdateParamsBodySerialization(t *testing.T) {
 	t.Run("Part set — Text variant serializes at root", func(t *testing.T) {
 		params := PartUpdateParams{
-			Part: F(PartUpdatePartUnion(PartUpdatePartText{
+			Part: F(PartUpdateParamsPartUnion(PartUpdateParamsPartText{
 				ID:        F("prt_1"),
 				SessionID: F("ses_1"),
 				MessageID: F("msg_1"),
 				Text:      F("hello"),
-				Type:      F(PartUpdatePartTextTypeText),
+				Type:      F(PartUpdateParamsPartTextTypeText),
 			})),
 		}
 		b, err := json.Marshal(params)
@@ -55,13 +55,13 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 
 	t.Run("Part set — File variant serializes at root", func(t *testing.T) {
 		params := PartUpdateParams{
-			Part: F(PartUpdatePartUnion(PartUpdatePartFile{
+			Part: F(PartUpdateParamsPartUnion(PartUpdateParamsPartFile{
 				ID:        F("prt_2"),
 				SessionID: F("ses_1"),
 				MessageID: F("msg_1"),
 				Mime:      F("text/plain"),
 				URL:       F("file:///tmp/a.txt"),
-				Type:      F(PartUpdatePartFileTypeFile),
+				Type:      F(PartUpdateParamsPartFileTypeFile),
 				Filename:  F("a.txt"),
 			})),
 		}
@@ -84,12 +84,12 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 
 	t.Run("Part set — Compaction variant with tail_start_id", func(t *testing.T) {
 		params := PartUpdateParams{
-			Part: F(PartUpdatePartUnion(PartUpdatePartCompaction{
+			Part: F(PartUpdateParamsPartUnion(PartUpdateParamsPartCompaction{
 				ID:          F("prt_3"),
 				SessionID:   F("ses_1"),
 				MessageID:   F("msg_1"),
 				Auto:        F(true),
-				Type:        F(PartUpdatePartCompactionTypeCompaction),
+				Type:        F(PartUpdateParamsPartCompactionTypeCompaction),
 				TailStartID: F("msg_99"),
 			})),
 		}
@@ -114,8 +114,8 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 // serialize all required fields correctly per OpenAPI schema.
 func TestToolStateParamsSerialization(t *testing.T) {
 	t.Run("ToolStatePending — status+input+raw required", func(t *testing.T) {
-		s := PartUpdatePartToolStatePending{
-			Status: F(PartUpdatePartToolStatePendingStatusPending),
+		s := PartUpdateParamsPartToolStatePending{
+			Status: F(PartUpdateParamsPartToolStatePendingStatusPending),
 			Input:  F(map[string]any{"key": "val"}),
 			Raw:    F(`{"key":"val"}`),
 		}
@@ -136,10 +136,10 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateRunning — status+input+time required", func(t *testing.T) {
-		s := PartUpdatePartToolStateRunning{
+		s := PartUpdateParamsPartToolStateRunning{
 			Input:  F(map[string]any{"arg": 1}),
-			Status: F(PartUpdatePartToolStateRunningStatusRunning),
-			Time:   F(PartUpdatePartToolStateRunningTime{Start: F(int64(1700000000))}),
+			Status: F(PartUpdateParamsPartToolStateRunningStatusRunning),
+			Time:   F(PartUpdateParamsPartToolStateRunningTime{Start: F(int64(1700000000))}),
 		}
 		b, err := json.Marshal(s)
 		if err != nil {
@@ -159,10 +159,10 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateRunning — optional title+metadata omitted when unset", func(t *testing.T) {
-		s := PartUpdatePartToolStateRunning{
+		s := PartUpdateParamsPartToolStateRunning{
 			Input:  F(map[string]any{}),
-			Status: F(PartUpdatePartToolStateRunningStatusRunning),
-			Time:   F(PartUpdatePartToolStateRunningTime{Start: F(int64(1700000001))}),
+			Status: F(PartUpdateParamsPartToolStateRunningStatusRunning),
+			Time:   F(PartUpdateParamsPartToolStateRunningTime{Start: F(int64(1700000001))}),
 		}
 		b, err := json.Marshal(s)
 		if err != nil {
@@ -178,12 +178,12 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateCompleted — all required fields present", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompleted{
+		s := PartUpdateParamsPartToolStateCompleted{
 			Input:    F(map[string]any{"x": 1}),
 			Metadata: F(map[string]any{"provider": "test"}),
 			Output:   F("result text"),
-			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-			Time: F(PartUpdatePartToolStateCompletedTime{
+			Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+			Time: F(PartUpdateParamsPartToolStateCompletedTime{
 				Start: F(int64(1700000000)),
 				End:   F(int64(1700000010)),
 			}),
@@ -211,24 +211,24 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateCompleted — optional attachments serialized when set", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompleted{
+		s := PartUpdateParamsPartToolStateCompleted{
 			Input:    F(map[string]any{}),
 			Metadata: F(map[string]any{}),
 			Output:   F("ok"),
-			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-			Time: F(PartUpdatePartToolStateCompletedTime{
+			Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+			Time: F(PartUpdateParamsPartToolStateCompletedTime{
 				Start: F(int64(1700000000)),
 				End:   F(int64(1700000010)),
 			}),
 			Title: F("T"),
-			Attachments: F([]PartUpdatePartFile{
+			Attachments: F([]PartUpdateParamsPartFile{
 				{
 					ID:        F("prt_99"),
 					SessionID: F("ses_1"),
 					MessageID: F("msg_1"),
 					Mime:      F("image/png"),
 					URL:       F("file:///img.png"),
-					Type:      F(PartUpdatePartFileTypeFile),
+					Type:      F(PartUpdateParamsPartFileTypeFile),
 				},
 			}),
 		}
@@ -249,12 +249,12 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateCompleted — optional compacted in time", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompleted{
+		s := PartUpdateParamsPartToolStateCompleted{
 			Input:    F(map[string]any{}),
 			Metadata: F(map[string]any{}),
 			Output:   F("ok"),
-			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-			Time: F(PartUpdatePartToolStateCompletedTime{
+			Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+			Time: F(PartUpdateParamsPartToolStateCompletedTime{
 				Start:     F(int64(1700000000)),
 				End:       F(int64(1700000010)),
 				Compacted: F(int64(1700000005)),
@@ -272,12 +272,12 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateCompleted — compacted absent when unset", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompleted{
+		s := PartUpdateParamsPartToolStateCompleted{
 			Input:    F(map[string]any{}),
 			Metadata: F(map[string]any{}),
 			Output:   F("ok"),
-			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-			Time: F(PartUpdatePartToolStateCompletedTime{
+			Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+			Time: F(PartUpdateParamsPartToolStateCompletedTime{
 				Start: F(int64(1700000000)),
 				End:   F(int64(1700000010)),
 			}),
@@ -294,11 +294,11 @@ func TestToolStateParamsSerialization(t *testing.T) {
 	})
 
 	t.Run("ToolStateError — status+input+error+time required", func(t *testing.T) {
-		s := PartUpdatePartToolStateError{
+		s := PartUpdateParamsPartToolStateError{
 			Error:  F("something failed"),
 			Input:  F(map[string]any{"cmd": "ls"}),
-			Status: F(PartUpdatePartToolStateErrorStatusError),
-			Time: F(PartUpdatePartToolStateErrorTime{
+			Status: F(PartUpdateParamsPartToolStateErrorStatusError),
+			Time: F(PartUpdateParamsPartToolStateErrorTime{
 				Start: F(int64(1700000000)),
 				End:   F(int64(1700000002)),
 			}),

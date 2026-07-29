@@ -4,11 +4,13 @@ package shared
 
 type UnionString string
 
-func (UnionString) ImplementsPermissionPatternUnion()      {}
 func (UnionString) ImplementsConfigV2ReferenceUnionParam() {}
 
 type UnionBool bool
 
+func (UnionBool) ImplementsConfigFormatterSettingUnionParam()          {}
+func (UnionBool) ImplementsConfigLspSettingUnionParam()                {}
+func (UnionBool) ImplementsConfigMcpOAuthUnionParam()                  {}
 func (UnionBool) ImplementsConfigProviderOptionsTimeoutUnion()         {}
 func (UnionBool) ImplementsMcpAddParamsConfigRemoteOAuthUnion()        {}
 func (UnionBool) ImplementsProviderModelCapabilitiesInterleavedUnion() {}

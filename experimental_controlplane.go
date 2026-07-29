@@ -42,19 +42,19 @@ func (r *ExperimentalControlPlaneService) MoveSession(ctx context.Context, body 
 	return
 }
 
-// MoveSessionDestination represents the destination for a session move.
-type MoveSessionDestination struct {
+// MoveSessionDestinationParam represents the destination for a session move.
+type MoveSessionDestinationParam struct {
 	Directory param.Field[string] `json:"directory,required"`
 }
 
-func (r MoveSessionDestination) MarshalJSON() (data []byte, err error) {
+func (r MoveSessionDestinationParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
 type ExperimentalControlPlaneMoveSessionParams struct {
-	SessionID   param.Field[string]                 `json:"sessionID,required"`
-	Destination param.Field[MoveSessionDestination] `json:"destination,required"`
-	MoveChanges param.Field[bool]                   `json:"moveChanges"`
+	SessionID   param.Field[string]                      `json:"sessionID,required"`
+	Destination param.Field[MoveSessionDestinationParam] `json:"destination,required"`
+	MoveChanges param.Field[bool]                        `json:"moveChanges"`
 }
 
 func (r ExperimentalControlPlaneMoveSessionParams) MarshalJSON() (data []byte, err error) {

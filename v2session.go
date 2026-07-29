@@ -464,13 +464,69 @@ func (r v2SessionContextResponseJSON) RawJSON() string {
 // [V2SessionMessageShell], [V2SessionMessageAssistant],
 // [V2SessionMessageCompaction].
 type V2SessionMessage struct {
-	JSON  v2SessionMessageJSON `json:"-"`
-	union V2SessionMessageUnion
+	ID string `json:"id,required"`
+	// This field can have the runtime type of [V2SessionMessageTime],
+	// [V2SessionMessageShellTime], [V2SessionMessageAssistantTime].
+	Time  any    `json:"time,required"`
+	Type  string `json:"type,required"`
+	Agent string `json:"agent"`
+	// This field can have the runtime type of [[]V2PromptAgentAttachment].
+	Agents  any    `json:"agents"`
+	CallID  string `json:"callID"`
+	Command string `json:"command"`
+	// This field can have the runtime type of
+	// [[]V2SessionMessageAssistantContent].
+	Content any     `json:"content"`
+	Cost    float64 `json:"cost"`
+	// This field can have the runtime type of [SessionErrorUnknown].
+	Error any `json:"error"`
+	// This field can have the runtime type of [[]V2PromptFileAttachment].
+	Files  any    `json:"files"`
+	Finish string `json:"finish"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any `json:"metadata"`
+	// This field can have the runtime type of [V2SessionMessageModel].
+	Model     any                              `json:"model"`
+	Output    string                           `json:"output"`
+	Reason    V2SessionMessageCompactionReason `json:"reason"`
+	Recent    string                           `json:"recent"`
+	SessionID string                           `json:"sessionID"`
+	// This field can have the runtime type of
+	// [V2SessionMessageAssistantSnapshot].
+	Snapshot any    `json:"snapshot"`
+	Summary  string `json:"summary"`
+	Text     string `json:"text"`
+	// This field can have the runtime type of [V2SessionMessageTokens].
+	Tokens any                  `json:"tokens"`
+	JSON   v2SessionMessageJSON `json:"-"`
+	union  V2SessionMessageUnion
 }
 
 // v2SessionMessageJSON contains the JSON metadata for the struct
 // [V2SessionMessage]
 type v2SessionMessageJSON struct {
+	ID          apijson.Field
+	Time        apijson.Field
+	Type        apijson.Field
+	Agent       apijson.Field
+	Agents      apijson.Field
+	CallID      apijson.Field
+	Command     apijson.Field
+	Content     apijson.Field
+	Cost        apijson.Field
+	Error       apijson.Field
+	Files       apijson.Field
+	Finish      apijson.Field
+	Metadata    apijson.Field
+	Model       apijson.Field
+	Output      apijson.Field
+	Reason      apijson.Field
+	Recent      apijson.Field
+	SessionID   apijson.Field
+	Snapshot    apijson.Field
+	Summary     apijson.Field
+	Text        apijson.Field
+	Tokens      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -695,9 +751,10 @@ type V2SessionMessageAssistant struct {
 	Type  string                        `json:"type,required"`
 	Agent string                        `json:"agent,required"`
 	Model V2SessionMessageModel         `json:"model,required"`
-	// This field can have the runtime type of
-	// [V2SessionMessageAssistantTextContent],
-	// [V2SessionMessageAssistantReasoningContent],
+	// Each element is a union carrier; call
+	// [V2SessionMessageAssistantContent.AsUnion] to obtain the typed variant, which
+	// is one of [V2SessionMessageAssistantTextContent],
+	// [V2SessionMessageAssistantReasoningContent] or
 	// [V2SessionMessageAssistantToolContent].
 	Content  []V2SessionMessageAssistantContent `json:"content,required"`
 	Snapshot V2SessionMessageAssistantSnapshot  `json:"snapshot"`
@@ -956,6 +1013,20 @@ func (r v2SessionMessageTokensCacheJSON) RawJSON() string {
 // [V2SessionMessageAssistantTextContent], [V2SessionMessageAssistantReasoningContent]
 // or [V2SessionMessageAssistantToolContent].
 type V2SessionMessageAssistantContent struct {
+	ID   string `json:"id,required"`
+	Type string `json:"type,required"`
+	Name string `json:"name"`
+	// This field can have the runtime type of [V2SessionMessageToolProvider].
+	Provider any `json:"provider"`
+	// This field can have the runtime type of [map[string]any].
+	ProviderMetadata any `json:"providerMetadata"`
+	// This field can have the runtime type of [V2SessionMessageToolState].
+	State any    `json:"state"`
+	Text  string `json:"text"`
+	// This field can have the runtime type of
+	// [V2SessionMessageAssistantReasoningContentTime],
+	// [V2SessionMessageToolTime].
+	Time  any                                  `json:"time"`
 	JSON  v2SessionMessageAssistantContentJSON `json:"-"`
 	union V2SessionMessageAssistantContentUnion
 }
@@ -963,8 +1034,16 @@ type V2SessionMessageAssistantContent struct {
 // v2SessionMessageAssistantContentJSON contains the JSON metadata for the
 // struct [V2SessionMessageAssistantContent]
 type v2SessionMessageAssistantContentJSON struct {
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ID               apijson.Field
+	Type             apijson.Field
+	Name             apijson.Field
+	Provider         apijson.Field
+	ProviderMetadata apijson.Field
+	State            apijson.Field
+	Text             apijson.Field
+	Time             apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
 }
 
 func (r v2SessionMessageAssistantContentJSON) RawJSON() string {
@@ -1136,6 +1215,11 @@ func (r v2SessionPromptResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+// V2SessionInputPrompt represents the OpenAPI `Prompt` schema. `Prompt` is a
+// single named definition that is $ref'd from nine places — SessionInputAdmitted,
+// the session.next.prompted and session.next.prompt.admitted variants of both the
+// /event and /global/event streams, and their sync counterparts — so one Go type
+// serves all of them.
 type V2SessionInputPrompt struct {
 	Text   string                    `json:"text,required"`
 	Files  []V2PromptFileAttachment  `json:"files"`
@@ -1143,6 +1227,8 @@ type V2SessionInputPrompt struct {
 	JSON   v2SessionInputPromptJSON  `json:"-"`
 }
 
+// v2SessionInputPromptJSON contains the JSON metadata for the struct
+// [V2SessionInputPrompt]
 type v2SessionInputPromptJSON struct {
 	Text        apijson.Field
 	Files       apijson.Field
@@ -1376,12 +1462,36 @@ func (r toolFileContentJSON) RawJSON() string {
 // [V2SessionMessageToolStateCompleted], [V2SessionMessageToolStateError].
 type V2SessionMessageToolState struct {
 	Status V2SessionMessageToolStateStatus `json:"status,required"`
-	JSON   v2SessionMessageToolStateJSON   `json:"-"`
-	union  V2SessionMessageToolStateUnion
+	// This field can have the runtime type of [string], [map[string]any].
+	Input any `json:"input,required"`
+	// This field can have the runtime type of [[]V2PromptFileAttachment].
+	Attachments any `json:"attachments"`
+	// This field can have the runtime type of [[]ToolTextContent],
+	// [[]ToolFileContent].
+	Content any `json:"content"`
+	// This field can have the runtime type of [SessionErrorUnknown].
+	Error any `json:"error"`
+	// This field can have the runtime type of [[]string].
+	OutputPaths any `json:"outputPaths"`
+	// Arbitrary JSON value holding the tool result. Per OpenAPI
+	// `SessionMessageToolState{Completed,Error}.result` is an unconstrained schema
+	// (`{}`), so no fixed set of runtime types applies.
+	Result any `json:"result"`
+	// This field can have the runtime type of [map[string]any].
+	Structured any                           `json:"structured"`
+	JSON       v2SessionMessageToolStateJSON `json:"-"`
+	union      V2SessionMessageToolStateUnion
 }
 
 type v2SessionMessageToolStateJSON struct {
 	Status      apijson.Field
+	Input       apijson.Field
+	Attachments apijson.Field
+	Content     apijson.Field
+	Error       apijson.Field
+	OutputPaths apijson.Field
+	Result      apijson.Field
+	Structured  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1631,6 +1741,32 @@ func (r V2SessionMessageToolStateError) implementsV2SessionMessageToolStateUnion
 // [V2SessionDurableEventCompactionEnded], [V2SessionDurableEventRevertStaged],
 // [V2SessionDurableEventRevertCleared] or [V2SessionDurableEventRevertCommitted].
 type V2SessionDurableEvent struct {
+	ID   string `json:"id,required"`
+	Type string `json:"type,required"`
+	// This field can have the runtime type of [V2EventDurable].
+	Durable any `json:"durable"`
+	// This field can have the runtime type of [LocationRef].
+	Location any `json:"location"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any `json:"metadata"`
+	// This field can have the runtime type of
+	// [V2EventSessionNextAgentSwitchedData], [V2EventSessionNextModelSwitchedData],
+	// [V2EventSessionNextMovedData], [V2EventSessionNextPromptedData],
+	// [V2EventSessionNextPromptAdmittedData],
+	// [V2EventSessionNextContextUpdatedData], [V2EventSessionNextSyntheticData],
+	// [V2EventSessionNextShellStartedData], [V2EventSessionNextShellEndedData],
+	// [V2EventSessionNextStepStartedData], [V2EventSessionNextStepEndedData],
+	// [V2EventSessionNextStepFailedData], [V2EventSessionNextTextStartedData],
+	// [V2EventSessionNextTextEndedData], [V2EventSessionNextToolInputStartedData],
+	// [V2EventSessionNextToolInputEndedData], [V2EventSessionNextToolCalledData],
+	// [V2EventSessionNextToolProgressData], [V2EventSessionNextToolSuccessData],
+	// [V2EventSessionNextToolFailedData], [V2EventSessionNextReasoningStartedData],
+	// [V2EventSessionNextReasoningEndedData], [V2EventSessionNextRetriedData],
+	// [V2EventSessionNextCompactionStartedData],
+	// [V2EventSessionNextCompactionEndedData],
+	// [V2EventSessionNextRevertStagedData], [V2EventSessionNextRevertClearedData],
+	// [V2EventSessionNextRevertCommittedData].
+	Data  any                       `json:"data,required"`
 	JSON  v2SessionDurableEventJSON `json:"-"`
 	union V2SessionDurableEventUnion
 }
@@ -1638,6 +1774,12 @@ type V2SessionDurableEvent struct {
 // v2SessionDurableEventJSON contains the JSON metadata for the struct
 // [V2SessionDurableEvent].
 type v2SessionDurableEventJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
+	Data        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2594,193 +2736,261 @@ func (r v2SessionDurableEventRevertCommittedJSON) RawJSON() string {
 
 func (V2SessionDurableEventRevertCommitted) implementsV2SessionDurableEvent() {}
 
+// All four unions below are discriminated unions in OpenAPI: every member pins its
+// tag property to a single-value `enum` -- `status` for `SessionMessageToolState*`
+// and `type` for `SessionMessageAssistant{Text,Reasoning,Tool}`, `SessionMessage`
+// (anyOf) and `SessionDurableEvent` (oneOf). They must therefore be registered with
+// that property as apijson's discriminator key.
+//
+// Without a discriminator key the decoder falls back to its exactness heuristic
+// (internal/apijson/decoder.go, newUnionDecoder), which is not sufficient here:
+//
+//   - The heuristic never penalises a *missing* `required` field, so a variant whose
+//     property set is a subset of another's matches just as exactly. Every
+//     `V2SessionDurableEvent*` variant has the identical property set
+//     (`id`/`metadata`/`type`/`durable`/`location`/`data`), so all 28 tie and the
+//     left-most one wins for every payload.
+//   - The only implicit discrimination the heuristic offers is guardUnknown, which
+//     downgrades exactness when a field's Go type has an `IsKnown() bool` method that
+//     rejects the value. That is how the non-discriminated unions in session.go
+//     (`PartUnion`, `ToolPartStateUnion`, ...) stay routable: each variant types its
+//     tag as its own single-value enum. The v2 variants here type `Type`/`Status` as
+//     a plain `string`, so no such downgrade happens.
+//
+// DiscriminatorValue must stay an untyped string constant: the decoder compares it
+// against the `any` gjson value with `==`, so a typed constant would never match.
+// A payload whose tag matches no variant still falls through to the exactness
+// heuristic, so unknown future members degrade exactly as they did before.
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2SessionMessageToolStateUnion](),
-		"",
+		"status",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageToolStatePending](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "pending",
+			Type:               reflect.TypeFor[V2SessionMessageToolStatePending](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageToolStateRunning](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "running",
+			Type:               reflect.TypeFor[V2SessionMessageToolStateRunning](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageToolStateCompleted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "completed",
+			Type:               reflect.TypeFor[V2SessionMessageToolStateCompleted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageToolStateError](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "error",
+			Type:               reflect.TypeFor[V2SessionMessageToolStateError](),
 		},
 	)
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2SessionMessageAssistantContentUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageAssistantTextContent](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeFor[V2SessionMessageAssistantTextContent](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageAssistantReasoningContent](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "reasoning",
+			Type:               reflect.TypeFor[V2SessionMessageAssistantReasoningContent](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageAssistantToolContent](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "tool",
+			Type:               reflect.TypeFor[V2SessionMessageAssistantToolContent](),
 		},
 	)
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2SessionMessageUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageAgentSwitched](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "agent-switched",
+			Type:               reflect.TypeFor[V2SessionMessageAgentSwitched](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageModelSwitched](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "model-switched",
+			Type:               reflect.TypeFor[V2SessionMessageModelSwitched](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageUser](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "user",
+			Type:               reflect.TypeFor[V2SessionMessageUser](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageSynthetic](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "synthetic",
+			Type:               reflect.TypeFor[V2SessionMessageSynthetic](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageShell](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "system",
+			Type:               reflect.TypeFor[V2SessionMessageSystem](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageAssistant](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "shell",
+			Type:               reflect.TypeFor[V2SessionMessageShell](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageCompaction](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "assistant",
+			Type:               reflect.TypeFor[V2SessionMessageAssistant](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionMessageSystem](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "compaction",
+			Type:               reflect.TypeFor[V2SessionMessageCompaction](),
 		},
 	)
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2SessionDurableEventUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventAgentSwitched](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.agent.switched",
+			Type:               reflect.TypeFor[V2SessionDurableEventAgentSwitched](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventModelSwitched](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.model.switched",
+			Type:               reflect.TypeFor[V2SessionDurableEventModelSwitched](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventMoved](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.moved",
+			Type:               reflect.TypeFor[V2SessionDurableEventMoved](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventPrompted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.prompted",
+			Type:               reflect.TypeFor[V2SessionDurableEventPrompted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventPromptAdmitted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.prompt.admitted",
+			Type:               reflect.TypeFor[V2SessionDurableEventPromptAdmitted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventContextUpdated](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.context.updated",
+			Type:               reflect.TypeFor[V2SessionDurableEventContextUpdated](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventSynthetic](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.synthetic",
+			Type:               reflect.TypeFor[V2SessionDurableEventSynthetic](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventShellStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.shell.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventShellStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventShellEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.shell.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventShellEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventStepStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.step.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventStepStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventStepEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.step.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventStepEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventStepFailed](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.step.failed",
+			Type:               reflect.TypeFor[V2SessionDurableEventStepFailed](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventTextStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.text.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventTextStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventTextEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.text.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventTextEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolInputStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.input.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolInputStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolInputEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.input.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolInputEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolCalled](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.called",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolCalled](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolProgress](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.progress",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolProgress](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolSuccess](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.success",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolSuccess](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventToolFailed](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.tool.failed",
+			Type:               reflect.TypeFor[V2SessionDurableEventToolFailed](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventReasoningStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.reasoning.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventReasoningStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventReasoningEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.reasoning.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventReasoningEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventRetried](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.retried",
+			Type:               reflect.TypeFor[V2SessionDurableEventRetried](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventCompactionStarted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.compaction.started",
+			Type:               reflect.TypeFor[V2SessionDurableEventCompactionStarted](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventCompactionEnded](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.compaction.ended",
+			Type:               reflect.TypeFor[V2SessionDurableEventCompactionEnded](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventRevertStaged](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.revert.staged",
+			Type:               reflect.TypeFor[V2SessionDurableEventRevertStaged](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventRevertCleared](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.revert.cleared",
+			Type:               reflect.TypeFor[V2SessionDurableEventRevertCleared](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2SessionDurableEventRevertCommitted](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "session.next.revert.committed",
+			Type:               reflect.TypeFor[V2SessionDurableEventRevertCommitted](),
 		},
 	)
 }
@@ -2953,7 +3163,11 @@ func (r locationRefJSON) RawJSON() string {
 	return r.raw
 }
 
-// RevertState represents a revert state.
+// RevertState represents the OpenAPI `RevertState` schema. That schema is a
+// single named definition that is $ref'd from six places — the revert/stage
+// response, SessionV2Info.revert, the session.next.revert.staged variants of both
+// the /event and /global/event streams, and their sync counterpart — so one Go
+// type serves all of them.
 type RevertState struct {
 	MessageID string          `json:"messageID,required"`
 	PartID    string          `json:"partID"`

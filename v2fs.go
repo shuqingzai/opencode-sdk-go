@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strings"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
@@ -55,14 +56,22 @@ func (r *V2FsService) Find(ctx context.Context, query V2FsFindParams, opts ...op
 // Read a file at the given path.
 //
 // The path argument is the file path to read, which will be appended to
-// the `/api/fs/read/` URL.
+// the `/api/fs/read/` URL. Each path segment is percent-encoded with
+// [url.PathEscape] so that spaces, '#', '?', and other special characters
+// are transmitted correctly; '/' segment separators are preserved so that
+// multi-level paths (e.g. "src/main.go") match the wildcard route
+// `/api/fs/read/*` on the server side.
 func (r *V2FsService) Read(ctx context.Context, path string, query V2FsReadParams, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if path == "" {
 		err = errors.New("missing required path parameter")
 		return
 	}
-	urlPath := fmt.Sprintf("api/fs/read/%s", path)
+	segs := strings.Split(path, "/")
+	for i, s := range segs {
+		segs[i] = url.PathEscape(s)
+	}
+	urlPath := fmt.Sprintf("api/fs/read/%s", strings.Join(segs, "/"))
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, urlPath, query, &res, opts...)
 	return
 }

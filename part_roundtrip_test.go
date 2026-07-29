@@ -29,8 +29,8 @@ import (
 func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 	// Sub-test A: required field unset (Present=false) — must NOT appear in JSON
 	t.Run("required field unset → NOT emitted (Present wins over required tag)", func(t *testing.T) {
-		// PartUpdatePartToolStatePending has Status, Input, Raw all required
-		s := PartUpdatePartToolStatePending{}
+		// PartUpdateParamsPartToolStatePending has Status, Input, Raw all required
+		s := PartUpdateParamsPartToolStatePending{}
 		b, err := json.Marshal(s)
 		if err != nil {
 			t.Fatal(err)
@@ -52,10 +52,10 @@ func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 
 	// Sub-test B: required field with zero value (Present=true, Value=zero) — MUST appear
 	t.Run("required field set to zero value → IS emitted (Present=true)", func(t *testing.T) {
-		s := PartUpdatePartToolStatePending{
-			Status: F(PartUpdatePartToolStatePendingStatus("")), // zero string
-			Input:  F(map[string]any{}),                         // zero map (empty)
-			Raw:    F(""),                                       // zero string
+		s := PartUpdateParamsPartToolStatePending{
+			Status: F(PartUpdateParamsPartToolStatePendingStatus("")), // zero string
+			Input:  F(map[string]any{}),                               // zero map (empty)
+			Raw:    F(""),                                             // zero string
 		}
 		b, err := json.Marshal(s)
 		if err != nil {
@@ -72,12 +72,12 @@ func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 
 	// Sub-test C: optional field unset → must NOT appear
 	t.Run("optional field unset → NOT emitted", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompleted{
+		s := PartUpdateParamsPartToolStateCompleted{
 			Input:    F(map[string]any{"k": "v"}),
 			Metadata: F(map[string]any{"m": 1}),
 			Output:   F("out"),
-			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-			Time: F(PartUpdatePartToolStateCompletedTime{
+			Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+			Time: F(PartUpdateParamsPartToolStateCompletedTime{
 				Start: F(int64(1000)),
 				End:   F(int64(2000)),
 			}),
@@ -97,7 +97,7 @@ func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 
 	// Sub-test D: optional compacted unset → not in time object
 	t.Run("optional compacted unset → NOT in time object", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompletedTime{
+		s := PartUpdateParamsPartToolStateCompletedTime{
 			Start: F(int64(100)),
 			End:   F(int64(200)),
 			// Compacted not set
@@ -115,7 +115,7 @@ func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 
 	// Sub-test E: optional compacted SET → appears
 	t.Run("optional compacted set → IS in time object", func(t *testing.T) {
-		s := PartUpdatePartToolStateCompletedTime{
+		s := PartUpdateParamsPartToolStateCompletedTime{
 			Start:     F(int64(100)),
 			End:       F(int64(200)),
 			Compacted: F(int64(150)),
@@ -135,8 +135,8 @@ func TestV1_RequestSerialization_RequiredTagSemantics(t *testing.T) {
 // TestV1_RequestSerialization_ToolStatePending verifies Pending variant serialization.
 func TestV1_RequestSerialization_ToolStatePending(t *testing.T) {
 	t.Run("all fields set — full JSON", func(t *testing.T) {
-		s := PartUpdatePartToolStatePending{
-			Status: F(PartUpdatePartToolStatePendingStatusPending),
+		s := PartUpdateParamsPartToolStatePending{
+			Status: F(PartUpdateParamsPartToolStatePendingStatusPending),
 			Input:  F(map[string]any{"cmd": "ls", "dir": "/tmp"}),
 			Raw:    F(`{"cmd":"ls","dir":"/tmp"}`),
 		}
@@ -160,15 +160,15 @@ func TestV1_RequestSerialization_ToolStatePending(t *testing.T) {
 	})
 
 	t.Run("whole tool part with pending state via union", func(t *testing.T) {
-		tool := PartUpdatePartTool{
+		tool := PartUpdateParamsPartTool{
 			CallID:    F("call_abc"),
 			ID:        F("prt_tool"),
 			MessageID: F("msg_1"),
 			SessionID: F("ses_1"),
 			Tool:      F("bash"),
-			Type:      F(PartUpdatePartToolTypeTool),
-			State: F(PartUpdatePartToolStateUnion(PartUpdatePartToolStatePending{
-				Status: F(PartUpdatePartToolStatePendingStatusPending),
+			Type:      F(PartUpdateParamsPartToolTypeTool),
+			State: F(PartUpdateParamsPartToolStateUnion(PartUpdateParamsPartToolStatePending{
+				Status: F(PartUpdateParamsPartToolStatePendingStatusPending),
 				Input:  F(map[string]any{"cmd": "echo hello"}),
 				Raw:    F(`{"cmd":"echo hello"}`),
 			})),
@@ -194,28 +194,28 @@ func TestV1_RequestSerialization_ToolStatePending(t *testing.T) {
 }
 
 // TestV1_RequestSerialization_ToolStateCompleted_Attachments verifies the new
-// Attachments field on PartUpdatePartToolStateCompleted serializes correctly and
+// Attachments field on PartUpdateParamsPartToolStateCompleted serializes correctly and
 // that each FilePart element matches OpenAPI FilePart field names.
 func TestV1_RequestSerialization_ToolStateCompleted_Attachments(t *testing.T) {
-	s := PartUpdatePartToolStateCompleted{
+	s := PartUpdateParamsPartToolStateCompleted{
 		Input:    F(map[string]any{"x": 1}),
 		Metadata: F(map[string]any{"provider": "test", "model": "gpt-4"}),
 		Output:   F("analysis complete"),
-		Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-		Time: F(PartUpdatePartToolStateCompletedTime{
+		Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+		Time: F(PartUpdateParamsPartToolStateCompletedTime{
 			Start:     F(int64(1700000000)),
 			End:       F(int64(1700000100)),
 			Compacted: F(int64(1700000050)),
 		}),
 		Title: F("code_analysis"),
-		Attachments: F([]PartUpdatePartFile{
+		Attachments: F([]PartUpdateParamsPartFile{
 			{
 				ID:        F("fprt_1"),
 				SessionID: F("ses_1"),
 				MessageID: F("msg_1"),
 				Mime:      F("image/png"),
 				URL:       F("file:///chart.png"),
-				Type:      F(PartUpdatePartFileTypeFile),
+				Type:      F(PartUpdateParamsPartFileTypeFile),
 				Filename:  F("chart.png"),
 			},
 			{
@@ -224,7 +224,7 @@ func TestV1_RequestSerialization_ToolStateCompleted_Attachments(t *testing.T) {
 				MessageID: F("msg_1"),
 				Mime:      F("application/pdf"),
 				URL:       F("file:///report.pdf"),
-				Type:      F(PartUpdatePartFileTypeFile),
+				Type:      F(PartUpdateParamsPartFileTypeFile),
 			},
 		}),
 	}
@@ -261,25 +261,25 @@ func TestV1_RequestSerialization_ToolStateCompleted_Attachments(t *testing.T) {
 }
 
 // TestV1_RequestSerialization_UnionInPartUpdateParams verifies putting ToolState
-// variants into PartUpdatePartTool and then into PartUpdateParams produces correct
+// variants into PartUpdateParamsPartTool and then into PartUpdateParams produces correct
 // top-level JSON.
 func TestV1_RequestSerialization_UnionInPartUpdateParams(t *testing.T) {
 	params := PartUpdateParams{
 		Directory: F("d"),
 		Workspace: F("w"),
-		Part: F(PartUpdatePartUnion(PartUpdatePartTool{
+		Part: F(PartUpdateParamsPartUnion(PartUpdateParamsPartTool{
 			CallID:    F("cid"),
 			ID:        F("pid"),
 			MessageID: F("mid"),
 			SessionID: F("sid"),
 			Tool:      F("read_file"),
-			Type:      F(PartUpdatePartToolTypeTool),
-			State: F(PartUpdatePartToolStateUnion(PartUpdatePartToolStateCompleted{
+			Type:      F(PartUpdateParamsPartToolTypeTool),
+			State: F(PartUpdateParamsPartToolStateUnion(PartUpdateParamsPartToolStateCompleted{
 				Input:    F(map[string]any{"path": "/etc/hosts"}),
 				Metadata: F(map[string]any{}),
 				Output:   F("127.0.0.1 localhost"),
-				Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-				Time: F(PartUpdatePartToolStateCompletedTime{
+				Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+				Time: F(PartUpdateParamsPartToolStateCompletedTime{
 					Start: F(int64(1000)),
 					End:   F(int64(1010)),
 				}),
@@ -294,7 +294,7 @@ func TestV1_RequestSerialization_UnionInPartUpdateParams(t *testing.T) {
 	}
 	got := string(b)
 
-	// The Part is set, so body is the union variant (PartUpdatePartTool) at root
+	// The Part is set, so body is the union variant (PartUpdateParamsPartTool) at root
 	for _, want := range []string{
 		`"type":"tool"`,
 		`"callID":"cid"`,
@@ -714,8 +714,8 @@ func TestV3_Response_ToolStateCompleted_FieldValuesFromAsUnion(t *testing.T) {
 // rather than byte-for-byte strings.
 func TestV4_RoundTrip_ToolStatePending(t *testing.T) {
 	// Step 1: marshal the request-side param struct
-	req := PartUpdatePartToolStatePending{
-		Status: F(PartUpdatePartToolStatePendingStatusPending),
+	req := PartUpdateParamsPartToolStatePending{
+		Status: F(PartUpdateParamsPartToolStatePendingStatusPending),
 		Input:  F(map[string]any{"cmd": "cat /etc/hosts"}),
 		Raw:    F(`{"cmd":"cat /etc/hosts"}`),
 	}
@@ -770,25 +770,25 @@ func TestV4_RoundTrip_ToolStatePending(t *testing.T) {
 // Tests semantic round-trip: marshal request params → unmarshal response → verify data intact.
 // Also tests response-side idempotency: unmarshal → re-marshal → unmarshal gives same data.
 func TestV4_RoundTrip_ToolStateCompleted(t *testing.T) {
-	req := PartUpdatePartToolStateCompleted{
+	req := PartUpdateParamsPartToolStateCompleted{
 		Input:    F(map[string]any{"p": "/etc/hosts"}),
 		Metadata: F(map[string]any{"m": "v"}),
 		Output:   F("127.0.0.1 localhost"),
-		Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
-		Time: F(PartUpdatePartToolStateCompletedTime{
+		Status:   F(PartUpdateParamsPartToolStateCompletedStatusCompleted),
+		Time: F(PartUpdateParamsPartToolStateCompletedTime{
 			Start:     F(int64(1700000000)),
 			End:       F(int64(1700000010)),
 			Compacted: F(int64(1700000005)),
 		}),
 		Title: F("read_file"),
-		Attachments: F([]PartUpdatePartFile{
+		Attachments: F([]PartUpdateParamsPartFile{
 			{
 				ID:        F("fp1"),
 				SessionID: F("s1"),
 				MessageID: F("m1"),
 				Mime:      F("text/plain"),
 				URL:       F("file:///out.txt"),
-				Type:      F(PartUpdatePartFileTypeFile),
+				Type:      F(PartUpdateParamsPartFileTypeFile),
 			},
 		}),
 	}
@@ -1025,7 +1025,7 @@ func TestV5_RequiredTagSemantics_Summary(t *testing.T) {
 
 		// Evidence 2: A required param.Field that is NOT set (Present=false)
 		// produces NO JSON output — just like an optional unset field.
-		pending := PartUpdatePartToolStatePending{
+		pending := PartUpdateParamsPartToolStatePending{
 			// All three fields (status, input, raw) are tagged required
 			// but none are set — Present=false for all
 		}
@@ -1036,10 +1036,10 @@ func TestV5_RequiredTagSemantics_Summary(t *testing.T) {
 
 		// Evidence 3: An OPTIONAL param.Field that IS set (Present=true)
 		// DOES appear in JSON — just like a required set field.
-		running := PartUpdatePartToolStateRunning{
+		running := PartUpdateParamsPartToolStateRunning{
 			Input:  F(map[string]any{}),
-			Status: F(PartUpdatePartToolStateRunningStatusRunning),
-			Time:   F(PartUpdatePartToolStateRunningTime{Start: F(int64(1))}),
+			Status: F(PartUpdateParamsPartToolStateRunningStatusRunning),
+			Time:   F(PartUpdateParamsPartToolStateRunningTime{Start: F(int64(1))}),
 			Title:  F("optional_title"), // Title is OPTIONAL but set
 		}
 		b2, _ := json.Marshal(running)
@@ -1330,6 +1330,10 @@ func TestV6_ExtraFields_ForwardCompat(t *testing.T) {
 // TestV6_UserMessage_Format_Deserialization verifies that UserMessage.Format
 // correctly captures OutputFormat values when present in JSON, and is absent
 // when the Format field is not included in the response.
+//
+// The OpenAPI `OutputFormat` anyOf is routed through the response-side
+// [OutputFormatUnion], so a present `format` resolves to [OutputFormatText] or
+// [OutputFormatJsonSchema] rather than a generic map.
 func TestV6_UserMessage_Format_Deserialization(t *testing.T) {
 	t.Run("Format field absent", func(t *testing.T) {
 		raw := `{
@@ -1367,14 +1371,14 @@ func TestV6_UserMessage_Format_Deserialization(t *testing.T) {
 		if um.Format == nil {
 			t.Fatal("Format should be non-nil when present")
 		}
-		// Format will be deserialized as map[string]any since no Response-side
-		// OutputFormat union registration exists — this is expected behavior.
-		formatMap, ok := um.Format.(map[string]any)
+		// Format is routed through the response-side [OutputFormatUnion], so the
+		// `text` variant resolves to the typed [OutputFormatText].
+		format, ok := um.Format.(OutputFormatText)
 		if !ok {
-			t.Fatalf("Format: expected map[string]any, got %T", um.Format)
+			t.Fatalf("Format: expected OutputFormatText, got %T", um.Format)
 		}
-		if formatMap["type"] != "text" {
-			t.Errorf("Format.type: got %v", formatMap["type"])
+		if format.Type != OutputFormatTextTypeText {
+			t.Errorf("Format.Type: got %v", format.Type)
 		}
 		t.Logf("Format[text]: %v ✓", um.Format)
 	})
@@ -1396,12 +1400,17 @@ func TestV6_UserMessage_Format_Deserialization(t *testing.T) {
 		if um.Format == nil {
 			t.Fatal("Format should be non-nil when present")
 		}
-		formatMap, ok := um.Format.(map[string]any)
+		format, ok := um.Format.(OutputFormatJsonSchema)
 		if !ok {
-			t.Fatalf("Format: expected map[string]any, got %T", um.Format)
+			t.Fatalf("Format: expected OutputFormatJsonSchema, got %T", um.Format)
 		}
-		if formatMap["type"] != "json_schema" {
-			t.Errorf("Format.type: got %v", formatMap["type"])
+		if format.Type != OutputFormatJsonSchemaTypeJsonSchema {
+			t.Errorf("Format.Type: got %v", format.Type)
+		}
+		// OpenAPI `$ref JSONSchema` is the open object `{"type": "object"}`, so the
+		// schema payload must survive as a generic map.
+		if format.Schema["type"] != "object" {
+			t.Errorf("Format.Schema: got %v", format.Schema)
 		}
 		t.Logf("Format[json_schema]: %v ✓", um.Format)
 	})
@@ -1522,7 +1531,7 @@ func TestV6_SessionStatus_Discriminator(t *testing.T) {
 		t.Logf("retry discriminator with action: ✓")
 	})
 
-	t.Run("retry status without action field (omitzero)", func(t *testing.T) {
+	t.Run("retry status without action field", func(t *testing.T) {
 		raw := `{"type": "retry", "attempt": 1, "message": "timeout", "next": 1000}`
 		var m SessionStatusMap
 		if err := json.Unmarshal([]byte(`{"ses_3": `+raw+`}`), &m); err != nil {
@@ -1533,7 +1542,8 @@ func TestV6_SessionStatus_Discriminator(t *testing.T) {
 		if !ok {
 			t.Fatalf("expected SessionStatusRetry, got %T", s)
 		}
-		// Action field is omitzero — when absent, it's zero-value
+		// OpenAPI SessionStatus.anyOf[1].required omits `action`, so an absent
+		// action decodes to the zero value rather than erroring.
 		if retry.Action.Reason != "" {
 			t.Errorf("empty Action.Reason expected, got %q", retry.Action.Reason)
 		}

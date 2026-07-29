@@ -5,6 +5,7 @@ package opencode
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -50,7 +51,7 @@ func (r *PermissionService) Reply(ctx context.Context, requestID string, params 
 		err = errors.New("missing required requestID parameter")
 		return
 	}
-	path := "permission/" + requestID + "/reply"
+	path := fmt.Sprintf("permission/%s/reply", requestID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
@@ -68,7 +69,7 @@ func (r *PermissionService) Respond(ctx context.Context, sessionID string, permi
 		err = errors.New("missing required permissionID parameter")
 		return
 	}
-	path := "session/" + sessionID + "/permissions/" + permissionID
+	path := fmt.Sprintf("session/%s/permissions/%s", sessionID, permissionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }

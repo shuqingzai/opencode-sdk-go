@@ -113,11 +113,6 @@ func (r *McpAuthService) Start(ctx context.Context, name string, query McpAuthSt
 	return
 }
 
-// Deprecated: Use [McpAuthService.Start] instead.
-func (r *McpService) AuthStart(ctx context.Context, name string, query McpAuthStartParams, opts ...option.RequestOption) (res *McpAuthStartResponse, err error) {
-	return r.Auth.Start(ctx, name, query, opts...)
-}
-
 // OAuth callback
 func (r *McpAuthService) Callback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -128,11 +123,6 @@ func (r *McpAuthService) Callback(ctx context.Context, name string, params McpAu
 	path := fmt.Sprintf("mcp/%s/auth/callback", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
-}
-
-// Deprecated: Use [McpAuthService.Callback] instead.
-func (r *McpService) AuthCallback(ctx context.Context, name string, params McpAuthCallbackParams, opts ...option.RequestOption) (res *McpStatus, err error) {
-	return r.Auth.Callback(ctx, name, params, opts...)
 }
 
 // Authenticate with MCP server
@@ -147,11 +137,6 @@ func (r *McpAuthService) Authenticate(ctx context.Context, name string, query Mc
 	return
 }
 
-// Deprecated: Use [McpAuthService.Authenticate] instead.
-func (r *McpService) AuthAuthenticate(ctx context.Context, name string, query McpAuthAuthenticateParams, opts ...option.RequestOption) (res *McpStatus, err error) {
-	return r.Auth.Authenticate(ctx, name, query, opts...)
-}
-
 // Remove MCP server authentication
 func (r *McpAuthService) Remove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -162,11 +147,6 @@ func (r *McpAuthService) Remove(ctx context.Context, name string, query McpAuthR
 	path := fmt.Sprintf("mcp/%s/auth", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, query, &res, opts...)
 	return
-}
-
-// Deprecated: Use [McpAuthService.Remove] instead.
-func (r *McpService) AuthRemove(ctx context.Context, name string, query McpAuthRemoveParams, opts ...option.RequestOption) (res *McpAuthRemoveResponse, err error) {
-	return r.Auth.Remove(ctx, name, query, opts...)
 }
 
 // McpStatus represents the status of an MCP server connection.
@@ -474,8 +454,8 @@ type McpAddParamsConfigRemote struct {
 	// OAuth authentication configuration for this MCP server.
 	//
 	// Per the OpenAPI schema, this field can be either [McpAddParamsConfigRemoteOAuth]
-	// (a complete OAuth config) or [McpAddParamsConfigRemoteOAuthDisabled] (a scalar
-	// `false` value explicitly disabling OAuth).
+	// (a complete OAuth config) or [shared.UnionBool] (a scalar `false` value
+	// explicitly disabling OAuth).
 	OAuth param.Field[McpAddParamsConfigRemoteOAuthUnion] `json:"oauth"`
 	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
 	Timeout param.Field[int64] `json:"timeout"`
@@ -508,8 +488,7 @@ func (r McpAddParamsConfigRemoteOAuth) MarshalJSON() (data []byte, err error) {
 
 func (r McpAddParamsConfigRemoteOAuth) ImplementsMcpAddParamsConfigRemoteOAuthUnion() {}
 
-// Satisfied by [McpAddParamsConfigRemoteOAuth],
-// [McpAddParamsConfigRemoteOAuthDisabled].
+// Satisfied by [McpAddParamsConfigRemoteOAuth], [shared.UnionBool].
 type McpAddParamsConfigRemoteOAuthUnion interface {
 	ImplementsMcpAddParamsConfigRemoteOAuthUnion()
 }

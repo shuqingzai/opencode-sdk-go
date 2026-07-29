@@ -35,7 +35,7 @@ func NewToolService(opts ...option.RequestOption) (r *ToolService) {
 }
 
 // List tool IDs
-func (r *ToolService) Ids(ctx context.Context, query ToolIdsParams, opts ...option.RequestOption) (res *[]string, err error) {
+func (r *ToolService) IDs(ctx context.Context, query ToolIDsParams, opts ...option.RequestOption) (res *[]string, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/tool/ids"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -51,10 +51,13 @@ func (r *ToolService) List(ctx context.Context, query ToolListParams, opts ...op
 }
 
 type ToolListItem struct {
-	ID          string           `json:"id,required"`
-	Description string           `json:"description,required"`
-	Parameters  any              `json:"parameters,required"`
-	JSON        toolListItemJSON `json:"-"`
+	ID          string `json:"id,required"`
+	Description string `json:"description,required"`
+	// Arbitrary JSON value holding the tool's JSON Schema parameters. Per OpenAPI
+	// `ToolListItem.parameters` is an unconstrained schema (`{}`), so no fixed set
+	// of runtime types applies.
+	Parameters any              `json:"parameters,required"`
+	JSON       toolListItemJSON `json:"-"`
 }
 
 // toolListItemJSON contains the JSON metadata for the struct [ToolListItem]
@@ -74,13 +77,13 @@ func (r toolListItemJSON) RawJSON() string {
 	return r.raw
 }
 
-type ToolIdsParams struct {
+type ToolIDsParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 
-// URLQuery serializes [ToolIdsParams]'s query parameters as `url.Values`.
-func (r ToolIdsParams) URLQuery() (v url.Values) {
+// URLQuery serializes [ToolIDsParams]'s query parameters as `url.Values`.
+func (r ToolIDsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,

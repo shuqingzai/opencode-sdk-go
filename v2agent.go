@@ -78,12 +78,15 @@ type V2AgentInfo struct {
 	// Color of the agent. Can be a hex color string (e.g. "#FF5733") or a
 	// preset name ("primary"|"secondary"|"accent"|"success"|"warning"|"error"|
 	// "info").
-	// This field can have the runtime type of [string], [AgentColor].
-	Color       any                `json:"color"`
+	//
+	// Color is the OpenAPI [AgentColor] anyOf. Both members are JSON strings and
+	// [AgentColorUnion] registers a single [gjson.String] variant for them, so every
+	// value lands on [AgentColor]; a nil value means the field was absent, null or
+	// not a string.
+	Color       AgentColorUnion    `json:"color"`
 	Steps       int64              `json:"steps"`
 	Permissions []PermissionV2Rule `json:"permissions,required"`
 	JSON        v2AgentInfoJSON    `json:"-"`
-	colorUnion  AgentColorUnion
 }
 
 // v2AgentInfoJSON contains the JSON metadata for the struct [V2AgentInfo]
@@ -103,28 +106,25 @@ type v2AgentInfoJSON struct {
 }
 
 func (r *V2AgentInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2AgentInfo{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	colorData := gjson.GetBytes(data, "color").Raw
-	if colorData != "" {
-		if err = apijson.UnmarshalRoot([]byte(colorData), &r.colorUnion); err != nil {
-			return err
-		}
-		r.Color = r.colorUnion
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2AgentInfoJSON) RawJSON() string {
 	return r.raw
 }
 
+// AsColorUnion returns a [AgentColorUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [AgentColor].
+func (r *V2AgentInfo) AsColorUnion() AgentColorUnion {
+	return r.Color
+}
+
 // AsColor returns the color field as a typed [AgentColor] value for type-safe
 // access to preset constants and [AgentColor.IsKnown].
 func (r *V2AgentInfo) AsColor() AgentColor {
-	c, _ := r.colorUnion.(AgentColor)
+	c, _ := r.Color.(AgentColor)
 	return c
 }
 
@@ -190,90 +190,6 @@ func init() {
 			Type:       reflect.TypeFor[AgentColor](),
 		},
 	)
-}
-
-type ModelRef struct {
-	ID         string       `json:"id,required"`
-	ProviderID string       `json:"providerID,required"`
-	Variant    string       `json:"variant"`
-	JSON       modelRefJSON `json:"-"`
-}
-
-// modelRefJSON contains the JSON metadata for the struct [ModelRef]
-type modelRefJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ModelRef) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r modelRefJSON) RawJSON() string {
-	return r.raw
-}
-
-type ProviderRequest struct {
-	Headers map[string]string   `json:"headers,required"`
-	Body    map[string]any      `json:"body,required"`
-	JSON    providerRequestJSON `json:"-"`
-}
-
-type providerRequestJSON struct {
-	Headers     apijson.Field
-	Body        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ProviderRequest) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r providerRequestJSON) RawJSON() string {
-	return r.raw
-}
-
-type PermissionV2Rule struct {
-	Action   string               `json:"action,required"`
-	Resource string               `json:"resource,required"`
-	Effect   PermissionV2Effect   `json:"effect,required"`
-	JSON     permissionV2RuleJSON `json:"-"`
-}
-
-type permissionV2RuleJSON struct {
-	Action      apijson.Field
-	Resource    apijson.Field
-	Effect      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PermissionV2Rule) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r permissionV2RuleJSON) RawJSON() string {
-	return r.raw
-}
-
-type PermissionV2Effect string
-
-const (
-	PermissionV2EffectAllow PermissionV2Effect = "allow"
-	PermissionV2EffectDeny  PermissionV2Effect = "deny"
-	PermissionV2EffectAsk   PermissionV2Effect = "ask"
-)
-
-func (r PermissionV2Effect) IsKnown() bool {
-	switch r {
-	case PermissionV2EffectAllow, PermissionV2EffectDeny, PermissionV2EffectAsk:
-		return true
-	}
-	return false
 }
 
 type V2AgentListParams struct {

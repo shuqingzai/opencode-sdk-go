@@ -101,10 +101,10 @@ type PartUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 	// Part is the PATCH body. Its value is serialized as the body root when
-	// present (any of the 12 [PartUpdatePartUnion] variants). When unset, no
-	// body is sent. The `json:"-"` tag prevents the field from being
-	// serialized as a `{ "Part": ... }` wrapper.
-	Part param.Field[PartUpdatePartUnion] `json:"-"`
+	// present (any of the 12 [PartUpdateParamsPartUnion] variants). When
+	// unset, no body is sent. The `json:"-"` tag prevents the field from
+	// being serialized as a `{ "Part": ... }` wrapper.
+	Part param.Field[PartUpdateParamsPartUnion] `json:"-"`
 }
 
 func (r PartUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -121,562 +121,566 @@ func (r PartUpdateParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Satisfied by [PartUpdatePartText], [PartUpdatePartSubtask],
-// [PartUpdatePartReasoning], [PartUpdatePartFile], [PartUpdatePartTool],
-// [PartUpdatePartStepStart], [PartUpdatePartStepFinish], [PartUpdatePartSnapshot],
-// [PartUpdatePartPatch], [PartUpdatePartAgent], [PartUpdatePartRetry] or
-// [PartUpdatePartCompaction].
-type PartUpdatePartUnion interface {
-	implementsPartUpdatePartUnion()
+// Satisfied by [PartUpdateParamsPartText], [PartUpdateParamsPartSubtask],
+// [PartUpdateParamsPartReasoning], [PartUpdateParamsPartFile],
+// [PartUpdateParamsPartTool], [PartUpdateParamsPartStepStart],
+// [PartUpdateParamsPartStepFinish], [PartUpdateParamsPartSnapshot],
+// [PartUpdateParamsPartPatch], [PartUpdateParamsPartAgent],
+// [PartUpdateParamsPartRetry] or [PartUpdateParamsPartCompaction].
+type PartUpdateParamsPartUnion interface {
+	implementsPartUpdateParamsPartUnion()
 }
 
-type PartUpdatePartText struct {
-	ID        param.Field[string]                 `json:"id,required"`
-	MessageID param.Field[string]                 `json:"messageID,required"`
-	SessionID param.Field[string]                 `json:"sessionID,required"`
-	Text      param.Field[string]                 `json:"text,required"`
-	Type      param.Field[PartUpdatePartTextType] `json:"type,required"`
-	Ignored   param.Field[bool]                   `json:"ignored"`
-	Metadata  param.Field[map[string]any]         `json:"metadata"`
-	Synthetic param.Field[bool]                   `json:"synthetic"`
-	Time      param.Field[PartUpdatePartTextTime] `json:"time"`
+type PartUpdateParamsPartText struct {
+	ID        param.Field[string]                       `json:"id,required"`
+	MessageID param.Field[string]                       `json:"messageID,required"`
+	SessionID param.Field[string]                       `json:"sessionID,required"`
+	Text      param.Field[string]                       `json:"text,required"`
+	Type      param.Field[PartUpdateParamsPartTextType] `json:"type,required"`
+	Ignored   param.Field[bool]                         `json:"ignored"`
+	Metadata  param.Field[map[string]any]               `json:"metadata"`
+	Synthetic param.Field[bool]                         `json:"synthetic"`
+	Time      param.Field[PartUpdateParamsPartTextTime] `json:"time"`
 }
 
-func (r PartUpdatePartText) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartText) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartText) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartText) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartTextType string
+type PartUpdateParamsPartTextType string
 
 const (
-	PartUpdatePartTextTypeText PartUpdatePartTextType = "text"
+	PartUpdateParamsPartTextTypeText PartUpdateParamsPartTextType = "text"
 )
 
-func (r PartUpdatePartTextType) IsKnown() bool {
+func (r PartUpdateParamsPartTextType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartTextTypeText:
+	case PartUpdateParamsPartTextTypeText:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartTextTime struct {
+type PartUpdateParamsPartTextTime struct {
 	Start param.Field[int64] `json:"start,required"`
 	End   param.Field[int64] `json:"end"`
 }
 
-func (r PartUpdatePartTextTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartTextTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartSubtask struct {
-	Agent       param.Field[string]                     `json:"agent,required"`
-	Description param.Field[string]                     `json:"description,required"`
-	ID          param.Field[string]                     `json:"id,required"`
-	MessageID   param.Field[string]                     `json:"messageID,required"`
-	Prompt      param.Field[string]                     `json:"prompt,required"`
-	SessionID   param.Field[string]                     `json:"sessionID,required"`
-	Type        param.Field[PartUpdatePartSubtaskType]  `json:"type,required"`
-	Command     param.Field[string]                     `json:"command"`
-	Model       param.Field[PartUpdatePartSubtaskModel] `json:"model"`
+type PartUpdateParamsPartSubtask struct {
+	Agent       param.Field[string]                           `json:"agent,required"`
+	Description param.Field[string]                           `json:"description,required"`
+	ID          param.Field[string]                           `json:"id,required"`
+	MessageID   param.Field[string]                           `json:"messageID,required"`
+	Prompt      param.Field[string]                           `json:"prompt,required"`
+	SessionID   param.Field[string]                           `json:"sessionID,required"`
+	Type        param.Field[PartUpdateParamsPartSubtaskType]  `json:"type,required"`
+	Command     param.Field[string]                           `json:"command"`
+	Model       param.Field[PartUpdateParamsPartSubtaskModel] `json:"model"`
 }
 
-func (r PartUpdatePartSubtask) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartSubtask) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartSubtask) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartSubtask) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartSubtaskType string
+type PartUpdateParamsPartSubtaskType string
 
 const (
-	PartUpdatePartSubtaskTypeSubtask PartUpdatePartSubtaskType = "subtask"
+	PartUpdateParamsPartSubtaskTypeSubtask PartUpdateParamsPartSubtaskType = "subtask"
 )
 
-func (r PartUpdatePartSubtaskType) IsKnown() bool {
+func (r PartUpdateParamsPartSubtaskType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartSubtaskTypeSubtask:
+	case PartUpdateParamsPartSubtaskTypeSubtask:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartSubtaskModel struct {
+type PartUpdateParamsPartSubtaskModel struct {
 	ModelID    param.Field[string] `json:"modelID,required"`
 	ProviderID param.Field[string] `json:"providerID,required"`
 }
 
-func (r PartUpdatePartSubtaskModel) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartSubtaskModel) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartReasoning struct {
-	ID        param.Field[string]                      `json:"id,required"`
-	MessageID param.Field[string]                      `json:"messageID,required"`
-	SessionID param.Field[string]                      `json:"sessionID,required"`
-	Text      param.Field[string]                      `json:"text,required"`
-	Time      param.Field[PartUpdatePartReasoningTime] `json:"time,required"`
-	Type      param.Field[PartUpdatePartReasoningType] `json:"type,required"`
-	Metadata  param.Field[map[string]any]              `json:"metadata"`
+type PartUpdateParamsPartReasoning struct {
+	ID        param.Field[string]                            `json:"id,required"`
+	MessageID param.Field[string]                            `json:"messageID,required"`
+	SessionID param.Field[string]                            `json:"sessionID,required"`
+	Text      param.Field[string]                            `json:"text,required"`
+	Time      param.Field[PartUpdateParamsPartReasoningTime] `json:"time,required"`
+	Type      param.Field[PartUpdateParamsPartReasoningType] `json:"type,required"`
+	Metadata  param.Field[map[string]any]                    `json:"metadata"`
 }
 
-func (r PartUpdatePartReasoning) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartReasoning) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartReasoning) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartReasoning) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartReasoningType string
+type PartUpdateParamsPartReasoningType string
 
 const (
-	PartUpdatePartReasoningTypeReasoning PartUpdatePartReasoningType = "reasoning"
+	PartUpdateParamsPartReasoningTypeReasoning PartUpdateParamsPartReasoningType = "reasoning"
 )
 
-func (r PartUpdatePartReasoningType) IsKnown() bool {
+func (r PartUpdateParamsPartReasoningType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartReasoningTypeReasoning:
+	case PartUpdateParamsPartReasoningTypeReasoning:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartReasoningTime struct {
+type PartUpdateParamsPartReasoningTime struct {
 	Start param.Field[int64] `json:"start,required"`
 	End   param.Field[int64] `json:"end"`
 }
 
-func (r PartUpdatePartReasoningTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartReasoningTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartFile struct {
-	ID        param.Field[string]                 `json:"id,required"`
-	MessageID param.Field[string]                 `json:"messageID,required"`
-	Mime      param.Field[string]                 `json:"mime,required"`
-	SessionID param.Field[string]                 `json:"sessionID,required"`
-	Type      param.Field[PartUpdatePartFileType] `json:"type,required"`
-	URL       param.Field[string]                 `json:"url,required"`
-	Filename  param.Field[string]                 `json:"filename"`
+type PartUpdateParamsPartFile struct {
+	ID        param.Field[string]                       `json:"id,required"`
+	MessageID param.Field[string]                       `json:"messageID,required"`
+	Mime      param.Field[string]                       `json:"mime,required"`
+	SessionID param.Field[string]                       `json:"sessionID,required"`
+	Type      param.Field[PartUpdateParamsPartFileType] `json:"type,required"`
+	URL       param.Field[string]                       `json:"url,required"`
+	Filename  param.Field[string]                       `json:"filename"`
 	// Source of the file (e.g. symbol, resource, or inline file source).
 	// Accepts [map[string]any] or an appropriate FilePartSource variant.
 	Source param.Field[any] `json:"source"`
 }
 
-func (r PartUpdatePartFile) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartFile) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartFile) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartFile) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartFileType string
+type PartUpdateParamsPartFileType string
 
 const (
-	PartUpdatePartFileTypeFile PartUpdatePartFileType = "file"
+	PartUpdateParamsPartFileTypeFile PartUpdateParamsPartFileType = "file"
 )
 
-func (r PartUpdatePartFileType) IsKnown() bool {
+func (r PartUpdateParamsPartFileType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartFileTypeFile:
+	case PartUpdateParamsPartFileTypeFile:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartTool struct {
-	CallID    param.Field[string]                       `json:"callID,required"`
-	ID        param.Field[string]                       `json:"id,required"`
-	MessageID param.Field[string]                       `json:"messageID,required"`
-	SessionID param.Field[string]                       `json:"sessionID,required"`
-	State     param.Field[PartUpdatePartToolStateUnion] `json:"state,required"`
-	Tool      param.Field[string]                       `json:"tool,required"`
-	Type      param.Field[PartUpdatePartToolType]       `json:"type,required"`
-	Metadata  param.Field[map[string]any]               `json:"metadata"`
+type PartUpdateParamsPartTool struct {
+	CallID    param.Field[string]                             `json:"callID,required"`
+	ID        param.Field[string]                             `json:"id,required"`
+	MessageID param.Field[string]                             `json:"messageID,required"`
+	SessionID param.Field[string]                             `json:"sessionID,required"`
+	State     param.Field[PartUpdateParamsPartToolStateUnion] `json:"state,required"`
+	Tool      param.Field[string]                             `json:"tool,required"`
+	Type      param.Field[PartUpdateParamsPartToolType]       `json:"type,required"`
+	Metadata  param.Field[map[string]any]                     `json:"metadata"`
 }
 
-func (r PartUpdatePartTool) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartTool) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartTool) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartTool) implementsPartUpdateParamsPartUnion() {}
 
-// PartUpdatePartToolStatePending represents the pending variant of
-// [PartUpdatePartToolStateUnion].
-type PartUpdatePartToolStatePending struct {
-	Status param.Field[PartUpdatePartToolStatePendingStatus] `json:"status,required"`
-	Input  param.Field[map[string]any]                       `json:"input,required"`
-	Raw    param.Field[string]                               `json:"raw,required"`
+// PartUpdateParamsPartToolStatePending represents the pending variant of
+// [PartUpdateParamsPartToolStateUnion].
+type PartUpdateParamsPartToolStatePending struct {
+	Status param.Field[PartUpdateParamsPartToolStatePendingStatus] `json:"status,required"`
+	Input  param.Field[map[string]any]                             `json:"input,required"`
+	Raw    param.Field[string]                                     `json:"raw,required"`
 }
 
-func (r PartUpdatePartToolStatePending) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStatePending) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartToolStatePending) implementsPartUpdatePartToolStateUnion() {}
+func (r PartUpdateParamsPartToolStatePending) implementsPartUpdateParamsPartToolStateUnion() {}
 
-type PartUpdatePartToolStatePendingStatus string
+type PartUpdateParamsPartToolStatePendingStatus string
 
 const (
-	PartUpdatePartToolStatePendingStatusPending PartUpdatePartToolStatePendingStatus = "pending"
+	PartUpdateParamsPartToolStatePendingStatusPending PartUpdateParamsPartToolStatePendingStatus = "pending"
 )
 
-func (r PartUpdatePartToolStatePendingStatus) IsKnown() bool {
+func (r PartUpdateParamsPartToolStatePendingStatus) IsKnown() bool {
 	switch r {
-	case PartUpdatePartToolStatePendingStatusPending:
+	case PartUpdateParamsPartToolStatePendingStatusPending:
 		return true
 	}
 	return false
 }
 
-// PartUpdatePartToolStateRunning represents the running variant of
-// [PartUpdatePartToolStateUnion].
-type PartUpdatePartToolStateRunning struct {
-	Input    param.Field[map[string]any]                       `json:"input,required"`
-	Status   param.Field[PartUpdatePartToolStateRunningStatus] `json:"status,required"`
-	Time     param.Field[PartUpdatePartToolStateRunningTime]   `json:"time,required"`
-	Title    param.Field[string]                               `json:"title"`
-	Metadata param.Field[map[string]any]                       `json:"metadata"`
+// PartUpdateParamsPartToolStateRunning represents the running variant of
+// [PartUpdateParamsPartToolStateUnion].
+type PartUpdateParamsPartToolStateRunning struct {
+	Input    param.Field[map[string]any]                             `json:"input,required"`
+	Status   param.Field[PartUpdateParamsPartToolStateRunningStatus] `json:"status,required"`
+	Time     param.Field[PartUpdateParamsPartToolStateRunningTime]   `json:"time,required"`
+	Title    param.Field[string]                                     `json:"title"`
+	Metadata param.Field[map[string]any]                             `json:"metadata"`
 }
 
-func (r PartUpdatePartToolStateRunning) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateRunning) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartToolStateRunning) implementsPartUpdatePartToolStateUnion() {}
+func (r PartUpdateParamsPartToolStateRunning) implementsPartUpdateParamsPartToolStateUnion() {}
 
-type PartUpdatePartToolStateRunningStatus string
+type PartUpdateParamsPartToolStateRunningStatus string
 
 const (
-	PartUpdatePartToolStateRunningStatusRunning PartUpdatePartToolStateRunningStatus = "running"
+	PartUpdateParamsPartToolStateRunningStatusRunning PartUpdateParamsPartToolStateRunningStatus = "running"
 )
 
-func (r PartUpdatePartToolStateRunningStatus) IsKnown() bool {
+func (r PartUpdateParamsPartToolStateRunningStatus) IsKnown() bool {
 	switch r {
-	case PartUpdatePartToolStateRunningStatusRunning:
+	case PartUpdateParamsPartToolStateRunningStatusRunning:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartToolStateRunningTime struct {
+type PartUpdateParamsPartToolStateRunningTime struct {
 	Start param.Field[int64] `json:"start,required"`
 }
 
-func (r PartUpdatePartToolStateRunningTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateRunningTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// PartUpdatePartToolStateCompleted represents the completed variant of
-// [PartUpdatePartToolStateUnion].
-type PartUpdatePartToolStateCompleted struct {
-	Input    param.Field[map[string]any]                         `json:"input,required"`
-	Metadata param.Field[map[string]any]                         `json:"metadata,required"`
-	Output   param.Field[string]                                 `json:"output,required"`
-	Status   param.Field[PartUpdatePartToolStateCompletedStatus] `json:"status,required"`
-	Time     param.Field[PartUpdatePartToolStateCompletedTime]   `json:"time,required"`
-	Title    param.Field[string]                                 `json:"title,required"`
+// PartUpdateParamsPartToolStateCompleted represents the completed variant of
+// [PartUpdateParamsPartToolStateUnion].
+type PartUpdateParamsPartToolStateCompleted struct {
+	Input    param.Field[map[string]any]                               `json:"input,required"`
+	Metadata param.Field[map[string]any]                               `json:"metadata,required"`
+	Output   param.Field[string]                                       `json:"output,required"`
+	Status   param.Field[PartUpdateParamsPartToolStateCompletedStatus] `json:"status,required"`
+	Time     param.Field[PartUpdateParamsPartToolStateCompletedTime]   `json:"time,required"`
+	Title    param.Field[string]                                       `json:"title,required"`
 	// Optional list of file attachments.
-	Attachments param.Field[[]PartUpdatePartFile] `json:"attachments"`
+	Attachments param.Field[[]PartUpdateParamsPartFile] `json:"attachments"`
 }
 
-func (r PartUpdatePartToolStateCompleted) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateCompleted) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartToolStateCompleted) implementsPartUpdatePartToolStateUnion() {}
+func (r PartUpdateParamsPartToolStateCompleted) implementsPartUpdateParamsPartToolStateUnion() {}
 
-type PartUpdatePartToolStateCompletedStatus string
+type PartUpdateParamsPartToolStateCompletedStatus string
 
 const (
-	PartUpdatePartToolStateCompletedStatusCompleted PartUpdatePartToolStateCompletedStatus = "completed"
+	PartUpdateParamsPartToolStateCompletedStatusCompleted PartUpdateParamsPartToolStateCompletedStatus = "completed"
 )
 
-func (r PartUpdatePartToolStateCompletedStatus) IsKnown() bool {
+func (r PartUpdateParamsPartToolStateCompletedStatus) IsKnown() bool {
 	switch r {
-	case PartUpdatePartToolStateCompletedStatusCompleted:
+	case PartUpdateParamsPartToolStateCompletedStatusCompleted:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartToolStateCompletedTime struct {
+type PartUpdateParamsPartToolStateCompletedTime struct {
 	Start     param.Field[int64] `json:"start,required"`
 	End       param.Field[int64] `json:"end,required"`
 	Compacted param.Field[int64] `json:"compacted"`
 }
 
-func (r PartUpdatePartToolStateCompletedTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateCompletedTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// PartUpdatePartToolStateError represents the error variant of
-// [PartUpdatePartToolStateUnion].
-type PartUpdatePartToolStateError struct {
-	Error    param.Field[string]                             `json:"error,required"`
-	Input    param.Field[map[string]any]                     `json:"input,required"`
-	Status   param.Field[PartUpdatePartToolStateErrorStatus] `json:"status,required"`
-	Time     param.Field[PartUpdatePartToolStateErrorTime]   `json:"time,required"`
-	Metadata param.Field[map[string]any]                     `json:"metadata"`
+// PartUpdateParamsPartToolStateError represents the error variant of
+// [PartUpdateParamsPartToolStateUnion].
+type PartUpdateParamsPartToolStateError struct {
+	Error    param.Field[string]                                   `json:"error,required"`
+	Input    param.Field[map[string]any]                           `json:"input,required"`
+	Status   param.Field[PartUpdateParamsPartToolStateErrorStatus] `json:"status,required"`
+	Time     param.Field[PartUpdateParamsPartToolStateErrorTime]   `json:"time,required"`
+	Metadata param.Field[map[string]any]                           `json:"metadata"`
 }
 
-func (r PartUpdatePartToolStateError) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateError) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartToolStateError) implementsPartUpdatePartToolStateUnion() {}
+func (r PartUpdateParamsPartToolStateError) implementsPartUpdateParamsPartToolStateUnion() {}
 
-type PartUpdatePartToolStateErrorStatus string
+type PartUpdateParamsPartToolStateErrorStatus string
 
 const (
-	PartUpdatePartToolStateErrorStatusError PartUpdatePartToolStateErrorStatus = "error"
+	PartUpdateParamsPartToolStateErrorStatusError PartUpdateParamsPartToolStateErrorStatus = "error"
 )
 
-func (r PartUpdatePartToolStateErrorStatus) IsKnown() bool {
+func (r PartUpdateParamsPartToolStateErrorStatus) IsKnown() bool {
 	switch r {
-	case PartUpdatePartToolStateErrorStatusError:
+	case PartUpdateParamsPartToolStateErrorStatusError:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartToolStateErrorTime struct {
+type PartUpdateParamsPartToolStateErrorTime struct {
 	Start param.Field[int64] `json:"start,required"`
 	End   param.Field[int64] `json:"end,required"`
 }
 
-func (r PartUpdatePartToolStateErrorTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartToolStateErrorTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// PartUpdatePartToolStateUnion represents the OpenAPI ToolState anyOf union
-// (per the [PartUpdatePartTool.State] field).
+// PartUpdateParamsPartToolStateUnion represents the OpenAPI ToolState anyOf
+// union (per the [PartUpdateParamsPartTool.State] field).
 //
-// Satisfied by [PartUpdatePartToolStatePending], [PartUpdatePartToolStateRunning],
-// [PartUpdatePartToolStateCompleted] or [PartUpdatePartToolStateError].
-type PartUpdatePartToolStateUnion interface {
-	implementsPartUpdatePartToolStateUnion()
+// Satisfied by [PartUpdateParamsPartToolStatePending],
+// [PartUpdateParamsPartToolStateRunning],
+// [PartUpdateParamsPartToolStateCompleted] or
+// [PartUpdateParamsPartToolStateError].
+type PartUpdateParamsPartToolStateUnion interface {
+	implementsPartUpdateParamsPartToolStateUnion()
 }
 
-type PartUpdatePartToolType string
+type PartUpdateParamsPartToolType string
 
 const (
-	PartUpdatePartToolTypeTool PartUpdatePartToolType = "tool"
+	PartUpdateParamsPartToolTypeTool PartUpdateParamsPartToolType = "tool"
 )
 
-func (r PartUpdatePartToolType) IsKnown() bool {
+func (r PartUpdateParamsPartToolType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartToolTypeTool:
+	case PartUpdateParamsPartToolTypeTool:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartStepStart struct {
-	ID        param.Field[string]                      `json:"id,required"`
-	MessageID param.Field[string]                      `json:"messageID,required"`
-	SessionID param.Field[string]                      `json:"sessionID,required"`
-	Type      param.Field[PartUpdatePartStepStartType] `json:"type,required"`
-	Snapshot  param.Field[string]                      `json:"snapshot"`
+type PartUpdateParamsPartStepStart struct {
+	ID        param.Field[string]                            `json:"id,required"`
+	MessageID param.Field[string]                            `json:"messageID,required"`
+	SessionID param.Field[string]                            `json:"sessionID,required"`
+	Type      param.Field[PartUpdateParamsPartStepStartType] `json:"type,required"`
+	Snapshot  param.Field[string]                            `json:"snapshot"`
 }
 
-func (r PartUpdatePartStepStart) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartStepStart) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartStepStart) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartStepStart) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartStepStartType string
+type PartUpdateParamsPartStepStartType string
 
 const (
-	PartUpdatePartStepStartTypeStepStart PartUpdatePartStepStartType = "step-start"
+	PartUpdateParamsPartStepStartTypeStepStart PartUpdateParamsPartStepStartType = "step-start"
 )
 
-func (r PartUpdatePartStepStartType) IsKnown() bool {
+func (r PartUpdateParamsPartStepStartType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartStepStartTypeStepStart:
+	case PartUpdateParamsPartStepStartTypeStepStart:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartStepFinish struct {
-	Cost      param.Field[float64]                        `json:"cost,required"`
-	ID        param.Field[string]                         `json:"id,required"`
-	MessageID param.Field[string]                         `json:"messageID,required"`
-	Reason    param.Field[string]                         `json:"reason,required"`
-	SessionID param.Field[string]                         `json:"sessionID,required"`
-	Tokens    param.Field[PartUpdatePartStepFinishTokens] `json:"tokens,required"`
-	Type      param.Field[PartUpdatePartStepFinishType]   `json:"type,required"`
-	Snapshot  param.Field[string]                         `json:"snapshot"`
+type PartUpdateParamsPartStepFinish struct {
+	Cost      param.Field[float64]                              `json:"cost,required"`
+	ID        param.Field[string]                               `json:"id,required"`
+	MessageID param.Field[string]                               `json:"messageID,required"`
+	Reason    param.Field[string]                               `json:"reason,required"`
+	SessionID param.Field[string]                               `json:"sessionID,required"`
+	Tokens    param.Field[PartUpdateParamsPartStepFinishTokens] `json:"tokens,required"`
+	Type      param.Field[PartUpdateParamsPartStepFinishType]   `json:"type,required"`
+	Snapshot  param.Field[string]                               `json:"snapshot"`
 }
 
-func (r PartUpdatePartStepFinish) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartStepFinish) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartStepFinish) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartStepFinish) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartStepFinishType string
+type PartUpdateParamsPartStepFinishType string
 
 const (
-	PartUpdatePartStepFinishTypeStepFinish PartUpdatePartStepFinishType = "step-finish"
+	PartUpdateParamsPartStepFinishTypeStepFinish PartUpdateParamsPartStepFinishType = "step-finish"
 )
 
-func (r PartUpdatePartStepFinishType) IsKnown() bool {
+func (r PartUpdateParamsPartStepFinishType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartStepFinishTypeStepFinish:
+	case PartUpdateParamsPartStepFinishTypeStepFinish:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartStepFinishTokens struct {
-	Cache     param.Field[PartUpdatePartStepFinishTokensCache] `json:"cache,required"`
-	Input     param.Field[int64]                               `json:"input,required"`
-	Output    param.Field[int64]                               `json:"output,required"`
-	Reasoning param.Field[int64]                               `json:"reasoning,required"`
-	Total     param.Field[int64]                               `json:"total"`
+type PartUpdateParamsPartStepFinishTokens struct {
+	Cache     param.Field[PartUpdateParamsPartStepFinishTokensCache] `json:"cache,required"`
+	Input     param.Field[int64]                                     `json:"input,required"`
+	Output    param.Field[int64]                                     `json:"output,required"`
+	Reasoning param.Field[int64]                                     `json:"reasoning,required"`
+	Total     param.Field[int64]                                     `json:"total"`
 }
 
-func (r PartUpdatePartStepFinishTokens) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartStepFinishTokens) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartStepFinishTokensCache struct {
+type PartUpdateParamsPartStepFinishTokensCache struct {
 	Read  param.Field[int64] `json:"read,required"`
 	Write param.Field[int64] `json:"write,required"`
 }
 
-func (r PartUpdatePartStepFinishTokensCache) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartStepFinishTokensCache) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartSnapshot struct {
-	ID        param.Field[string]                     `json:"id,required"`
-	MessageID param.Field[string]                     `json:"messageID,required"`
-	SessionID param.Field[string]                     `json:"sessionID,required"`
-	Snapshot  param.Field[string]                     `json:"snapshot,required"`
-	Type      param.Field[PartUpdatePartSnapshotType] `json:"type,required"`
+type PartUpdateParamsPartSnapshot struct {
+	ID        param.Field[string]                           `json:"id,required"`
+	MessageID param.Field[string]                           `json:"messageID,required"`
+	SessionID param.Field[string]                           `json:"sessionID,required"`
+	Snapshot  param.Field[string]                           `json:"snapshot,required"`
+	Type      param.Field[PartUpdateParamsPartSnapshotType] `json:"type,required"`
 }
 
-func (r PartUpdatePartSnapshot) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartSnapshot) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartSnapshot) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartSnapshot) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartSnapshotType string
+type PartUpdateParamsPartSnapshotType string
 
 const (
-	PartUpdatePartSnapshotTypeSnapshot PartUpdatePartSnapshotType = "snapshot"
+	PartUpdateParamsPartSnapshotTypeSnapshot PartUpdateParamsPartSnapshotType = "snapshot"
 )
 
-func (r PartUpdatePartSnapshotType) IsKnown() bool {
+func (r PartUpdateParamsPartSnapshotType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartSnapshotTypeSnapshot:
+	case PartUpdateParamsPartSnapshotTypeSnapshot:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartPatch struct {
-	Files     param.Field[[]string]                `json:"files,required"`
-	Hash      param.Field[string]                  `json:"hash,required"`
-	ID        param.Field[string]                  `json:"id,required"`
-	MessageID param.Field[string]                  `json:"messageID,required"`
-	SessionID param.Field[string]                  `json:"sessionID,required"`
-	Type      param.Field[PartUpdatePartPatchType] `json:"type,required"`
+type PartUpdateParamsPartPatch struct {
+	Files     param.Field[[]string]                      `json:"files,required"`
+	Hash      param.Field[string]                        `json:"hash,required"`
+	ID        param.Field[string]                        `json:"id,required"`
+	MessageID param.Field[string]                        `json:"messageID,required"`
+	SessionID param.Field[string]                        `json:"sessionID,required"`
+	Type      param.Field[PartUpdateParamsPartPatchType] `json:"type,required"`
 }
 
-func (r PartUpdatePartPatch) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartPatch) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartPatch) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartPatch) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartPatchType string
+type PartUpdateParamsPartPatchType string
 
 const (
-	PartUpdatePartPatchTypePatch PartUpdatePartPatchType = "patch"
+	PartUpdateParamsPartPatchTypePatch PartUpdateParamsPartPatchType = "patch"
 )
 
-func (r PartUpdatePartPatchType) IsKnown() bool {
+func (r PartUpdateParamsPartPatchType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartPatchTypePatch:
+	case PartUpdateParamsPartPatchTypePatch:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartAgent struct {
-	ID        param.Field[string]                    `json:"id,required"`
-	MessageID param.Field[string]                    `json:"messageID,required"`
-	Name      param.Field[string]                    `json:"name,required"`
-	SessionID param.Field[string]                    `json:"sessionID,required"`
-	Type      param.Field[PartUpdatePartAgentType]   `json:"type,required"`
-	Source    param.Field[PartUpdatePartAgentSource] `json:"source"`
+type PartUpdateParamsPartAgent struct {
+	ID        param.Field[string]                          `json:"id,required"`
+	MessageID param.Field[string]                          `json:"messageID,required"`
+	Name      param.Field[string]                          `json:"name,required"`
+	SessionID param.Field[string]                          `json:"sessionID,required"`
+	Type      param.Field[PartUpdateParamsPartAgentType]   `json:"type,required"`
+	Source    param.Field[PartUpdateParamsPartAgentSource] `json:"source"`
 }
 
-func (r PartUpdatePartAgent) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartAgent) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartAgent) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartAgent) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartAgentType string
+type PartUpdateParamsPartAgentType string
 
 const (
-	PartUpdatePartAgentTypeAgent PartUpdatePartAgentType = "agent"
+	PartUpdateParamsPartAgentTypeAgent PartUpdateParamsPartAgentType = "agent"
 )
 
-func (r PartUpdatePartAgentType) IsKnown() bool {
+func (r PartUpdateParamsPartAgentType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartAgentTypeAgent:
+	case PartUpdateParamsPartAgentTypeAgent:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartAgentSource struct {
+type PartUpdateParamsPartAgentSource struct {
 	End   param.Field[int64]  `json:"end,required"`
 	Start param.Field[int64]  `json:"start,required"`
 	Value param.Field[string] `json:"value,required"`
 }
 
-func (r PartUpdatePartAgentSource) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartAgentSource) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartRetry struct {
-	Attempt   param.Field[int64]                    `json:"attempt,required"`
-	ID        param.Field[string]                   `json:"id,required"`
-	MessageID param.Field[string]                   `json:"messageID,required"`
-	SessionID param.Field[string]                   `json:"sessionID,required"`
-	Time      param.Field[PartUpdatePartRetryTime]  `json:"time,required"`
-	Type      param.Field[PartUpdatePartRetryType]  `json:"type,required"`
-	Error     param.Field[PartUpdatePartRetryError] `json:"error,required"`
+type PartUpdateParamsPartRetry struct {
+	Attempt   param.Field[int64]                          `json:"attempt,required"`
+	ID        param.Field[string]                         `json:"id,required"`
+	MessageID param.Field[string]                         `json:"messageID,required"`
+	SessionID param.Field[string]                         `json:"sessionID,required"`
+	Time      param.Field[PartUpdateParamsPartRetryTime]  `json:"time,required"`
+	Type      param.Field[PartUpdateParamsPartRetryType]  `json:"type,required"`
+	Error     param.Field[PartUpdateParamsPartRetryError] `json:"error,required"`
 }
 
-func (r PartUpdatePartRetry) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartRetry) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartRetry) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartRetry) implementsPartUpdateParamsPartUnion() {}
 
-// PartUpdatePartRetryError mirrors the OpenAPI APIError payload schema for the
-// [PartUpdatePartRetry.Error] field — a `{"name":"APIError","data":{...}}` envelope.
-type PartUpdatePartRetryError struct {
-	Name param.Field[string]                       `json:"name,required"`
-	Data param.Field[PartUpdatePartRetryErrorData] `json:"data,required"`
+// PartUpdateParamsPartRetryError mirrors the OpenAPI APIError payload schema
+// for the [PartUpdateParamsPartRetry.Error] field — a
+// `{"name":"APIError","data":{...}}` envelope.
+type PartUpdateParamsPartRetryError struct {
+	Name param.Field[string]                             `json:"name,required"`
+	Data param.Field[PartUpdateParamsPartRetryErrorData] `json:"data,required"`
 }
 
-func (r PartUpdatePartRetryError) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartRetryError) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// PartUpdatePartRetryErrorData mirrors OpenAPI APIErrorData.
-type PartUpdatePartRetryErrorData struct {
+// PartUpdateParamsPartRetryErrorData mirrors OpenAPI APIErrorData.
+type PartUpdateParamsPartRetryErrorData struct {
 	IsRetryable     param.Field[bool]              `json:"isRetryable,required"`
 	Message         param.Field[string]            `json:"message,required"`
 	Metadata        param.Field[map[string]string] `json:"metadata"`
@@ -685,57 +689,57 @@ type PartUpdatePartRetryErrorData struct {
 	StatusCode      param.Field[int64]             `json:"statusCode"`
 }
 
-func (r PartUpdatePartRetryErrorData) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartRetryErrorData) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartRetryType string
+type PartUpdateParamsPartRetryType string
 
 const (
-	PartUpdatePartRetryTypeRetry PartUpdatePartRetryType = "retry"
+	PartUpdateParamsPartRetryTypeRetry PartUpdateParamsPartRetryType = "retry"
 )
 
-func (r PartUpdatePartRetryType) IsKnown() bool {
+func (r PartUpdateParamsPartRetryType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartRetryTypeRetry:
+	case PartUpdateParamsPartRetryTypeRetry:
 		return true
 	}
 	return false
 }
 
-type PartUpdatePartRetryTime struct {
+type PartUpdateParamsPartRetryTime struct {
 	Created param.Field[int64] `json:"created,required"`
 }
 
-func (r PartUpdatePartRetryTime) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartRetryTime) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type PartUpdatePartCompaction struct {
-	Auto        param.Field[bool]                         `json:"auto,required"`
-	ID          param.Field[string]                       `json:"id,required"`
-	MessageID   param.Field[string]                       `json:"messageID,required"`
-	SessionID   param.Field[string]                       `json:"sessionID,required"`
-	Type        param.Field[PartUpdatePartCompactionType] `json:"type,required"`
-	Overflow    param.Field[bool]                         `json:"overflow"`
-	TailStartID param.Field[string]                       `json:"tail_start_id"`
+type PartUpdateParamsPartCompaction struct {
+	Auto        param.Field[bool]                               `json:"auto,required"`
+	ID          param.Field[string]                             `json:"id,required"`
+	MessageID   param.Field[string]                             `json:"messageID,required"`
+	SessionID   param.Field[string]                             `json:"sessionID,required"`
+	Type        param.Field[PartUpdateParamsPartCompactionType] `json:"type,required"`
+	Overflow    param.Field[bool]                               `json:"overflow"`
+	TailStartID param.Field[string]                             `json:"tail_start_id"`
 }
 
-func (r PartUpdatePartCompaction) MarshalJSON() (data []byte, err error) {
+func (r PartUpdateParamsPartCompaction) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r PartUpdatePartCompaction) implementsPartUpdatePartUnion() {}
+func (r PartUpdateParamsPartCompaction) implementsPartUpdateParamsPartUnion() {}
 
-type PartUpdatePartCompactionType string
+type PartUpdateParamsPartCompactionType string
 
 const (
-	PartUpdatePartCompactionTypeCompaction PartUpdatePartCompactionType = "compaction"
+	PartUpdateParamsPartCompactionTypeCompaction PartUpdateParamsPartCompactionType = "compaction"
 )
 
-func (r PartUpdatePartCompactionType) IsKnown() bool {
+func (r PartUpdateParamsPartCompactionType) IsKnown() bool {
 	switch r {
-	case PartUpdatePartCompactionTypeCompaction:
+	case PartUpdateParamsPartCompactionTypeCompaction:
 		return true
 	}
 	return false
@@ -743,78 +747,78 @@ func (r PartUpdatePartCompactionType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[PartUpdatePartUnion](),
+		reflect.TypeFor[PartUpdateParamsPartUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartText](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartSubtask](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartSubtask](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartReasoning](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartReasoning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartFile](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartFile](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartTool](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartTool](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartStepStart](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartStepStart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartStepFinish](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartStepFinish](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartSnapshot](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartSnapshot](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartPatch](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartPatch](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartAgent](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartAgent](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartRetry](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartRetry](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartCompaction](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartCompaction](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[PartUpdatePartToolStateUnion](),
+		reflect.TypeFor[PartUpdateParamsPartToolStateUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartToolStatePending](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartToolStatePending](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartToolStateRunning](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartToolStateRunning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartToolStateCompleted](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartToolStateCompleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[PartUpdatePartToolStateError](),
+			Type:       reflect.TypeFor[PartUpdateParamsPartToolStateError](),
 		},
 	)
 }

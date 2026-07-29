@@ -76,8 +76,11 @@ func TestWorktreeRemove(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Worktree.Remove(context.TODO(), opencode.WorktreeRemoveParams{
-		Directory: opencode.F("/path/to/worktree"),
+		Directory: opencode.F("workspace-root"),
 		Workspace: opencode.F("workspace"),
+		Body: opencode.F(opencode.WorktreeRemoveParamsBody{
+			Directory: opencode.F("/path/to/worktree"),
+		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -101,8 +104,11 @@ func TestWorktreeReset(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Worktree.Reset(context.TODO(), opencode.WorktreeResetParams{
-		Directory: opencode.F("/path/to/worktree"),
+		Directory: opencode.F("workspace-root"),
 		Workspace: opencode.F("workspace"),
+		Body: opencode.F(opencode.WorktreeResetParamsBody{
+			Directory: opencode.F("/path/to/worktree"),
+		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error

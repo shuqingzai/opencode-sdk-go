@@ -309,16 +309,13 @@ func (r TuiSubmitPromptParams) URLQuery() (v url.Values) {
 }
 
 type TuiPublishParams struct {
-	Directory param.Field[string]              `query:"directory"`
-	Workspace param.Field[string]              `query:"workspace"`
-	Body      param.Field[TuiPublishBodyUnion] `json:"-"`
+	Directory param.Field[string]                    `query:"directory"`
+	Workspace param.Field[string]                    `query:"workspace"`
+	Body      param.Field[TuiPublishParamsBodyUnion] `json:"-"`
 }
 
 func (r TuiPublishParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.Present {
-		return apijson.MarshalRoot(r.Body)
-	}
-	return nil, nil
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [TuiPublishParams]'s query parameters as `url.Values`.
@@ -329,159 +326,207 @@ func (r TuiPublishParams) URLQuery() (v url.Values) {
 	})
 }
 
-type TuiPublishBodyUnion interface {
-	implementsTuiPublishBody()
+type TuiPublishParamsBodyUnion interface {
+	implementsTuiPublishParamsBodyUnion()
 }
 
-type TuiPublishBodyPromptAppend struct {
-	Type       param.Field[TuiPublishBodyPromptAppendType]       `json:"type,required"`
-	Properties param.Field[TuiPublishBodyPromptAppendProperties] `json:"properties,required"`
+type TuiPublishParamsBodyPromptAppend struct {
+	Type       param.Field[TuiPublishParamsBodyPromptAppendType]       `json:"type,required"`
+	Properties param.Field[TuiPublishParamsBodyPromptAppendProperties] `json:"properties,required"`
 }
 
-func (r TuiPublishBodyPromptAppend) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyPromptAppend) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TuiPublishBodyPromptAppend) implementsTuiPublishBody() {}
+func (r TuiPublishParamsBodyPromptAppend) implementsTuiPublishParamsBodyUnion() {}
 
-type TuiPublishBodyPromptAppendType string
+type TuiPublishParamsBodyPromptAppendType string
 
 const (
-	TuiPublishBodyPromptAppendTypeTuiPromptAppend TuiPublishBodyPromptAppendType = "tui.prompt.append"
+	TuiPublishParamsBodyPromptAppendTypeTuiPromptAppend TuiPublishParamsBodyPromptAppendType = "tui.prompt.append"
 )
 
-func (r TuiPublishBodyPromptAppendType) IsKnown() bool {
+func (r TuiPublishParamsBodyPromptAppendType) IsKnown() bool {
 	switch r {
-	case TuiPublishBodyPromptAppendTypeTuiPromptAppend:
+	case TuiPublishParamsBodyPromptAppendTypeTuiPromptAppend:
 		return true
 	}
 	return false
 }
 
-type TuiPublishBodyPromptAppendProperties struct {
+type TuiPublishParamsBodyPromptAppendProperties struct {
 	Text param.Field[string] `json:"text,required"`
 }
 
-func (r TuiPublishBodyPromptAppendProperties) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyPromptAppendProperties) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TuiPublishBodyCommandExecute struct {
-	Type       param.Field[TuiPublishBodyCommandExecuteType]       `json:"type,required"`
-	Properties param.Field[TuiPublishBodyCommandExecuteProperties] `json:"properties,required"`
+type TuiPublishParamsBodyCommandExecute struct {
+	Type       param.Field[TuiPublishParamsBodyCommandExecuteType]       `json:"type,required"`
+	Properties param.Field[TuiPublishParamsBodyCommandExecuteProperties] `json:"properties,required"`
 }
 
-func (r TuiPublishBodyCommandExecute) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyCommandExecute) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TuiPublishBodyCommandExecute) implementsTuiPublishBody() {}
+func (r TuiPublishParamsBodyCommandExecute) implementsTuiPublishParamsBodyUnion() {}
 
-type TuiPublishBodyCommandExecuteType string
+type TuiPublishParamsBodyCommandExecuteType string
 
 const (
-	TuiPublishBodyCommandExecuteTypeTuiCommandExecute TuiPublishBodyCommandExecuteType = "tui.command.execute"
+	TuiPublishParamsBodyCommandExecuteTypeTuiCommandExecute TuiPublishParamsBodyCommandExecuteType = "tui.command.execute"
 )
 
-func (r TuiPublishBodyCommandExecuteType) IsKnown() bool {
+func (r TuiPublishParamsBodyCommandExecuteType) IsKnown() bool {
 	switch r {
-	case TuiPublishBodyCommandExecuteTypeTuiCommandExecute:
+	case TuiPublishParamsBodyCommandExecuteTypeTuiCommandExecute:
 		return true
 	}
 	return false
 }
 
-type TuiPublishBodyCommandExecuteProperties struct {
+type TuiPublishParamsBodyCommandExecuteProperties struct {
 	Command param.Field[string] `json:"command,required"`
 }
 
-func (r TuiPublishBodyCommandExecuteProperties) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyCommandExecuteProperties) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TuiPublishBodyToastShow struct {
-	Type       param.Field[TuiPublishBodyToastShowType]       `json:"type,required"`
-	Properties param.Field[TuiPublishBodyToastShowProperties] `json:"properties,required"`
-}
-
-func (r TuiPublishBodyToastShow) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r TuiPublishBodyToastShow) implementsTuiPublishBody() {}
-
-type TuiPublishBodyToastShowType string
+// TuiPublishParamsBodyCommandExecutePropertiesCommand enumerates the well-known command
+// identifiers for the tui.command.execute event. Because the OpenAPI schema uses
+// anyOf[enum, string], arbitrary string values are also accepted; use a plain
+// string literal when a command is not listed here.
+type TuiPublishParamsBodyCommandExecutePropertiesCommand string
 
 const (
-	TuiPublishBodyToastShowTypeTuiToastShow TuiPublishBodyToastShowType = "tui.toast.show"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionList         TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.list"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionNew          TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.new"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionShare        TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.share"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionInterrupt    TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.interrupt"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionCompact      TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.compact"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageUp       TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.page.up"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageDown     TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.page.down"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineUp       TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.line.up"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineDown     TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.line.down"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageUp   TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.half.page.up"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageDown TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.half.page.down"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionFirst        TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.first"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLast         TuiPublishParamsBodyCommandExecutePropertiesCommand = "session.last"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandPromptClear         TuiPublishParamsBodyCommandExecutePropertiesCommand = "prompt.clear"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandPromptSubmit        TuiPublishParamsBodyCommandExecutePropertiesCommand = "prompt.submit"
+	TuiPublishParamsBodyCommandExecutePropertiesCommandAgentCycle          TuiPublishParamsBodyCommandExecutePropertiesCommand = "agent.cycle"
 )
 
-func (r TuiPublishBodyToastShowType) IsKnown() bool {
+func (r TuiPublishParamsBodyCommandExecutePropertiesCommand) IsKnown() bool {
 	switch r {
-	case TuiPublishBodyToastShowTypeTuiToastShow:
+	case TuiPublishParamsBodyCommandExecutePropertiesCommandSessionList,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionNew,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionShare,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionInterrupt,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionCompact,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageUp,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageDown,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineUp,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineDown,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageUp,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageDown,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionFirst,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLast,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandPromptClear,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandPromptSubmit,
+		TuiPublishParamsBodyCommandExecutePropertiesCommandAgentCycle:
 		return true
 	}
 	return false
 }
 
-type TuiPublishBodyToastShowProperties struct {
-	Message  param.Field[string]                                   `json:"message,required"`
-	Variant  param.Field[TuiPublishBodyToastShowPropertiesVariant] `json:"variant,required"`
-	Title    param.Field[string]                                   `json:"title"`
-	Duration param.Field[int64]                                    `json:"duration"`
+type TuiPublishParamsBodyToastShow struct {
+	Type       param.Field[TuiPublishParamsBodyToastShowType]       `json:"type,required"`
+	Properties param.Field[TuiPublishParamsBodyToastShowProperties] `json:"properties,required"`
 }
 
-func (r TuiPublishBodyToastShowProperties) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyToastShow) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-type TuiPublishBodyToastShowPropertiesVariant string
+func (r TuiPublishParamsBodyToastShow) implementsTuiPublishParamsBodyUnion() {}
+
+type TuiPublishParamsBodyToastShowType string
 
 const (
-	TuiPublishBodyToastShowPropertiesVariantInfo    TuiPublishBodyToastShowPropertiesVariant = "info"
-	TuiPublishBodyToastShowPropertiesVariantSuccess TuiPublishBodyToastShowPropertiesVariant = "success"
-	TuiPublishBodyToastShowPropertiesVariantWarning TuiPublishBodyToastShowPropertiesVariant = "warning"
-	TuiPublishBodyToastShowPropertiesVariantError   TuiPublishBodyToastShowPropertiesVariant = "error"
+	TuiPublishParamsBodyToastShowTypeTuiToastShow TuiPublishParamsBodyToastShowType = "tui.toast.show"
 )
 
-func (r TuiPublishBodyToastShowPropertiesVariant) IsKnown() bool {
+func (r TuiPublishParamsBodyToastShowType) IsKnown() bool {
 	switch r {
-	case TuiPublishBodyToastShowPropertiesVariantInfo, TuiPublishBodyToastShowPropertiesVariantSuccess, TuiPublishBodyToastShowPropertiesVariantWarning, TuiPublishBodyToastShowPropertiesVariantError:
+	case TuiPublishParamsBodyToastShowTypeTuiToastShow:
 		return true
 	}
 	return false
 }
 
-type TuiPublishBodySessionSelect struct {
-	Type       param.Field[TuiPublishBodySessionSelectType]       `json:"type,required"`
-	Properties param.Field[TuiPublishBodySessionSelectProperties] `json:"properties,required"`
+type TuiPublishParamsBodyToastShowProperties struct {
+	Message  param.Field[string]                                         `json:"message,required"`
+	Variant  param.Field[TuiPublishParamsBodyToastShowPropertiesVariant] `json:"variant,required"`
+	Title    param.Field[string]                                         `json:"title"`
+	Duration param.Field[int64]                                          `json:"duration"`
 }
 
-func (r TuiPublishBodySessionSelect) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodyToastShowProperties) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r TuiPublishBodySessionSelect) implementsTuiPublishBody() {}
-
-type TuiPublishBodySessionSelectType string
+type TuiPublishParamsBodyToastShowPropertiesVariant string
 
 const (
-	TuiPublishBodySessionSelectTypeTuiSessionSelect TuiPublishBodySessionSelectType = "tui.session.select"
+	TuiPublishParamsBodyToastShowPropertiesVariantInfo    TuiPublishParamsBodyToastShowPropertiesVariant = "info"
+	TuiPublishParamsBodyToastShowPropertiesVariantSuccess TuiPublishParamsBodyToastShowPropertiesVariant = "success"
+	TuiPublishParamsBodyToastShowPropertiesVariantWarning TuiPublishParamsBodyToastShowPropertiesVariant = "warning"
+	TuiPublishParamsBodyToastShowPropertiesVariantError   TuiPublishParamsBodyToastShowPropertiesVariant = "error"
 )
 
-func (r TuiPublishBodySessionSelectType) IsKnown() bool {
+func (r TuiPublishParamsBodyToastShowPropertiesVariant) IsKnown() bool {
 	switch r {
-	case TuiPublishBodySessionSelectTypeTuiSessionSelect:
+	case TuiPublishParamsBodyToastShowPropertiesVariantInfo, TuiPublishParamsBodyToastShowPropertiesVariantSuccess, TuiPublishParamsBodyToastShowPropertiesVariantWarning, TuiPublishParamsBodyToastShowPropertiesVariantError:
 		return true
 	}
 	return false
 }
 
-type TuiPublishBodySessionSelectProperties struct {
+type TuiPublishParamsBodySessionSelect struct {
+	Type       param.Field[TuiPublishParamsBodySessionSelectType]       `json:"type,required"`
+	Properties param.Field[TuiPublishParamsBodySessionSelectProperties] `json:"properties,required"`
+}
+
+func (r TuiPublishParamsBodySessionSelect) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r TuiPublishParamsBodySessionSelect) implementsTuiPublishParamsBodyUnion() {}
+
+type TuiPublishParamsBodySessionSelectType string
+
+const (
+	TuiPublishParamsBodySessionSelectTypeTuiSessionSelect TuiPublishParamsBodySessionSelectType = "tui.session.select"
+)
+
+func (r TuiPublishParamsBodySessionSelectType) IsKnown() bool {
+	switch r {
+	case TuiPublishParamsBodySessionSelectTypeTuiSessionSelect:
+		return true
+	}
+	return false
+}
+
+type TuiPublishParamsBodySessionSelectProperties struct {
 	SessionID param.Field[string] `json:"sessionID,required"`
 }
 
-func (r TuiPublishBodySessionSelectProperties) MarshalJSON() (data []byte, err error) {
+func (r TuiPublishParamsBodySessionSelectProperties) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -518,14 +563,16 @@ func (r TuiControlNextParams) URLQuery() (v url.Values) {
 
 type TuiControlNextResponse struct {
 	Path string `json:"path,required"`
-	// This field is `unknown` per the OpenAPI schema, so its runtime type is
-	// `any`. The server returns arbitrary JSON in this field (e.g.
-	// `{text: "queued"}`); callers should type-assert as needed.
+	// Arbitrary JSON value holding the TUI request payload. Per OpenAPI
+	// `tui.control.next` response `body` is an unconstrained schema (`{}`), so no
+	// fixed set of runtime types applies; callers should type-assert as needed.
 	Body any                        `json:"body,required"`
-	JSON tuicontrolNextResponseJSON `json:"-"`
+	JSON tuiControlNextResponseJSON `json:"-"`
 }
 
-type tuicontrolNextResponseJSON struct {
+// tuiControlNextResponseJSON contains the JSON metadata for the struct
+// [TuiControlNextResponse]
+type tuiControlNextResponseJSON struct {
 	Path        apijson.Field
 	Body        apijson.Field
 	raw         string
@@ -536,7 +583,7 @@ func (r *TuiControlNextResponse) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r tuicontrolNextResponseJSON) RawJSON() string {
+func (r tuiControlNextResponseJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -547,10 +594,7 @@ type TuiControlResponseParams struct {
 }
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.Present {
-		return apijson.MarshalRoot(r.Body)
-	}
-	return nil, nil
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [TuiControlResponseParams]'s query parameters as
@@ -564,23 +608,23 @@ func (r TuiControlResponseParams) URLQuery() (v url.Values) {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[TuiPublishBodyUnion](),
+		reflect.TypeFor[TuiPublishParamsBodyUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[TuiPublishBodyPromptAppend](),
+			Type:       reflect.TypeFor[TuiPublishParamsBodyPromptAppend](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[TuiPublishBodyCommandExecute](),
+			Type:       reflect.TypeFor[TuiPublishParamsBodyCommandExecute](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[TuiPublishBodyToastShow](),
+			Type:       reflect.TypeFor[TuiPublishParamsBodyToastShow](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[TuiPublishBodySessionSelect](),
+			Type:       reflect.TypeFor[TuiPublishParamsBodySessionSelect](),
 		},
 	)
 }

@@ -13,6 +13,44 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
+// TestTuiPublishParamsBodyCommandExecutePropertiesCommandIsKnown verifies that all
+// enumerated command values from the OpenAPI schema are recognized by IsKnown(),
+// and that an unknown value is correctly rejected. The field type remains
+// param.Field[string] because the OpenAPI schema uses anyOf[enum, string].
+func TestTuiPublishParamsBodyCommandExecutePropertiesCommandIsKnown(t *testing.T) {
+	t.Parallel()
+	known := []opencode.TuiPublishParamsBodyCommandExecutePropertiesCommand{
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionList,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionNew,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionShare,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionInterrupt,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionCompact,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageUp,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionPageDown,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineUp,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLineDown,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageUp,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionHalfPageDown,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionFirst,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandSessionLast,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandPromptClear,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandPromptSubmit,
+		opencode.TuiPublishParamsBodyCommandExecutePropertiesCommandAgentCycle,
+	}
+	if len(known) != 16 {
+		t.Errorf("expected 16 known commands (matching OpenAPI enum), got %d", len(known))
+	}
+	for _, cmd := range known {
+		if !cmd.IsKnown() {
+			t.Errorf("IsKnown() returned false for known command %q", cmd)
+		}
+	}
+	unknown := opencode.TuiPublishParamsBodyCommandExecutePropertiesCommand("custom.command")
+	if unknown.IsKnown() {
+		t.Errorf("IsKnown() returned true for unknown command %q", unknown)
+	}
+}
+
 func TestTuiAppendPromptWithOptionalParams(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"

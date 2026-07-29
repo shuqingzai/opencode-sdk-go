@@ -73,7 +73,7 @@ type Config struct {
 	// automatically
 	Autoshare bool `json:"autoshare"`
 	// Automatically update to the latest version. Set to true to auto-update, false to disable, or 'notify' to show update notifications
-	// This field can have the runtime type of [bool] or "notify".
+	// This field can have the runtime type of [bool], [string].
 	Autoupdate any `json:"autoupdate"`
 	// Command configuration, see https://opencode.ai/docs/commands
 	Command map[string]ConfigCommand `json:"command"`
@@ -88,9 +88,9 @@ type Config struct {
 	Experimental ConfigExperimental `json:"experimental"`
 	// Enable or configure formatters. Omit or set to false to disable, true to
 	// enable built-ins, or an object to enable built-ins with overrides.
-	// Per OpenAPI `Config.formatter` is `boolean | object | map[string]ConfigFormatter`.
-	// This field can have the runtime type of [bool], [map[string]ConfigFormatter],
-	// [map[string]bool].
+	// Per OpenAPI `Config.formatter` is `anyOf [boolean, object]`, where the object
+	// maps formatter names to [ConfigFormatter] overrides.
+	// This field can have the runtime type of [bool], [map[string]ConfigFormatter].
 	Formatter any `json:"formatter"`
 	// Additional instruction files or patterns to include
 	Instructions []string `json:"instructions"`
@@ -110,22 +110,25 @@ type Config struct {
 	Model string `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides.
-	// This field can have the runtime type of [string], [ConfigPermission].
-	Permission any `json:"permission"`
-	// This field can have the runtime type of [string] or [][2]any{string, object}.
+	//
+	// Permission is the OpenAPI `PermissionConfig` anyOf; the decoder selects the
+	// concrete variant structurally, so a nil value means the field was absent, null
+	// or matched no variant.
+	Permission ConfigPermissionUnion `json:"permission"`
+	// This field can have the runtime type of [string], [[]any].
 	Plugin []any `json:"plugin"`
 	// Custom provider configurations and model overrides
 	Provider map[string]ConfigProvider `json:"provider"`
 	// Reference configuration for external documentation. Keys are reference
 	// names, values can be a plain URL/path string or a structured config (git
 	// or local).
-	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
-	// [ConfigV2ReferenceLocal].
+	// Each value can have the runtime type of [ConfigV2ReferenceString],
+	// [ConfigV2ReferenceGit], [ConfigV2ReferenceLocal].
 	Reference map[string]any `json:"reference"`
 	// References from external sources. Keys are reference names, values can be a
 	// plain URL/path string or a structured config (git or local).
-	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
-	// [ConfigV2ReferenceLocal].
+	// Each value can have the runtime type of [ConfigV2ReferenceString],
+	// [ConfigV2ReferenceGit], [ConfigV2ReferenceLocal].
 	References map[string]any `json:"references"`
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
@@ -151,9 +154,6 @@ type Config struct {
 	// Maximum depth for nested subagents
 	SubagentDepth int64      `json:"subagent_depth"`
 	JSON          configJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after [UnmarshalJSON]
-	// routes the raw data through [ConfigPermissionUnion] registered variants.
-	permissionUnion ConfigPermissionUnion
 }
 
 // configJSON contains the JSON metadata for the struct [Config]
@@ -203,14 +203,110 @@ func (r *Config) UnmarshalJSON(data []byte) (err error) {
 	if err = apijson.UnmarshalRoot(data, r); err != nil {
 		return err
 	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
+	// `formatter`, `lsp`, `reference` and `references` are all anyOf-typed and land
+	// on `any` carrier fields, so the generic interface branch of the decoder
+	// (internal/apijson/decoder.go, `case reflect.Interface`) would hand back
+	// `map[string]any` for every object payload and the declared runtime types would
+	// be unreachable. Route the raw sub-documents explicitly instead.
+	//
+	// `permission` needs no such help: it is declared as [ConfigPermissionUnion], so
+	// the decoder resolves it through the registered union natively.
+	r.Formatter = configObjectMapField[ConfigFormatter](data, "formatter", r.Formatter)
+	r.Lsp = configObjectMapField[ConfigLsp](data, "lsp", r.Lsp)
+	r.Reference = configReferenceField(data, "reference", r.Reference)
+	r.References = configReferenceField(data, "references", r.References)
 	return nil
+}
+
+// configObjectMapField routes the object arm of an OpenAPI
+// `anyOf [boolean, object(additionalProperties: <shape>)]` field onto
+// `map[string]T`, which is what the runtime comments on [Config.Formatter] and
+// [Config.Lsp] declare. The boolean arm needs no help: a JSON scalar already
+// decodes to a Go `bool` through the decoder's generic interface branch; only the
+// object arm degrades to `map[string]any`.
+//
+// A payload matching neither arm keeps whatever the generic decoder produced
+// rather than failing, so a single unreadable field cannot abort the decode of the
+// whole `/config` document. The raw bytes stay available via [Config.RawJSON].
+//
+// Entries decode through `T`'s own [json.Unmarshaler], so [ConfigLsp]'s nested
+// `anyOf [{disabled: true}, {command, ...}]` is shape-routed here as well.
+func configObjectMapField[T any](data []byte, key string, fallback any) any {
+	node := gjson.GetBytes(data, key)
+	if node.Type != gjson.JSON || !node.IsObject() {
+		return fallback
+	}
+	typed := map[string]T{}
+	if err := apijson.UnmarshalRoot([]byte(node.Raw), &typed); err != nil {
+		return fallback
+	}
+	return typed
+}
+
+// configReferenceField routes every entry of the OpenAPI `Config.reference` /
+// `Config.references` object (`additionalProperties: anyOf [string,
+// ConfigV2ReferenceGit, ConfigV2ReferenceLocal]`) onto its declared variant.
+//
+// The map itself stays `map[string]any` -- the OpenAPI value is a union and a
+// Response carrier field may not be typed as a union interface -- but the values
+// become the concrete variants named by the runtime comment instead of the
+// `string` / `map[string]any` the generic decoder produces.
+//
+// Entries that match no variant keep the generically decoded value, so one drifted
+// reference cannot cost the caller the rest of the document.
+func configReferenceField(data []byte, key string, fallback map[string]any) map[string]any {
+	node := gjson.GetBytes(data, key)
+	if node.Type != gjson.JSON || !node.IsObject() {
+		return fallback
+	}
+	routed := make(map[string]any, len(fallback))
+	for name, generic := range fallback {
+		routed[name] = generic
+	}
+	node.ForEach(func(key, value gjson.Result) bool {
+		if variant, ok := configV2Reference(value); ok {
+			routed[key.String()] = variant
+		}
+		return true
+	})
+	return routed
+}
+
+// configV2Reference picks the variant of the OpenAPI `Config.reference` /
+// `Config.references` `additionalProperties` anyOf for one raw entry: a plain
+// string, [ConfigV2ReferenceGit] (required `[repository]`) or
+// [ConfigV2ReferenceLocal] (required `[path]`).
+//
+// Do not replace this with `apijson.UnmarshalRoot(&ConfigV2ReferenceUnion)`. The
+// two object variants share no discriminator, and the union decoder's exactness
+// heuristic penalises unknown extra properties but never a missing `required`
+// field -- so `{"path": "./docs", "zz": 1}` ties on both variants and the
+// left-to-right tie-break misroutes it to [ConfigV2ReferenceGit].
+// [ConfigLsp.UnmarshalJSON] routes by hand for the same reason.
+//
+// `repository` is tested first: it is the git variant's only required property and
+// `additionalProperties: false` forbids it on the local one, and vice versa. An
+// explicit `null` counts as absent; unknown properties are ignored so a property
+// added by a newer server can never flip the variant.
+func configV2Reference(node gjson.Result) (any, bool) {
+	switch {
+	case node.Type == gjson.String:
+		return ConfigV2ReferenceString(node.String()), true
+	case node.Type != gjson.JSON || !node.IsObject():
+		return nil, false
+	}
+	if repository := node.Get("repository"); repository.Exists() && repository.Type != gjson.Null {
+		var git ConfigV2ReferenceGit
+		if err := apijson.UnmarshalRoot([]byte(node.Raw), &git); err != nil {
+			return nil, false
+		}
+		return git, true
+	}
+	var local ConfigV2ReferenceLocal
+	if err := apijson.UnmarshalRoot([]byte(node.Raw), &local); err != nil {
+		return nil, false
+	}
+	return local, true
 }
 
 func (r configJSON) RawJSON() string {
@@ -219,10 +315,65 @@ func (r configJSON) RawJSON() string {
 
 // AsPermission returns the permission field as a typed union.
 //
-// Possible runtime types of the union are [string] (PermissionActionConfig:
-// "ask"|"allow"|"deny") or [ConfigPermission].
+// Possible runtime types of the union are [ConfigPermissionAction] (a short
+// string: "ask"|"allow"|"deny") or [ConfigPermission].
 func (r *Config) AsPermission() ConfigPermissionUnion {
-	return r.permissionUnion
+	return r.Permission
+}
+
+// AsFormatter returns the object arm of the `formatter` field as a typed map of
+// formatter name to override.
+//
+// It is nil when `formatter` is absent or carries the boolean arm of the OpenAPI
+// `anyOf [boolean, object]`; use [Config.Formatter] directly to read that arm.
+func (r *Config) AsFormatter() map[string]ConfigFormatter {
+	formatter, _ := r.Formatter.(map[string]ConfigFormatter)
+	return formatter
+}
+
+// AsLsp returns the object arm of the `lsp` field as a typed map of LSP server name
+// to configuration. Each [ConfigLsp] carries its own variant, reachable through
+// [ConfigLsp.AsUnion].
+//
+// It is nil when `lsp` is absent or carries the boolean arm of the OpenAPI
+// `anyOf [boolean, object]`; use [Config.Lsp] directly to read that arm.
+func (r *Config) AsLsp() map[string]ConfigLsp {
+	lsp, _ := r.Lsp.(map[string]ConfigLsp)
+	return lsp
+}
+
+// AsReference returns the `reference` field with every entry as a typed
+// [ConfigV2ReferenceUnion].
+//
+// Entries that matched no variant of the OpenAPI anyOf are omitted; read
+// [Config.Reference] directly to reach them.
+func (r *Config) AsReference() map[string]ConfigV2ReferenceUnion {
+	return configReferenceUnions(r.Reference)
+}
+
+// AsReferences returns the `references` field with every entry as a typed
+// [ConfigV2ReferenceUnion].
+//
+// Entries that matched no variant of the OpenAPI anyOf are omitted; read
+// [Config.References] directly to reach them.
+func (r *Config) AsReferences() map[string]ConfigV2ReferenceUnion {
+	return configReferenceUnions(r.References)
+}
+
+// configReferenceUnions narrows an already-routed reference map (see
+// [configReferenceField]) to the typed union. It returns nil for an absent field so
+// that callers can distinguish it from a present-but-empty object.
+func configReferenceUnions(entries map[string]any) map[string]ConfigV2ReferenceUnion {
+	if entries == nil {
+		return nil
+	}
+	unions := make(map[string]ConfigV2ReferenceUnion, len(entries))
+	for name, value := range entries {
+		if variant, ok := value.(ConfigV2ReferenceUnion); ok {
+			unions[name] = variant
+		}
+	}
+	return unions
 }
 
 // ConfigPermissionUnion represents the OpenAPI PermissionConfig anyOf union.
@@ -406,23 +557,23 @@ type AgentConfig struct {
 	Model       string          `json:"model"`
 	// Permission configuration. Can be a short string ("ask"|"allow"|"deny") or
 	// an object with per-action permission rule overrides.
-	// This field can have the runtime type of [ConfigPermissionAction] or [ConfigPermission].
-	Permission  any             `json:"permission"`
-	Prompt      string          `json:"prompt"`
-	Temperature float64         `json:"temperature"`
-	Tools       map[string]bool `json:"tools"`
-	TopP        float64         `json:"top_p"`
-	Variant     string          `json:"variant"`
-	Hidden      bool            `json:"hidden"`
-	Options     map[string]any  `json:"options"`
-	Color       string          `json:"color"`
-	Steps       int64           `json:"steps"`
-	MaxSteps    int64           `json:"maxSteps"`
-	ExtraFields map[string]any  `json:"-,extras"`
-	JSON        agentConfigJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after [UnmarshalJSON]
-	// routes the raw data through [ConfigPermissionUnion] registered variants.
-	permissionUnion ConfigPermissionUnion
+	//
+	// Permission is the OpenAPI `PermissionConfig` anyOf; the decoder selects the
+	// concrete variant structurally, so a nil value means the field was absent, null
+	// or matched no variant.
+	Permission  ConfigPermissionUnion `json:"permission"`
+	Prompt      string                `json:"prompt"`
+	Temperature float64               `json:"temperature"`
+	Tools       map[string]bool       `json:"tools"`
+	TopP        float64               `json:"top_p"`
+	Variant     string                `json:"variant"`
+	Hidden      bool                  `json:"hidden"`
+	Options     map[string]any        `json:"options"`
+	Color       string                `json:"color"`
+	Steps       int64                 `json:"steps"`
+	MaxSteps    int64                 `json:"maxSteps"`
+	ExtraFields map[string]any        `json:"-,extras"`
+	JSON        agentConfigJSON       `json:"-"`
 }
 
 // agentConfigJSON contains the JSON metadata for the struct
@@ -448,18 +599,7 @@ type agentConfigJSON struct {
 }
 
 func (r *AgentConfig) UnmarshalJSON(data []byte) (err error) {
-	*r = AgentConfig{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r agentConfigJSON) RawJSON() string {
@@ -471,7 +611,7 @@ func (r agentConfigJSON) RawJSON() string {
 // Possible runtime types of the union are [ConfigPermissionAction] (a short
 // string: "ask"|"allow"|"deny") or [ConfigPermission].
 func (r *AgentConfig) AsPermission() ConfigPermissionUnion {
-	return r.permissionUnion
+	return r.Permission
 }
 
 type AgentConfigMode string
@@ -649,6 +789,10 @@ func (r ConfigLayout) IsKnown() bool {
 	return false
 }
 
+// ConfigLsp is the response-side carrier for one entry of the OpenAPI
+// `Config.lsp` object form, i.e. `Config.lsp.additionalProperties`, which is
+// `anyOf [{disabled: boolean(enum: true)}, {command, extensions?, disabled?, env?,
+// initialization?}]` (JS SDK v2: `{disabled: true} | {command: Array<string>, ...}`).
 type ConfigLsp struct {
 	// This field can have the runtime type of [[]string].
 	Command  any  `json:"command"`
@@ -680,11 +824,49 @@ func (r configLspJSON) RawJSON() string {
 
 func (r *ConfigLsp) UnmarshalJSON(data []byte) (err error) {
 	*r = ConfigLsp{}
-	err = apijson.UnmarshalRoot(data, &r.union)
-	if err != nil {
-		return err
+	// Pick the variant from the payload shape instead of delegating to the exactness
+	// heuristic behind `apijson.UnmarshalRoot(data, &r.union)` -- see the comment on
+	// [ConfigLspUnion] for why that heuristic cannot decide this particular union.
+	// Decoding straight into the chosen variant keeps the rest of the contract
+	// identical: [apijson.Port] still transfers the typed field values plus
+	// `JSON.raw` and `JSON.ExtraFields` onto the carrier.
+	if configLspIsDisabledVariant(data) {
+		var disabled ConfigLspDisabled
+		if err = apijson.UnmarshalRoot(data, &disabled); err != nil {
+			return err
+		}
+		r.union = disabled
+	} else {
+		var object ConfigLspObject
+		if err = apijson.UnmarshalRoot(data, &object); err != nil {
+			return err
+		}
+		r.union = object
 	}
 	return apijson.Port(r.union, &r)
+}
+
+// configLspIsDisabledVariant reports whether a raw `Config.lsp` entry is the
+// OpenAPI `{disabled: boolean(enum: true)}` variant rather than the general LSP
+// server object.
+//
+// The two anyOf variants share no discriminator key, so the decision is derived
+// from their `required` sets instead: the disabled form requires `disabled` and
+// pins it to `true` via `enum: [true]`, while the object form requires `command`.
+// A payload carrying `command` can therefore never be the disabled form, and a
+// payload whose `disabled` is absent or not literally `true` can never be it
+// either -- selecting [ConfigLspDisabled] there would produce a
+// [ConfigLspDisabledDisabled] value that fails its own [IsKnown] contract.
+//
+// Unknown properties are deliberately ignored rather than treated as a mismatch
+// (both variants declare `additionalProperties: false`), so that a property added
+// by a newer server can never flip the variant. An explicit `null` counts as absent,
+// matching how [ConfigMcp.UnmarshalJSON] treats a null `oauth`.
+func configLspIsDisabledVariant(data []byte) bool {
+	if command := gjson.GetBytes(data, "command"); command.Exists() && command.Type != gjson.Null {
+		return false
+	}
+	return gjson.GetBytes(data, "disabled").Type == gjson.True
 }
 
 // AsUnion returns a [ConfigLspUnion] interface which you can cast to the specific
@@ -700,6 +882,25 @@ type ConfigLspUnion interface {
 	implementsConfigLsp()
 }
 
+// The variants are registered so that [ConfigLspUnion] participates in apijson's
+// union machinery like every other union, but [ConfigLsp.UnmarshalJSON] routes the
+// variant itself and never relies on the registration order below.
+//
+// Regression: the exactness heuristic cannot decide this union. It only penalises
+// unknown extra properties and never penalises a missing `required` field, so
+// `{"command": ["gopls"], "zz": 1}` scored `extras` on both variants and the
+// left-to-right tie-break handed a genuine LSP server config to
+// [ConfigLspDisabled]. Neither of the two generic escapes works here:
+//   - A discriminator is unavailable. OpenAPI gives the variants no shared
+//     judgement key: one is keyed on `disabled` (`enum: [true]`), the other on
+//     `command`.
+//   - Reordering only moves the bug. With [ConfigLspObject] first, `{"disabled":
+//     true}` scores `exact` on it (a missing `required` `command` costs nothing)
+//     and short-circuits, making [ConfigLspDisabled] entirely unreachable.
+//
+// Making [ConfigLspDisabled.UnmarshalJSON] reject foreign payloads would not help
+// either: apijson skips a registered variant's own [json.Unmarshaler] and always
+// uses the struct decoder for it.
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[ConfigLspUnion](),
@@ -715,6 +916,9 @@ func init() {
 	)
 }
 
+// ConfigLspDisabled is the `{disabled: boolean(enum: true)}` variant of the
+// OpenAPI `Config.lsp.additionalProperties` anyOf, i.e. the form that switches a
+// single LSP server off without configuring it.
 type ConfigLspDisabled struct {
 	Disabled ConfigLspDisabledDisabled `json:"disabled,required"`
 	JSON     configLspDisabledJSON     `json:"-"`
@@ -752,6 +956,10 @@ func (r ConfigLspDisabledDisabled) IsKnown() bool {
 	return false
 }
 
+// ConfigLspObject is the LSP server variant of the OpenAPI
+// `Config.lsp.additionalProperties` anyOf. OpenAPI marks `command` as its only
+// required property; it is also the variant that carries every payload the
+// disabled form cannot represent, including `{"disabled": false}`.
 type ConfigLspObject struct {
 	Command        []string            `json:"command,required"`
 	Disabled       bool                `json:"disabled"`
@@ -785,19 +993,30 @@ func (r ConfigLspObject) implementsConfigLsp() {}
 type ConfigMcp struct {
 	// Type of MCP server connection
 	Type ConfigMcpType `json:"type,required"`
-	// This field can have the runtime type of [[]string]. Command and arguments to run the MCP server (for "local" type).
+	// Command and arguments to run the MCP server (for "local" type).
+	// This field can have the runtime type of [[]string].
 	Command any `json:"command"`
-	// This field can have the runtime type of [string, nil]. Working directory for the MCP server process (for "local" type).
+	// Working directory for the MCP server process (for "local" type).
+	// This field can have the runtime type of [string].
 	Cwd any `json:"cwd"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
-	// This field can have the runtime type of [map[string]string]. Environment variables to set when running the MCP server (for "local" type).
+	// Environment variables to set when running the MCP server (for "local" type).
+	// This field can have the runtime type of [map[string]string].
 	Environment any `json:"environment"`
-	// This field can have the runtime type of [map[string]string]. Headers to send with the request (for "remote" type).
+	// Headers to send with the request (for "remote" type).
+	// This field can have the runtime type of [map[string]string].
 	Headers any `json:"headers"`
-	// This field can have the runtime type of [McpOAuthConfig, nil]. OAuth authentication configuration for the MCP server (for "remote" type).
+	// OAuth authentication configuration for the MCP server (for "remote" type).
+	// Set to false to disable OAuth auto-detection.
+	// This field can have the runtime type of [McpOAuthConfig], [McpOAuthDisabled].
+	//
+	// Unlike [McpRemoteConfig.OAuth] this stays `any`: it is a union carrier filled by
+	// [apijson.Port], which panics when the destination field is a union interface.
+	// See [ConfigMcp.UnmarshalJSON].
 	OAuth any `json:"oauth"`
-	// This field can have the runtime type of [int64, nil]. Timeout in milliseconds for MCP server requests.
+	// Timeout in milliseconds for MCP server requests.
+	// This field can have the runtime type of [int64].
 	Timeout any `json:"timeout"`
 	// URL of the remote MCP server (for "remote" type).
 	URL   string        `json:"url"`
@@ -824,6 +1043,14 @@ func (r configMcpJSON) RawJSON() string {
 	return r.raw
 }
 
+// UnmarshalJSON decodes the OpenAPI `Config.mcp.additionalProperties` anyOf.
+//
+// The nested `oauth` anyOf on [McpRemoteConfig] needs no routing here: that field
+// is declared as [McpOAuthUnion], so the variant decode already produced the typed
+// value and [apijson.Port] transfers it onto the `any` carrier below. Porting in
+// that direction (union value -> `any` field) is the safe one; the reverse
+// (`any` value -> union-typed field) panics in [apijson.Port], which is why
+// [ConfigMcp.OAuth] must stay `any`.
 func (r *ConfigMcp) UnmarshalJSON(data []byte) (err error) {
 	*r = ConfigMcp{}
 	err = apijson.UnmarshalRoot(data, &r.union)
@@ -842,22 +1069,50 @@ func (r ConfigMcp) AsUnion() ConfigMcpUnion {
 	return r.union
 }
 
+// AsOAuth returns the oauth field as a typed union.
+//
+// Possible runtime types of the union are [McpOAuthConfig] or [McpOAuthDisabled]
+// (the scalar `false` value that disables OAuth auto-detection). It is nil when
+// the MCP server is not a remote one or when `oauth` is absent.
+func (r ConfigMcp) AsOAuth() McpOAuthUnion {
+	oauth, _ := r.OAuth.(McpOAuthUnion)
+	return oauth
+}
+
 // Union satisfied by [McpLocalConfig], [McpRemoteConfig] or [ConfigMcpDisabled].
 type ConfigMcpUnion interface {
 	implementsConfigMcp()
 }
 
+// The union is discriminated on `type`, which OpenAPI pins to `enum: ["local"]`
+// on McpLocalConfig and `enum: ["remote"]` on McpRemoteConfig. The disabled form
+// `{enabled: boolean}` declares no `type` at all, so it is matched by the absent
+// (nil) discriminator value.
+//
+// Regression: without a discriminator the exactness heuristic decided the variant,
+// and `{"enabled": false}` resolved to [McpLocalConfig] — the struct decoder never
+// penalises missing `required` fields, so `enabled` alone scored as an exact match
+// on the left-most variant and [ConfigMcpDisabled] was unreachable. Reordering the
+// variants cannot fix this: ties are broken left-to-right, so any object carrying
+// an unknown property would then score `extras` on [ConfigMcpDisabled] first and
+// swallow genuine local/remote configs.
+//
+// DiscriminatorValue must stay an untyped string constant ("local"/"remote"):
+// the decoder compares it against the `any` gjson value with `==`, so a typed
+// enum constant such as [McpLocalConfigTypeLocal] would never match.
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[ConfigMcpUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpLocalConfig](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "local",
+			Type:               reflect.TypeFor[McpLocalConfig](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpRemoteConfig](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "remote",
+			Type:               reflect.TypeFor[McpRemoteConfig](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
@@ -933,33 +1188,42 @@ func (r configModeJSON) RawJSON() string {
 	return r.raw
 }
 
+// ConfigPermission is the object arm of the OpenAPI `PermissionConfig` anyOf.
+//
+// Ten of its properties -- `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`,
+// `external_directory`, `lsp` and `skill` -- are declared `$ref
+// PermissionRuleConfig`, i.e. the identical `anyOf [PermissionActionConfig,
+// PermissionObjectConfig]`. They are therefore modelled identically, as
+// [ConfigPermissionBashUnion] whose two variants [ConfigPermissionBashString] and
+// [ConfigPermissionBashMap] are exactly that anyOf. The decoder selects the
+// concrete variant structurally, so a nil rule means the property was absent, null
+// or matched no variant. Use [ConfigPermission.AsBash] and its siblings for a read
+// that mirrors the other `AsXxx` accessors in this package.
+//
+// The remaining five -- `todowrite`, `question`, `webfetch`, `websearch` and
+// `doom_loop` -- are declared `$ref PermissionActionConfig`, a plain string enum,
+// and so are typed directly.
 type ConfigPermission struct {
-	// This field can have the runtime type of [ConfigPermissionBashString], [ConfigPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string], [map[string]any].
-	Edit     any                      `json:"edit"`
-	Webfetch ConfigPermissionWebfetch `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any                       `json:"external_directory"`
+	Bash              ConfigPermissionBashUnion `json:"bash"`
+	Edit              ConfigPermissionBashUnion `json:"edit"`
+	Webfetch          ConfigPermissionWebfetch  `json:"webfetch"`
+	Read              ConfigPermissionBashUnion `json:"read"`
+	Glob              ConfigPermissionBashUnion `json:"glob"`
+	Grep              ConfigPermissionBashUnion `json:"grep"`
+	List              ConfigPermissionBashUnion `json:"list"`
+	Task              ConfigPermissionBashUnion `json:"task"`
+	ExternalDirectory ConfigPermissionBashUnion `json:"external_directory"`
 	Todowrite         ConfigPermissionTodowrite `json:"todowrite"`
 	Question          ConfigPermissionQuestion  `json:"question"`
 	Websearch         ConfigPermissionWebsearch `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp      any                      `json:"lsp"`
-	DoomLoop ConfigPermissionDoomLoop `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                  `json:"skill"`
-	JSON  configPermissionJSON `json:"-"`
+	Lsp               ConfigPermissionBashUnion `json:"lsp"`
+	DoomLoop          ConfigPermissionDoomLoop  `json:"doom_loop"`
+	Skill             ConfigPermissionBashUnion `json:"skill"`
+	// ExtraFields carries the properties allowed by the OpenAPI
+	// `additionalProperties: $ref PermissionRuleConfig` of this object, i.e.
+	// permission rules for tools this SDK does not know yet.
+	ExtraFields map[string]ConfigPermissionBashUnion `json:"-,extras"`
+	JSON        configPermissionJSON                 `json:"-"`
 }
 
 // configPermissionJSON contains the JSON metadata for the struct
@@ -994,6 +1258,77 @@ func (r configPermissionJSON) RawJSON() string {
 
 func (r ConfigPermission) implementsConfigPermissionUnion() {}
 
+// AsBash returns the `bash` permission rule as a typed union.
+//
+// Possible runtime types of the union are [ConfigPermissionBashString] (a short
+// action: "ask"|"allow"|"deny") or [ConfigPermissionBashMap] (per-pattern actions).
+// It is nil when the rule is absent.
+func (r ConfigPermission) AsBash() ConfigPermissionBashUnion {
+	return r.Bash
+}
+
+// AsEdit returns the `edit` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsEdit() ConfigPermissionBashUnion {
+	return r.Edit
+}
+
+// AsRead returns the `read` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsRead() ConfigPermissionBashUnion {
+	return r.Read
+}
+
+// AsGlob returns the `glob` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsGlob() ConfigPermissionBashUnion {
+	return r.Glob
+}
+
+// AsGrep returns the `grep` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsGrep() ConfigPermissionBashUnion {
+	return r.Grep
+}
+
+// AsList returns the `list` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsList() ConfigPermissionBashUnion {
+	return r.List
+}
+
+// AsTask returns the `task` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsTask() ConfigPermissionBashUnion {
+	return r.Task
+}
+
+// AsExternalDirectory returns the `external_directory` permission rule as a typed
+// union. See [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsExternalDirectory() ConfigPermissionBashUnion {
+	return r.ExternalDirectory
+}
+
+// AsLsp returns the `lsp` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsLsp() ConfigPermissionBashUnion {
+	return r.Lsp
+}
+
+// AsSkill returns the `skill` permission rule as a typed union. See
+// [ConfigPermission.AsBash] for the possible runtime types.
+func (r ConfigPermission) AsSkill() ConfigPermissionBashUnion {
+	return r.Skill
+}
+
+// ConfigPermissionBashUnion models the OpenAPI `PermissionRuleConfig` anyOf
+// (`anyOf [PermissionActionConfig, PermissionObjectConfig]`, JS SDK v2
+// `PermissionRuleConfig = PermissionActionConfig | PermissionObjectConfig`).
+//
+// Despite the name it is not specific to the `bash` rule: OpenAPI declares all ten
+// rule properties of [ConfigPermission] -- and its `additionalProperties` -- with
+// the same `$ref PermissionRuleConfig`, so they all route through this union.
+//
 // Union satisfied by [ConfigPermissionBashString] or [ConfigPermissionBashMap].
 type ConfigPermissionBashUnion interface {
 	implementsConfigPermissionBashUnion()
@@ -1190,7 +1525,7 @@ type ConfigProviderModel struct {
 	Experimental bool                     `json:"experimental"`
 	Family       string                   `json:"family"`
 	Headers      map[string]string        `json:"headers"`
-	// This field can have the runtime type of [bool] or object.
+	// This field can have the runtime type of [bool], [map[string]any].
 	Interleaved any                            `json:"interleaved"`
 	Limit       ConfigProviderModelsLimit      `json:"limit"`
 	Modalities  ConfigProviderModelsModalities `json:"modalities"`
@@ -1202,7 +1537,7 @@ type ConfigProviderModel struct {
 	Status      ConfigProviderModelsStatus     `json:"status"`
 	Temperature bool                           `json:"temperature"`
 	ToolCall    bool                           `json:"tool_call"`
-	// This field can have the runtime type of object.
+	// This field can have the runtime type of [map[string]any].
 	Variants any                     `json:"variants"`
 	JSON     configProviderModelJSON `json:"-"`
 }
@@ -1427,15 +1762,20 @@ type ConfigProviderOptions struct {
 	SetCacheKey   bool   `json:"setCacheKey"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
-	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	Timeout any `json:"timeout"`
+	//
+	// Timeout is the OpenAPI `ProviderConfig.options.timeout` anyOf; the decoder
+	// selects the concrete variant structurally, so a nil value means the field was
+	// absent, null or matched no variant.
+	Timeout ConfigProviderOptionsTimeoutUnion `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
-	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	HeaderTimeout any                       `json:"headerTimeout"`
-	ChunkTimeout  int64                     `json:"chunkTimeout"`
-	ExtraFields   map[string]any            `json:"-,extras"`
-	JSON          configProviderOptionsJSON `json:"-"`
+	//
+	// HeaderTimeout is the OpenAPI `ProviderConfig.options.headerTimeout` anyOf and
+	// resolves exactly like [ConfigProviderOptions.Timeout].
+	HeaderTimeout ConfigProviderOptionsTimeoutUnion `json:"headerTimeout"`
+	ChunkTimeout  int64                             `json:"chunkTimeout"`
+	ExtraFields   map[string]any                    `json:"-,extras"`
+	JSON          configProviderOptionsJSON         `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
@@ -1452,6 +1792,14 @@ type configProviderOptionsJSON struct {
 	ExtraFields   map[string]apijson.Field
 }
 
+// UnmarshalJSON decodes [ConfigProviderOptions].
+//
+// `timeout` and `headerTimeout` are both `anyOf [integer, boolean(enum: false)]`
+// and are declared as [ConfigProviderOptionsTimeoutUnion], so the decoder resolves
+// them through the registered union: the numeric variant lands on [shared.UnionInt]
+// (an int64, as OpenAPI's `integer` requires) and the scalar `false` on
+// [shared.UnionBool]. Declaring them `any` instead would send them through the
+// generic interface branch, which hands back `float64` for every JSON number.
 func (r *ConfigProviderOptions) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
@@ -1460,11 +1808,39 @@ func (r configProviderOptionsJSON) RawJSON() string {
 	return r.raw
 }
 
+// AsTimeout returns the timeout field as a typed union.
+//
+// Possible runtime types of the union are [shared.UnionInt] (milliseconds, > 0),
+// [shared.UnionFloat] (a non-integral number, which OpenAPI does not allow) or
+// [shared.UnionBool] (the scalar `false` value that disables the timeout). It is
+// nil when `timeout` is absent.
+func (r ConfigProviderOptions) AsTimeout() ConfigProviderOptionsTimeoutUnion {
+	return r.Timeout
+}
+
+// AsHeaderTimeout returns the headerTimeout field as a typed union.
+//
+// Possible runtime types of the union are [shared.UnionInt] (milliseconds, > 0),
+// [shared.UnionFloat] (a non-integral number, which OpenAPI does not allow) or
+// [shared.UnionBool] (the scalar `false` value that disables the timeout). It is
+// nil when `headerTimeout` is absent.
+func (r ConfigProviderOptions) AsHeaderTimeout() ConfigProviderOptionsTimeoutUnion {
+	return r.HeaderTimeout
+}
+
 // ConfigProviderOptionsTimeoutUnion represents a timeout duration as either an
 // integer (milliseconds, > 0) or false (to disable). Used by
 // [ConfigProviderOptions.Timeout] and [ConfigProviderOptions.HeaderTimeout].
 //
-// Union satisfied by [shared.UnionInt] or [shared.UnionBool].
+// Union satisfied by [shared.UnionInt], [shared.UnionFloat] or [shared.UnionBool].
+//
+// OpenAPI constrains the numeric variant to `integer` and the boolean one to
+// `enum: [false]`. [shared.UnionFloat] and the `gjson.True` filter are registered
+// beyond that so a spec-violating payload still decodes losslessly instead of
+// failing the whole document: a fractional number would otherwise be truncated
+// into [shared.UnionInt], and `true` would match no variant at all and make the
+// union decoder fail. [shared.UnionInt] is registered first, so a whole number
+// still short-circuits onto it as an exact match.
 type ConfigProviderOptionsTimeoutUnion interface {
 	ImplementsConfigProviderOptionsTimeoutUnion()
 }
@@ -1476,6 +1852,10 @@ func init() {
 		apijson.UnionVariant{
 			TypeFilter: gjson.Number,
 			Type:       reflect.TypeFor[shared.UnionInt](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.Number,
+			Type:       reflect.TypeFor[shared.UnionFloat](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.True,
@@ -1590,8 +1970,12 @@ type McpRemoteConfig struct {
 	// Headers to send with the request
 	Headers map[string]string `json:"headers"`
 	// OAuth authentication configuration for this MCP server.
-	// This field can have the runtime type of [McpOAuthConfig] or bool (false).
-	OAuth any                 `json:"oauth"`
+	// Set to false to disable OAuth auto-detection.
+	//
+	// OAuth is the OpenAPI `McpRemoteConfig.oauth` anyOf; the decoder selects the
+	// concrete variant structurally, so a nil value means the field was absent, null
+	// or matched no variant.
+	OAuth McpOAuthUnion       `json:"oauth"`
 	JSON  mcpRemoteConfigJSON `json:"-"`
 }
 
@@ -1617,6 +2001,15 @@ func (r mcpRemoteConfigJSON) RawJSON() string {
 
 func (r McpRemoteConfig) implementsConfigMcp() {}
 
+// AsOAuth returns the oauth field as a typed union.
+//
+// Possible runtime types of the union are [McpOAuthConfig] or [McpOAuthDisabled]
+// (the scalar `false` value that disables OAuth auto-detection). It is nil when
+// `oauth` is absent.
+func (r McpRemoteConfig) AsOAuth() McpOAuthUnion {
+	return r.OAuth
+}
+
 // Type of MCP server connection
 type McpRemoteConfigType string
 
@@ -1630,6 +2023,60 @@ func (r McpRemoteConfigType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// McpOAuthUnion represents the OpenAPI `McpRemoteConfig.oauth` anyOf union:
+// `anyOf [McpOAuthConfig, boolean(enum: false)]`.
+//
+// Union satisfied by [McpOAuthConfig] (a complete OAuth configuration) or
+// [McpOAuthDisabled] (the scalar `false` value that disables OAuth
+// auto-detection).
+type McpOAuthUnion interface {
+	implementsMcpOAuthUnion()
+}
+
+// McpOAuthDisabled is the scalar variant of the OpenAPI `McpRemoteConfig.oauth`
+// anyOf, i.e. `false` to disable OAuth auto-detection for the MCP server.
+//
+// OpenAPI constrains this variant to `enum: [false]`, which is enforced by
+// [McpOAuthDisabled.IsKnown] rather than by rejecting the payload, so a
+// spec-violating `"oauth": true` still decodes instead of failing the whole
+// document.
+type McpOAuthDisabled bool
+
+const (
+	McpOAuthDisabledFalse McpOAuthDisabled = false
+)
+
+func (r McpOAuthDisabled) IsKnown() bool {
+	switch r {
+	case McpOAuthDisabledFalse:
+		return true
+	}
+	return false
+}
+
+func (r McpOAuthDisabled) implementsMcpOAuthUnion() {}
+
+func (r McpOAuthConfig) implementsMcpOAuthUnion() {}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[McpOAuthUnion](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[McpOAuthConfig](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[McpOAuthDisabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[McpOAuthDisabled](),
+		},
+	)
 }
 
 type ConfigGetParams struct {
@@ -1664,20 +2111,22 @@ type ConfigUpdateParams struct {
 	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
 	Enterprise        param.Field[EnterpriseConfigParam]         `json:"enterprise"`
 	Experimental      param.Field[ConfigExperimentalParam]       `json:"experimental"`
-	// Enable or configure formatters. Pass false to disable, true to enable
-	// built-ins, or a map of formatter-name to config to enable with overrides.
-	// Accepts [bool] or [map[string]ConfigFormatter].
-	Formatter    param.Field[any]            `json:"formatter"`
-	Instructions param.Field[[]string]       `json:"instructions"`
-	Layout       param.Field[ConfigLayout]   `json:"layout"`
-	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
-	// Enable or configure LSP servers. Pass false to disable, true to enable
-	// built-ins, or a map of LSP-name to config to enable with overrides.
-	// Accepts [bool] or [map[string]ConfigLsp].
-	Lsp   param.Field[any]                       `json:"lsp"`
-	Mcp   param.Field[map[string]ConfigMcpParam] `json:"mcp"`
-	Mode  param.Field[ConfigModeParam]           `json:"mode"`
-	Model param.Field[string]                    `json:"model"`
+	// Enable or configure formatters. Pass [shared.UnionBool](false) to disable,
+	// [shared.UnionBool](true) to enable built-ins, or a [ConfigFormatterMapParam]
+	// of formatter-name to [ConfigFormatterParam] to enable with overrides.
+	Formatter    param.Field[ConfigFormatterSettingUnionParam] `json:"formatter"`
+	Instructions param.Field[[]string]                         `json:"instructions"`
+	Layout       param.Field[ConfigLayout]                     `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel]                   `json:"logLevel"`
+	// Enable or configure LSP servers. Pass [shared.UnionBool](false) to disable,
+	// [shared.UnionBool](true) to enable built-ins, or a [ConfigLspMapParam] of
+	// LSP-name to [ConfigLspUnionParam] to enable with overrides.
+	Lsp param.Field[ConfigLspSettingUnionParam] `json:"lsp"`
+	// Map of MCP server name → configuration. Each value is a
+	// [ConfigMcpLocalParam], a [ConfigMcpRemoteParam] or a [ConfigMcpDisabledParam].
+	Mcp   param.Field[map[string]ConfigMcpUnionParam] `json:"mcp"`
+	Mode  param.Field[ConfigModeParam]                `json:"mode"`
+	Model param.Field[string]                         `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
 	// (a string constant) or [ConfigPermissionParam].
@@ -1975,6 +2424,9 @@ type AgentConfigParam struct {
 	Color       param.Field[string]                     `json:"color"`
 	Steps       param.Field[int64]                      `json:"steps"`
 	MaxSteps    param.Field[int64]                      `json:"maxSteps"`
+	// ExtraFields carries the properties allowed by the OpenAPI
+	// `AgentConfig.additionalProperties: {}`, which places no constraint on the value.
+	ExtraFields map[string]any `json:"-,extras"`
 }
 
 func (r AgentConfigParam) MarshalJSON() (data []byte, err error) {
@@ -2064,26 +2516,161 @@ func (r ConfigV2ExperimentalPolicyParam) MarshalJSON() (data []byte, err error) 
 	return apijson.MarshalRoot(r)
 }
 
-// ConfigMcpParam is the request-side representation of ConfigMcp.
+// ConfigMcpUnionParam is the request-side union for one entry of the `mcp` config
+// map, i.e. the OpenAPI `Config.mcp.additionalProperties` anyOf
+// `[McpLocalConfig, McpRemoteConfig, {enabled: boolean}]` (JS SDK v2:
+// `McpLocalConfig | McpRemoteConfig | { enabled: boolean }`).
 //
-// ConfigMcp is a union of three variants: McpLocalConfig (type="local"),
-// McpRemoteConfig (type="remote"), and the disabled form ({enabled: false}).
-// The disabled form has no `type` field, so Type is not required here.
-type ConfigMcpParam struct {
-	Type        param.Field[ConfigMcpType] `json:"type"`
-	Command     param.Field[any]           `json:"command"`
-	Cwd         param.Field[any]           `json:"cwd"`
-	Enabled     param.Field[bool]          `json:"enabled"`
-	Environment param.Field[any]           `json:"environment"`
-	Headers     param.Field[any]           `json:"headers"`
-	OAuth       param.Field[any]           `json:"oauth"`
-	Timeout     param.Field[any]           `json:"timeout"`
-	URL         param.Field[string]        `json:"url"`
+// Satisfied by [ConfigMcpLocalParam], [ConfigMcpRemoteParam],
+// [ConfigMcpDisabledParam].
+//
+// It replaces the former flat superset `ConfigMcpParam`, whose single struct could
+// express combinations OpenAPI forbids (both variants declare
+// `additionalProperties: false`) and whose `command` / `cwd` / `environment` /
+// `headers` / `oauth` / `timeout` fields were typed `param.Field[any]`, losing the
+// `integer` and `map<string, string>` contracts. The same OpenAPI schema is modelled
+// this way for `POST /mcp` in [McpAddParamsConfigUnion].
+type ConfigMcpUnionParam interface {
+	implementsConfigMcpUnionParam()
 }
 
-func (r ConfigMcpParam) MarshalJSON() (data []byte, err error) {
+// The union is discriminated on `type`, mirroring the response-side
+// [ConfigMcpUnion]: OpenAPI pins it to `enum: ["local"]` on McpLocalConfig and
+// `enum: ["remote"]` on McpRemoteConfig, while the disabled form `{enabled:
+// boolean}` declares no `type` at all and so is matched by the absent (nil)
+// discriminator value.
+//
+// DiscriminatorValue must stay an untyped string constant ("local"/"remote"): the
+// decoder compares it against the `any` gjson value with `==`, so a typed enum
+// constant such as [McpLocalConfigTypeLocal] would never match.
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigMcpUnionParam](),
+		"type",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "local",
+			Type:               reflect.TypeFor[ConfigMcpLocalParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "remote",
+			Type:               reflect.TypeFor[ConfigMcpRemoteParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigMcpDisabledParam](),
+		},
+	)
+}
+
+// ConfigMcpLocalParam is the request-side representation of the OpenAPI
+// [McpLocalConfig] variant of [ConfigMcpUnionParam].
+type ConfigMcpLocalParam struct {
+	// Type of MCP server connection
+	Type param.Field[McpLocalConfigType] `json:"type,required"`
+	// Command and arguments to run the MCP server
+	Command param.Field[[]string] `json:"command,required"`
+	// Working directory for the MCP server process
+	Cwd param.Field[string] `json:"cwd"`
+	// Enable or disable the MCP server on startup
+	Enabled param.Field[bool] `json:"enabled"`
+	// Environment variables to set when running the MCP server
+	Environment param.Field[map[string]string] `json:"environment"`
+	// Timeout in milliseconds for MCP server requests
+	Timeout param.Field[int64] `json:"timeout"`
+}
+
+func (r ConfigMcpLocalParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+func (r ConfigMcpLocalParam) implementsConfigMcpUnionParam() {}
+
+// ConfigMcpRemoteParam is the request-side representation of the OpenAPI
+// [McpRemoteConfig] variant of [ConfigMcpUnionParam].
+type ConfigMcpRemoteParam struct {
+	// Type of MCP server connection
+	Type param.Field[McpRemoteConfigType] `json:"type,required"`
+	// URL of the remote MCP server
+	URL param.Field[string] `json:"url,required"`
+	// Enable or disable the MCP server on startup
+	Enabled param.Field[bool] `json:"enabled"`
+	// Headers to send with the request
+	Headers param.Field[map[string]string] `json:"headers"`
+	// OAuth authentication configuration for the MCP server. Pass
+	// [shared.UnionBool](false) to disable OAuth auto-detection.
+	OAuth param.Field[ConfigMcpOAuthUnionParam] `json:"oauth"`
+	// Timeout in milliseconds for MCP server requests
+	Timeout param.Field[int64] `json:"timeout"`
+}
+
+func (r ConfigMcpRemoteParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigMcpRemoteParam) implementsConfigMcpUnionParam() {}
+
+// ConfigMcpDisabledParam is the request-side representation of the
+// `{enabled: boolean}` variant of [ConfigMcpUnionParam], i.e. the form that
+// switches an MCP server off without configuring it. OpenAPI marks `enabled` as its
+// only (and required) property.
+type ConfigMcpDisabledParam struct {
+	// Enable or disable the MCP server on startup
+	Enabled param.Field[bool] `json:"enabled,required"`
+}
+
+func (r ConfigMcpDisabledParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigMcpDisabledParam) implementsConfigMcpUnionParam() {}
+
+// ConfigMcpOAuthUnionParam is the request-side union for the `oauth` property of
+// [ConfigMcpRemoteParam], i.e. the OpenAPI `McpRemoteConfig.oauth` anyOf
+// `[McpOAuthConfig, boolean(enum: false)]` (JS SDK v2: `McpOAuthConfig | false`).
+//
+// Satisfied by [ConfigMcpOAuthParam] or [shared.UnionBool] (the scalar `false`
+// value that disables OAuth auto-detection).
+type ConfigMcpOAuthUnionParam interface {
+	ImplementsConfigMcpOAuthUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigMcpOAuthUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigMcpOAuthParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+	)
+}
+
+// ConfigMcpOAuthParam is the request-side representation of the OpenAPI
+// [McpOAuthConfig] schema, the object arm of [ConfigMcpOAuthUnionParam].
+type ConfigMcpOAuthParam struct {
+	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
+	ClientID param.Field[string] `json:"clientId"`
+	// OAuth client secret (if required by the authorization server)
+	ClientSecret param.Field[string] `json:"clientSecret"`
+	// OAuth scopes to request during authorization
+	Scope param.Field[string] `json:"scope"`
+	// OAuth callback port for the local HTTP server
+	CallbackPort param.Field[int64] `json:"callbackPort"`
+	// OAuth redirect URI
+	RedirectURI param.Field[string] `json:"redirectUri"`
+}
+
+func (r ConfigMcpOAuthParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigMcpOAuthParam) ImplementsConfigMcpOAuthUnionParam() {}
 
 // ServerConfigParam is the request-side representation of ServerConfig.
 type ServerConfigParam struct {
@@ -2233,14 +2820,175 @@ type ConfigProviderOptionsParam struct {
 	BaseURL       param.Field[string] `json:"baseURL"`
 	EnterpriseURL param.Field[string] `json:"enterpriseUrl"`
 	SetCacheKey   param.Field[bool]   `json:"setCacheKey"`
-	Timeout       param.Field[any]    `json:"timeout"`
-	HeaderTimeout param.Field[any]    `json:"headerTimeout"`
-	ChunkTimeout  param.Field[int64]  `json:"chunkTimeout"`
+	// Timeout in milliseconds for full requests to this provider. Pass
+	// [shared.UnionInt] for a duration or [shared.UnionBool](false) to disable it.
+	Timeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"timeout"`
+	// Timeout in milliseconds to wait for response headers. Pass [shared.UnionInt]
+	// for a duration or [shared.UnionBool](false) to disable it.
+	HeaderTimeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"headerTimeout"`
+	ChunkTimeout  param.Field[int64]                             `json:"chunkTimeout"`
+	// ExtraFields carries the properties allowed by the OpenAPI
+	// `ProviderConfig.options.additionalProperties: {}`, which places no constraint
+	// on the value.
+	ExtraFields map[string]any `json:"-,extras"`
 }
 
 func (r ConfigProviderOptionsParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+// ConfigFormatterSettingUnionParam is the request-side union for the whole
+// `formatter` config field, i.e. the OpenAPI `Config.formatter` anyOf
+// `[boolean, object(additionalProperties: <formatter shape>)]` (JS SDK v2:
+// `boolean | { [key: string]: {...} }`). Per its OpenAPI description: omit or pass
+// false to disable, true to enable built-ins, or an object to enable built-ins with
+// overrides.
+//
+// Satisfied by [shared.UnionBool] or [ConfigFormatterMapParam].
+type ConfigFormatterSettingUnionParam interface {
+	ImplementsConfigFormatterSettingUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigFormatterSettingUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigFormatterMapParam](),
+		},
+	)
+}
+
+// ConfigFormatterMapParam is the object arm of [ConfigFormatterSettingUnionParam]:
+// a map of formatter name to override.
+type ConfigFormatterMapParam map[string]ConfigFormatterParam
+
+func (r ConfigFormatterMapParam) ImplementsConfigFormatterSettingUnionParam() {}
+
+// ConfigFormatterParam is the request-side representation of [ConfigFormatter], one
+// entry of the object arm of the OpenAPI `Config.formatter` anyOf.
+//
+// It exists because [ConfigFormatter] is a response type: its fields are plain Go
+// values with no `param.Field` wrapper, so marshalling one into a request body emits
+// every zero value (`"disabled": false`, `"environment": {}`, `"extensions": []`)
+// as if the caller had asked for it.
+type ConfigFormatterParam struct {
+	Command     param.Field[[]string]          `json:"command"`
+	Disabled    param.Field[bool]              `json:"disabled"`
+	Environment param.Field[map[string]string] `json:"environment"`
+	Extensions  param.Field[[]string]          `json:"extensions"`
+}
+
+func (r ConfigFormatterParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigLspSettingUnionParam is the request-side union for the whole `lsp` config
+// field, i.e. the OpenAPI `Config.lsp` anyOf
+// `[boolean, object(additionalProperties: <the ConfigLsp union>)]` (JS SDK v2:
+// `boolean | { [key: string]: ... }`). Per its OpenAPI description: omit or pass
+// false to disable, true to enable built-ins, or an object to enable built-ins with
+// overrides.
+//
+// Satisfied by [shared.UnionBool] or [ConfigLspMapParam].
+type ConfigLspSettingUnionParam interface {
+	ImplementsConfigLspSettingUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigLspSettingUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspMapParam](),
+		},
+	)
+}
+
+// ConfigLspMapParam is the object arm of [ConfigLspSettingUnionParam]: a map of LSP
+// server name to configuration, each entry being a [ConfigLspUnionParam].
+type ConfigLspMapParam map[string]ConfigLspUnionParam
+
+func (r ConfigLspMapParam) ImplementsConfigLspSettingUnionParam() {}
+
+// ConfigLspUnionParam is the request-side union for one entry of the `lsp` config
+// map, i.e. the OpenAPI `Config.lsp.additionalProperties` anyOf
+// `[{disabled: boolean(enum: true)}, {command, extensions?, disabled?, env?,
+// initialization?}]` (JS SDK v2:
+// `{disabled: true} | {command: Array<string>, ...}`). It mirrors the response-side
+// [ConfigLspUnion].
+//
+// Satisfied by [ConfigLspDisabledParam] or [ConfigLspObjectParam].
+type ConfigLspUnionParam interface {
+	implementsConfigLspUnionParam()
+}
+
+// The variants share no discriminator key -- OpenAPI keys one on `disabled`
+// (`enum: [true]`) and the other on `command` -- so no discriminator is registered,
+// exactly as for the response-side [ConfigLspUnion]. Requests are only ever
+// marshalled, so the caller's choice of variant is what reaches the wire and the
+// decoder's exactness heuristic is never consulted here.
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigLspUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspDisabledParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspObjectParam](),
+		},
+	)
+}
+
+// ConfigLspDisabledParam is the request-side representation of [ConfigLspDisabled],
+// the `{disabled: boolean(enum: true)}` variant of [ConfigLspUnionParam].
+type ConfigLspDisabledParam struct {
+	Disabled param.Field[ConfigLspDisabledDisabled] `json:"disabled,required"`
+}
+
+func (r ConfigLspDisabledParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigLspDisabledParam) implementsConfigLspUnionParam() {}
+
+// ConfigLspObjectParam is the request-side representation of [ConfigLspObject], the
+// LSP server variant of [ConfigLspUnionParam]. OpenAPI marks `command` as its only
+// required property.
+type ConfigLspObjectParam struct {
+	Command        param.Field[[]string]          `json:"command,required"`
+	Disabled       param.Field[bool]              `json:"disabled"`
+	Env            param.Field[map[string]string] `json:"env"`
+	Extensions     param.Field[[]string]          `json:"extensions"`
+	Initialization param.Field[map[string]any]    `json:"initialization"`
+}
+
+func (r ConfigLspObjectParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigLspObjectParam) implementsConfigLspUnionParam() {}
 
 // ConfigV2ReferenceGitParam is the request-side representation of ConfigV2ReferenceGit.
 type ConfigV2ReferenceGitParam struct {
@@ -2325,23 +3073,33 @@ type ConfigPermissionBashMapParam map[string]ConfigPermissionBashMapItem
 
 func (r ConfigPermissionBashMapParam) implementsConfigPermissionBashUnionParam() {}
 
-// ConfigPermissionParam is the request-side representation of ConfigPermission.
+// ConfigPermissionParam is the request-side representation of [ConfigPermission].
+//
+// As on the response side, the ten properties OpenAPI declares `$ref
+// PermissionRuleConfig` -- `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`,
+// `external_directory`, `lsp` and `skill` -- are all typed
+// [ConfigPermissionBashUnionParam], and the five declared `$ref
+// PermissionActionConfig` are plain string enums.
 type ConfigPermissionParam struct {
 	Bash              param.Field[ConfigPermissionBashUnionParam] `json:"bash"`
-	Edit              param.Field[any]                            `json:"edit"`
+	Edit              param.Field[ConfigPermissionBashUnionParam] `json:"edit"`
 	Webfetch          param.Field[ConfigPermissionWebfetch]       `json:"webfetch"`
-	Read              param.Field[any]                            `json:"read"`
-	Glob              param.Field[any]                            `json:"glob"`
-	Grep              param.Field[any]                            `json:"grep"`
-	List              param.Field[any]                            `json:"list"`
-	Task              param.Field[any]                            `json:"task"`
-	ExternalDirectory param.Field[any]                            `json:"external_directory"`
+	Read              param.Field[ConfigPermissionBashUnionParam] `json:"read"`
+	Glob              param.Field[ConfigPermissionBashUnionParam] `json:"glob"`
+	Grep              param.Field[ConfigPermissionBashUnionParam] `json:"grep"`
+	List              param.Field[ConfigPermissionBashUnionParam] `json:"list"`
+	Task              param.Field[ConfigPermissionBashUnionParam] `json:"task"`
+	ExternalDirectory param.Field[ConfigPermissionBashUnionParam] `json:"external_directory"`
 	Todowrite         param.Field[ConfigPermissionTodowrite]      `json:"todowrite"`
 	Question          param.Field[ConfigPermissionQuestion]       `json:"question"`
 	Websearch         param.Field[ConfigPermissionWebsearch]      `json:"websearch"`
-	Lsp               param.Field[any]                            `json:"lsp"`
+	Lsp               param.Field[ConfigPermissionBashUnionParam] `json:"lsp"`
 	DoomLoop          param.Field[ConfigPermissionDoomLoop]       `json:"doom_loop"`
-	Skill             param.Field[any]                            `json:"skill"`
+	Skill             param.Field[ConfigPermissionBashUnionParam] `json:"skill"`
+	// ExtraFields carries the properties allowed by the OpenAPI
+	// `additionalProperties: $ref PermissionRuleConfig` of this object, i.e.
+	// permission rules for tools this SDK does not know yet.
+	ExtraFields map[string]ConfigPermissionBashUnionParam `json:"-,extras"`
 }
 
 func (r ConfigPermissionParam) MarshalJSON() (data []byte, err error) {

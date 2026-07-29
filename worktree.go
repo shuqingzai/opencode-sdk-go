@@ -111,15 +111,18 @@ func (r WorktreeNewParams) URLQuery() (v url.Values) {
 	})
 }
 
-// WorktreeRemoveParams — Directory is sent both as a JSON body field and as a
-// URL query parameter; the OpenAPI endpoint accepts the same value from either location.
+// WorktreeRemoveParams contains the request parameters for removing a worktree.
+// Directory and Workspace are URL query parameters (workspace routing).
+// Body carries the worktree path to delete as a JSON request body; the OpenAPI
+// requestBody is optional, so an unset Body sends no request body at all.
 type WorktreeRemoveParams struct {
-	Directory param.Field[string] `json:"directory,required" query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Directory param.Field[string]                   `query:"directory"`
+	Workspace param.Field[string]                   `query:"workspace"`
+	Body      param.Field[WorktreeRemoveParamsBody] `json:"-"`
 }
 
 func (r WorktreeRemoveParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [WorktreeRemoveParams]'s query parameters as `url.Values`.
@@ -130,15 +133,28 @@ func (r WorktreeRemoveParams) URLQuery() (v url.Values) {
 	})
 }
 
-// WorktreeResetParams — Directory is sent both as a JSON body field and as a
-// URL query parameter; the OpenAPI endpoint accepts the same value from either location.
+// WorktreeRemoveParamsBody is the JSON body for the DELETE /experimental/worktree
+// endpoint (OpenAPI schema `WorktreeRemoveInput`).
+type WorktreeRemoveParamsBody struct {
+	Directory param.Field[string] `json:"directory,required"`
+}
+
+func (r WorktreeRemoveParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// WorktreeResetParams contains the request parameters for resetting a worktree.
+// Directory and Workspace are URL query parameters (workspace routing).
+// Body carries the worktree path to reset as a JSON request body; the OpenAPI
+// requestBody is optional, so an unset Body sends no request body at all.
 type WorktreeResetParams struct {
-	Directory param.Field[string] `json:"directory,required" query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
+	Directory param.Field[string]                  `query:"directory"`
+	Workspace param.Field[string]                  `query:"workspace"`
+	Body      param.Field[WorktreeResetParamsBody] `json:"-"`
 }
 
 func (r WorktreeResetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [WorktreeResetParams]'s query parameters as `url.Values`.
@@ -147,6 +163,16 @@ func (r WorktreeResetParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// WorktreeResetParamsBody is the JSON body for the POST /experimental/worktree/reset
+// endpoint (OpenAPI schema `WorktreeResetInput`).
+type WorktreeResetParamsBody struct {
+	Directory param.Field[string] `json:"directory,required"`
+}
+
+func (r WorktreeResetParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type WorktreeListParams struct {

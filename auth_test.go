@@ -25,11 +25,11 @@ func TestAuthSet(t *testing.T) {
 	client := opencode.NewClient(
 		option.WithBaseURL(baseURL),
 	)
-	_, err := client.Auth.Set(context.TODO(), "providerID", opencode.OAuth{
-		Type:    "oauth",
-		Refresh: "refresh_token",
-		Access:  "access_token",
-		Expires: 3600,
+	_, err := client.Auth.Set(context.TODO(), "providerID", opencode.AuthParamOAuth{
+		Type:    opencode.F(opencode.AuthParamOAuthTypeOAuth),
+		Refresh: opencode.F("refresh_token"),
+		Access:  opencode.F("access_token"),
+		Expires: opencode.F(int64(3600)),
 	})
 	if err != nil {
 		var apierr *opencode.Error

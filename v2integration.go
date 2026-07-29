@@ -11,12 +11,13 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/apiquery"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
-	"github.com/tidwall/gjson"
 )
 
 // V2IntegrationService contains methods and other services that help with
@@ -274,11 +275,13 @@ func (r v2IntegrationAttemptStatusResponseJSON) RawJSON() string {
 type IntegrationInfo struct {
 	ID   string `json:"id,required"`
 	Name string `json:"name,required"`
-	// This field can have the runtime type of [[]IntegrationMethodUnion].
-	Methods any `json:"methods,required"`
-	// This field can have the runtime type of [[]ConnectionInfoUnion].
-	Connections any                 `json:"connections,required"`
-	JSON        integrationInfoJSON `json:"-"`
+	// Methods is the OpenAPI array of `anyOf [IntegrationMethod]`; the decoder routes
+	// each element to one of the registered [IntegrationMethodUnion] variants.
+	Methods []IntegrationMethodUnion `json:"methods,required"`
+	// Connections is the OpenAPI array of `anyOf [ConnectionInfo]`; the decoder routes
+	// each element to one of the registered [ConnectionInfoUnion] variants.
+	Connections []ConnectionInfoUnion `json:"connections,required"`
+	JSON        integrationInfoJSON   `json:"-"`
 }
 
 // integrationInfoJSON contains the JSON metadata for the struct [IntegrationInfo]
@@ -299,6 +302,23 @@ func (r integrationInfoJSON) RawJSON() string {
 	return r.raw
 }
 
+// AsMethodsUnion returns the methods field as a typed slice of union values.
+//
+// Possible runtime types of each element are [IntegrationOAuthMethod],
+// [IntegrationKeyMethod] or [IntegrationEnvMethod].
+func (r *IntegrationInfo) AsMethodsUnion() []IntegrationMethodUnion {
+	return r.Methods
+}
+
+// AsConnectionsUnion returns the connections field as a typed slice of union
+// values.
+//
+// Possible runtime types of each element are [ConnectionCredentialInfo] or
+// [ConnectionEnvInfo].
+func (r *IntegrationInfo) AsConnectionsUnion() []ConnectionInfoUnion {
+	return r.Connections
+}
+
 // ===== IntegrationMethod Union =====
 
 // IntegrationMethodUnion represents the union of integration method types.
@@ -313,9 +333,10 @@ type IntegrationOAuthMethod struct {
 	ID    string                     `json:"id,required"`
 	Type  IntegrationOAuthMethodType `json:"type,required"`
 	Label string                     `json:"label,required"`
-	// This field can have the runtime type of [[]IntegrationTextPrompt],
-	// [[]IntegrationSelectPrompt].
-	Prompts any                        `json:"prompts"`
+	// Prompts is the OpenAPI array of `anyOf [IntegrationTextPrompt,
+	// IntegrationSelectPrompt]`; the decoder routes each element to one of the
+	// registered [IntegrationPromptUnion] variants.
+	Prompts []IntegrationPromptUnion   `json:"prompts"`
 	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 
@@ -335,6 +356,14 @@ func (r *IntegrationOAuthMethod) UnmarshalJSON(data []byte) (err error) {
 
 func (r integrationOAuthMethodJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsPromptsUnion returns the prompts field as a typed slice of union values.
+//
+// Possible runtime types of each element are [IntegrationTextPrompt] or
+// [IntegrationSelectPrompt]. It is nil when `prompts` is absent.
+func (r *IntegrationOAuthMethod) AsPromptsUnion() []IntegrationPromptUnion {
+	return r.Prompts
 }
 
 func (r IntegrationOAuthMethod) implementsIntegrationMethodUnion() {}
@@ -434,18 +463,21 @@ func (r IntegrationEnvMethodType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[IntegrationMethodUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationOAuthMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "oauth",
+			Type:               reflect.TypeFor[IntegrationOAuthMethod](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationKeyMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "key",
+			Type:               reflect.TypeFor[IntegrationKeyMethod](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationEnvMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "env",
+			Type:               reflect.TypeFor[IntegrationEnvMethod](),
 		},
 	)
 }
@@ -541,14 +573,16 @@ func (r ConnectionEnvInfoType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[ConnectionInfoUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConnectionCredentialInfo](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "credential",
+			Type:               reflect.TypeFor[ConnectionCredentialInfo](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConnectionEnvInfo](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "env",
+			Type:               reflect.TypeFor[ConnectionEnvInfo](),
 		},
 	)
 }
@@ -556,14 +590,16 @@ func init() {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[IntegrationPromptUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationTextPrompt](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeFor[IntegrationTextPrompt](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationSelectPrompt](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "select",
+			Type:               reflect.TypeFor[IntegrationSelectPrompt](),
 		},
 	)
 }
@@ -646,11 +682,13 @@ func (r integrationAttemptTimeJSON) RawJSON() string {
 // failed, or expired.
 type IntegrationAttemptStatus struct {
 	Status IntegrationAttemptStatusType `json:"status,required"`
-	// Message is present only when status is "failed". This field can have the
-	// runtime type of [string].
-	Message any `json:"message"`
-	// This field can have the runtime type of [IntegrationAttemptTime].
-	Time  any                          `json:"time,required"`
+	// Message is present only when status is "failed"; OpenAPI types it `string` in
+	// that single variant, so the carrier is the concrete Go type and stays empty
+	// for the other three variants.
+	Message string `json:"message"`
+	// Time is declared by all four variants with the same shape, so the carrier is
+	// the concrete Go type rather than an `any` runtime-typed field.
+	Time  IntegrationAttemptTime       `json:"time,required"`
 	JSON  integrationAttemptStatusJSON `json:"-"`
 	union IntegrationAttemptStatusUnion
 }
@@ -828,22 +866,26 @@ func (r IntegrationAttemptStatusExpired) implementsIntegrationAttemptStatus() {}
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[IntegrationAttemptStatusUnion](),
-		"",
+		"status",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationAttemptStatusPending](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "pending",
+			Type:               reflect.TypeFor[IntegrationAttemptStatusPending](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationAttemptStatusComplete](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "complete",
+			Type:               reflect.TypeFor[IntegrationAttemptStatusComplete](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationAttemptStatusFailed](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "failed",
+			Type:               reflect.TypeFor[IntegrationAttemptStatusFailed](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationAttemptStatusExpired](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "expired",
+			Type:               reflect.TypeFor[IntegrationAttemptStatusExpired](),
 		},
 	)
 }
@@ -1044,8 +1086,8 @@ func (r V2IntegrationGetParams) URLQuery() (v url.Values) {
 // V2IntegrationConnectKeyParams contains the body and query parameters for connecting
 // with a key.
 type V2IntegrationConnectKeyParams struct {
-	Location param.Field[V2LocationParam]      `query:"location"`
-	Body     V2IntegrationConnectKeyParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                   `query:"location"`
+	Body     param.Field[V2IntegrationConnectKeyParamsBody] `json:"-"`
 }
 
 func (r V2IntegrationConnectKeyParams) MarshalJSON() (data []byte, err error) {
@@ -1072,8 +1114,8 @@ func (r V2IntegrationConnectKeyParamsBody) MarshalJSON() (data []byte, err error
 // V2IntegrationConnectOauthParams contains the body and query parameters for
 // beginning an OAuth connection.
 type V2IntegrationConnectOauthParams struct {
-	Location param.Field[V2LocationParam]        `query:"location"`
-	Body     V2IntegrationConnectOauthParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                     `query:"location"`
+	Body     param.Field[V2IntegrationConnectOauthParamsBody] `json:"-"`
 }
 
 func (r V2IntegrationConnectOauthParams) MarshalJSON() (data []byte, err error) {
@@ -1113,8 +1155,8 @@ func (r V2IntegrationAttemptStatusParams) URLQuery() (v url.Values) {
 // V2IntegrationAttemptCompleteParams contains the body and query parameters for
 // completing an OAuth attempt.
 type V2IntegrationAttemptCompleteParams struct {
-	Location param.Field[V2LocationParam]           `query:"location"`
-	Body     V2IntegrationAttemptCompleteParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                        `query:"location"`
+	Body     param.Field[V2IntegrationAttemptCompleteParamsBody] `json:"-"`
 }
 
 func (r V2IntegrationAttemptCompleteParams) MarshalJSON() (data []byte, err error) {

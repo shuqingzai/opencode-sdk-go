@@ -276,3 +276,42 @@ func (r *PermissionSavedInfo) UnmarshalJSON(data []byte) (err error) {
 func (r permissionSavedInfoJSON) RawJSON() string {
 	return r.raw
 }
+
+type PermissionV2Rule struct {
+	Action   string               `json:"action,required"`
+	Resource string               `json:"resource,required"`
+	Effect   PermissionV2Effect   `json:"effect,required"`
+	JSON     permissionV2RuleJSON `json:"-"`
+}
+
+type permissionV2RuleJSON struct {
+	Action      apijson.Field
+	Resource    apijson.Field
+	Effect      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *PermissionV2Rule) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r permissionV2RuleJSON) RawJSON() string {
+	return r.raw
+}
+
+type PermissionV2Effect string
+
+const (
+	PermissionV2EffectAllow PermissionV2Effect = "allow"
+	PermissionV2EffectDeny  PermissionV2Effect = "deny"
+	PermissionV2EffectAsk   PermissionV2Effect = "ask"
+)
+
+func (r PermissionV2Effect) IsKnown() bool {
+	switch r {
+	case PermissionV2EffectAllow, PermissionV2EffectDeny, PermissionV2EffectAsk:
+		return true
+	}
+	return false
+}

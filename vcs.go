@@ -191,11 +191,11 @@ func (r *VcsService) Status(ctx context.Context, query VcsStatusParams, opts ...
 }
 
 type VcsFileStatus struct {
-	File      string            `json:"file,required"`
-	Additions int64             `json:"additions,required"`
-	Deletions int64             `json:"deletions,required"`
-	Status    VcsFileDiffStatus `json:"status,required"`
-	JSON      vcsFileStatusJSON `json:"-"`
+	File      string              `json:"file,required"`
+	Additions int64               `json:"additions,required"`
+	Deletions int64               `json:"deletions,required"`
+	Status    VcsFileStatusStatus `json:"status,required"`
+	JSON      vcsFileStatusJSON   `json:"-"`
 }
 
 type vcsFileStatusJSON struct {
@@ -215,6 +215,22 @@ func (r vcsFileStatusJSON) RawJSON() string {
 	return r.raw
 }
 
+type VcsFileStatusStatus string
+
+const (
+	VcsFileStatusStatusAdded    VcsFileStatusStatus = "added"
+	VcsFileStatusStatusDeleted  VcsFileStatusStatus = "deleted"
+	VcsFileStatusStatusModified VcsFileStatusStatus = "modified"
+)
+
+func (r VcsFileStatusStatus) IsKnown() bool {
+	switch r {
+	case VcsFileStatusStatusAdded, VcsFileStatusStatusDeleted, VcsFileStatusStatusModified:
+		return true
+	}
+	return false
+}
+
 type VcsStatusParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
@@ -225,11 +241,6 @@ func (r VcsStatusParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-// Deprecated: Use [VcsDiffService.Raw] instead.
-func (r *VcsService) DiffRaw(ctx context.Context, query VcsDiffRawParams, opts ...option.RequestOption) (res *string, err error) {
-	return r.Diff.Raw(ctx, query, opts...)
 }
 
 type VcsDiffRawParams struct {

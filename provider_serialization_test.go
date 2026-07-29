@@ -2,6 +2,7 @@ package opencode
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -226,6 +227,91 @@ func TestProviderListResponseDeserialization(t *testing.T) {
 	})
 }
 
+// TestProviderModelVariantsDeserialization pins the static type of
+// ProviderModel.Variants.
+//
+// OpenAPI Model.variants is
+//
+//	{"type":"object","additionalProperties":{"type":"object"}}
+//
+// and JS SDK(v2) types it as `variants?: {[key: string]: {[key: string]: unknown}}`.
+// The value schema is constrained to `object`, so the Go mapping is
+// map[string]map[string]any -- a bare map[string]any would under-specify the
+// declared value type.
+func TestProviderModelVariantsDeserialization(t *testing.T) {
+	if got, want := reflect.TypeOf(ProviderModel{}.Variants).String(), "map[string]map[string]interface {}"; got != want {
+		t.Errorf("ProviderModel.Variants static type = %s, want %s", got, want)
+	}
+
+	model := func(variants string) string {
+		return `{"id":"m","providerID":"p","api":{"id":"a","url":"u","npm":"n"},"name":"M",` +
+			`"capabilities":{"temperature":true,"reasoning":true,"attachment":false,"toolcall":true,` +
+			`"input":{"text":true,"audio":false,"image":false,"video":false,"pdf":false},` +
+			`"output":{"text":true,"audio":false,"image":false,"video":false,"pdf":false},` +
+			`"interleaved":false},` +
+			`"cost":{"input":1,"output":2,"cache":{"read":0,"write":0}},` +
+			`"limit":{"context":100,"output":50},"status":"active","options":{},"headers":{},` +
+			`"release_date":"2024-01-01"` + variants + `}`
+	}
+
+	t.Run("nested free-form objects survive", func(t *testing.T) {
+		var m ProviderModel
+		raw := model(`,"variants":{"thinking":{"reasoningEffort":"high","budget":32000,` +
+			`"nested":{"a":[1,2]}},"fast":{}}`)
+		if err := json.Unmarshal([]byte(raw), &m); err != nil {
+			t.Fatal(err)
+		}
+		if len(m.Variants) != 2 {
+			t.Fatalf("len(Variants) = %d, want 2", len(m.Variants))
+		}
+		// Element type is a concrete map -- no type assertion needed, which is
+		// exactly what the tightened static type buys the caller.
+		thinking := m.Variants["thinking"]
+		if thinking["reasoningEffort"] != "high" {
+			t.Errorf("variants.thinking.reasoningEffort = %v", thinking["reasoningEffort"])
+		}
+		if nested, ok := thinking["nested"].(map[string]any); !ok || len(nested) != 1 {
+			t.Errorf("variants.thinking.nested = %#v", thinking["nested"])
+		}
+		if fast, ok := m.Variants["fast"]; !ok || len(fast) != 0 {
+			t.Errorf("variants.fast = %#v (present=%v), want empty object", fast, ok)
+		}
+	})
+
+	t.Run("variants absent (optional per OpenAPI)", func(t *testing.T) {
+		var m ProviderModel
+		if err := json.Unmarshal([]byte(model("")), &m); err != nil {
+			t.Fatal(err)
+		}
+		if m.Variants != nil {
+			t.Errorf("Variants = %#v, want nil", m.Variants)
+		}
+	})
+
+	t.Run("variants null does not abort the decode", func(t *testing.T) {
+		var m ProviderModel
+		if err := json.Unmarshal([]byte(model(`,"variants":null`)), &m); err != nil {
+			t.Fatalf("variants:null must not fail the decode, got: %v", err)
+		}
+		if m.Variants != nil {
+			t.Errorf("Variants = %#v, want nil", m.Variants)
+		}
+		if m.ID != "m" {
+			t.Error("sibling fields lost on a null variants")
+		}
+	})
+
+	t.Run("empty variants object", func(t *testing.T) {
+		var m ProviderModel
+		if err := json.Unmarshal([]byte(model(`,"variants":{}`)), &m); err != nil {
+			t.Fatal(err)
+		}
+		if len(m.Variants) != 0 {
+			t.Errorf("len(Variants) = %d, want 0", len(m.Variants))
+		}
+	})
+}
+
 func TestProviderAuthMethodDeserialization(t *testing.T) {
 	t.Run("type oauth no prompts", func(t *testing.T) {
 		raw := `{"type":"oauth","label":"Sign in with Google"}`
@@ -277,13 +363,33 @@ func TestProviderAuthMethodDeserialization(t *testing.T) {
 		if a.Prompts == nil {
 			t.Fatal("Prompts should not be nil")
 		}
-		// Prompts is any — raw JSON array unmarshaled as []interface{} (apijson standard)
-		prompts, ok := a.Prompts.([]interface{})
-		if !ok {
-			t.Fatalf("expected []interface{}, got %T", a.Prompts)
-		}
+		// Prompts is declared []ProviderAuthMethodPrompt, so the array decoder routes
+		// every element through the registered variants of that union: one concrete
+		// variant per element.
+		prompts := a.Prompts
 		if len(prompts) != 2 {
 			t.Fatalf("expected 2 prompts, got %d", len(prompts))
+		}
+		text, ok := prompts[0].(ProviderAuthMethodPromptText)
+		if !ok {
+			t.Fatalf("prompts[0] = %T, want ProviderAuthMethodPromptText", prompts[0])
+		}
+		if text.Key != "api_key" || text.Message != "Enter API key" || text.Placeholder != "sk-..." {
+			t.Errorf("prompts[0] = %+v", text)
+		}
+		sel, ok := prompts[1].(ProviderAuthMethodPromptSelect)
+		if !ok {
+			t.Fatalf("prompts[1] = %T, want ProviderAuthMethodPromptSelect", prompts[1])
+		}
+		if sel.Key != "region" || len(sel.Options) != 2 {
+			t.Fatalf("prompts[1] = %+v", sel)
+		}
+		if sel.Options[1].Value != "eu-west" || sel.Options[1].Hint != "GDPR-compliant" {
+			t.Errorf("prompts[1].Options[1] = %+v", sel.Options[1])
+		}
+		// AsPromptsUnion is the typed accessor for the same payload.
+		if got := a.AsPromptsUnion(); len(got) != 2 {
+			t.Fatalf("AsPromptsUnion() len = %d, want 2", len(got))
 		}
 	})
 
@@ -300,12 +406,18 @@ func TestProviderAuthMethodDeserialization(t *testing.T) {
 		if err := json.Unmarshal([]byte(raw), &a); err != nil {
 			t.Fatal(err)
 		}
-		prompts, ok := a.Prompts.([]interface{})
-		if !ok {
-			t.Fatalf("expected []interface{}, got %T", a.Prompts)
-		}
+		prompts := a.Prompts
 		if len(prompts) != 2 {
 			t.Fatalf("expected 2 prompts, got %d", len(prompts))
+		}
+		for i, want := range []string{"key1", "key2"} {
+			text, ok := prompts[i].(ProviderAuthMethodPromptText)
+			if !ok {
+				t.Fatalf("prompts[%d] = %T, want ProviderAuthMethodPromptText", i, prompts[i])
+			}
+			if text.Type != ProviderAuthMethodPromptTextTypeText || text.Key != want {
+				t.Errorf("prompts[%d] = %+v, want key %q", i, text, want)
+			}
 		}
 	})
 

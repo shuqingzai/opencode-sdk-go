@@ -5,6 +5,7 @@ package opencode
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -50,7 +51,7 @@ func (r *QuestionService) Reply(ctx context.Context, requestID string, params Qu
 		err = errors.New("missing required requestID parameter")
 		return
 	}
-	path := "question/" + requestID + "/reply"
+	path := fmt.Sprintf("question/%s/reply", requestID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return
 }
@@ -62,7 +63,7 @@ func (r *QuestionService) Reject(ctx context.Context, requestID string, query Qu
 		err = errors.New("missing required requestID parameter")
 		return
 	}
-	path := "question/" + requestID + "/reject"
+	path := fmt.Sprintf("question/%s/reject", requestID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, query, &res, opts...)
 	return
 }
@@ -71,7 +72,7 @@ type QuestionRequest struct {
 	ID        string              `json:"id,required"`
 	SessionID string              `json:"sessionID,required"`
 	Questions []QuestionInfo      `json:"questions,required"`
-	Tool      QuestionRequestTool `json:"tool"`
+	Tool      QuestionTool        `json:"tool"`
 	JSON      questionRequestJSON `json:"-"`
 }
 
@@ -146,26 +147,26 @@ func (r questionOptionJSON) RawJSON() string {
 	return r.raw
 }
 
-type QuestionRequestTool struct {
-	MessageID string                  `json:"messageID,required"`
-	CallID    string                  `json:"callID,required"`
-	JSON      questionRequestToolJSON `json:"-"`
+type QuestionTool struct {
+	MessageID string           `json:"messageID,required"`
+	CallID    string           `json:"callID,required"`
+	JSON      questionToolJSON `json:"-"`
 }
 
-// questionRequestToolJSON contains the JSON metadata for the struct
-// [QuestionRequestTool]
-type questionRequestToolJSON struct {
+// questionToolJSON contains the JSON metadata for the struct
+// [QuestionTool]
+type questionToolJSON struct {
 	MessageID   apijson.Field
 	CallID      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *QuestionRequestTool) UnmarshalJSON(data []byte) (err error) {
+func (r *QuestionTool) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r questionRequestToolJSON) RawJSON() string {
+func (r questionToolJSON) RawJSON() string {
 	return r.raw
 }
 

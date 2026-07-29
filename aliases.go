@@ -10,6 +10,18 @@ import (
 type Error = apierror.Error
 
 // This is an alias to an internal type.
+type UnionString = shared.UnionString
+
+// This is an alias to an internal type.
+type UnionBool = shared.UnionBool
+
+// This is an alias to an internal type.
+type UnionInt = shared.UnionInt
+
+// This is an alias to an internal type.
+type UnionFloat = shared.UnionFloat
+
+// This is an alias to an internal type.
 type MessageAbortedError = shared.MessageAbortedError
 
 // This is an alias to an internal type.

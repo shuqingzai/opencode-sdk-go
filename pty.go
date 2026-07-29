@@ -113,7 +113,7 @@ func (r *PtyService) Connect(ctx context.Context, ptyID string, query PtyConnect
 }
 
 // Get a connect token for a PTY
-func (r *PtyService) ConnectToken(ctx context.Context, ptyID string, query PtyConnectTokenParams, opts ...option.RequestOption) (res *PtyConnectTokenResponse, err error) {
+func (r *PtyService) ConnectToken(ctx context.Context, ptyID string, query PtyConnectTokenParams, opts ...option.RequestOption) (res *PtyTicketConnectToken, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if ptyID == "" {
 		err = errors.New("missing required ptyID parameter")
@@ -160,10 +160,10 @@ func (r PtyGetParams) URLQuery() (v url.Values) {
 }
 
 type PtyUpdateParams struct {
-	Title     param.Field[string]         `json:"title"`
-	Size      param.Field[V2PtySizeParam] `json:"size"`
-	Directory param.Field[string]         `query:"directory"`
-	Workspace param.Field[string]         `query:"workspace"`
+	Title     param.Field[string]       `json:"title"`
+	Size      param.Field[PtySizeParam] `json:"size"`
+	Directory param.Field[string]       `query:"directory"`
+	Workspace param.Field[string]       `query:"workspace"`
 }
 
 func (r PtyUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -231,6 +231,55 @@ func (r PtyShellsParams) URLQuery() (v url.Values) {
 	})
 }
 
+type Pty struct {
+	Args    []string `json:"args,required"`
+	Command string   `json:"command,required"`
+	Cwd     string   `json:"cwd,required"`
+	// ExitCode is the exit code of the PTY process if it has exited.
+	ExitCode int64     `json:"exitCode"`
+	ID       string    `json:"id,required"`
+	Pid      int64     `json:"pid,required"`
+	Status   PtyStatus `json:"status,required"`
+	Title    string    `json:"title,required"`
+	JSON     ptyJSON   `json:"-"`
+}
+
+type ptyJSON struct {
+	Args        apijson.Field
+	Command     apijson.Field
+	Cwd         apijson.Field
+	ExitCode    apijson.Field
+	ID          apijson.Field
+	Pid         apijson.Field
+	Status      apijson.Field
+	Title       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *Pty) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ptyJSON) RawJSON() string {
+	return r.raw
+}
+
+type PtyStatus string
+
+const (
+	PtyStatusRunning PtyStatus = "running"
+	PtyStatusExited  PtyStatus = "exited"
+)
+
+func (r PtyStatus) IsKnown() bool {
+	switch r {
+	case PtyStatusRunning, PtyStatusExited:
+		return true
+	}
+	return false
+}
+
 type PtyShell struct {
 	Path       string       `json:"path,required"`
 	Name       string       `json:"name,required"`
@@ -266,23 +315,12 @@ func (r PtyConnectTokenParams) URLQuery() (v url.Values) {
 	})
 }
 
-type PtyConnectTokenResponse struct {
-	Ticket    string                      `json:"ticket,required"`
-	ExpiresIn int64                       `json:"expires_in,required"`
-	JSON      ptyConnectTokenResponseJSON `json:"-"`
+// PtySizeParam represents the terminal size for a PTY.
+type PtySizeParam struct {
+	Rows param.Field[int64] `json:"rows,required"`
+	Cols param.Field[int64] `json:"cols,required"`
 }
 
-type ptyConnectTokenResponseJSON struct {
-	Ticket      apijson.Field
-	ExpiresIn   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PtyConnectTokenResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptyConnectTokenResponseJSON) RawJSON() string {
-	return r.raw
+func (r PtySizeParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

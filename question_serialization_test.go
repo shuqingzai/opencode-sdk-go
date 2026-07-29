@@ -242,11 +242,11 @@ func TestQuestionOptionUnmarshal(t *testing.T) {
 	}
 }
 
-// Aligned with OpenAPI QuestionTool schema (Go type: QuestionRequestTool).
+// Aligned with OpenAPI QuestionTool schema (Go type: QuestionTool).
 // required: messageID, callID
-func TestQuestionRequestToolUnmarshal(t *testing.T) {
+func TestQuestionToolUnmarshal(t *testing.T) {
 	raw := `{"messageID": "msg_q1", "callID": "call_q1"}`
-	var t2 QuestionRequestTool
+	var t2 QuestionTool
 	if err := json.Unmarshal([]byte(raw), &t2); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
