@@ -171,10 +171,9 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 
 // ExperimentalWorkspaceNewParams contains the request parameters for creating a workspace.
 type ExperimentalWorkspaceNewParams struct {
-	Directory param.Field[string]                `query:"directory"`
-	Workspace param.Field[string]                `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput   `json:"-"`
-	JSON      experimentalWorkspaceNewParamsJSON `json:"-"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
+	Body      ExperimentalWorkspaceCreateInput `json:"-"`
 }
 
 func (r ExperimentalWorkspaceNewParams) MarshalJSON() (data []byte, err error) {
@@ -189,48 +188,15 @@ func (r ExperimentalWorkspaceNewParams) URLQuery() (v url.Values) {
 	})
 }
 
-// experimentalWorkspaceNewParamsJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceNewParams]
-type experimentalWorkspaceNewParamsJSON struct {
-	Directory   apijson.Field
-	Workspace   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r experimentalWorkspaceNewParamsJSON) RawJSON() string {
-	return r.raw
-}
-
 type ExperimentalWorkspaceCreateInput struct {
-	ID     param.Field[string]                  `json:"id"`
-	Type   param.Field[string]                  `json:"type,required"`
-	Branch param.Field[string]                  `json:"branch"`
-	Extra  param.Field[any]                     `json:"extra"`
-	JSON   experimentalWorkspaceCreateInputJSON `json:"-"`
-}
-
-// experimentalWorkspaceCreateInputJSON contains the JSON metadata for the struct
-// [ExperimentalWorkspaceCreateInput]
-type experimentalWorkspaceCreateInputJSON struct {
-	ID          apijson.Field
-	Type        apijson.Field
-	Branch      apijson.Field
-	Extra       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ExperimentalWorkspaceCreateInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	ID     param.Field[string] `json:"id"`
+	Type   param.Field[string] `json:"type,required"`
+	Branch param.Field[string] `json:"branch"`
+	Extra  param.Field[any]    `json:"extra"`
 }
 
 func (r ExperimentalWorkspaceCreateInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r experimentalWorkspaceCreateInputJSON) RawJSON() string {
-	return r.raw
 }
 
 type ExperimentalWorkspaceRemoveParams struct {

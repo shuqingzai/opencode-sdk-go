@@ -214,26 +214,31 @@ type McpStatusUnion interface {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*McpStatusUnion)(nil)).Elem(),
-		"",
+		"status",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusConnected{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "connected",
+			Type:               reflect.TypeOf(McpStatusConnected{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusDisabled{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "disabled",
+			Type:               reflect.TypeOf(McpStatusDisabled{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusFailed{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "failed",
+			Type:               reflect.TypeOf(McpStatusFailed{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusNeedsAuth{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "needs_auth",
+			Type:               reflect.TypeOf(McpStatusNeedsAuth{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpStatusNeedsClientRegistration{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "needs_client_registration",
+			Type:               reflect.TypeOf(McpStatusNeedsClientRegistration{}),
 		},
 	)
 }

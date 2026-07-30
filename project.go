@@ -171,11 +171,11 @@ func (r ProjectCurrentParams) URLQuery() (v url.Values) {
 }
 
 type ProjectUpdateParams struct {
-	Directory param.Field[string]          `query:"directory"`
-	Workspace param.Field[string]          `query:"workspace"`
-	Name      param.Field[string]          `json:"name"`
-	Icon      param.Field[ProjectIcon]     `json:"icon"`
-	Commands  param.Field[ProjectCommands] `json:"commands"`
+	Directory param.Field[string]                      `query:"directory"`
+	Workspace param.Field[string]                      `query:"workspace"`
+	Name      param.Field[string]                      `json:"name"`
+	Icon      param.Field[ProjectUpdateParamsIcon]     `json:"icon"`
+	Commands  param.Field[ProjectUpdateParamsCommands] `json:"commands"`
 }
 
 // MarshalJSON serializes [ProjectUpdateParams] omitting query parameters.
@@ -191,14 +191,70 @@ func (r ProjectUpdateParams) URLQuery() (v url.Values) {
 	})
 }
 
+// ProjectUpdateParamsIcon represents the icon configuration when updating a project.
+type ProjectUpdateParamsIcon struct {
+	URL      param.Field[string] `json:"url"`
+	Override param.Field[string] `json:"override"`
+	Color    param.Field[string] `json:"color"`
+}
+
+func (r ProjectUpdateParamsIcon) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ProjectUpdateParamsCommands represents the commands configuration when updating a project.
+type ProjectUpdateParamsCommands struct {
+	// Startup script to run when creating a new workspace (worktree)
+	Start param.Field[string] `json:"start"`
+}
+
+func (r ProjectUpdateParamsCommands) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type ProjectIcon struct {
-	URL      string `json:"url"`
-	Override string `json:"override"`
-	Color    string `json:"color"`
+	URL      string          `json:"url"`
+	Override string          `json:"override"`
+	Color    string          `json:"color"`
+	JSON     projectIconJSON `json:"-"`
+}
+
+// projectIconJSON contains the JSON metadata for the struct [ProjectIcon]
+type projectIconJSON struct {
+	URL         apijson.Field
+	Override    apijson.Field
+	Color       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectIcon) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectIconJSON) RawJSON() string {
+	return r.raw
 }
 
 type ProjectCommands struct {
-	Start string `json:"start"`
+	// Startup script to run when creating a new workspace (worktree)
+	Start string              `json:"start"`
+	JSON  projectCommandsJSON `json:"-"`
+}
+
+// projectCommandsJSON contains the JSON metadata for the struct [ProjectCommands]
+type projectCommandsJSON struct {
+	Start       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ProjectCommands) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r projectCommandsJSON) RawJSON() string {
+	return r.raw
 }
 
 // List known local absolute directories for a project.

@@ -16,6 +16,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // ProviderService contains methods and other services that help with interacting with
@@ -465,7 +466,7 @@ func (r providerModelCostTierJSON) RawJSON() string {
 // ProviderModelCostTierContext represents the tier context threshold for a cost tier.
 type ProviderModelCostTierContext struct {
 	Type ProviderModelCostTierContextType `json:"type,required"`
-	Size float64                          `json:"size,required"`
+	Size int64                            `json:"size,required"`
 	JSON providerModelCostTierContextJSON `json:"-"`
 }
 
@@ -529,9 +530,9 @@ func (r providerModelCostExperimentalOver200KJSON) RawJSON() string {
 
 // ProviderModelLimit represents limits for a model.
 type ProviderModelLimit struct {
-	Context float64                `json:"context,required"`
-	Input   float64                `json:"input"`
-	Output  float64                `json:"output,required"`
+	Context int64                  `json:"context,required"`
+	Input   int64                  `json:"input"`
+	Output  int64                  `json:"output,required"`
 	JSON    providerModelLimitJSON `json:"-"`
 }
 
@@ -554,8 +555,11 @@ func (r providerModelLimitJSON) RawJSON() string {
 
 // ProviderAuthMethod represents an authentication method for a provider.
 type ProviderAuthMethod struct {
-	Type    ProviderAuthMethodType     `json:"type,required"`
-	Label   string                     `json:"label,required"`
+	Type  ProviderAuthMethodType `json:"type,required"`
+	Label string                 `json:"label,required"`
+	// Prompts is a list of [ProviderAuthMethodPrompt] values. Each element resolves
+	// to either [ProviderAuthMethodPromptText] or [ProviderAuthMethodPromptSelect]
+	// based on its `type` discriminator.
 	Prompts []ProviderAuthMethodPrompt `json:"prompts"`
 	JSON    providerAuthMethodJSON     `json:"-"`
 }
@@ -604,10 +608,12 @@ func init() {
 		reflect.TypeOf((*ProviderAuthMethodPrompt)(nil)).Elem(),
 		"type",
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "text",
 			Type:               reflect.TypeOf(ProviderAuthMethodPromptText{}),
 		},
 		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "select",
 			Type:               reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
 		},

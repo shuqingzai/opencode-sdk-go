@@ -147,48 +147,57 @@ func (r globalUpgradeResponseJSON) RawJSON() string {
 // All fields are optional for PATCH semantics.
 type GlobalConfigUpdateParams struct {
 	// Body parameters — all Config fields as optional
-	Schema            param.Field[string]                     `json:"$schema"`
-	Agent             param.Field[ConfigAgent]                `json:"agent"`
-	Attachment        param.Field[AttachmentConfig]           `json:"attachment"`
-	Autoshare         param.Field[bool]                       `json:"autoshare"`
-	Autoupdate        param.Field[interface{}]                `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand]   `json:"command"`
-	Compaction        param.Field[ConfigCompaction]           `json:"compaction"`
-	DisabledProviders param.Field[[]string]                   `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                   `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]           `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]         `json:"experimental"`
-	Formatter         param.Field[map[string]ConfigFormatter] `json:"formatter"`
-	Instructions      param.Field[[]string]                   `json:"instructions"`
-	Layout            param.Field[ConfigLayout]               `json:"layout"`
-	LogLevel          param.Field[ConfigLogLevel]             `json:"logLevel"`
-	Lsp               param.Field[map[string]ConfigLsp]       `json:"lsp"`
-	Mcp               param.Field[map[string]ConfigMcp]       `json:"mcp"`
-	Mode              param.Field[ConfigMode]                 `json:"mode"`
-	Model             param.Field[string]                     `json:"model"`
-	Permission        param.Field[ConfigPermission]           `json:"permission"`
+	Schema            param.Field[string]                        `json:"$schema"`
+	Agent             param.Field[ConfigAgentParam]              `json:"agent"`
+	Attachment        param.Field[AttachmentConfigParam]         `json:"attachment"`
+	Autoshare         param.Field[bool]                          `json:"autoshare"`
+	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommandParam] `json:"command"`
+	Compaction        param.Field[ConfigCompactionParam]         `json:"compaction"`
+	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfigParam]         `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimentalParam]       `json:"experimental"`
+	// Enable or configure formatters. Pass false to disable, true to enable
+	// built-ins, or a map of formatter-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigFormatter].
+	Formatter    param.Field[interface{}]    `json:"formatter"`
+	Instructions param.Field[[]string]       `json:"instructions"`
+	Layout       param.Field[ConfigLayout]   `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
+	// Enable or configure LSP servers. Pass false to disable, true to enable
+	// built-ins, or a map of lsp-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigLsp].
+	Lsp   param.Field[interface{}]                    `json:"lsp"`
+	Mcp   param.Field[map[string]ConfigMcpUnionParam] `json:"mcp"`
+	Mode  param.Field[ConfigModeParam]                `json:"mode"`
+	Model param.Field[string]                         `json:"model"`
+	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
+	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
+	// (a string constant) or [ConfigPermissionParam].
+	Permission param.Field[ConfigPermissionUnionParam] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin        param.Field[[]interface{}]             `json:"plugin"`
-	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
+	Plugin   param.Field[[]interface{}]                  `json:"plugin"`
+	Provider param.Field[map[string]ConfigProviderParam] `json:"provider"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	Reference param.Field[map[string]interface{}] `json:"reference"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]interface{}]    `json:"references"`
-	Share         param.Field[ConfigShare]               `json:"share"`
-	Shell         param.Field[string]                    `json:"shell"`
-	Server        param.Field[ServerConfig]              `json:"server"`
-	Skills        param.Field[ConfigSkills]              `json:"skills"`
-	SmallModel    param.Field[string]                    `json:"small_model"`
-	Snapshot      param.Field[bool]                      `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutput]          `json:"tool_output"`
-	Tools         param.Field[map[string]bool]           `json:"tools"`
-	Username      param.Field[string]                    `json:"username"`
-	Watcher       param.Field[ConfigWatcher]             `json:"watcher"`
-	DefaultAgent  param.Field[string]                    `json:"default_agent"`
-	SubagentDepth param.Field[int64]                     `json:"subagent_depth"`
+	References    param.Field[map[string]interface{}] `json:"references"`
+	Share         param.Field[ConfigShare]            `json:"share"`
+	Shell         param.Field[string]                 `json:"shell"`
+	Server        param.Field[ServerConfigParam]      `json:"server"`
+	Skills        param.Field[ConfigSkillsParam]      `json:"skills"`
+	SmallModel    param.Field[string]                 `json:"small_model"`
+	Snapshot      param.Field[bool]                   `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutputParam]  `json:"tool_output"`
+	Tools         param.Field[map[string]bool]        `json:"tools"`
+	Username      param.Field[string]                 `json:"username"`
+	Watcher       param.Field[ConfigWatcherParam]     `json:"watcher"`
+	DefaultAgent  param.Field[string]                 `json:"default_agent"`
+	SubagentDepth param.Field[int64]                  `json:"subagent_depth"`
 }
 
 func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -198,7 +207,7 @@ func (r GlobalConfigUpdateParams) MarshalJSON() (data []byte, err error) {
 type GlobalEvent struct {
 	Directory string `json:"directory,required"`
 	// This field can have the runtime type of
-	// [EventListResponseEventXxx] (88 V2 Event types):
+	// [EventListResponseEventXxx] (89 V2 Event types):
 	// [EventListResponseEventCommandExecuted],
 	// [EventListResponseEventFileEdited],
 	// [EventListResponseEventFileWatcherUpdated],
@@ -286,6 +295,9 @@ type GlobalEvent struct {
 	// [EventListResponseEventSessionNextRevertStaged],
 	// [EventListResponseEventSessionNextRevertCleared],
 	// [EventListResponseEventSessionNextRevertCommitted],
+	// [EventListResponseEventSessionNextPromptAdmitted],
+	// [EventListResponseEventSessionNextContextUpdated],
+	// [EventListResponseEventProjectDirectoriesUpdated],
 	//
 	// [SyncEventResponse] (V1 SyncEvent).
 	Payload   interface{}     `json:"payload,required"`
@@ -1290,4 +1302,14 @@ func (r *SyncEventResponseSyncEvent) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [SyncEventResponseSyncEventDataUnion] interface which you can
+// cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are the [SyncEventXxx] variants, e.g.
+// [SyncEventMessageUpdated], [SyncEventSessionUpdated],
+// [SyncEventSessionNextToolCalled].
+func (r SyncEventResponseSyncEvent) AsUnion() SyncEventResponseSyncEventDataUnion {
+	return r.union
 }

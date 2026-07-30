@@ -373,8 +373,22 @@ func (r v2ModelInfoCostItemJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2ModelInfoCostTierType string
+
+const (
+	V2ModelInfoCostTierTypeContext V2ModelInfoCostTierType = "context"
+)
+
+func (r V2ModelInfoCostTierType) IsKnown() bool {
+	switch r {
+	case V2ModelInfoCostTierTypeContext:
+		return true
+	}
+	return false
+}
+
 type V2ModelInfoCostTier struct {
-	Type string                  `json:"type,required"`
+	Type V2ModelInfoCostTierType `json:"type,required"`
 	Size int64                   `json:"size,required"`
 	JSON v2ModelInfoCostTierJSON `json:"-"`
 }

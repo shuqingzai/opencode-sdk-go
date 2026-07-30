@@ -314,14 +314,22 @@ type V2EventPayloadUnion interface {
 }
 
 type V2EventCatalogUpdated struct {
-	Data V2EventCatalogUpdatedData `json:"data,required"`
-	Type V2EventCatalogUpdatedType `json:"type,required"`
-	JSON v2EventCatalogUpdatedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventCatalogUpdatedData `json:"data,required"`
+	Type     V2EventCatalogUpdatedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventCatalogUpdatedJSON `json:"-"`
 }
 
 type v2EventCatalogUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -368,14 +376,22 @@ func (r v2EventCatalogUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventCommandExecuted struct {
-	Data V2EventCommandExecutedData `json:"data,required"`
-	Type V2EventCommandExecutedType `json:"type,required"`
-	JSON v2EventCommandExecutedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventCommandExecutedData `json:"data,required"`
+	Type     V2EventCommandExecutedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventCommandExecutedJSON `json:"-"`
 }
 
 type v2EventCommandExecutedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -430,14 +446,22 @@ func (r v2EventCommandExecutedDataJSON) RawJSON() string {
 }
 
 type V2EventFileEdited struct {
-	Data V2EventFileEditedData `json:"data,required"`
-	Type V2EventFileEditedType `json:"type,required"`
-	JSON v2EventFileEditedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventFileEditedData  `json:"data,required"`
+	Type     V2EventFileEditedType  `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventFileEditedJSON  `json:"-"`
 }
 
 type v2EventFileEditedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -504,14 +528,22 @@ func (r V2EventFileWatcherUpdatedEvent) IsKnown() bool {
 }
 
 type V2EventFileWatcherUpdated struct {
-	Data V2EventFileWatcherUpdatedData `json:"data,required"`
-	Type V2EventFileWatcherUpdatedType `json:"type,required"`
-	JSON v2EventFileWatcherUpdatedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventFileWatcherUpdatedData `json:"data,required"`
+	Type     V2EventFileWatcherUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventFileWatcherUpdatedJSON `json:"-"`
 }
 
 type v2EventFileWatcherUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -562,14 +594,22 @@ func (r v2EventFileWatcherUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventGlobalDisposed struct {
-	Data V2EventGlobalDisposedData `json:"data,required"`
-	Type V2EventGlobalDisposedType `json:"type,required"`
-	JSON v2EventGlobalDisposedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventGlobalDisposedData `json:"data,required"`
+	Type     V2EventGlobalDisposedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventGlobalDisposedJSON `json:"-"`
 }
 
 type v2EventGlobalDisposedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -616,14 +656,22 @@ func (r v2EventGlobalDisposedDataJSON) RawJSON() string {
 }
 
 type V2EventInstallationUpdateAvailable struct {
-	Data V2EventInstallationUpdateAvailableData `json:"data,required"`
-	Type V2EventInstallationUpdateAvailableType `json:"type,required"`
-	JSON v2EventInstallationUpdateAvailableJSON `json:"-"`
+	ID       string                                 `json:"id,required"`
+	Data     V2EventInstallationUpdateAvailableData `json:"data,required"`
+	Type     V2EventInstallationUpdateAvailableType `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Metadata map[string]interface{}                 `json:"metadata"`
+	JSON     v2EventInstallationUpdateAvailableJSON `json:"-"`
 }
 
 type v2EventInstallationUpdateAvailableJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -672,14 +720,22 @@ func (r v2EventInstallationUpdateAvailableDataJSON) RawJSON() string {
 }
 
 type V2EventInstallationUpdated struct {
-	Data V2EventInstallationUpdatedData `json:"data,required"`
-	Type V2EventInstallationUpdatedType `json:"type,required"`
-	JSON v2EventInstallationUpdatedJSON `json:"-"`
+	ID       string                         `json:"id,required"`
+	Data     V2EventInstallationUpdatedData `json:"data,required"`
+	Type     V2EventInstallationUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                 `json:"durable"`
+	Location LocationRef                    `json:"location"`
+	Metadata map[string]interface{}         `json:"metadata"`
+	JSON     v2EventInstallationUpdatedJSON `json:"-"`
 }
 
 type v2EventInstallationUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -728,14 +784,22 @@ func (r v2EventInstallationUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventIntegrationConnectionUpdated struct {
-	Data V2EventIntegrationConnectionUpdatedData `json:"data,required"`
-	Type V2EventIntegrationConnectionUpdatedType `json:"type,required"`
-	JSON v2EventIntegrationConnectionUpdatedJSON `json:"-"`
+	ID       string                                  `json:"id,required"`
+	Data     V2EventIntegrationConnectionUpdatedData `json:"data,required"`
+	Type     V2EventIntegrationConnectionUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Metadata map[string]interface{}                  `json:"metadata"`
+	JSON     v2EventIntegrationConnectionUpdatedJSON `json:"-"`
 }
 
 type v2EventIntegrationConnectionUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -784,14 +848,22 @@ func (r v2EventIntegrationConnectionUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventIntegrationUpdated struct {
-	Data V2EventIntegrationUpdatedData `json:"data,required"`
-	Type V2EventIntegrationUpdatedType `json:"type,required"`
-	JSON v2EventIntegrationUpdatedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventIntegrationUpdatedData `json:"data,required"`
+	Type     V2EventIntegrationUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventIntegrationUpdatedJSON `json:"-"`
 }
 
 type v2EventIntegrationUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -838,14 +910,22 @@ func (r v2EventIntegrationUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventLspUpdated struct {
-	Data V2EventLspUpdatedData `json:"data,required"`
-	Type V2EventLspUpdatedType `json:"type,required"`
-	JSON v2EventLspUpdatedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventLspUpdatedData  `json:"data,required"`
+	Type     V2EventLspUpdatedType  `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventLspUpdatedJSON  `json:"-"`
 }
 
 type v2EventLspUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -892,14 +972,22 @@ func (r v2EventLspUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventMcpBrowserOpenFailed struct {
-	Data V2EventMcpBrowserOpenFailedData `json:"data,required"`
-	Type V2EventMcpBrowserOpenFailedType `json:"type,required"`
-	JSON v2EventMcpBrowserOpenFailedJSON `json:"-"`
+	ID       string                          `json:"id,required"`
+	Data     V2EventMcpBrowserOpenFailedData `json:"data,required"`
+	Type     V2EventMcpBrowserOpenFailedType `json:"type,required"`
+	Durable  V2EventDurable                  `json:"durable"`
+	Location LocationRef                     `json:"location"`
+	Metadata map[string]interface{}          `json:"metadata"`
+	JSON     v2EventMcpBrowserOpenFailedJSON `json:"-"`
 }
 
 type v2EventMcpBrowserOpenFailedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -950,14 +1038,22 @@ func (r v2EventMcpBrowserOpenFailedDataJSON) RawJSON() string {
 }
 
 type V2EventMcpToolsChanged struct {
-	Data V2EventMcpToolsChangedData `json:"data,required"`
-	Type V2EventMcpToolsChangedType `json:"type,required"`
-	JSON v2EventMcpToolsChangedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventMcpToolsChangedData `json:"data,required"`
+	Type     V2EventMcpToolsChangedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventMcpToolsChangedJSON `json:"-"`
 }
 
 type v2EventMcpToolsChangedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1006,14 +1102,22 @@ func (r v2EventMcpToolsChangedDataJSON) RawJSON() string {
 }
 
 type V2EventMessagePartDelta struct {
-	Data V2EventMessagePartDeltaData `json:"data,required"`
-	Type V2EventMessagePartDeltaType `json:"type,required"`
-	JSON v2EventMessagePartDeltaJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventMessagePartDeltaData `json:"data,required"`
+	Type     V2EventMessagePartDeltaType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventMessagePartDeltaJSON `json:"-"`
 }
 
 type v2EventMessagePartDeltaJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1070,14 +1174,22 @@ func (r v2EventMessagePartDeltaDataJSON) RawJSON() string {
 }
 
 type V2EventMessagePartRemoved struct {
-	Data V2EventMessagePartRemovedData `json:"data,required"`
-	Type V2EventMessagePartRemovedType `json:"type,required"`
-	JSON v2EventMessagePartRemovedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventMessagePartRemovedData `json:"data,required"`
+	Type     V2EventMessagePartRemovedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventMessagePartRemovedJSON `json:"-"`
 }
 
 type v2EventMessagePartRemovedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1130,14 +1242,22 @@ func (r v2EventMessagePartRemovedDataJSON) RawJSON() string {
 }
 
 type V2EventMessagePartUpdated struct {
-	Data V2EventMessagePartUpdatedData `json:"data,required"`
-	Type V2EventMessagePartUpdatedType `json:"type,required"`
-	JSON v2EventMessagePartUpdatedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventMessagePartUpdatedData `json:"data,required"`
+	Type     V2EventMessagePartUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventMessagePartUpdatedJSON `json:"-"`
 }
 
 type v2EventMessagePartUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1190,14 +1310,22 @@ func (r v2EventMessagePartUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventMessageRemoved struct {
-	Data V2EventMessageRemovedData `json:"data,required"`
-	Type V2EventMessageRemovedType `json:"type,required"`
-	JSON v2EventMessageRemovedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventMessageRemovedData `json:"data,required"`
+	Type     V2EventMessageRemovedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventMessageRemovedJSON `json:"-"`
 }
 
 type v2EventMessageRemovedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1248,14 +1376,22 @@ func (r v2EventMessageRemovedDataJSON) RawJSON() string {
 }
 
 type V2EventMessageUpdated struct {
-	Data V2EventMessageUpdatedData `json:"data,required"`
-	Type V2EventMessageUpdatedType `json:"type,required"`
-	JSON v2EventMessageUpdatedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventMessageUpdatedData `json:"data,required"`
+	Type     V2EventMessageUpdatedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventMessageUpdatedJSON `json:"-"`
 }
 
 type v2EventMessageUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1306,14 +1442,22 @@ func (r v2EventMessageUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventModelsDevRefreshed struct {
-	Data V2EventModelsDevRefreshedData `json:"data,required"`
-	Type V2EventModelsDevRefreshedType `json:"type,required"`
-	JSON v2EventModelsDevRefreshedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventModelsDevRefreshedData `json:"data,required"`
+	Type     V2EventModelsDevRefreshedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventModelsDevRefreshedJSON `json:"-"`
 }
 
 type v2EventModelsDevRefreshedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1360,14 +1504,22 @@ func (r v2EventModelsDevRefreshedDataJSON) RawJSON() string {
 }
 
 type V2EventPermissionAsked struct {
-	Data V2EventPermissionAskedData `json:"data,required"`
-	Type V2EventPermissionAskedType `json:"type,required"`
-	JSON v2EventPermissionAskedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventPermissionAskedData `json:"data,required"`
+	Type     V2EventPermissionAskedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventPermissionAskedJSON `json:"-"`
 }
 
 type v2EventPermissionAskedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1450,14 +1602,22 @@ func (r V2EventPermissionAskedDataToolJSON) RawJSON() string {
 }
 
 type V2EventPermissionReplied struct {
-	Data V2EventPermissionRepliedData `json:"data,required"`
-	Type V2EventPermissionRepliedType `json:"type,required"`
-	JSON v2EventPermissionRepliedJSON `json:"-"`
+	ID       string                       `json:"id,required"`
+	Data     V2EventPermissionRepliedData `json:"data,required"`
+	Type     V2EventPermissionRepliedType `json:"type,required"`
+	Durable  V2EventDurable               `json:"durable"`
+	Location LocationRef                  `json:"location"`
+	Metadata map[string]interface{}       `json:"metadata"`
+	JSON     v2EventPermissionRepliedJSON `json:"-"`
 }
 
 type v2EventPermissionRepliedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1510,14 +1670,22 @@ func (r v2EventPermissionRepliedDataJSON) RawJSON() string {
 }
 
 type V2EventPermissionV2Asked struct {
-	Data V2EventPermissionV2AskedData `json:"data,required"`
-	Type V2EventPermissionV2AskedType `json:"type,required"`
-	JSON v2EventPermissionV2AskedJSON `json:"-"`
+	ID       string                       `json:"id,required"`
+	Data     V2EventPermissionV2AskedData `json:"data,required"`
+	Type     V2EventPermissionV2AskedType `json:"type,required"`
+	Durable  V2EventDurable               `json:"durable"`
+	Location LocationRef                  `json:"location"`
+	Metadata map[string]interface{}       `json:"metadata"`
+	JSON     v2EventPermissionV2AskedJSON `json:"-"`
 }
 
 type v2EventPermissionV2AskedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1579,14 +1747,22 @@ func (r v2EventPermissionV2AskedDataJSON) RawJSON() string {
 }
 
 type V2EventPermissionV2Replied struct {
-	Data V2EventPermissionV2RepliedData `json:"data,required"`
-	Type V2EventPermissionV2RepliedType `json:"type,required"`
-	JSON v2EventPermissionV2RepliedJSON `json:"-"`
+	ID       string                         `json:"id,required"`
+	Data     V2EventPermissionV2RepliedData `json:"data,required"`
+	Type     V2EventPermissionV2RepliedType `json:"type,required"`
+	Durable  V2EventDurable                 `json:"durable"`
+	Location LocationRef                    `json:"location"`
+	Metadata map[string]interface{}         `json:"metadata"`
+	JSON     v2EventPermissionV2RepliedJSON `json:"-"`
 }
 
 type v2EventPermissionV2RepliedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1639,14 +1815,22 @@ func (r v2EventPermissionV2RepliedDataJSON) RawJSON() string {
 }
 
 type V2EventPluginAdded struct {
-	Data V2EventPluginAddedData `json:"data,required"`
-	Type V2EventPluginAddedType `json:"type,required"`
-	JSON v2EventPluginAddedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventPluginAddedData `json:"data,required"`
+	Type     V2EventPluginAddedType `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventPluginAddedJSON `json:"-"`
 }
 
 type v2EventPluginAddedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1695,14 +1879,22 @@ func (r v2EventPluginAddedDataJSON) RawJSON() string {
 }
 
 type V2EventProjectDirectoriesUpdated struct {
-	Data V2EventProjectDirectoriesUpdatedData `json:"data,required"`
-	Type V2EventProjectDirectoriesUpdatedType `json:"type,required"`
-	JSON v2EventProjectDirectoriesUpdatedJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventProjectDirectoriesUpdatedData `json:"data,required"`
+	Type     V2EventProjectDirectoriesUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventProjectDirectoriesUpdatedJSON `json:"-"`
 }
 
 type v2EventProjectDirectoriesUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1751,14 +1943,22 @@ func (r v2EventProjectDirectoriesUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventProjectUpdated struct {
-	Data V2EventProjectUpdatedData `json:"data,required"`
-	Type V2EventProjectUpdatedType `json:"type,required"`
-	JSON v2EventProjectUpdatedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventProjectUpdatedData `json:"data,required"`
+	Type     V2EventProjectUpdatedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventProjectUpdatedJSON `json:"-"`
 }
 
 type v2EventProjectUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1821,14 +2021,22 @@ func (r v2EventProjectUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventPtyCreated struct {
-	Data V2EventPtyCreatedData `json:"data,required"`
-	Type V2EventPtyCreatedType `json:"type,required"`
-	JSON v2EventPtyCreatedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventPtyCreatedData  `json:"data,required"`
+	Type     V2EventPtyCreatedType  `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventPtyCreatedJSON  `json:"-"`
 }
 
 type v2EventPtyCreatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1877,14 +2085,22 @@ func (r v2EventPtyCreatedDataJSON) RawJSON() string {
 }
 
 type V2EventPtyDeleted struct {
-	Data V2EventPtyDeletedData `json:"data,required"`
-	Type V2EventPtyDeletedType `json:"type,required"`
-	JSON v2EventPtyDeletedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventPtyDeletedData  `json:"data,required"`
+	Type     V2EventPtyDeletedType  `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventPtyDeletedJSON  `json:"-"`
 }
 
 type v2EventPtyDeletedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1933,14 +2149,22 @@ func (r v2EventPtyDeletedDataJSON) RawJSON() string {
 }
 
 type V2EventPtyExited struct {
-	Data V2EventPtyExitedData `json:"data,required"`
-	Type V2EventPtyExitedType `json:"type,required"`
-	JSON v2EventPtyExitedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventPtyExitedData   `json:"data,required"`
+	Type     V2EventPtyExitedType   `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventPtyExitedJSON   `json:"-"`
 }
 
 type v2EventPtyExitedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1991,14 +2215,22 @@ func (r v2EventPtyExitedDataJSON) RawJSON() string {
 }
 
 type V2EventPtyUpdated struct {
-	Data V2EventPtyUpdatedData `json:"data,required"`
-	Type V2EventPtyUpdatedType `json:"type,required"`
-	JSON v2EventPtyUpdatedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventPtyUpdatedData  `json:"data,required"`
+	Type     V2EventPtyUpdatedType  `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventPtyUpdatedJSON  `json:"-"`
 }
 
 type v2EventPtyUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2047,14 +2279,22 @@ func (r v2EventPtyUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionAsked struct {
-	Data V2EventQuestionAskedData `json:"data,required"`
-	Type V2EventQuestionAskedType `json:"type,required"`
-	JSON v2EventQuestionAskedJSON `json:"-"`
+	ID       string                   `json:"id,required"`
+	Data     V2EventQuestionAskedData `json:"data,required"`
+	Type     V2EventQuestionAskedType `json:"type,required"`
+	Durable  V2EventDurable           `json:"durable"`
+	Location LocationRef              `json:"location"`
+	Metadata map[string]interface{}   `json:"metadata"`
+	JSON     v2EventQuestionAskedJSON `json:"-"`
 }
 
 type v2EventQuestionAskedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2110,14 +2350,22 @@ func (r v2EventQuestionAskedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionRejected struct {
-	Data V2EventQuestionRejectedData `json:"data,required"`
-	Type V2EventQuestionRejectedType `json:"type,required"`
-	JSON v2EventQuestionRejectedJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventQuestionRejectedData `json:"data,required"`
+	Type     V2EventQuestionRejectedType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventQuestionRejectedJSON `json:"-"`
 }
 
 type v2EventQuestionRejectedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2168,14 +2416,22 @@ func (r v2EventQuestionRejectedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionReplied struct {
-	Data V2EventQuestionRepliedData `json:"data,required"`
-	Type V2EventQuestionRepliedType `json:"type,required"`
-	JSON v2EventQuestionRepliedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventQuestionRepliedData `json:"data,required"`
+	Type     V2EventQuestionRepliedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventQuestionRepliedJSON `json:"-"`
 }
 
 type v2EventQuestionRepliedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2228,14 +2484,22 @@ func (r v2EventQuestionRepliedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionV2Asked struct {
-	Data V2EventQuestionV2AskedData `json:"data,required"`
-	Type V2EventQuestionV2AskedType `json:"type,required"`
-	JSON v2EventQuestionV2AskedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventQuestionV2AskedData `json:"data,required"`
+	Type     V2EventQuestionV2AskedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventQuestionV2AskedJSON `json:"-"`
 }
 
 type v2EventQuestionV2AskedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2290,14 +2554,22 @@ func (r v2EventQuestionV2AskedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionV2Rejected struct {
-	Data V2EventQuestionV2RejectedData `json:"data,required"`
-	Type V2EventQuestionV2RejectedType `json:"type,required"`
-	JSON v2EventQuestionV2RejectedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventQuestionV2RejectedData `json:"data,required"`
+	Type     V2EventQuestionV2RejectedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventQuestionV2RejectedJSON `json:"-"`
 }
 
 type v2EventQuestionV2RejectedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2348,14 +2620,22 @@ func (r v2EventQuestionV2RejectedDataJSON) RawJSON() string {
 }
 
 type V2EventQuestionV2Replied struct {
-	Data V2EventQuestionV2RepliedData `json:"data,required"`
-	Type V2EventQuestionV2RepliedType `json:"type,required"`
-	JSON v2EventQuestionV2RepliedJSON `json:"-"`
+	ID       string                       `json:"id,required"`
+	Data     V2EventQuestionV2RepliedData `json:"data,required"`
+	Type     V2EventQuestionV2RepliedType `json:"type,required"`
+	Durable  V2EventDurable               `json:"durable"`
+	Location LocationRef                  `json:"location"`
+	Metadata map[string]interface{}       `json:"metadata"`
+	JSON     v2EventQuestionV2RepliedJSON `json:"-"`
 }
 
 type v2EventQuestionV2RepliedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2408,14 +2688,22 @@ func (r v2EventQuestionV2RepliedDataJSON) RawJSON() string {
 }
 
 type V2EventReferenceUpdated struct {
-	Data V2EventReferenceUpdatedData `json:"data,required"`
-	Type V2EventReferenceUpdatedType `json:"type,required"`
-	JSON v2EventReferenceUpdatedJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventReferenceUpdatedData `json:"data,required"`
+	Type     V2EventReferenceUpdatedType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventReferenceUpdatedJSON `json:"-"`
 }
 
 type v2EventReferenceUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2462,14 +2750,22 @@ func (r v2EventReferenceUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventServerConnected struct {
-	Data V2EventServerConnectedData `json:"data,required"`
-	Type V2EventServerConnectedType `json:"type,required"`
-	JSON v2EventServerConnectedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventServerConnectedData `json:"data,required"`
+	Type     V2EventServerConnectedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventServerConnectedJSON `json:"-"`
 }
 
 type v2EventServerConnectedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2516,14 +2812,22 @@ func (r v2EventServerConnectedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionCompacted struct {
-	Data V2EventSessionCompactedData `json:"data,required"`
-	Type V2EventSessionCompactedType `json:"type,required"`
-	JSON v2EventSessionCompactedJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventSessionCompactedData `json:"data,required"`
+	Type     V2EventSessionCompactedType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventSessionCompactedJSON `json:"-"`
 }
 
 type v2EventSessionCompactedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2572,14 +2876,22 @@ func (r v2EventSessionCompactedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionCreated struct {
-	Data V2EventSessionCreatedData `json:"data,required"`
-	Type V2EventSessionCreatedType `json:"type,required"`
-	JSON v2EventSessionCreatedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventSessionCreatedData `json:"data,required"`
+	Type     V2EventSessionCreatedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventSessionCreatedJSON `json:"-"`
 }
 
 type v2EventSessionCreatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2630,14 +2942,22 @@ func (r v2EventSessionCreatedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionDeleted struct {
-	Data V2EventSessionDeletedData `json:"data,required"`
-	Type V2EventSessionDeletedType `json:"type,required"`
-	JSON v2EventSessionDeletedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventSessionDeletedData `json:"data,required"`
+	Type     V2EventSessionDeletedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventSessionDeletedJSON `json:"-"`
 }
 
 type v2EventSessionDeletedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2688,14 +3008,22 @@ func (r v2EventSessionDeletedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionDiff struct {
-	Data V2EventSessionDiffData `json:"data,required"`
-	Type V2EventSessionDiffType `json:"type,required"`
-	JSON v2EventSessionDiffJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventSessionDiffData `json:"data,required"`
+	Type     V2EventSessionDiffType `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventSessionDiffJSON `json:"-"`
 }
 
 type v2EventSessionDiffJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2746,14 +3074,22 @@ func (r v2EventSessionDiffDataJSON) RawJSON() string {
 }
 
 type V2EventSessionError struct {
-	Data V2EventSessionErrorData `json:"data,required"`
-	Type V2EventSessionErrorType `json:"type,required"`
-	JSON v2EventSessionErrorJSON `json:"-"`
+	ID       string                  `json:"id,required"`
+	Data     V2EventSessionErrorData `json:"data,required"`
+	Type     V2EventSessionErrorType `json:"type,required"`
+	Durable  V2EventDurable          `json:"durable"`
+	Location LocationRef             `json:"location"`
+	Metadata map[string]interface{}  `json:"metadata"`
+	JSON     v2EventSessionErrorJSON `json:"-"`
 }
 
 type v2EventSessionErrorJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2807,14 +3143,22 @@ func (r v2EventSessionErrorDataJSON) RawJSON() string {
 }
 
 type V2EventSessionIdle struct {
-	Data V2EventSessionIdleData `json:"data,required"`
-	Type V2EventSessionIdleType `json:"type,required"`
-	JSON v2EventSessionIdleJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventSessionIdleData `json:"data,required"`
+	Type     V2EventSessionIdleType `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventSessionIdleJSON `json:"-"`
 }
 
 type v2EventSessionIdleJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2863,14 +3207,22 @@ func (r v2EventSessionIdleDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextAgentSwitched struct {
-	Data V2EventSessionNextAgentSwitchedData `json:"data,required"`
-	Type V2EventSessionNextAgentSwitchedType `json:"type,required"`
-	JSON v2EventSessionNextAgentSwitchedJSON `json:"-"`
+	ID       string                              `json:"id,required"`
+	Data     V2EventSessionNextAgentSwitchedData `json:"data,required"`
+	Type     V2EventSessionNextAgentSwitchedType `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Metadata map[string]interface{}              `json:"metadata"`
+	JSON     v2EventSessionNextAgentSwitchedJSON `json:"-"`
 }
 
 type v2EventSessionNextAgentSwitchedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2925,14 +3277,22 @@ func (r v2EventSessionNextAgentSwitchedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextCompactionDelta struct {
-	Data V2EventSessionNextCompactionDeltaData `json:"data,required"`
-	Type V2EventSessionNextCompactionDeltaType `json:"type,required"`
-	JSON v2EventSessionNextCompactionDeltaJSON `json:"-"`
+	ID       string                                `json:"id,required"`
+	Data     V2EventSessionNextCompactionDeltaData `json:"data,required"`
+	Type     V2EventSessionNextCompactionDeltaType `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Metadata map[string]interface{}                `json:"metadata"`
+	JSON     v2EventSessionNextCompactionDeltaJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionDeltaJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3003,14 +3363,22 @@ func (r V2EventSessionNextCompactionEndedReason) IsKnown() bool {
 }
 
 type V2EventSessionNextCompactionEnded struct {
-	Data V2EventSessionNextCompactionEndedData `json:"data,required"`
-	Type V2EventSessionNextCompactionEndedType `json:"type,required"`
-	JSON v2EventSessionNextCompactionEndedJSON `json:"-"`
+	ID       string                                `json:"id,required"`
+	Data     V2EventSessionNextCompactionEndedData `json:"data,required"`
+	Type     V2EventSessionNextCompactionEndedType `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Metadata map[string]interface{}                `json:"metadata"`
+	JSON     v2EventSessionNextCompactionEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3085,14 +3453,22 @@ func (r V2EventSessionNextCompactionStartedReason) IsKnown() bool {
 }
 
 type V2EventSessionNextCompactionStarted struct {
-	Data V2EventSessionNextCompactionStartedData `json:"data,required"`
-	Type V2EventSessionNextCompactionStartedType `json:"type,required"`
-	JSON v2EventSessionNextCompactionStartedJSON `json:"-"`
+	ID       string                                  `json:"id,required"`
+	Data     V2EventSessionNextCompactionStartedData `json:"data,required"`
+	Type     V2EventSessionNextCompactionStartedType `json:"type,required"`
+	Durable  V2EventDurable                          `json:"durable"`
+	Location LocationRef                             `json:"location"`
+	Metadata map[string]interface{}                  `json:"metadata"`
+	JSON     v2EventSessionNextCompactionStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextCompactionStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3147,14 +3523,22 @@ func (r v2EventSessionNextCompactionStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextContextUpdated struct {
-	Data V2EventSessionNextContextUpdatedData `json:"data,required"`
-	Type V2EventSessionNextContextUpdatedType `json:"type,required"`
-	JSON v2EventSessionNextContextUpdatedJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextContextUpdatedData `json:"data,required"`
+	Type     V2EventSessionNextContextUpdatedType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextContextUpdatedJSON `json:"-"`
 }
 
 type v2EventSessionNextContextUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3209,14 +3593,22 @@ func (r v2EventSessionNextContextUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextModelSwitched struct {
-	Data V2EventSessionNextModelSwitchedData `json:"data,required"`
-	Type V2EventSessionNextModelSwitchedType `json:"type,required"`
-	JSON v2EventSessionNextModelSwitchedJSON `json:"-"`
+	ID       string                              `json:"id,required"`
+	Data     V2EventSessionNextModelSwitchedData `json:"data,required"`
+	Type     V2EventSessionNextModelSwitchedType `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Metadata map[string]interface{}              `json:"metadata"`
+	JSON     v2EventSessionNextModelSwitchedJSON `json:"-"`
 }
 
 type v2EventSessionNextModelSwitchedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3271,14 +3663,22 @@ func (r v2EventSessionNextModelSwitchedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextMoved struct {
-	Data V2EventSessionNextMovedData `json:"data,required"`
-	Type V2EventSessionNextMovedType `json:"type,required"`
-	JSON v2EventSessionNextMovedJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventSessionNextMovedData `json:"data,required"`
+	Type     V2EventSessionNextMovedType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventSessionNextMovedJSON `json:"-"`
 }
 
 type v2EventSessionNextMovedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3349,14 +3749,22 @@ func (r V2EventSessionNextPromptAdmittedDelivery) IsKnown() bool {
 }
 
 type V2EventSessionNextPromptAdmitted struct {
-	Data V2EventSessionNextPromptAdmittedData `json:"data,required"`
-	Type V2EventSessionNextPromptAdmittedType `json:"type,required"`
-	JSON v2EventSessionNextPromptAdmittedJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextPromptAdmittedData `json:"data,required"`
+	Type     V2EventSessionNextPromptAdmittedType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextPromptAdmittedJSON `json:"-"`
 }
 
 type v2EventSessionNextPromptAdmittedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3430,14 +3838,22 @@ func (r V2EventSessionNextPromptedDelivery) IsKnown() bool {
 }
 
 type V2EventSessionNextPrompted struct {
-	Data V2EventSessionNextPromptedData `json:"data,required"`
-	Type V2EventSessionNextPromptedType `json:"type,required"`
-	JSON v2EventSessionNextPromptedJSON `json:"-"`
+	ID       string                         `json:"id,required"`
+	Data     V2EventSessionNextPromptedData `json:"data,required"`
+	Type     V2EventSessionNextPromptedType `json:"type,required"`
+	Durable  V2EventDurable                 `json:"durable"`
+	Location LocationRef                    `json:"location"`
+	Metadata map[string]interface{}         `json:"metadata"`
+	JSON     v2EventSessionNextPromptedJSON `json:"-"`
 }
 
 type v2EventSessionNextPromptedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3495,14 +3911,22 @@ func (r v2EventSessionNextPromptedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextReasoningDelta struct {
-	Data V2EventSessionNextReasoningDeltaData `json:"data,required"`
-	Type V2EventSessionNextReasoningDeltaType `json:"type,required"`
-	JSON v2EventSessionNextReasoningDeltaJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextReasoningDeltaData `json:"data,required"`
+	Type     V2EventSessionNextReasoningDeltaType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextReasoningDeltaJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningDeltaJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3559,14 +3983,22 @@ func (r v2EventSessionNextReasoningDeltaDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextReasoningEnded struct {
-	Data V2EventSessionNextReasoningEndedData `json:"data,required"`
-	Type V2EventSessionNextReasoningEndedType `json:"type,required"`
-	JSON v2EventSessionNextReasoningEndedJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextReasoningEndedData `json:"data,required"`
+	Type     V2EventSessionNextReasoningEndedType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextReasoningEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3626,14 +4058,22 @@ func (r v2EventSessionNextReasoningEndedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextReasoningStarted struct {
-	Data V2EventSessionNextReasoningStartedData `json:"data,required"`
-	Type V2EventSessionNextReasoningStartedType `json:"type,required"`
-	JSON v2EventSessionNextReasoningStartedJSON `json:"-"`
+	ID       string                                 `json:"id,required"`
+	Data     V2EventSessionNextReasoningStartedData `json:"data,required"`
+	Type     V2EventSessionNextReasoningStartedType `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Metadata map[string]interface{}                 `json:"metadata"`
+	JSON     v2EventSessionNextReasoningStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3691,14 +4131,22 @@ func (r v2EventSessionNextReasoningStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextRetried struct {
-	Data V2EventSessionNextRetriedData `json:"data,required"`
-	Type V2EventSessionNextRetriedType `json:"type,required"`
-	JSON v2EventSessionNextRetriedJSON `json:"-"`
+	ID       string                        `json:"id,required"`
+	Data     V2EventSessionNextRetriedData `json:"data,required"`
+	Type     V2EventSessionNextRetriedType `json:"type,required"`
+	Durable  V2EventDurable                `json:"durable"`
+	Location LocationRef                   `json:"location"`
+	Metadata map[string]interface{}        `json:"metadata"`
+	JSON     v2EventSessionNextRetriedJSON `json:"-"`
 }
 
 type v2EventSessionNextRetriedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3754,14 +4202,22 @@ func (r v2EventSessionNextRetriedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextRevertCleared struct {
-	Data V2EventSessionNextRevertClearedData `json:"data,required"`
-	Type V2EventSessionNextRevertClearedType `json:"type,required"`
-	JSON v2EventSessionNextRevertClearedJSON `json:"-"`
+	ID       string                              `json:"id,required"`
+	Data     V2EventSessionNextRevertClearedData `json:"data,required"`
+	Type     V2EventSessionNextRevertClearedType `json:"type,required"`
+	Durable  V2EventDurable                      `json:"durable"`
+	Location LocationRef                         `json:"location"`
+	Metadata map[string]interface{}              `json:"metadata"`
+	JSON     v2EventSessionNextRevertClearedJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertClearedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3812,14 +4268,22 @@ func (r v2EventSessionNextRevertClearedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextRevertCommitted struct {
-	Data V2EventSessionNextRevertCommittedData `json:"data,required"`
-	Type V2EventSessionNextRevertCommittedType `json:"type,required"`
-	JSON v2EventSessionNextRevertCommittedJSON `json:"-"`
+	ID       string                                `json:"id,required"`
+	Data     V2EventSessionNextRevertCommittedData `json:"data,required"`
+	Type     V2EventSessionNextRevertCommittedType `json:"type,required"`
+	Durable  V2EventDurable                        `json:"durable"`
+	Location LocationRef                           `json:"location"`
+	Metadata map[string]interface{}                `json:"metadata"`
+	JSON     v2EventSessionNextRevertCommittedJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertCommittedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3872,14 +4336,22 @@ func (r v2EventSessionNextRevertCommittedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextRevertStaged struct {
-	Data V2EventSessionNextRevertStagedData `json:"data,required"`
-	Type V2EventSessionNextRevertStagedType `json:"type,required"`
-	JSON v2EventSessionNextRevertStagedJSON `json:"-"`
+	ID       string                             `json:"id,required"`
+	Data     V2EventSessionNextRevertStagedData `json:"data,required"`
+	Type     V2EventSessionNextRevertStagedType `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Metadata map[string]interface{}             `json:"metadata"`
+	JSON     v2EventSessionNextRevertStagedJSON `json:"-"`
 }
 
 type v2EventSessionNextRevertStagedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3932,14 +4404,22 @@ func (r v2EventSessionNextRevertStagedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextShellEnded struct {
-	Data V2EventSessionNextShellEndedData `json:"data,required"`
-	Type V2EventSessionNextShellEndedType `json:"type,required"`
-	JSON v2EventSessionNextShellEndedJSON `json:"-"`
+	ID       string                           `json:"id,required"`
+	Data     V2EventSessionNextShellEndedData `json:"data,required"`
+	Type     V2EventSessionNextShellEndedType `json:"type,required"`
+	Durable  V2EventDurable                   `json:"durable"`
+	Location LocationRef                      `json:"location"`
+	Metadata map[string]interface{}           `json:"metadata"`
+	JSON     v2EventSessionNextShellEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextShellEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3994,14 +4474,22 @@ func (r v2EventSessionNextShellEndedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextShellStarted struct {
-	Data V2EventSessionNextShellStartedData `json:"data,required"`
-	Type V2EventSessionNextShellStartedType `json:"type,required"`
-	JSON v2EventSessionNextShellStartedJSON `json:"-"`
+	ID       string                             `json:"id,required"`
+	Data     V2EventSessionNextShellStartedData `json:"data,required"`
+	Type     V2EventSessionNextShellStartedType `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Metadata map[string]interface{}             `json:"metadata"`
+	JSON     v2EventSessionNextShellStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextShellStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4058,14 +4546,22 @@ func (r v2EventSessionNextShellStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextStepEnded struct {
-	Data V2EventSessionNextStepEndedData `json:"data,required"`
-	Type V2EventSessionNextStepEndedType `json:"type,required"`
-	JSON v2EventSessionNextStepEndedJSON `json:"-"`
+	ID       string                          `json:"id,required"`
+	Data     V2EventSessionNextStepEndedData `json:"data,required"`
+	Type     V2EventSessionNextStepEndedType `json:"type,required"`
+	Durable  V2EventDurable                  `json:"durable"`
+	Location LocationRef                     `json:"location"`
+	Metadata map[string]interface{}          `json:"metadata"`
+	JSON     v2EventSessionNextStepEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextStepEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4174,14 +4670,22 @@ func (r V2EventSessionNextStepEndedDataTokensCacheJSON) RawJSON() string {
 }
 
 type V2EventSessionNextStepFailed struct {
-	Data V2EventSessionNextStepFailedData `json:"data,required"`
-	Type V2EventSessionNextStepFailedType `json:"type,required"`
-	JSON v2EventSessionNextStepFailedJSON `json:"-"`
+	ID       string                           `json:"id,required"`
+	Data     V2EventSessionNextStepFailedData `json:"data,required"`
+	Type     V2EventSessionNextStepFailedType `json:"type,required"`
+	Durable  V2EventDurable                   `json:"durable"`
+	Location LocationRef                      `json:"location"`
+	Metadata map[string]interface{}           `json:"metadata"`
+	JSON     v2EventSessionNextStepFailedJSON `json:"-"`
 }
 
 type v2EventSessionNextStepFailedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4236,14 +4740,22 @@ func (r v2EventSessionNextStepFailedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextStepStarted struct {
-	Data V2EventSessionNextStepStartedData `json:"data,required"`
-	Type V2EventSessionNextStepStartedType `json:"type,required"`
-	JSON v2EventSessionNextStepStartedJSON `json:"-"`
+	ID       string                            `json:"id,required"`
+	Data     V2EventSessionNextStepStartedData `json:"data,required"`
+	Type     V2EventSessionNextStepStartedType `json:"type,required"`
+	Durable  V2EventDurable                    `json:"durable"`
+	Location LocationRef                       `json:"location"`
+	Metadata map[string]interface{}            `json:"metadata"`
+	JSON     v2EventSessionNextStepStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextStepStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4302,14 +4814,22 @@ func (r v2EventSessionNextStepStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextSynthetic struct {
-	Data V2EventSessionNextSyntheticData `json:"data,required"`
-	Type V2EventSessionNextSyntheticType `json:"type,required"`
-	JSON v2EventSessionNextSyntheticJSON `json:"-"`
+	ID       string                          `json:"id,required"`
+	Data     V2EventSessionNextSyntheticData `json:"data,required"`
+	Type     V2EventSessionNextSyntheticType `json:"type,required"`
+	Durable  V2EventDurable                  `json:"durable"`
+	Location LocationRef                     `json:"location"`
+	Metadata map[string]interface{}          `json:"metadata"`
+	JSON     v2EventSessionNextSyntheticJSON `json:"-"`
 }
 
 type v2EventSessionNextSyntheticJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4364,14 +4884,22 @@ func (r v2EventSessionNextSyntheticDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextTextDelta struct {
-	Data V2EventSessionNextTextDeltaData `json:"data,required"`
-	Type V2EventSessionNextTextDeltaType `json:"type,required"`
-	JSON v2EventSessionNextTextDeltaJSON `json:"-"`
+	ID       string                          `json:"id,required"`
+	Data     V2EventSessionNextTextDeltaData `json:"data,required"`
+	Type     V2EventSessionNextTextDeltaType `json:"type,required"`
+	Durable  V2EventDurable                  `json:"durable"`
+	Location LocationRef                     `json:"location"`
+	Metadata map[string]interface{}          `json:"metadata"`
+	JSON     v2EventSessionNextTextDeltaJSON `json:"-"`
 }
 
 type v2EventSessionNextTextDeltaJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4428,14 +4956,22 @@ func (r v2EventSessionNextTextDeltaDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextTextEnded struct {
-	Data V2EventSessionNextTextEndedData `json:"data,required"`
-	Type V2EventSessionNextTextEndedType `json:"type,required"`
-	JSON v2EventSessionNextTextEndedJSON `json:"-"`
+	ID       string                          `json:"id,required"`
+	Data     V2EventSessionNextTextEndedData `json:"data,required"`
+	Type     V2EventSessionNextTextEndedType `json:"type,required"`
+	Durable  V2EventDurable                  `json:"durable"`
+	Location LocationRef                     `json:"location"`
+	Metadata map[string]interface{}          `json:"metadata"`
+	JSON     v2EventSessionNextTextEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextTextEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4492,14 +5028,22 @@ func (r v2EventSessionNextTextEndedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextTextStarted struct {
-	Data V2EventSessionNextTextStartedData `json:"data,required"`
-	Type V2EventSessionNextTextStartedType `json:"type,required"`
-	JSON v2EventSessionNextTextStartedJSON `json:"-"`
+	ID       string                            `json:"id,required"`
+	Data     V2EventSessionNextTextStartedData `json:"data,required"`
+	Type     V2EventSessionNextTextStartedType `json:"type,required"`
+	Durable  V2EventDurable                    `json:"durable"`
+	Location LocationRef                       `json:"location"`
+	Metadata map[string]interface{}            `json:"metadata"`
+	JSON     v2EventSessionNextTextStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextTextStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4554,14 +5098,22 @@ func (r v2EventSessionNextTextStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolCalled struct {
-	Data V2EventSessionNextToolCalledData `json:"data,required"`
-	Type V2EventSessionNextToolCalledType `json:"type,required"`
-	JSON v2EventSessionNextToolCalledJSON `json:"-"`
+	ID       string                           `json:"id,required"`
+	Data     V2EventSessionNextToolCalledData `json:"data,required"`
+	Type     V2EventSessionNextToolCalledType `json:"type,required"`
+	Durable  V2EventDurable                   `json:"durable"`
+	Location LocationRef                      `json:"location"`
+	Metadata map[string]interface{}           `json:"metadata"`
+	JSON     v2EventSessionNextToolCalledJSON `json:"-"`
 }
 
 type v2EventSessionNextToolCalledJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4645,14 +5197,22 @@ func (r V2EventSessionNextToolCalledDataProviderJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolFailed struct {
-	Data V2EventSessionNextToolFailedData `json:"data,required"`
-	Type V2EventSessionNextToolFailedType `json:"type,required"`
-	JSON v2EventSessionNextToolFailedJSON `json:"-"`
+	ID       string                           `json:"id,required"`
+	Data     V2EventSessionNextToolFailedData `json:"data,required"`
+	Type     V2EventSessionNextToolFailedType `json:"type,required"`
+	Durable  V2EventDurable                   `json:"durable"`
+	Location LocationRef                      `json:"location"`
+	Metadata map[string]interface{}           `json:"metadata"`
+	JSON     v2EventSessionNextToolFailedJSON `json:"-"`
 }
 
 type v2EventSessionNextToolFailedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4736,14 +5296,22 @@ func (r V2EventSessionNextToolFailedDataProviderJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolInputDelta struct {
-	Data V2EventSessionNextToolInputDeltaData `json:"data,required"`
-	Type V2EventSessionNextToolInputDeltaType `json:"type,required"`
-	JSON v2EventSessionNextToolInputDeltaJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextToolInputDeltaData `json:"data,required"`
+	Type     V2EventSessionNextToolInputDeltaType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextToolInputDeltaJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputDeltaJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4800,14 +5368,22 @@ func (r v2EventSessionNextToolInputDeltaDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolInputEnded struct {
-	Data V2EventSessionNextToolInputEndedData `json:"data,required"`
-	Type V2EventSessionNextToolInputEndedType `json:"type,required"`
-	JSON v2EventSessionNextToolInputEndedJSON `json:"-"`
+	ID       string                               `json:"id,required"`
+	Data     V2EventSessionNextToolInputEndedData `json:"data,required"`
+	Type     V2EventSessionNextToolInputEndedType `json:"type,required"`
+	Durable  V2EventDurable                       `json:"durable"`
+	Location LocationRef                          `json:"location"`
+	Metadata map[string]interface{}               `json:"metadata"`
+	JSON     v2EventSessionNextToolInputEndedJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputEndedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4864,14 +5440,22 @@ func (r v2EventSessionNextToolInputEndedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolInputStarted struct {
-	Data V2EventSessionNextToolInputStartedData `json:"data,required"`
-	Type V2EventSessionNextToolInputStartedType `json:"type,required"`
-	JSON v2EventSessionNextToolInputStartedJSON `json:"-"`
+	ID       string                                 `json:"id,required"`
+	Data     V2EventSessionNextToolInputStartedData `json:"data,required"`
+	Type     V2EventSessionNextToolInputStartedType `json:"type,required"`
+	Durable  V2EventDurable                         `json:"durable"`
+	Location LocationRef                            `json:"location"`
+	Metadata map[string]interface{}                 `json:"metadata"`
+	JSON     v2EventSessionNextToolInputStartedJSON `json:"-"`
 }
 
 type v2EventSessionNextToolInputStartedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4928,14 +5512,22 @@ func (r v2EventSessionNextToolInputStartedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolProgress struct {
-	Data V2EventSessionNextToolProgressData `json:"data,required"`
-	Type V2EventSessionNextToolProgressType `json:"type,required"`
-	JSON v2EventSessionNextToolProgressJSON `json:"-"`
+	ID       string                             `json:"id,required"`
+	Data     V2EventSessionNextToolProgressData `json:"data,required"`
+	Type     V2EventSessionNextToolProgressType `json:"type,required"`
+	Durable  V2EventDurable                     `json:"durable"`
+	Location LocationRef                        `json:"location"`
+	Metadata map[string]interface{}             `json:"metadata"`
+	JSON     v2EventSessionNextToolProgressJSON `json:"-"`
 }
 
 type v2EventSessionNextToolProgressJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -4996,14 +5588,22 @@ func (r v2EventSessionNextToolProgressDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolSuccess struct {
-	Data V2EventSessionNextToolSuccessData `json:"data,required"`
-	Type V2EventSessionNextToolSuccessType `json:"type,required"`
-	JSON v2EventSessionNextToolSuccessJSON `json:"-"`
+	ID       string                            `json:"id,required"`
+	Data     V2EventSessionNextToolSuccessData `json:"data,required"`
+	Type     V2EventSessionNextToolSuccessType `json:"type,required"`
+	Durable  V2EventDurable                    `json:"durable"`
+	Location LocationRef                       `json:"location"`
+	Metadata map[string]interface{}            `json:"metadata"`
+	JSON     v2EventSessionNextToolSuccessJSON `json:"-"`
 }
 
 type v2EventSessionNextToolSuccessJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5093,14 +5693,22 @@ func (r V2EventSessionNextToolSuccessDataProviderJSON) RawJSON() string {
 }
 
 type V2EventSessionStatus struct {
-	Data V2EventSessionStatusData `json:"data,required"`
-	Type V2EventSessionStatusType `json:"type,required"`
-	JSON v2EventSessionStatusJSON `json:"-"`
+	ID       string                   `json:"id,required"`
+	Data     V2EventSessionStatusData `json:"data,required"`
+	Type     V2EventSessionStatusType `json:"type,required"`
+	Durable  V2EventDurable           `json:"durable"`
+	Location LocationRef              `json:"location"`
+	Metadata map[string]interface{}   `json:"metadata"`
+	JSON     v2EventSessionStatusJSON `json:"-"`
 }
 
 type v2EventSessionStatusJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5151,14 +5759,22 @@ func (r v2EventSessionStatusDataJSON) RawJSON() string {
 }
 
 type V2EventSessionUpdated struct {
-	Data V2EventSessionUpdatedData `json:"data,required"`
-	Type V2EventSessionUpdatedType `json:"type,required"`
-	JSON v2EventSessionUpdatedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventSessionUpdatedData `json:"data,required"`
+	Type     V2EventSessionUpdatedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventSessionUpdatedJSON `json:"-"`
 }
 
 type v2EventSessionUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5209,14 +5825,22 @@ func (r v2EventSessionUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventTodoUpdated struct {
-	Data V2EventTodoUpdatedData `json:"data,required"`
-	Type V2EventTodoUpdatedType `json:"type,required"`
-	JSON v2EventTodoUpdatedJSON `json:"-"`
+	ID       string                 `json:"id,required"`
+	Data     V2EventTodoUpdatedData `json:"data,required"`
+	Type     V2EventTodoUpdatedType `json:"type,required"`
+	Durable  V2EventDurable         `json:"durable"`
+	Location LocationRef            `json:"location"`
+	Metadata map[string]interface{} `json:"metadata"`
+	JSON     v2EventTodoUpdatedJSON `json:"-"`
 }
 
 type v2EventTodoUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5267,14 +5891,22 @@ func (r v2EventTodoUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventTuiCommandExecute struct {
-	Data V2EventTuiCommandExecuteData `json:"data,required"`
-	Type V2EventTuiCommandExecuteType `json:"type,required"`
-	JSON v2EventTuiCommandExecuteJSON `json:"-"`
+	ID       string                       `json:"id,required"`
+	Data     V2EventTuiCommandExecuteData `json:"data,required"`
+	Type     V2EventTuiCommandExecuteType `json:"type,required"`
+	Durable  V2EventDurable               `json:"durable"`
+	Location LocationRef                  `json:"location"`
+	Metadata map[string]interface{}       `json:"metadata"`
+	JSON     v2EventTuiCommandExecuteJSON `json:"-"`
 }
 
 type v2EventTuiCommandExecuteJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5324,14 +5956,22 @@ func (r v2EventTuiCommandExecuteDataJSON) RawJSON() string {
 }
 
 type V2EventTuiPromptAppend struct {
-	Data V2EventTuiPromptAppendData `json:"data,required"`
-	Type V2EventTuiPromptAppendType `json:"type,required"`
-	JSON v2EventTuiPromptAppendJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventTuiPromptAppendData `json:"data,required"`
+	Type     V2EventTuiPromptAppendType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventTuiPromptAppendJSON `json:"-"`
 }
 
 type v2EventTuiPromptAppendJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5380,14 +6020,22 @@ func (r v2EventTuiPromptAppendDataJSON) RawJSON() string {
 }
 
 type V2EventTuiSessionSelect struct {
-	Data V2EventTuiSessionSelectData `json:"data,required"`
-	Type V2EventTuiSessionSelectType `json:"type,required"`
-	JSON v2EventTuiSessionSelectJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventTuiSessionSelectData `json:"data,required"`
+	Type     V2EventTuiSessionSelectType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventTuiSessionSelectJSON `json:"-"`
 }
 
 type v2EventTuiSessionSelectJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5456,14 +6104,22 @@ func (r V2EventTuiToastShowVariant) IsKnown() bool {
 }
 
 type V2EventTuiToastShow struct {
-	Data V2EventTuiToastShowData `json:"data,required"`
-	Type V2EventTuiToastShowType `json:"type,required"`
-	JSON v2EventTuiToastShowJSON `json:"-"`
+	ID       string                  `json:"id,required"`
+	Data     V2EventTuiToastShowData `json:"data,required"`
+	Type     V2EventTuiToastShowType `json:"type,required"`
+	Durable  V2EventDurable          `json:"durable"`
+	Location LocationRef             `json:"location"`
+	Metadata map[string]interface{}  `json:"metadata"`
+	JSON     v2EventTuiToastShowJSON `json:"-"`
 }
 
 type v2EventTuiToastShowJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5518,14 +6174,22 @@ func (r v2EventTuiToastShowDataJSON) RawJSON() string {
 }
 
 type V2EventVcsBranchUpdated struct {
-	Data V2EventVcsBranchUpdatedData `json:"data,required"`
-	Type V2EventVcsBranchUpdatedType `json:"type,required"`
-	JSON v2EventVcsBranchUpdatedJSON `json:"-"`
+	ID       string                      `json:"id,required"`
+	Data     V2EventVcsBranchUpdatedData `json:"data,required"`
+	Type     V2EventVcsBranchUpdatedType `json:"type,required"`
+	Durable  V2EventDurable              `json:"durable"`
+	Location LocationRef                 `json:"location"`
+	Metadata map[string]interface{}      `json:"metadata"`
+	JSON     v2EventVcsBranchUpdatedJSON `json:"-"`
 }
 
 type v2EventVcsBranchUpdatedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5574,14 +6238,22 @@ func (r v2EventVcsBranchUpdatedDataJSON) RawJSON() string {
 }
 
 type V2EventWorkspaceFailed struct {
-	Data V2EventWorkspaceFailedData `json:"data,required"`
-	Type V2EventWorkspaceFailedType `json:"type,required"`
-	JSON v2EventWorkspaceFailedJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventWorkspaceFailedData `json:"data,required"`
+	Type     V2EventWorkspaceFailedType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventWorkspaceFailedJSON `json:"-"`
 }
 
 type v2EventWorkspaceFailedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5630,14 +6302,22 @@ func (r v2EventWorkspaceFailedDataJSON) RawJSON() string {
 }
 
 type V2EventWorkspaceReady struct {
-	Data V2EventWorkspaceReadyData `json:"data,required"`
-	Type V2EventWorkspaceReadyType `json:"type,required"`
-	JSON v2EventWorkspaceReadyJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventWorkspaceReadyData `json:"data,required"`
+	Type     V2EventWorkspaceReadyType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventWorkspaceReadyJSON `json:"-"`
 }
 
 type v2EventWorkspaceReadyJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5706,14 +6386,22 @@ func (r V2EventWorkspaceStatusStatus) IsKnown() bool {
 }
 
 type V2EventWorkspaceStatus struct {
-	Data V2EventWorkspaceStatusData `json:"data,required"`
-	Type V2EventWorkspaceStatusType `json:"type,required"`
-	JSON v2EventWorkspaceStatusJSON `json:"-"`
+	ID       string                     `json:"id,required"`
+	Data     V2EventWorkspaceStatusData `json:"data,required"`
+	Type     V2EventWorkspaceStatusType `json:"type,required"`
+	Durable  V2EventDurable             `json:"durable"`
+	Location LocationRef                `json:"location"`
+	Metadata map[string]interface{}     `json:"metadata"`
+	JSON     v2EventWorkspaceStatusJSON `json:"-"`
 }
 
 type v2EventWorkspaceStatusJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5764,14 +6452,22 @@ func (r v2EventWorkspaceStatusDataJSON) RawJSON() string {
 }
 
 type V2EventWorktreeFailed struct {
-	Data V2EventWorktreeFailedData `json:"data,required"`
-	Type V2EventWorktreeFailedType `json:"type,required"`
-	JSON v2EventWorktreeFailedJSON `json:"-"`
+	ID       string                    `json:"id,required"`
+	Data     V2EventWorktreeFailedData `json:"data,required"`
+	Type     V2EventWorktreeFailedType `json:"type,required"`
+	Durable  V2EventDurable            `json:"durable"`
+	Location LocationRef               `json:"location"`
+	Metadata map[string]interface{}    `json:"metadata"`
+	JSON     v2EventWorktreeFailedJSON `json:"-"`
 }
 
 type v2EventWorktreeFailedJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -5820,14 +6516,22 @@ func (r v2EventWorktreeFailedDataJSON) RawJSON() string {
 }
 
 type V2EventWorktreeReady struct {
-	Data V2EventWorktreeReadyData `json:"data,required"`
-	Type V2EventWorktreeReadyType `json:"type,required"`
-	JSON v2EventWorktreeReadyJSON `json:"-"`
+	ID       string                   `json:"id,required"`
+	Data     V2EventWorktreeReadyData `json:"data,required"`
+	Type     V2EventWorktreeReadyType `json:"type,required"`
+	Durable  V2EventDurable           `json:"durable"`
+	Location LocationRef              `json:"location"`
+	Metadata map[string]interface{}   `json:"metadata"`
+	JSON     v2EventWorktreeReadyJSON `json:"-"`
 }
 
 type v2EventWorktreeReadyJSON struct {
+	ID          apijson.Field
 	Data        apijson.Field
 	Type        apijson.Field
+	Durable     apijson.Field
+	Location    apijson.Field
+	Metadata    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

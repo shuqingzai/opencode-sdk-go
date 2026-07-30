@@ -155,10 +155,9 @@ func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
 
 // ConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
 type ConsoleSwitchOrgParams struct {
-	Directory param.Field[string]        `query:"directory"`
-	Workspace param.Field[string]        `query:"workspace"`
-	Body      ConsoleSwitchOrgInput      `json:"-"`
-	JSON      consoleSwitchOrgParamsJSON `json:"-"`
+	Directory param.Field[string]   `query:"directory"`
+	Workspace param.Field[string]   `query:"workspace"`
+	Body      ConsoleSwitchOrgInput `json:"-"`
 }
 
 func (r ConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
@@ -173,38 +172,11 @@ func (r ConsoleSwitchOrgParams) URLQuery() (v url.Values) {
 	})
 }
 
-type consoleSwitchOrgParamsJSON struct {
-	Directory   apijson.Field
-	Workspace   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r consoleSwitchOrgParamsJSON) RawJSON() string {
-	return r.raw
-}
-
 type ConsoleSwitchOrgInput struct {
-	AccountID param.Field[string]       `json:"accountID,required"`
-	OrgID     param.Field[string]       `json:"orgID,required"`
-	JSON      consoleSwitchOrgInputJSON `json:"-"`
-}
-
-type consoleSwitchOrgInputJSON struct {
-	AccountID   apijson.Field
-	OrgID       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConsoleSwitchOrgInput) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	AccountID param.Field[string] `json:"accountID,required"`
+	OrgID     param.Field[string] `json:"orgID,required"`
 }
 
 func (r ConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r consoleSwitchOrgInputJSON) RawJSON() string {
-	return r.raw
 }

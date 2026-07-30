@@ -1258,7 +1258,7 @@ func (r EventListResponseEventSessionError) implementsEventListResponse() {}
 func (r EventListResponseEventSessionError) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionErrorProperties struct {
-	Error     EventListResponseEventSessionErrorPropertiesError `json:"error,required"`
+	Error     EventListResponseEventSessionErrorPropertiesError `json:"error"`
 	SessionID string                                            `json:"sessionID"`
 	JSON      eventListResponseEventSessionErrorPropertiesJSON  `json:"-"`
 }
@@ -1330,6 +1330,7 @@ func (r EventListResponseEventSessionErrorPropertiesError) AsUnion() EventListRe
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
 // [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
+// [shared.ContentFilterError],
 // [shared.ContextOverflowError] or
 // [shared.APIError].
 type EventListResponseEventSessionErrorPropertiesErrorUnion interface {

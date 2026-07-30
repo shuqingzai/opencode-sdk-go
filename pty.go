@@ -179,25 +179,12 @@ func (r PtyUpdateParams) URLQuery() (v url.Values) {
 }
 
 type PtySize struct {
-	Rows int64       `json:"rows,required"`
-	Cols int64       `json:"cols,required"`
-	JSON ptySizeJSON `json:"-"`
+	Rows param.Field[int64] `json:"rows,required"`
+	Cols param.Field[int64] `json:"cols,required"`
 }
 
-// ptySizeJSON contains the JSON metadata for the struct [PtySize]
-type ptySizeJSON struct {
-	Rows        apijson.Field
-	Cols        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PtySize) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptySizeJSON) RawJSON() string {
-	return r.raw
+func (r PtySize) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type PtyRemoveParams struct {

@@ -832,22 +832,26 @@ func (r IntegrationAttemptStatusExpired) implementsIntegrationAttemptStatus() {}
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*IntegrationAttemptStatusUnion)(nil)).Elem(),
-		"",
+		"status",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationAttemptStatusPending{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "pending",
+			Type:               reflect.TypeOf(IntegrationAttemptStatusPending{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationAttemptStatusComplete{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "complete",
+			Type:               reflect.TypeOf(IntegrationAttemptStatusComplete{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationAttemptStatusFailed{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "failed",
+			Type:               reflect.TypeOf(IntegrationAttemptStatusFailed{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationAttemptStatusExpired{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "expired",
+			Type:               reflect.TypeOf(IntegrationAttemptStatusExpired{}),
 		},
 	)
 }
@@ -1065,21 +1069,8 @@ func (r V2IntegrationConnectKeyParams) URLQuery() (v url.Values) {
 
 // V2IntegrationConnectKeyParamsBody contains the body fields for the connect key request.
 type V2IntegrationConnectKeyParamsBody struct {
-	Key   param.Field[string]                   `json:"key,required"`
-	Label param.Field[string]                   `json:"label"`
-	JSON  v2IntegrationConnectKeyParamsBodyJSON `json:"-"`
-}
-
-// v2IntegrationConnectKeyParamsBodyJSON contains the JSON metadata for the struct [V2IntegrationConnectKeyParamsBody]
-type v2IntegrationConnectKeyParamsBodyJSON struct {
-	Key         apijson.Field
-	Label       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r v2IntegrationConnectKeyParamsBodyJSON) RawJSON() string {
-	return r.raw
+	Key   param.Field[string] `json:"key,required"`
+	Label param.Field[string] `json:"label"`
 }
 
 func (r V2IntegrationConnectKeyParamsBody) MarshalJSON() (data []byte, err error) {
@@ -1147,19 +1138,7 @@ func (r V2IntegrationAttemptCompleteParams) URLQuery() (v url.Values) {
 
 // V2IntegrationAttemptCompleteParamsBody contains the body fields for completing an attempt.
 type V2IntegrationAttemptCompleteParamsBody struct {
-	Code param.Field[string]                        `json:"code"`
-	JSON v2IntegrationAttemptCompleteParamsBodyJSON `json:"-"`
-}
-
-// v2IntegrationAttemptCompleteParamsBodyJSON contains the JSON metadata for the struct [V2IntegrationAttemptCompleteParamsBody]
-type v2IntegrationAttemptCompleteParamsBodyJSON struct {
-	Code        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r v2IntegrationAttemptCompleteParamsBodyJSON) RawJSON() string {
-	return r.raw
+	Code param.Field[string] `json:"code"`
 }
 
 func (r V2IntegrationAttemptCompleteParamsBody) MarshalJSON() (data []byte, err error) {

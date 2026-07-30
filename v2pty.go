@@ -332,25 +332,12 @@ func (r V2PtyUpdateParams) URLQuery() (v url.Values) {
 
 // V2PtySize represents the terminal size for a PTY.
 type V2PtySize struct {
-	Rows int64         `json:"rows,required"`
-	Cols int64         `json:"cols,required"`
-	JSON v2PtySizeJSON `json:"-"`
+	Rows param.Field[int64] `json:"rows,required"`
+	Cols param.Field[int64] `json:"cols,required"`
 }
 
-// v2PtySizeJSON contains the JSON metadata for the struct [V2PtySize]
-type v2PtySizeJSON struct {
-	Rows        apijson.Field
-	Cols        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2PtySize) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2PtySizeJSON) RawJSON() string {
-	return r.raw
+func (r V2PtySize) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 // V2PtyRemoveParams contains the query parameters for removing a v2 PTY.

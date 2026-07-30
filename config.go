@@ -96,8 +96,9 @@ type Config struct {
 	// @deprecated Always uses stretch layout.
 	Layout ConfigLayout `json:"layout"`
 	// Log level for the application
-	LogLevel ConfigLogLevel       `json:"logLevel"`
-	Lsp      map[string]ConfigLsp `json:"lsp"`
+	LogLevel ConfigLogLevel `json:"logLevel"`
+	// This field can have the runtime type of [bool], [map[string]ConfigLsp].
+	Lsp interface{} `json:"lsp"`
 	// MCP (Model Context Protocol) server configurations
 	Mcp map[string]ConfigMcp `json:"mcp"`
 	// @deprecated Use `agent` field instead.
@@ -106,7 +107,8 @@ type Config struct {
 	Model string `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides.
-	// This field can have the runtime type of [string], [ConfigPermission].
+	// This field can have the runtime type of [ConfigPermissionAction],
+	// [ConfigPermission].
 	Permission interface{} `json:"permission"`
 	// This field can have the runtime type of [string] or [][2]interface{}{string, object}.
 	Plugin []interface{} `json:"plugin"`
@@ -247,16 +249,12 @@ func (r ConfigPermissionAction) IsKnown() bool {
 	return false
 }
 
-func (r ConfigPermissionAction) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r ConfigPermissionAction) UnmarshalJSON(data []byte) (err error) {
+func (r *ConfigPermissionAction) UnmarshalJSON(data []byte) (err error) {
 	var raw string
 	if err = apijson.UnmarshalRoot(data, &raw); err != nil {
 		return err
 	}
-	r = ConfigPermissionAction(raw)
+	*r = ConfigPermissionAction(raw)
 	return nil
 }
 
@@ -420,10 +418,10 @@ type ConfigAgentBuild struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]string          `json:"options"`
+	Options     map[string]interface{}     `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
-	MaxSteps    int64                      `json:"max_steps"`
+	MaxSteps    int64                      `json:"maxSteps"`
 	ExtraFields map[string]interface{}     `json:"-,extras"`
 	JSON        configAgentBuildJSON       `json:"-"`
 }
@@ -642,10 +640,10 @@ type ConfigAgentGeneral struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
-	MaxSteps    int64                        `json:"max_steps"`
+	MaxSteps    int64                        `json:"maxSteps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentGeneralJSON       `json:"-"`
 }
@@ -864,10 +862,10 @@ type ConfigAgentPlan struct {
 	TopP        float64                   `json:"top_p"`
 	Variant     string                    `json:"variant"`
 	Hidden      bool                      `json:"hidden"`
-	Options     map[string]string         `json:"options"`
+	Options     map[string]interface{}    `json:"options"`
 	Color       string                    `json:"color"`
 	Steps       int64                     `json:"steps"`
-	MaxSteps    int64                     `json:"max_steps"`
+	MaxSteps    int64                     `json:"maxSteps"`
 	ExtraFields map[string]interface{}    `json:"-,extras"`
 	JSON        configAgentPlanJSON       `json:"-"`
 }
@@ -1084,10 +1082,10 @@ type ConfigAgentExplore struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
-	MaxSteps    int64                        `json:"max_steps"`
+	MaxSteps    int64                        `json:"maxSteps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentExploreJSON       `json:"-"`
 }
@@ -1305,10 +1303,10 @@ type ConfigAgentTitle struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]string          `json:"options"`
+	Options     map[string]interface{}     `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
-	MaxSteps    int64                      `json:"max_steps"`
+	MaxSteps    int64                      `json:"maxSteps"`
 	ExtraFields map[string]interface{}     `json:"-,extras"`
 	JSON        configAgentTitleJSON       `json:"-"`
 }
@@ -1525,10 +1523,10 @@ type ConfigAgentSummary struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]string            `json:"options"`
+	Options     map[string]interface{}       `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
-	MaxSteps    int64                        `json:"max_steps"`
+	MaxSteps    int64                        `json:"maxSteps"`
 	ExtraFields map[string]interface{}       `json:"-,extras"`
 	JSON        configAgentSummaryJSON       `json:"-"`
 }
@@ -1745,10 +1743,10 @@ type ConfigAgentCompaction struct {
 	TopP        float64                         `json:"top_p"`
 	Variant     string                          `json:"variant"`
 	Hidden      bool                            `json:"hidden"`
-	Options     map[string]string               `json:"options"`
+	Options     map[string]interface{}          `json:"options"`
 	Color       string                          `json:"color"`
 	Steps       int64                           `json:"steps"`
-	MaxSteps    int64                           `json:"max_steps"`
+	MaxSteps    int64                           `json:"maxSteps"`
 	ExtraFields map[string]interface{}          `json:"-,extras"`
 	JSON        configAgentCompactionJSON       `json:"-"`
 }
@@ -1961,6 +1959,7 @@ type ConfigCommand struct {
 	Agent       string            `json:"agent"`
 	Description string            `json:"description"`
 	Model       string            `json:"model"`
+	Variant     string            `json:"variant"`
 	Subtask     bool              `json:"subtask"`
 	JSON        configCommandJSON `json:"-"`
 }
@@ -1971,6 +1970,7 @@ type configCommandJSON struct {
 	Agent       apijson.Field
 	Description apijson.Field
 	Model       apijson.Field
+	Variant     apijson.Field
 	Subtask     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -2408,6 +2408,12 @@ type ConfigModeBuild struct {
 	Temperature float64                   `json:"temperature"`
 	Tools       map[string]bool           `json:"tools"`
 	TopP        float64                   `json:"top_p"`
+	Variant     string                    `json:"variant"`
+	Hidden      bool                      `json:"hidden"`
+	Options     map[string]interface{}    `json:"options"`
+	Color       string                    `json:"color"`
+	Steps       int64                     `json:"steps"`
+	MaxSteps    int64                     `json:"maxSteps"`
 	ExtraFields map[string]interface{}    `json:"-,extras"`
 	JSON        configModeBuildJSON       `json:"-"`
 }
@@ -2423,6 +2429,12 @@ type configModeBuildJSON struct {
 	Temperature apijson.Field
 	Tools       apijson.Field
 	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2617,6 +2629,12 @@ type ConfigModePlan struct {
 	Temperature float64                  `json:"temperature"`
 	Tools       map[string]bool          `json:"tools"`
 	TopP        float64                  `json:"top_p"`
+	Variant     string                   `json:"variant"`
+	Hidden      bool                     `json:"hidden"`
+	Options     map[string]interface{}   `json:"options"`
+	Color       string                   `json:"color"`
+	Steps       int64                    `json:"steps"`
+	MaxSteps    int64                    `json:"maxSteps"`
 	ExtraFields map[string]interface{}   `json:"-,extras"`
 	JSON        configModePlanJSON       `json:"-"`
 }
@@ -2632,6 +2650,12 @@ type configModePlanJSON struct {
 	Temperature apijson.Field
 	Tools       apijson.Field
 	TopP        apijson.Field
+	Variant     apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -2877,6 +2901,8 @@ func (r configPermissionJSON) RawJSON() string {
 	return r.raw
 }
 
+func (r ConfigPermission) implementsConfigPermissionUnion() {}
+
 // Union satisfied by [ConfigPermissionBashString] or [ConfigPermissionBashMap].
 type ConfigPermissionBashUnion interface {
 	implementsConfigPermissionBashUnion()
@@ -3025,22 +3051,6 @@ const (
 func (r ConfigPermissionWebsearch) IsKnown() bool {
 	switch r {
 	case ConfigPermissionWebsearchAsk, ConfigPermissionWebsearchAllow, ConfigPermissionWebsearchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionCodesearch string
-
-const (
-	ConfigPermissionCodesearchAsk   ConfigPermissionCodesearch = "ask"
-	ConfigPermissionCodesearchAllow ConfigPermissionCodesearch = "allow"
-	ConfigPermissionCodesearchDeny  ConfigPermissionCodesearch = "deny"
-)
-
-func (r ConfigPermissionCodesearch) IsKnown() bool {
-	switch r {
-	case ConfigPermissionCodesearchAsk, ConfigPermissionCodesearchAllow, ConfigPermissionCodesearchDeny:
 		return true
 	}
 	return false
@@ -3565,57 +3575,60 @@ type ConfigUpdateParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 	// Body parameters — all Config fields as optional
-	Schema     param.Field[string]           `json:"$schema"`
-	Agent      param.Field[ConfigAgent]      `json:"agent"`
-	Attachment param.Field[AttachmentConfig] `json:"attachment"`
-	Autoshare  param.Field[bool]             `json:"autoshare"`
+	Schema     param.Field[string]                `json:"$schema"`
+	Agent      param.Field[ConfigAgentParam]      `json:"agent"`
+	Attachment param.Field[AttachmentConfigParam] `json:"attachment"`
+	Autoshare  param.Field[bool]                  `json:"autoshare"`
 	// Automatically update to the latest version. Pass true to auto-update,
 	// false to disable, or "notify" to show update notifications.
 	// Accepts [bool] or [string] ("notify").
-	Autoupdate        param.Field[interface{}]              `json:"autoupdate"`
-	Command           param.Field[map[string]ConfigCommand] `json:"command"`
-	Compaction        param.Field[ConfigCompaction]         `json:"compaction"`
-	DisabledProviders param.Field[[]string]                 `json:"disabled_providers"`
-	EnabledProviders  param.Field[[]string]                 `json:"enabled_providers"`
-	Enterprise        param.Field[EnterpriseConfig]         `json:"enterprise"`
-	Experimental      param.Field[ConfigExperimental]       `json:"experimental"`
+	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
+	Command           param.Field[map[string]ConfigCommandParam] `json:"command"`
+	Compaction        param.Field[ConfigCompactionParam]         `json:"compaction"`
+	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
+	EnabledProviders  param.Field[[]string]                      `json:"enabled_providers"`
+	Enterprise        param.Field[EnterpriseConfigParam]         `json:"enterprise"`
+	Experimental      param.Field[ConfigExperimentalParam]       `json:"experimental"`
 	// Enable or configure formatters. Pass false to disable, true to enable
 	// built-ins, or a map of formatter-name to config to enable with overrides.
 	// Accepts [bool] or [map[string]ConfigFormatter].
-	Formatter    param.Field[interface{}]          `json:"formatter"`
-	Instructions param.Field[[]string]             `json:"instructions"`
-	Layout       param.Field[ConfigLayout]         `json:"layout"`
-	LogLevel     param.Field[ConfigLogLevel]       `json:"logLevel"`
-	Lsp          param.Field[map[string]ConfigLsp] `json:"lsp"`
-	Mcp          param.Field[map[string]ConfigMcp] `json:"mcp"`
-	Mode         param.Field[ConfigMode]           `json:"mode"`
-	Model        param.Field[string]               `json:"model"`
+	Formatter    param.Field[interface{}]    `json:"formatter"`
+	Instructions param.Field[[]string]       `json:"instructions"`
+	Layout       param.Field[ConfigLayout]   `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
+	// Enable or configure LSP servers. Pass false to disable, true to enable
+	// built-ins, or a map of lsp-name to config to enable with overrides.
+	// Accepts [bool] or [map[string]ConfigLsp].
+	Lsp   param.Field[interface{}]                    `json:"lsp"`
+	Mcp   param.Field[map[string]ConfigMcpUnionParam] `json:"mcp"`
+	Mode  param.Field[ConfigModeParam]                `json:"mode"`
+	Model param.Field[string]                         `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
-	// (a string constant) or [ConfigPermission].
-	Permission param.Field[ConfigPermissionUnion] `json:"permission"`
+	// (a string constant) or [ConfigPermissionParam].
+	Permission param.Field[ConfigPermissionUnionParam] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin        param.Field[[]interface{}]             `json:"plugin"`
-	Provider      param.Field[map[string]ConfigProvider] `json:"provider"`
+	Plugin   param.Field[[]interface{}]                  `json:"plugin"`
+	Provider param.Field[map[string]ConfigProviderParam] `json:"provider"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference     param.Field[map[string]interface{}]    `json:"reference"`
+	Reference param.Field[map[string]interface{}] `json:"reference"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]interface{}]    `json:"references"`
-	Share         param.Field[ConfigShare]               `json:"share"`
-	Shell         param.Field[string]                    `json:"shell"`
-	Server        param.Field[ServerConfig]              `json:"server"`
-	Skills        param.Field[ConfigSkills]              `json:"skills"`
-	SmallModel    param.Field[string]                    `json:"small_model"`
-	Snapshot      param.Field[bool]                      `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutput]          `json:"tool_output"`
-	Tools         param.Field[map[string]bool]           `json:"tools"`
-	Username      param.Field[string]                    `json:"username"`
-	Watcher       param.Field[ConfigWatcher]             `json:"watcher"`
-	DefaultAgent  param.Field[string]                    `json:"default_agent"`
-	SubagentDepth param.Field[int64]                     `json:"subagent_depth"`
+	References    param.Field[map[string]interface{}] `json:"references"`
+	Share         param.Field[ConfigShare]            `json:"share"`
+	Shell         param.Field[string]                 `json:"shell"`
+	Server        param.Field[ServerConfigParam]      `json:"server"`
+	Skills        param.Field[ConfigSkillsParam]      `json:"skills"`
+	SmallModel    param.Field[string]                 `json:"small_model"`
+	Snapshot      param.Field[bool]                   `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutputParam]  `json:"tool_output"`
+	Tools         param.Field[map[string]bool]        `json:"tools"`
+	Username      param.Field[string]                 `json:"username"`
+	Watcher       param.Field[ConfigWatcherParam]     `json:"watcher"`
+	DefaultAgent  param.Field[string]                 `json:"default_agent"`
+	SubagentDepth param.Field[int64]                  `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3821,4 +3834,580 @@ func (r *ConfigToolOutput) UnmarshalJSON(data []byte) (err error) {
 
 func (r configToolOutputJSON) RawJSON() string {
 	return r.raw
+}
+
+// ---------------------------------------------------------------------------
+// Request (Param) types — one per Response struct that appears inside
+// param.Field[T] in ConfigUpdateParams / GlobalConfigUpdateParams.
+// All fields are param.Field[T] so unset optionals are omitted from PATCH bodies.
+// ---------------------------------------------------------------------------
+
+// ServerConfigParam is the request-side counterpart of [ServerConfig].
+type ServerConfigParam struct {
+	Port       param.Field[int64]    `json:"port"`
+	Hostname   param.Field[string]   `json:"hostname"`
+	Mdns       param.Field[bool]     `json:"mdns"`
+	MdnsDomain param.Field[string]   `json:"mdnsDomain"`
+	Cors       param.Field[[]string] `json:"cors"`
+}
+
+func (r ServerConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigToolOutputParam is the request-side counterpart of [ConfigToolOutput].
+type ConfigToolOutputParam struct {
+	// Maximum number of lines to display in tool output
+	MaxLines param.Field[int64] `json:"max_lines"`
+	// Maximum number of bytes to display in tool output
+	MaxBytes param.Field[int64] `json:"max_bytes"`
+}
+
+func (r ConfigToolOutputParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigSkillsParam is the request-side counterpart of [ConfigSkills].
+type ConfigSkillsParam struct {
+	Paths param.Field[[]string] `json:"paths"`
+	Urls  param.Field[[]string] `json:"urls"`
+}
+
+func (r ConfigSkillsParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigCompactionParam is the request-side counterpart of [ConfigCompaction].
+type ConfigCompactionParam struct {
+	Auto                 param.Field[bool]  `json:"auto"`
+	Prune                param.Field[bool]  `json:"prune"`
+	Reserved             param.Field[int64] `json:"reserved"`
+	TailTurns            param.Field[int64] `json:"tail_turns"`
+	PreserveRecentTokens param.Field[int64] `json:"preserve_recent_tokens"`
+}
+
+func (r ConfigCompactionParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// EnterpriseConfigParam is the request-side counterpart of [EnterpriseConfig].
+type EnterpriseConfigParam struct {
+	URL param.Field[string] `json:"url"`
+}
+
+func (r EnterpriseConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigWatcherParam is the request-side counterpart of [ConfigWatcher].
+type ConfigWatcherParam struct {
+	Ignore param.Field[[]string] `json:"ignore"`
+}
+
+func (r ConfigWatcherParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigCommandParam is the request-side counterpart of [ConfigCommand].
+type ConfigCommandParam struct {
+	Template    param.Field[string] `json:"template,required"`
+	Agent       param.Field[string] `json:"agent"`
+	Description param.Field[string] `json:"description"`
+	Model       param.Field[string] `json:"model"`
+	Variant     param.Field[string] `json:"variant"`
+	Subtask     param.Field[bool]   `json:"subtask"`
+}
+
+func (r ConfigCommandParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigExperimentalParam is the request-side counterpart of [ConfigExperimental].
+type ConfigExperimentalParam struct {
+	BatchTool           param.Field[bool]                              `json:"batch_tool"`
+	ContinueLoopOnDeny  param.Field[bool]                              `json:"continue_loop_on_deny"`
+	DisablePasteSummary param.Field[bool]                              `json:"disable_paste_summary"`
+	McpTimeout          param.Field[int64]                             `json:"mcp_timeout"`
+	OpenTelemetry       param.Field[bool]                              `json:"openTelemetry"`
+	Policies            param.Field[[]ConfigV2ExperimentalPolicyParam] `json:"policies"`
+	PrimaryTools        param.Field[[]string]                          `json:"primary_tools"`
+}
+
+func (r ConfigExperimentalParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigV2ExperimentalPolicyParam is the request-side counterpart of [ConfigV2ExperimentalPolicy].
+type ConfigV2ExperimentalPolicyParam struct {
+	Action   param.Field[ConfigV2ExperimentalPolicyAction] `json:"action,required"`
+	Effect   param.Field[PolicyEffect]                     `json:"effect,required"`
+	Resource param.Field[string]                           `json:"resource,required"`
+}
+
+func (r ConfigV2ExperimentalPolicyParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ImageAttachmentConfigParam is the request-side counterpart of [ImageAttachmentConfig].
+type ImageAttachmentConfigParam struct {
+	// Automatically resize images before sending
+	AutoResize param.Field[bool] `json:"auto_resize"`
+	// Maximum image width in pixels
+	MaxWidth param.Field[int64] `json:"max_width"`
+	// Maximum image height in pixels
+	MaxHeight param.Field[int64] `json:"max_height"`
+	// Maximum base64 encoded image size in bytes
+	MaxBase64Bytes param.Field[int64] `json:"max_base64_bytes"`
+}
+
+func (r ImageAttachmentConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// AttachmentConfigParam is the request-side counterpart of [AttachmentConfig].
+type AttachmentConfigParam struct {
+	// Image attachment configuration
+	Image param.Field[ImageAttachmentConfigParam] `json:"image"`
+}
+
+func (r AttachmentConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigPermissionParam is the request-side counterpart of [ConfigPermission].
+// It is also the object variant of the [ConfigPermissionUnionParam] request union.
+type ConfigPermissionParam struct {
+	// Accepts [ConfigPermissionBashString] or [map[string]ConfigPermissionBashMapItem].
+	Bash              param.Field[interface{}] `json:"bash"`
+	Edit              param.Field[interface{}] `json:"edit"`
+	Webfetch          param.Field[interface{}] `json:"webfetch"`
+	Read              param.Field[interface{}] `json:"read"`
+	Glob              param.Field[interface{}] `json:"glob"`
+	Grep              param.Field[interface{}] `json:"grep"`
+	List              param.Field[interface{}] `json:"list"`
+	Task              param.Field[interface{}] `json:"task"`
+	ExternalDirectory param.Field[interface{}] `json:"external_directory"`
+	Todowrite         param.Field[interface{}] `json:"todowrite"`
+	Question          param.Field[interface{}] `json:"question"`
+	Websearch         param.Field[interface{}] `json:"websearch"`
+	Lsp               param.Field[interface{}] `json:"lsp"`
+	DoomLoop          param.Field[interface{}] `json:"doom_loop"`
+	Skill             param.Field[interface{}] `json:"skill"`
+}
+
+func (r ConfigPermissionParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigPermissionParam) implementsConfigPermissionUnionParam() {}
+
+// ConfigPermissionUnionParam is the request-side union for the permission field.
+//
+// Satisfied by [ConfigPermissionAction] (a short string "ask"|"allow"|"deny")
+// or [ConfigPermissionParam] (per-action permission rule overrides).
+type ConfigPermissionUnionParam interface {
+	implementsConfigPermissionUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigPermissionUnionParam)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeOf(ConfigPermissionAction("")),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigPermissionParam{}),
+		},
+	)
+}
+
+// ConfigPermissionAction already implements ConfigPermissionUnionParam.
+func (r ConfigPermissionAction) implementsConfigPermissionUnionParam() {}
+
+// McpLocalConfigParam is the request-side counterpart of [McpLocalConfig].
+type McpLocalConfigParam struct {
+	// Command and arguments to run the MCP server
+	Command param.Field[[]string] `json:"command,required"`
+	// Type of MCP server connection
+	Type param.Field[McpLocalConfigType] `json:"type,required"`
+	Cwd  param.Field[string]             `json:"cwd"`
+	// Enable or disable the MCP server on startup
+	Enabled param.Field[bool] `json:"enabled"`
+	// Timeout in milliseconds
+	Timeout param.Field[int64] `json:"timeout"`
+	// Environment variables to set when running the MCP server
+	Environment param.Field[map[string]string] `json:"environment"`
+}
+
+func (r McpLocalConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r McpLocalConfigParam) implementsConfigMcpUnionParam() {}
+
+// McpRemoteConfigParam is the request-side counterpart of [McpRemoteConfig].
+type McpRemoteConfigParam struct {
+	// Type of MCP server connection
+	Type param.Field[McpRemoteConfigType] `json:"type,required"`
+	// URL of the remote MCP server
+	URL param.Field[string] `json:"url,required"`
+	// Enable or disable the MCP server on startup
+	Enabled param.Field[bool] `json:"enabled"`
+	// Timeout in milliseconds
+	Timeout param.Field[int64] `json:"timeout"`
+	// Headers to send with the request
+	Headers param.Field[map[string]string] `json:"headers"`
+	// OAuth authentication configuration for the MCP server. Set to false to
+	// disable OAuth auto-detection.
+	//
+	// Per the OpenAPI schema, this field can be either [McpOAuthConfigParam] (a
+	// complete OAuth config) or [McpOAuthConfigDisabledParam] (a scalar `false`).
+	OAuth param.Field[McpOAuthConfigUnionParam] `json:"oauth"`
+}
+
+func (r McpRemoteConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r McpRemoteConfigParam) implementsConfigMcpUnionParam() {}
+
+// McpOAuthConfigParam is the request-side counterpart of [McpOAuthConfig]
+// (OpenAPI McpOAuthConfig schema).
+type McpOAuthConfigParam struct {
+	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
+	ClientID param.Field[string] `json:"clientId"`
+	// OAuth client secret (if required by the authorization server)
+	ClientSecret param.Field[string] `json:"clientSecret"`
+	// OAuth scopes to request during authorization
+	Scope param.Field[string] `json:"scope"`
+	// OAuth callback port for the local HTTP server
+	CallbackPort param.Field[int64] `json:"callbackPort"`
+	// OAuth redirect URI
+	RedirectURI param.Field[string] `json:"redirectUri"`
+}
+
+func (r McpOAuthConfigParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r McpOAuthConfigParam) implementsMcpOAuthConfigUnionParam() {}
+
+// McpOAuthConfigDisabledParam represents the explicit `false` value for OAuth,
+// disabling OAuth auto-detection (OpenAPI boolean enum: [false]).
+type McpOAuthConfigDisabledParam struct {
+}
+
+func (r McpOAuthConfigDisabledParam) MarshalJSON() (data []byte, err error) {
+	return []byte("false"), nil
+}
+
+func (r McpOAuthConfigDisabledParam) implementsMcpOAuthConfigUnionParam() {}
+
+// Satisfied by [McpOAuthConfigParam], [McpOAuthConfigDisabledParam].
+type McpOAuthConfigUnionParam interface {
+	implementsMcpOAuthConfigUnionParam()
+}
+
+// ConfigMcpDisabledParam is the request-side counterpart of [ConfigMcpDisabled].
+type ConfigMcpDisabledParam struct {
+	Enabled param.Field[bool] `json:"enabled,required"`
+}
+
+func (r ConfigMcpDisabledParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigMcpDisabledParam) implementsConfigMcpUnionParam() {}
+
+// ConfigMcpUnionParam is the request-side union for per-server MCP config.
+//
+// Satisfied by [McpLocalConfigParam], [McpRemoteConfigParam], or [ConfigMcpDisabledParam].
+type ConfigMcpUnionParam interface {
+	implementsConfigMcpUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*ConfigMcpUnionParam)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpLocalConfigParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpRemoteConfigParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(ConfigMcpDisabledParam{}),
+		},
+	)
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*McpOAuthConfigUnionParam)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(McpOAuthConfigParam{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeOf(McpOAuthConfigDisabledParam{}),
+		},
+	)
+}
+
+// ConfigProviderOptionsParam is the request-side counterpart of [ConfigProviderOptions].
+type ConfigProviderOptionsParam struct {
+	APIKey        param.Field[string] `json:"apiKey"`
+	BaseURL       param.Field[string] `json:"baseURL"`
+	EnterpriseURL param.Field[string] `json:"enterpriseUrl"`
+	SetCacheKey   param.Field[bool]   `json:"setCacheKey"`
+	// Timeout in milliseconds for full requests to this provider. Set to false to
+	// disable timeout. Accepts [shared.UnionInt] or [shared.UnionBool].
+	Timeout param.Field[interface{}] `json:"timeout"`
+	// Timeout in milliseconds to wait for response headers. Set to false to disable.
+	// Accepts [shared.UnionInt] or [shared.UnionBool].
+	HeaderTimeout param.Field[interface{}] `json:"headerTimeout"`
+	ChunkTimeout  param.Field[int64]       `json:"chunkTimeout"`
+}
+
+func (r ConfigProviderOptionsParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelParam is the request-side counterpart of [ConfigProviderModel].
+type ConfigProviderModelParam struct {
+	ID           param.Field[string]            `json:"id"`
+	Attachment   param.Field[bool]              `json:"attachment"`
+	Experimental param.Field[bool]              `json:"experimental"`
+	Family       param.Field[string]            `json:"family"`
+	Headers      param.Field[map[string]string] `json:"headers"`
+	// Accepts bool or object.
+	Interleaved param.Field[interface{}]                         `json:"interleaved"`
+	Name        param.Field[string]                              `json:"name"`
+	Options     param.Field[map[string]interface{}]              `json:"options"`
+	Reasoning   param.Field[bool]                                `json:"reasoning"`
+	ReleaseDate param.Field[string]                              `json:"release_date"`
+	Temperature param.Field[bool]                                `json:"temperature"`
+	ToolCall    param.Field[bool]                                `json:"tool_call"`
+	Cost        param.Field[ConfigProviderModelsCostParam]       `json:"cost"`
+	Limit       param.Field[ConfigProviderModelsLimitParam]      `json:"limit"`
+	Modalities  param.Field[ConfigProviderModelsModalitiesParam] `json:"modalities"`
+	Provider    param.Field[ConfigProviderModelsProviderParam]   `json:"provider"`
+	Status      param.Field[ConfigProviderModelsStatus]          `json:"status"`
+	// Accepts object.
+	Variants param.Field[interface{}] `json:"variants"`
+}
+
+func (r ConfigProviderModelParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsCostParam is the request-side counterpart of
+// [ConfigProviderModelsCost].
+type ConfigProviderModelsCostParam struct {
+	Input           param.Field[float64]                                      `json:"input,required"`
+	Output          param.Field[float64]                                      `json:"output,required"`
+	CacheRead       param.Field[float64]                                      `json:"cache_read"`
+	CacheWrite      param.Field[float64]                                      `json:"cache_write"`
+	ContextOver200k param.Field[ConfigProviderModelsCostContextOver200kParam] `json:"context_over_200k"`
+}
+
+func (r ConfigProviderModelsCostParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsCostContextOver200kParam is the request-side counterpart
+// of [ConfigProviderModelsCostContextOver200k].
+type ConfigProviderModelsCostContextOver200kParam struct {
+	Input      param.Field[float64] `json:"input,required"`
+	Output     param.Field[float64] `json:"output,required"`
+	CacheRead  param.Field[float64] `json:"cache_read"`
+	CacheWrite param.Field[float64] `json:"cache_write"`
+}
+
+func (r ConfigProviderModelsCostContextOver200kParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsLimitParam is the request-side counterpart of
+// [ConfigProviderModelsLimit].
+type ConfigProviderModelsLimitParam struct {
+	Context param.Field[int64] `json:"context,required"`
+	Input   param.Field[int64] `json:"input"`
+	Output  param.Field[int64] `json:"output,required"`
+}
+
+func (r ConfigProviderModelsLimitParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsModalitiesParam is the request-side counterpart of
+// [ConfigProviderModelsModalities].
+type ConfigProviderModelsModalitiesParam struct {
+	Input  param.Field[[]ConfigProviderModelsModalitiesInput]  `json:"input"`
+	Output param.Field[[]ConfigProviderModelsModalitiesOutput] `json:"output"`
+}
+
+func (r ConfigProviderModelsModalitiesParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsProviderParam is the request-side counterpart of
+// [ConfigProviderModelsProvider].
+type ConfigProviderModelsProviderParam struct {
+	NPM param.Field[string] `json:"npm"`
+	API param.Field[string] `json:"api"`
+}
+
+func (r ConfigProviderModelsProviderParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderParam is the request-side counterpart of [ConfigProvider].
+type ConfigProviderParam struct {
+	ID        param.Field[string]                              `json:"id"`
+	API       param.Field[string]                              `json:"api"`
+	Env       param.Field[[]string]                            `json:"env"`
+	Models    param.Field[map[string]ConfigProviderModelParam] `json:"models"`
+	Name      param.Field[string]                              `json:"name"`
+	NPM       param.Field[string]                              `json:"npm"`
+	Whitelist param.Field[[]string]                            `json:"whitelist"`
+	Blacklist param.Field[[]string]                            `json:"blacklist"`
+	Options   param.Field[ConfigProviderOptionsParam]          `json:"options"`
+}
+
+func (r ConfigProviderParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// configAgentSubParam is a shared param shape for all ConfigAgent sub-types
+// (Build, General, Plan, Explore, Title, Summary, Compaction).
+// All sub-agent config structs share the same fields; use interface{} for the
+// permission field since it accepts a complex per-tool bash/string/map union.
+type configAgentSubParam struct {
+	Description param.Field[string] `json:"description"`
+	Disable     param.Field[bool]   `json:"disable"`
+	Mode        param.Field[string] `json:"mode"`
+	Model       param.Field[string] `json:"model"`
+	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
+	Permission  param.Field[interface{}]            `json:"permission"`
+	Prompt      param.Field[string]                 `json:"prompt"`
+	Temperature param.Field[float64]                `json:"temperature"`
+	Tools       param.Field[map[string]bool]        `json:"tools"`
+	TopP        param.Field[float64]                `json:"top_p"`
+	Variant     param.Field[string]                 `json:"variant"`
+	Hidden      param.Field[bool]                   `json:"hidden"`
+	Options     param.Field[map[string]interface{}] `json:"options"`
+	Color       param.Field[string]                 `json:"color"`
+	Steps       param.Field[int64]                  `json:"steps"`
+	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+}
+
+func (r configAgentSubParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigAgentBuildParam is the request-side counterpart of [ConfigAgentBuild].
+type ConfigAgentBuildParam = configAgentSubParam
+
+// ConfigAgentGeneralParam is the request-side counterpart of [ConfigAgentGeneral].
+type ConfigAgentGeneralParam = configAgentSubParam
+
+// ConfigAgentPlanParam is the request-side counterpart of [ConfigAgentPlan].
+type ConfigAgentPlanParam = configAgentSubParam
+
+// ConfigAgentExploreParam is the request-side counterpart of [ConfigAgentExplore].
+type ConfigAgentExploreParam = configAgentSubParam
+
+// ConfigAgentTitleParam is the request-side counterpart of [ConfigAgentTitle].
+type ConfigAgentTitleParam = configAgentSubParam
+
+// ConfigAgentSummaryParam is the request-side counterpart of [ConfigAgentSummary].
+type ConfigAgentSummaryParam = configAgentSubParam
+
+// ConfigAgentCompactionParam is the request-side counterpart of [ConfigAgentCompaction].
+type ConfigAgentCompactionParam = configAgentSubParam
+
+// ConfigAgentParam is the request-side counterpart of [ConfigAgent].
+// ExtraFields allows passing arbitrary named agent configs beyond the named sub-agents.
+type ConfigAgentParam struct {
+	Build      param.Field[ConfigAgentBuildParam]      `json:"build"`
+	Compaction param.Field[ConfigAgentCompactionParam] `json:"compaction"`
+	Explore    param.Field[ConfigAgentExploreParam]    `json:"explore"`
+	General    param.Field[ConfigAgentGeneralParam]    `json:"general"`
+	Plan       param.Field[ConfigAgentPlanParam]       `json:"plan"`
+	Summary    param.Field[ConfigAgentSummaryParam]    `json:"summary"`
+	Title      param.Field[ConfigAgentTitleParam]      `json:"title"`
+}
+
+func (r ConfigAgentParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigModeParam is the request-side counterpart of [ConfigMode].
+//
+// @deprecated Use ConfigAgentParam instead.
+type ConfigModeParam struct {
+	Build param.Field[ConfigModeBuildParam] `json:"build"`
+	Plan  param.Field[ConfigModePlanParam]  `json:"plan"`
+}
+
+func (r ConfigModeParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigModeBuildParam is the request-side counterpart of [ConfigModeBuild].
+type ConfigModeBuildParam struct {
+	Description param.Field[string] `json:"description"`
+	Disable     param.Field[bool]   `json:"disable"`
+	Mode        param.Field[string] `json:"mode"`
+	Model       param.Field[string] `json:"model"`
+	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
+	Permission  param.Field[interface{}]            `json:"permission"`
+	Prompt      param.Field[string]                 `json:"prompt"`
+	Temperature param.Field[float64]                `json:"temperature"`
+	Tools       param.Field[map[string]bool]        `json:"tools"`
+	TopP        param.Field[float64]                `json:"top_p"`
+	Variant     param.Field[string]                 `json:"variant"`
+	Hidden      param.Field[bool]                   `json:"hidden"`
+	Options     param.Field[map[string]interface{}] `json:"options"`
+	Color       param.Field[string]                 `json:"color"`
+	Steps       param.Field[int64]                  `json:"steps"`
+	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+}
+
+func (r ConfigModeBuildParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigModePlanParam is the request-side counterpart of [ConfigModePlan].
+type ConfigModePlanParam struct {
+	Description param.Field[string] `json:"description"`
+	Disable     param.Field[bool]   `json:"disable"`
+	Mode        param.Field[string] `json:"mode"`
+	Model       param.Field[string] `json:"model"`
+	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
+	Permission  param.Field[interface{}]            `json:"permission"`
+	Prompt      param.Field[string]                 `json:"prompt"`
+	Temperature param.Field[float64]                `json:"temperature"`
+	Tools       param.Field[map[string]bool]        `json:"tools"`
+	TopP        param.Field[float64]                `json:"top_p"`
+	Variant     param.Field[string]                 `json:"variant"`
+	Hidden      param.Field[bool]                   `json:"hidden"`
+	Options     param.Field[map[string]interface{}] `json:"options"`
+	Color       param.Field[string]                 `json:"color"`
+	Steps       param.Field[int64]                  `json:"steps"`
+	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+}
+
+func (r ConfigModePlanParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }

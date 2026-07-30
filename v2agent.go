@@ -216,6 +216,21 @@ func (r modelRefJSON) RawJSON() string {
 	return r.raw
 }
 
+// ModelRefParam is the request-side equivalent of [ModelRef].
+// All fields use param.Field[T] so unset optional fields are omitted from the
+// serialised JSON body rather than being sent as zero values.
+//
+// OpenAPI: ModelRef — required: [id, providerID]; optional: [variant]
+type ModelRefParam struct {
+	ID         param.Field[string] `json:"id,required"`
+	ProviderID param.Field[string] `json:"providerID,required"`
+	Variant    param.Field[string] `json:"variant"`
+}
+
+func (r ModelRefParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type ProviderRequest struct {
 	Headers map[string]string `json:"headers,required"`
 	// This field can have the runtime type of [map[string]interface{}].

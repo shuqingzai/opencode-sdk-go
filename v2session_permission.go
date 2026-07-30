@@ -107,9 +107,9 @@ type V2SessionPermissionNewParams struct {
 	Resources param.Field[[]string] `json:"resources,required"`
 	Save      param.Field[[]string] `json:"save"`
 	// This field can have the runtime type of [map[string]interface{}].
-	Metadata param.Field[interface{}]        `json:"metadata"`
-	Source   param.Field[PermissionV2Source] `json:"source"`
-	Agent    param.Field[string]             `json:"agent"`
+	Metadata param.Field[interface{}]             `json:"metadata"`
+	Source   param.Field[PermissionV2SourceParam] `json:"source"`
+	Agent    param.Field[string]                  `json:"agent"`
 }
 
 func (r V2SessionPermissionNewParams) MarshalJSON() (data []byte, err error) {

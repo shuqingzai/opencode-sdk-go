@@ -95,11 +95,18 @@ type v2ReferenceInfoJSON struct {
 
 func (r *V2ReferenceInfo) UnmarshalJSON(data []byte) (err error) {
 	*r = V2ReferenceInfo{}
-	err = apijson.UnmarshalRoot(data, &r.sourceUnion)
+	err = apijson.UnmarshalRoot(data, r)
 	if err != nil {
 		return err
 	}
-	return apijson.Port(r.sourceUnion, r)
+	sourceData := gjson.GetBytes(data, "source").Raw
+	if sourceData != "" {
+		err = apijson.UnmarshalRoot([]byte(sourceData), &r.sourceUnion)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r v2ReferenceInfoJSON) RawJSON() string {
@@ -180,14 +187,16 @@ func (r ReferenceGitSource) implementsReferenceSourceUnion() {}
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*ReferenceSourceUnion)(nil)).Elem(),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ReferenceLocalSource{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "local",
+			Type:               reflect.TypeOf(ReferenceLocalSource{}),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ReferenceGitSource{}),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "git",
+			Type:               reflect.TypeOf(ReferenceGitSource{}),
 		},
 	)
 }

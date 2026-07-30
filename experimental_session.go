@@ -89,25 +89,26 @@ func (r ExperimentalSessionBackgroundParams) URLQuery() (v url.Values) {
 }
 
 type GlobalSession struct {
-	ID          string                `json:"id,required"`
-	Slug        string                `json:"slug,required"`
-	ProjectID   string                `json:"projectID,required"`
-	Directory   string                `json:"directory,required"`
-	Title       string                `json:"title,required"`
-	Version     string                `json:"version,required"`
-	Time        GlobalSessionTime     `json:"time,required"`
-	Project     *ProjectSummary       `json:"project,required"`
-	WorkspaceID string                `json:"workspaceID,omitempty"`
-	Path        string                `json:"path,omitempty"`
-	ParentID    string                `json:"parentID,omitempty"`
-	Summary     *GlobalSessionSummary `json:"summary,omitempty"`
-	Cost        float64               `json:"cost,omitempty"`
-	Tokens      *GlobalSessionTokens  `json:"tokens,omitempty"`
-	Share       *GlobalSessionShare   `json:"share,omitempty"`
-	Agent       string                `json:"agent,omitempty"`
-	Model       *GlobalSessionModel   `json:"model,omitempty"`
-	Permission  PermissionRuleset     `json:"permission,omitempty"`
-	Revert      *GlobalSessionRevert  `json:"revert,omitempty"`
+	ID        string            `json:"id,required"`
+	Slug      string            `json:"slug,required"`
+	ProjectID string            `json:"projectID,required"`
+	Directory string            `json:"directory,required"`
+	Title     string            `json:"title,required"`
+	Version   string            `json:"version,required"`
+	Time      GlobalSessionTime `json:"time,required"`
+	// This field can have the runtime type of [ProjectSummary].
+	Project     interface{}          `json:"project,required"`
+	WorkspaceID string               `json:"workspaceID,omitempty"`
+	Path        string               `json:"path,omitempty"`
+	ParentID    string               `json:"parentID,omitempty"`
+	Summary     GlobalSessionSummary `json:"summary,omitempty"`
+	Cost        float64              `json:"cost,omitempty"`
+	Tokens      GlobalSessionTokens  `json:"tokens,omitempty"`
+	Share       GlobalSessionShare   `json:"share,omitempty"`
+	Agent       string               `json:"agent,omitempty"`
+	Model       GlobalSessionModel   `json:"model,omitempty"`
+	Permission  PermissionRuleset    `json:"permission,omitempty"`
+	Revert      GlobalSessionRevert  `json:"revert,omitempty"`
 	// This field can have the runtime type of [map[string]interface{}].
 	Metadata interface{}       `json:"metadata,omitempty"`
 	JSON     globalSessionJSON `json:"-"`

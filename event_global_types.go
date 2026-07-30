@@ -2342,18 +2342,16 @@ func (r eventListResponseEventSessionNextRetriedErrorJSON) RawJSON() string {
 
 // EventListResponseEventSessionNextPromptedPrompt
 type EventListResponseEventSessionNextPromptedPrompt struct {
-	Text       string                                              `json:"text,required"`
-	Files      []V2PromptFileAttachment                            `json:"files"`
-	Agents     []V2PromptAgentAttachment                           `json:"agents"`
-	References []V2PromptReferenceAttachment                       `json:"references"`
-	JSON       eventListResponseEventSessionNextPromptedPromptJSON `json:"-"`
+	Text   string                                              `json:"text,required"`
+	Files  []V2PromptFileAttachment                            `json:"files"`
+	Agents []V2PromptAgentAttachment                           `json:"agents"`
+	JSON   eventListResponseEventSessionNextPromptedPromptJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptedPromptJSON struct {
 	Text        apijson.Field
 	Files       apijson.Field
 	Agents      apijson.Field
-	References  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -3576,18 +3574,16 @@ func (r eventListResponseEventSessionNextPromptAdmittedPropertiesJSON) RawJSON()
 }
 
 type EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt struct {
-	Text       string                                                              `json:"text,required"`
-	Files      []V2PromptFileAttachment                                            `json:"files"`
-	Agents     []V2PromptAgentAttachment                                           `json:"agents"`
-	References []V2PromptReferenceAttachment                                       `json:"references"`
-	JSON       eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON `json:"-"`
+	Text   string                                                              `json:"text,required"`
+	Files  []V2PromptFileAttachment                                            `json:"files"`
+	Agents []V2PromptAgentAttachment                                           `json:"agents"`
+	JSON   eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON struct {
 	Text        apijson.Field
 	Files       apijson.Field
 	Agents      apijson.Field
-	References  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

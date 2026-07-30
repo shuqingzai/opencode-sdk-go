@@ -250,6 +250,20 @@ func (r permissionV2SourceJSON) RawJSON() string {
 	return r.raw
 }
 
+// PermissionV2SourceParam is the request-side equivalent of [PermissionV2Source].
+// All fields use param.Field[T]; all three are required per OpenAPI.
+//
+// OpenAPI: PermissionV2Source — required: [type, messageID, callID]
+type PermissionV2SourceParam struct {
+	Type      param.Field[PermissionV2SourceType] `json:"type,required"`
+	MessageID param.Field[string]                 `json:"messageID,required"`
+	CallID    param.Field[string]                 `json:"callID,required"`
+}
+
+func (r PermissionV2SourceParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // PermissionSavedInfo represents a saved permission entry.
 type PermissionSavedInfo struct {
 	ID        string                  `json:"id,required"`

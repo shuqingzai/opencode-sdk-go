@@ -373,6 +373,10 @@ type PermissionRule struct {
 	Action     param.Field[PermissionAction] `json:"action,required"`
 }
 
+func (r PermissionRule) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // PermissionRuleResponse is used for response deserialization.
 type PermissionRuleResponse struct {
 	Permission string                     `json:"permission,required"`
@@ -499,13 +503,13 @@ func (r AgentPartInputType) IsKnown() bool {
 }
 
 type SubtaskPartInputParam struct {
-	ID          param.Field[string]               `json:"id"`
-	Type        param.Field[SubtaskPartInputType] `json:"type,required"`
-	Prompt      param.Field[string]               `json:"prompt,required"`
-	Description param.Field[string]               `json:"description,required"`
-	Agent       param.Field[string]               `json:"agent,required"`
-	Model       param.Field[SubtaskPartModel]     `json:"model"`
-	Command     param.Field[string]               `json:"command"`
+	ID          param.Field[string]                `json:"id"`
+	Type        param.Field[SubtaskPartInputType]  `json:"type,required"`
+	Prompt      param.Field[string]                `json:"prompt,required"`
+	Description param.Field[string]                `json:"description,required"`
+	Agent       param.Field[string]                `json:"agent,required"`
+	Model       param.Field[SubtaskPartModelParam] `json:"model"`
+	Command     param.Field[string]                `json:"command"`
 }
 
 func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
@@ -513,6 +517,16 @@ func (r SubtaskPartInputParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r SubtaskPartInputParam) implementsSessionPromptParamsPartUnion() {}
+
+// SubtaskPartModelParam is used for request parameters.
+type SubtaskPartModelParam struct {
+	ProviderID param.Field[string] `json:"providerID,required"`
+	ModelID    param.Field[string] `json:"modelID,required"`
+}
+
+func (r SubtaskPartModelParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
 
 type SubtaskPartInputType string
 
@@ -3202,10 +3216,10 @@ func (r userMessageTimeJSON) RawJSON() string {
 }
 
 type UserMessageSummary struct {
-	Diffs []UserMessageSummaryDiff `json:"diffs,required"`
-	Body  string                   `json:"body"`
-	Title string                   `json:"title"`
-	JSON  userMessageSummaryJSON   `json:"-"`
+	Diffs []SnapshotFileDiff     `json:"diffs,required"`
+	Body  string                 `json:"body"`
+	Title string                 `json:"title"`
+	JSON  userMessageSummaryJSON `json:"-"`
 }
 
 // userMessageSummaryJSON contains the JSON metadata for the struct
@@ -3223,35 +3237,6 @@ func (r *UserMessageSummary) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r userMessageSummaryJSON) RawJSON() string {
-	return r.raw
-}
-
-type UserMessageSummaryDiff struct {
-	Additions int64                      `json:"additions,required"`
-	After     string                     `json:"after,required"`
-	Before    string                     `json:"before,required"`
-	Deletions int64                      `json:"deletions,required"`
-	File      string                     `json:"file,required"`
-	JSON      userMessageSummaryDiffJSON `json:"-"`
-}
-
-// userMessageSummaryDiffJSON contains the JSON metadata for the struct
-// [UserMessageSummaryDiff]
-type userMessageSummaryDiffJSON struct {
-	Additions   apijson.Field
-	After       apijson.Field
-	Before      apijson.Field
-	Deletions   apijson.Field
-	File        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *UserMessageSummaryDiff) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r userMessageSummaryDiffJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -3365,6 +3350,10 @@ type SessionNewParamsModel struct {
 	Variant    param.Field[string] `json:"variant"`
 }
 
+func (r SessionNewParamsModel) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 func (r SessionNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -3388,6 +3377,10 @@ type SessionUpdateParams struct {
 
 type SessionUpdateParamsTime struct {
 	Archived param.Field[int64] `json:"archived"`
+}
+
+func (r SessionUpdateParamsTime) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 func (r SessionUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3486,12 +3479,30 @@ type SessionCommandParams struct {
 }
 
 type SessionCommandParamsPart struct {
-	ID       param.Field[string]                   `json:"id"`
-	Type     param.Field[string]                   `json:"type,required"`
-	Mime     param.Field[string]                   `json:"mime,required"`
-	Filename param.Field[string]                   `json:"filename"`
-	URL      param.Field[string]                   `json:"url,required"`
-	Source   param.Field[FilePartSourceUnionParam] `json:"source"`
+	ID       param.Field[string]                        `json:"id"`
+	Type     param.Field[SessionCommandParamsPartsType] `json:"type,required"`
+	Mime     param.Field[string]                        `json:"mime,required"`
+	Filename param.Field[string]                        `json:"filename"`
+	URL      param.Field[string]                        `json:"url,required"`
+	Source   param.Field[FilePartSourceUnionParam]      `json:"source"`
+}
+
+func (r SessionCommandParamsPart) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SessionCommandParamsPartsType string
+
+const (
+	SessionCommandParamsPartsTypeFile SessionCommandParamsPartsType = "file"
+)
+
+func (r SessionCommandParamsPartsType) IsKnown() bool {
+	switch r {
+	case SessionCommandParamsPartsTypeFile:
+		return true
+	}
+	return false
 }
 
 func (r SessionCommandParams) MarshalJSON() (data []byte, err error) {
@@ -3858,6 +3869,10 @@ func (r sessionStatusIdleJSON) RawJSON() string {
 	return r.raw
 }
 
+func (r *SessionStatusIdle) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 func (r SessionStatusIdle) ImplementsSessionStatus() {}
 
 // SessionStatusRetry represents a retry session status
@@ -3914,6 +3929,10 @@ func (r sessionStatusRetryJSON) RawJSON() string {
 	return r.raw
 }
 
+func (r *SessionStatusRetry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 func (r SessionStatusRetry) ImplementsSessionStatus() {}
 
 // SessionStatusBusy represents a busy session status
@@ -3930,6 +3949,10 @@ type sessionStatusBusyJSON struct {
 
 func (r sessionStatusBusyJSON) RawJSON() string {
 	return r.raw
+}
+
+func (r *SessionStatusBusy) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r SessionStatusBusy) ImplementsSessionStatus() {}
