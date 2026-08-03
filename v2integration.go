@@ -276,10 +276,10 @@ type IntegrationInfo struct {
 	Name string `json:"name,required"`
 	// This field can have the runtime type of []IntegrationOAuthMethod,
 	// []IntegrationKeyMethod, []IntegrationEnvMethod.
-	Methods interface{} `json:"methods,required"`
+	Methods any `json:"methods,required"`
 	// This field can have the runtime type of []ConnectionCredentialInfo,
 	// []ConnectionEnvInfo.
-	Connections interface{}         `json:"connections,required"`
+	Connections any                 `json:"connections,required"`
 	JSON        integrationInfoJSON `json:"-"`
 }
 
@@ -317,7 +317,7 @@ type IntegrationOAuthMethod struct {
 	Label string                     `json:"label,required"`
 	// This field can have the runtime type of [[]IntegrationTextPrompt],
 	// [[]IntegrationSelectPrompt].
-	Prompts interface{}                `json:"prompts"`
+	Prompts any                        `json:"prompts"`
 	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 
@@ -435,19 +435,19 @@ func (r IntegrationEnvMethodType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*IntegrationMethodUnion)(nil)).Elem(),
+		reflect.TypeFor[IntegrationMethodUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationOAuthMethod{}),
+			Type:       reflect.TypeFor[IntegrationOAuthMethod](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationKeyMethod{}),
+			Type:       reflect.TypeFor[IntegrationKeyMethod](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationEnvMethod{}),
+			Type:       reflect.TypeFor[IntegrationEnvMethod](),
 		},
 	)
 }
@@ -542,30 +542,30 @@ func (r ConnectionEnvInfoType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConnectionInfoUnion)(nil)).Elem(),
+		reflect.TypeFor[ConnectionInfoUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConnectionCredentialInfo{}),
+			Type:       reflect.TypeFor[ConnectionCredentialInfo](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConnectionEnvInfo{}),
+			Type:       reflect.TypeFor[ConnectionEnvInfo](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*IntegrationPromptUnion)(nil)).Elem(),
+		reflect.TypeFor[IntegrationPromptUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationTextPrompt{}),
+			Type:       reflect.TypeFor[IntegrationTextPrompt](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(IntegrationSelectPrompt{}),
+			Type:       reflect.TypeFor[IntegrationSelectPrompt](),
 		},
 	)
 }
@@ -652,9 +652,9 @@ type IntegrationAttemptStatus struct {
 	Status IntegrationAttemptStatusType `json:"status,required"`
 	// Message is present only when status is "failed". This field can have the
 	// runtime type of [string].
-	Message interface{} `json:"message"`
+	Message any `json:"message"`
 	// This field can have the runtime type of [IntegrationAttemptTime].
-	Time  interface{}                  `json:"time,required"`
+	Time  any                          `json:"time,required"`
 	JSON  integrationAttemptStatusJSON `json:"-"`
 	union IntegrationAttemptStatusUnion
 }
@@ -831,27 +831,27 @@ func (r IntegrationAttemptStatusExpired) implementsIntegrationAttemptStatus() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*IntegrationAttemptStatusUnion)(nil)).Elem(),
+		reflect.TypeFor[IntegrationAttemptStatusUnion](),
 		"status",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "pending",
-			Type:               reflect.TypeOf(IntegrationAttemptStatusPending{}),
+			Type:               reflect.TypeFor[IntegrationAttemptStatusPending](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "complete",
-			Type:               reflect.TypeOf(IntegrationAttemptStatusComplete{}),
+			Type:               reflect.TypeFor[IntegrationAttemptStatusComplete](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "failed",
-			Type:               reflect.TypeOf(IntegrationAttemptStatusFailed{}),
+			Type:               reflect.TypeFor[IntegrationAttemptStatusFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "expired",
-			Type:               reflect.TypeOf(IntegrationAttemptStatusExpired{}),
+			Type:               reflect.TypeFor[IntegrationAttemptStatusExpired](),
 		},
 	)
 }

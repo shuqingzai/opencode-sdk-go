@@ -65,22 +65,22 @@ type Auth interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*Auth)(nil)).Elem(),
+		reflect.TypeFor[Auth](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "oauth",
-			Type:               reflect.TypeOf(OAuth{}),
+			Type:               reflect.TypeFor[OAuth](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "api",
-			Type:               reflect.TypeOf(ApiAuth{}),
+			Type:               reflect.TypeFor[ApiAuth](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "wellknown",
-			Type:               reflect.TypeOf(WellKnownAuth{}),
+			Type:               reflect.TypeFor[WellKnownAuth](),
 		},
 	)
 }

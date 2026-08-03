@@ -18,12 +18,12 @@ import (
 
 var encoders sync.Map // map[encoderEntry]encoderFunc
 
-func Marshal(value interface{}, writer *multipart.Writer) error {
+func Marshal(value any, writer *multipart.Writer) error {
 	e := &encoder{dateFormat: time.RFC3339}
 	return e.marshal(value, writer)
 }
 
-func MarshalRoot(value interface{}, writer *multipart.Writer) error {
+func MarshalRoot(value any, writer *multipart.Writer) error {
 	e := &encoder{root: true, dateFormat: time.RFC3339}
 	return e.marshal(value, writer)
 }
@@ -47,7 +47,7 @@ type encoderEntry struct {
 	root       bool
 }
 
-func (e *encoder) marshal(value interface{}, writer *multipart.Writer) error {
+func (e *encoder) marshal(value any, writer *multipart.Writer) error {
 	val := reflect.ValueOf(value)
 	if !val.IsValid() {
 		return nil
@@ -93,10 +93,10 @@ func (e *encoder) typeEncoder(t reflect.Type) encoderFunc {
 }
 
 func (e *encoder) newTypeEncoder(t reflect.Type) encoderFunc {
-	if t.ConvertibleTo(reflect.TypeOf(time.Time{})) {
+	if t.ConvertibleTo(reflect.TypeFor[time.Time]()) {
 		return e.newTimeTypeEncoder()
 	}
-	if t.ConvertibleTo(reflect.TypeOf((*io.Reader)(nil)).Elem()) {
+	if t.ConvertibleTo(reflect.TypeFor[io.Reader]()) {
 		return e.newReaderTypeEncoder()
 	}
 	e.root = false
@@ -180,7 +180,7 @@ func (e *encoder) newArrayTypeEncoder(t reflect.Type) encoderFunc {
 }
 
 func (e *encoder) newStructTypeEncoder(t reflect.Type) encoderFunc {
-	if t.Implements(reflect.TypeOf((*param.FieldLike)(nil)).Elem()) {
+	if t.Implements(reflect.TypeFor[param.FieldLike]()) {
 		return e.newFieldTypeEncoder(t)
 	}
 
@@ -290,7 +290,7 @@ func (e *encoder) newFieldTypeEncoder(t reflect.Type) encoderFunc {
 func (e *encoder) newTimeTypeEncoder() encoderFunc {
 	format := e.dateFormat
 	return func(key string, value reflect.Value, writer *multipart.Writer) error {
-		return writer.WriteField(key, value.Convert(reflect.TypeOf(time.Time{})).Interface().(time.Time).Format(format))
+		return writer.WriteField(key, value.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time).Format(format))
 	}
 }
 
@@ -312,7 +312,7 @@ func escapeQuotes(s string) string {
 
 func (e *encoder) newReaderTypeEncoder() encoderFunc {
 	return func(key string, value reflect.Value, writer *multipart.Writer) error {
-		reader := value.Convert(reflect.TypeOf((*io.Reader)(nil)).Elem()).Interface().(io.Reader)
+		reader := value.Convert(reflect.TypeFor[io.Reader]()).Interface().(io.Reader)
 		filename := "anonymous_file"
 		contentType := "application/octet-stream"
 		if named, ok := reader.(interface{ Filename() string }); ok {

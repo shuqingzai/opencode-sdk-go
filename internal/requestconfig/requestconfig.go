@@ -88,7 +88,7 @@ type PreRequestOptionFunc func(*RequestConfig) error
 func (s RequestOptionFunc) Apply(r *RequestConfig) error    { return s(r) }
 func (s PreRequestOptionFunc) Apply(r *RequestConfig) error { return s(r) }
 
-func NewRequestConfig(ctx context.Context, method string, u string, body interface{}, dst interface{}, opts ...RequestOption) (*RequestConfig, error) {
+func NewRequestConfig(ctx context.Context, method string, u string, body any, dst any, opts ...RequestOption) (*RequestConfig, error) {
 	var reader io.Reader
 
 	contentType := "application/json"
@@ -219,7 +219,7 @@ type RequestConfig struct {
 	// If ResponseBodyInto not nil, then we will attempt to deserialize into
 	// ResponseBodyInto. If Destination is a []byte, then it will return the body as
 	// is.
-	ResponseBodyInto interface{}
+	ResponseBodyInto any
 	// ResponseInto copies the \*http.Response of the corresponding request into the
 	// given address
 	ResponseInto **http.Response
@@ -366,10 +366,7 @@ func retryDelay(res *http.Response, retryCount int) time.Duration {
 	}
 
 	maxDelay := 8 * time.Second
-	delay := time.Duration(0.5 * float64(time.Second) * math.Pow(2, float64(retryCount)))
-	if delay > maxDelay {
-		delay = maxDelay
-	}
+	delay := min(time.Duration(0.5*float64(time.Second)*math.Pow(2, float64(retryCount))), maxDelay)
 
 	jitter := rand.Int63n(int64(delay / 4))
 	delay -= time.Duration(jitter)
@@ -559,7 +556,7 @@ func (cfg *RequestConfig) Execute() (err error) {
 	return nil
 }
 
-func ExecuteNewRequest(ctx context.Context, method string, u string, body interface{}, dst interface{}, opts ...RequestOption) error {
+func ExecuteNewRequest(ctx context.Context, method string, u string, body any, dst any, opts ...RequestOption) error {
 	cfg, err := NewRequestConfig(ctx, method, u, body, dst, opts...)
 	if err != nil {
 		return err

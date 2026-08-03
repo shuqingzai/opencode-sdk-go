@@ -112,7 +112,7 @@ type V2ProviderInfo struct {
 	Name          string `json:"name,required"`
 	Disabled      bool   `json:"disabled"`
 	// This field can have the runtime type of [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
-	Api      interface{}        `json:"api,required"`
+	Api      any                `json:"api,required"`
 	Request  ProviderRequest    `json:"request,required"`
 	JSON     v2ProviderInfoJSON `json:"-"`
 	apiUnion V2ProviderInfoApiUnion
@@ -165,8 +165,8 @@ type V2ProviderInfoApiAisdk struct {
 	Type    V2ProviderInfoApiAisdkType `json:"type,required"`
 	Package string                     `json:"package,required"`
 	URL     string                     `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}                `json:"settings"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                        `json:"settings"`
 	JSON     v2ProviderInfoApiAisdkJSON `json:"-"`
 }
 
@@ -192,8 +192,8 @@ func (r V2ProviderInfoApiAisdk) implementsV2ProviderInfoApiUnion() {}
 type V2ProviderInfoApiNative struct {
 	Type V2ProviderInfoApiNativeType `json:"type,required"`
 	URL  string                      `json:"url"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Settings interface{}                 `json:"settings,required"`
+	// This field can have the runtime type of [map[string]any].
+	Settings any                         `json:"settings,required"`
 	JSON     v2ProviderInfoApiNativeJSON `json:"-"`
 }
 
@@ -245,15 +245,15 @@ func (r V2ProviderInfoApiNativeType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*V2ProviderInfoApiUnion)(nil)).Elem(),
+		reflect.TypeFor[V2ProviderInfoApiUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoApiAisdk{}),
+			Type:       reflect.TypeFor[V2ProviderInfoApiAisdk](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(V2ProviderInfoApiNative{}),
+			Type:       reflect.TypeFor[V2ProviderInfoApiNative](),
 		},
 	)
 }

@@ -24,27 +24,27 @@ func TestEventOptionalObjectFieldsUseInterfaces(t *testing.T) {
 	}{
 		{
 			name:  "permission asked tool",
-			typ:   reflect.TypeOf(opencode.EventListResponseEventPermissionAskedProperties{}),
+			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionAskedProperties](),
 			field: "Tool",
 		},
 		{
 			name:  "question asked tool",
-			typ:   reflect.TypeOf(opencode.EventListResponseEventQuestionAskedProperties{}),
+			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionAskedProperties](),
 			field: "Tool",
 		},
 		{
 			name:  "permission v2 asked source",
-			typ:   reflect.TypeOf(opencode.EventListResponseEventPermissionV2AskedProperties{}),
+			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionV2AskedProperties](),
 			field: "Source",
 		},
 		{
 			name:  "question v2 asked tool",
-			typ:   reflect.TypeOf(opencode.EventListResponseEventQuestionV2AskedProperties{}),
+			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionV2AskedProperties](),
 			field: "Tool",
 		},
 	}
 
-	interfaceType := reflect.TypeOf((*interface{})(nil)).Elem()
+	interfaceType := reflect.TypeFor[any]()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			field, ok := tt.typ.FieldByName(tt.field)
@@ -52,7 +52,7 @@ func TestEventOptionalObjectFieldsUseInterfaces(t *testing.T) {
 				t.Fatalf("missing %s field", tt.field)
 			}
 			if field.Type != interfaceType {
-				t.Fatalf("%s field type = %s, want interface{}", tt.field, field.Type)
+				t.Fatalf("%s field type = %s, want any", tt.field, field.Type)
 			}
 
 			jsonField, ok := tt.typ.FieldByName("JSON")
@@ -61,12 +61,12 @@ func TestEventOptionalObjectFieldsUseInterfaces(t *testing.T) {
 			}
 			// The metadata must still include the field so the apijson
 			// framework can track it; the field is just typed as
-			// interface{} at runtime instead of a concrete pointer.
+			// any at runtime instead of a concrete pointer.
 			jsonFieldEntry, ok := jsonField.Type.FieldByName(tt.field)
 			if !ok {
 				t.Fatalf("JSON metadata must contain %s field", tt.field)
 			}
-			if jsonFieldEntry.Type != reflect.TypeOf(apijson.Field{}) {
+			if jsonFieldEntry.Type != reflect.TypeFor[apijson.Field]() {
 				t.Fatalf("JSON metadata field %s type = %s, want apijson.Field", tt.field, jsonFieldEntry.Type)
 			}
 		})

@@ -97,20 +97,20 @@ type GlobalSession struct {
 	Version   string            `json:"version,required"`
 	Time      GlobalSessionTime `json:"time,required"`
 	// This field can have the runtime type of [ProjectSummary].
-	Project     interface{}          `json:"project,required"`
+	Project     any                  `json:"project,required"`
 	WorkspaceID string               `json:"workspaceID,omitempty"`
 	Path        string               `json:"path,omitempty"`
 	ParentID    string               `json:"parentID,omitempty"`
-	Summary     GlobalSessionSummary `json:"summary,omitempty"`
+	Summary     GlobalSessionSummary `json:"summary"`
 	Cost        float64              `json:"cost,omitempty"`
-	Tokens      GlobalSessionTokens  `json:"tokens,omitempty"`
-	Share       GlobalSessionShare   `json:"share,omitempty"`
+	Tokens      GlobalSessionTokens  `json:"tokens"`
+	Share       GlobalSessionShare   `json:"share"`
 	Agent       string               `json:"agent,omitempty"`
-	Model       GlobalSessionModel   `json:"model,omitempty"`
+	Model       GlobalSessionModel   `json:"model"`
 	Permission  PermissionRuleset    `json:"permission,omitempty"`
-	Revert      GlobalSessionRevert  `json:"revert,omitempty"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}       `json:"metadata,omitempty"`
+	Revert      GlobalSessionRevert  `json:"revert"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any               `json:"metadata,omitempty"`
 	JSON     globalSessionJSON `json:"-"`
 }
 

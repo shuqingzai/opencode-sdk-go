@@ -130,7 +130,7 @@ type Workspace struct {
 	// The amount of time in milliseconds that this workspace has been used.
 	// This field can have the runtime type of [float64], [string] (one of "NaN",
 	// "Infinity", "-Infinity").
-	TimeUsed interface{}   `json:"timeUsed,required"`
+	TimeUsed any           `json:"timeUsed,required"`
 	JSON     workspaceJSON `json:"-"`
 }
 

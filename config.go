@@ -73,7 +73,7 @@ type Config struct {
 	Autoshare bool `json:"autoshare"`
 	// Automatically update to the latest version. Set to true to auto-update, false to disable, or 'notify' to show update notifications
 	// This field can have the runtime type of [bool] or "notify".
-	Autoupdate interface{} `json:"autoupdate"`
+	Autoupdate any `json:"autoupdate"`
 	// Command configuration, see https://opencode.ai/docs/commands
 	Command map[string]ConfigCommand `json:"command"`
 	// Compaction settings for session history
@@ -90,7 +90,7 @@ type Config struct {
 	// Per OpenAPI `Config.formatter` is `boolean | object | map[string]ConfigFormatter`.
 	// This field can have the runtime type of [bool], [map[string]ConfigFormatter],
 	// [map[string]bool].
-	Formatter interface{} `json:"formatter"`
+	Formatter any `json:"formatter"`
 	// Additional instruction files or patterns to include
 	Instructions []string `json:"instructions"`
 	// @deprecated Always uses stretch layout.
@@ -98,7 +98,7 @@ type Config struct {
 	// Log level for the application
 	LogLevel ConfigLogLevel `json:"logLevel"`
 	// This field can have the runtime type of [bool], [map[string]ConfigLsp].
-	Lsp interface{} `json:"lsp"`
+	Lsp any `json:"lsp"`
 	// MCP (Model Context Protocol) server configurations
 	Mcp map[string]ConfigMcp `json:"mcp"`
 	// @deprecated Use `agent` field instead.
@@ -109,9 +109,9 @@ type Config struct {
 	// object with per-action permission rule overrides.
 	// This field can have the runtime type of [ConfigPermissionAction],
 	// [ConfigPermission].
-	Permission interface{} `json:"permission"`
-	// This field can have the runtime type of [string] or [][2]interface{}{string, object}.
-	Plugin []interface{} `json:"plugin"`
+	Permission any `json:"permission"`
+	// This field can have the runtime type of [string] or [][2]any{string, object}.
+	Plugin []any `json:"plugin"`
 	// Custom provider configurations and model overrides
 	Provider map[string]ConfigProvider `json:"provider"`
 	// Reference configuration for external documentation. Keys are reference
@@ -119,12 +119,12 @@ type Config struct {
 	// or local).
 	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
 	// [ConfigV2ReferenceLocal].
-	Reference map[string]interface{} `json:"reference"`
+	Reference map[string]any `json:"reference"`
 	// References from external sources. Keys are reference names, values can be a
 	// plain URL/path string or a structured config (git or local).
 	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
 	// [ConfigV2ReferenceLocal].
-	References map[string]interface{} `json:"references"`
+	References map[string]any `json:"references"`
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
 	Share ConfigShare `json:"share"`
@@ -418,11 +418,11 @@ type ConfigAgentBuild struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]interface{}     `json:"options"`
+	Options     map[string]any             `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
 	MaxSteps    int64                      `json:"maxSteps"`
-	ExtraFields map[string]interface{}     `json:"-,extras"`
+	ExtraFields map[string]any             `json:"-,extras"`
 	JSON        configAgentBuildJSON       `json:"-"`
 }
 
@@ -474,35 +474,35 @@ func (r ConfigAgentBuildMode) IsKnown() bool {
 
 type ConfigAgentBuildPermission struct {
 	// This field can have the runtime type of [ConfigAgentBuildPermissionBashString], [ConfigAgentBuildPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                    `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                            `json:"skill"`
 	JSON  configAgentBuildPermissionJSON `json:"-"`
 }
 
@@ -544,15 +544,15 @@ type ConfigAgentBuildPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentBuildPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentBuildPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentBuildPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentBuildPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentBuildPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentBuildPermissionBashMap](),
 		},
 	)
 }
@@ -640,11 +640,11 @@ type ConfigAgentGeneral struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]interface{}       `json:"options"`
+	Options     map[string]any               `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"maxSteps"`
-	ExtraFields map[string]interface{}       `json:"-,extras"`
+	ExtraFields map[string]any               `json:"-,extras"`
 	JSON        configAgentGeneralJSON       `json:"-"`
 }
 
@@ -696,35 +696,35 @@ func (r ConfigAgentGeneralMode) IsKnown() bool {
 
 type ConfigAgentGeneralPermission struct {
 	// This field can have the runtime type of [ConfigAgentGeneralPermissionBashString], [ConfigAgentGeneralPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                      `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                              `json:"skill"`
 	JSON  configAgentGeneralPermissionJSON `json:"-"`
 }
 
@@ -766,15 +766,15 @@ type ConfigAgentGeneralPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentGeneralPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentGeneralPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentGeneralPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentGeneralPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentGeneralPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentGeneralPermissionBashMap](),
 		},
 	)
 }
@@ -862,11 +862,11 @@ type ConfigAgentPlan struct {
 	TopP        float64                   `json:"top_p"`
 	Variant     string                    `json:"variant"`
 	Hidden      bool                      `json:"hidden"`
-	Options     map[string]interface{}    `json:"options"`
+	Options     map[string]any            `json:"options"`
 	Color       string                    `json:"color"`
 	Steps       int64                     `json:"steps"`
 	MaxSteps    int64                     `json:"maxSteps"`
-	ExtraFields map[string]interface{}    `json:"-,extras"`
+	ExtraFields map[string]any            `json:"-,extras"`
 	JSON        configAgentPlanJSON       `json:"-"`
 }
 
@@ -917,35 +917,35 @@ func (r ConfigAgentPlanMode) IsKnown() bool {
 
 type ConfigAgentPlanPermission struct {
 	// This field can have the runtime type of [ConfigAgentPlanPermissionBashString], [ConfigAgentPlanPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                   `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                           `json:"skill"`
 	JSON  configAgentPlanPermissionJSON `json:"-"`
 }
 
@@ -987,15 +987,15 @@ type ConfigAgentPlanPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentPlanPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentPlanPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentPlanPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentPlanPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentPlanPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentPlanPermissionBashMap](),
 		},
 	)
 }
@@ -1082,11 +1082,11 @@ type ConfigAgentExplore struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]interface{}       `json:"options"`
+	Options     map[string]any               `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"maxSteps"`
-	ExtraFields map[string]interface{}       `json:"-,extras"`
+	ExtraFields map[string]any               `json:"-,extras"`
 	JSON        configAgentExploreJSON       `json:"-"`
 }
 
@@ -1138,35 +1138,35 @@ func (r ConfigAgentExploreMode) IsKnown() bool {
 
 type ConfigAgentExplorePermission struct {
 	// This field can have the runtime type of [ConfigAgentExplorePermissionBashString], [ConfigAgentExplorePermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                      `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                              `json:"skill"`
 	JSON  configAgentExplorePermissionJSON `json:"-"`
 }
 
@@ -1208,15 +1208,15 @@ type ConfigAgentExplorePermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentExplorePermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentExplorePermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentExplorePermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentExplorePermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentExplorePermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentExplorePermissionBashMap](),
 		},
 	)
 }
@@ -1303,11 +1303,11 @@ type ConfigAgentTitle struct {
 	TopP        float64                    `json:"top_p"`
 	Variant     string                     `json:"variant"`
 	Hidden      bool                       `json:"hidden"`
-	Options     map[string]interface{}     `json:"options"`
+	Options     map[string]any             `json:"options"`
 	Color       string                     `json:"color"`
 	Steps       int64                      `json:"steps"`
 	MaxSteps    int64                      `json:"maxSteps"`
-	ExtraFields map[string]interface{}     `json:"-,extras"`
+	ExtraFields map[string]any             `json:"-,extras"`
 	JSON        configAgentTitleJSON       `json:"-"`
 }
 
@@ -1358,35 +1358,35 @@ func (r ConfigAgentTitleMode) IsKnown() bool {
 
 type ConfigAgentTitlePermission struct {
 	// This field can have the runtime type of [ConfigAgentTitlePermissionBashString], [ConfigAgentTitlePermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                    `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                            `json:"skill"`
 	JSON  configAgentTitlePermissionJSON `json:"-"`
 }
 
@@ -1428,15 +1428,15 @@ type ConfigAgentTitlePermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentTitlePermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentTitlePermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentTitlePermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentTitlePermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentTitlePermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentTitlePermissionBashMap](),
 		},
 	)
 }
@@ -1523,11 +1523,11 @@ type ConfigAgentSummary struct {
 	TopP        float64                      `json:"top_p"`
 	Variant     string                       `json:"variant"`
 	Hidden      bool                         `json:"hidden"`
-	Options     map[string]interface{}       `json:"options"`
+	Options     map[string]any               `json:"options"`
 	Color       string                       `json:"color"`
 	Steps       int64                        `json:"steps"`
 	MaxSteps    int64                        `json:"maxSteps"`
-	ExtraFields map[string]interface{}       `json:"-,extras"`
+	ExtraFields map[string]any               `json:"-,extras"`
 	JSON        configAgentSummaryJSON       `json:"-"`
 }
 
@@ -1578,35 +1578,35 @@ func (r ConfigAgentSummaryMode) IsKnown() bool {
 
 type ConfigAgentSummaryPermission struct {
 	// This field can have the runtime type of [ConfigAgentSummaryPermissionBashString], [ConfigAgentSummaryPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                      `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                              `json:"skill"`
 	JSON  configAgentSummaryPermissionJSON `json:"-"`
 }
 
@@ -1648,15 +1648,15 @@ type ConfigAgentSummaryPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentSummaryPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentSummaryPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentSummaryPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentSummaryPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentSummaryPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentSummaryPermissionBashMap](),
 		},
 	)
 }
@@ -1743,11 +1743,11 @@ type ConfigAgentCompaction struct {
 	TopP        float64                         `json:"top_p"`
 	Variant     string                          `json:"variant"`
 	Hidden      bool                            `json:"hidden"`
-	Options     map[string]interface{}          `json:"options"`
+	Options     map[string]any                  `json:"options"`
 	Color       string                          `json:"color"`
 	Steps       int64                           `json:"steps"`
 	MaxSteps    int64                           `json:"maxSteps"`
-	ExtraFields map[string]interface{}          `json:"-,extras"`
+	ExtraFields map[string]any                  `json:"-,extras"`
 	JSON        configAgentCompactionJSON       `json:"-"`
 }
 
@@ -1799,35 +1799,35 @@ func (r ConfigAgentCompactionMode) IsKnown() bool {
 
 type ConfigAgentCompactionPermission struct {
 	// This field can have the runtime type of [ConfigAgentCompactionPermissionBashString], [ConfigAgentCompactionPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                         `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                                 `json:"skill"`
 	JSON  configAgentCompactionPermissionJSON `json:"-"`
 }
 
@@ -1869,15 +1869,15 @@ type ConfigAgentCompactionPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigAgentCompactionPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigAgentCompactionPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigAgentCompactionPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigAgentCompactionPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigAgentCompactionPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigAgentCompactionPermissionBashMap](),
 		},
 	)
 }
@@ -2115,14 +2115,14 @@ func (r ConfigLayout) IsKnown() bool {
 
 type ConfigLsp struct {
 	// This field can have the runtime type of [[]string].
-	Command  interface{} `json:"command"`
-	Disabled bool        `json:"disabled"`
+	Command  any  `json:"command"`
+	Disabled bool `json:"disabled"`
 	// This field can have the runtime type of [map[string]string].
-	Env interface{} `json:"env"`
+	Env any `json:"env"`
 	// This field can have the runtime type of [[]string].
-	Extensions interface{} `json:"extensions"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Initialization interface{}   `json:"initialization"`
+	Extensions any `json:"extensions"`
+	// This field can have the runtime type of [map[string]any].
+	Initialization any           `json:"initialization"`
 	JSON           configLspJSON `json:"-"`
 	union          ConfigLspUnion
 }
@@ -2166,15 +2166,15 @@ type ConfigLspUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigLspUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigLspUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigLspDisabled{}),
+			Type:       reflect.TypeFor[ConfigLspDisabled](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigLspObject{}),
+			Type:       reflect.TypeFor[ConfigLspObject](),
 		},
 	)
 }
@@ -2217,12 +2217,12 @@ func (r ConfigLspDisabledDisabled) IsKnown() bool {
 }
 
 type ConfigLspObject struct {
-	Command        []string               `json:"command,required"`
-	Disabled       bool                   `json:"disabled"`
-	Env            map[string]string      `json:"env"`
-	Extensions     []string               `json:"extensions"`
-	Initialization map[string]interface{} `json:"initialization"`
-	JSON           configLspObjectJSON    `json:"-"`
+	Command        []string            `json:"command,required"`
+	Disabled       bool                `json:"disabled"`
+	Env            map[string]string   `json:"env"`
+	Extensions     []string            `json:"extensions"`
+	Initialization map[string]any      `json:"initialization"`
+	JSON           configLspObjectJSON `json:"-"`
 }
 
 // configLspObjectJSON contains the JSON metadata for the struct [ConfigLspObject]
@@ -2250,19 +2250,19 @@ type ConfigMcp struct {
 	// Type of MCP server connection
 	Type ConfigMcpType `json:"type,required"`
 	// This field can have the runtime type of [[]string]. Command and arguments to run the MCP server (for "local" type).
-	Command interface{} `json:"command"`
+	Command any `json:"command"`
 	// This field can have the runtime type of [string, nil]. Working directory for the MCP server process (for "local" type).
-	Cwd interface{} `json:"cwd"`
+	Cwd any `json:"cwd"`
 	// Enable or disable the MCP server on startup
 	Enabled bool `json:"enabled"`
 	// This field can have the runtime type of [map[string]string]. Environment variables to set when running the MCP server (for "local" type).
-	Environment interface{} `json:"environment"`
+	Environment any `json:"environment"`
 	// This field can have the runtime type of [map[string]string]. Headers to send with the request (for "remote" type).
-	Headers interface{} `json:"headers"`
+	Headers any `json:"headers"`
 	// This field can have the runtime type of [McpOAuthConfig, nil]. OAuth authentication configuration for the MCP server (for "remote" type).
-	OAuth interface{} `json:"oauth"`
+	OAuth any `json:"oauth"`
 	// This field can have the runtime type of [int64, nil]. Timeout in milliseconds for MCP server requests.
-	Timeout interface{} `json:"timeout"`
+	Timeout any `json:"timeout"`
 	// URL of the remote MCP server (for "remote" type).
 	URL   string        `json:"url"`
 	JSON  configMcpJSON `json:"-"`
@@ -2313,19 +2313,19 @@ type ConfigMcpUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigMcpUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigMcpUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpLocalConfig{}),
+			Type:       reflect.TypeFor[McpLocalConfig](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpRemoteConfig{}),
+			Type:       reflect.TypeFor[McpRemoteConfig](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigMcpDisabled{}),
+			Type:       reflect.TypeFor[ConfigMcpDisabled](),
 		},
 	)
 }
@@ -2410,11 +2410,11 @@ type ConfigModeBuild struct {
 	TopP        float64                   `json:"top_p"`
 	Variant     string                    `json:"variant"`
 	Hidden      bool                      `json:"hidden"`
-	Options     map[string]interface{}    `json:"options"`
+	Options     map[string]any            `json:"options"`
 	Color       string                    `json:"color"`
 	Steps       int64                     `json:"steps"`
 	MaxSteps    int64                     `json:"maxSteps"`
-	ExtraFields map[string]interface{}    `json:"-,extras"`
+	ExtraFields map[string]any            `json:"-,extras"`
 	JSON        configModeBuildJSON       `json:"-"`
 }
 
@@ -2465,35 +2465,35 @@ func (r ConfigModeBuildMode) IsKnown() bool {
 
 type ConfigModeBuildPermission struct {
 	// This field can have the runtime type of [ConfigModeBuildPermissionBashString], [ConfigModeBuildPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                   `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                           `json:"skill"`
 	JSON  configModeBuildPermissionJSON `json:"-"`
 }
 
@@ -2535,15 +2535,15 @@ type ConfigModeBuildPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigModeBuildPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigModeBuildPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigModeBuildPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigModeBuildPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigModeBuildPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigModeBuildPermissionBashMap](),
 		},
 	)
 }
@@ -2631,11 +2631,11 @@ type ConfigModePlan struct {
 	TopP        float64                  `json:"top_p"`
 	Variant     string                   `json:"variant"`
 	Hidden      bool                     `json:"hidden"`
-	Options     map[string]interface{}   `json:"options"`
+	Options     map[string]any           `json:"options"`
 	Color       string                   `json:"color"`
 	Steps       int64                    `json:"steps"`
 	MaxSteps    int64                    `json:"maxSteps"`
-	ExtraFields map[string]interface{}   `json:"-,extras"`
+	ExtraFields map[string]any           `json:"-,extras"`
 	JSON        configModePlanJSON       `json:"-"`
 }
 
@@ -2686,35 +2686,35 @@ func (r ConfigModePlanMode) IsKnown() bool {
 
 type ConfigModePlanPermission struct {
 	// This field can have the runtime type of [ConfigModePlanPermissionBashString], [ConfigModePlanPermissionBashMap].
-	Bash interface{} `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Edit interface{} `json:"edit"`
+	Bash any `json:"bash"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Edit any `json:"edit"`
 	// This field can have the runtime type of [string].
-	Webfetch interface{} `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
+	Webfetch any `json:"webfetch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
 	// This field can have the runtime type of [string].
-	Todowrite interface{} `json:"todowrite"`
+	Todowrite any `json:"todowrite"`
 	// This field can have the runtime type of [string].
-	Question interface{} `json:"question"`
+	Question any `json:"question"`
 	// This field can have the runtime type of [string].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
 	// This field can have the runtime type of [string].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}                  `json:"skill"`
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                          `json:"skill"`
 	JSON  configModePlanPermissionJSON `json:"-"`
 }
 
@@ -2756,15 +2756,15 @@ type ConfigModePlanPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigModePlanPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigModePlanPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigModePlanPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigModePlanPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigModePlanPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigModePlanPermissionBashMap](),
 		},
 	)
 }
@@ -2841,33 +2841,33 @@ func (r ConfigModePlanPermissionWebfetch) IsKnown() bool {
 
 type ConfigPermission struct {
 	// This field can have the runtime type of [ConfigPermissionBashString], [ConfigPermissionBashMap].
-	Bash     interface{}              `json:"bash"`
+	Bash     any                      `json:"bash"`
 	Edit     ConfigPermissionEdit     `json:"edit"`
 	Webfetch ConfigPermissionWebfetch `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Read interface{} `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Glob interface{} `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Grep interface{} `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	List interface{} `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Task interface{} `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	ExternalDirectory interface{} `json:"external_directory"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Todowrite interface{} `json:"todowrite"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Question interface{} `json:"question"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Websearch interface{} `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Lsp interface{} `json:"lsp"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	DoomLoop interface{} `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]interface{}].
-	Skill interface{}          `json:"skill"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Read any `json:"read"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Glob any `json:"glob"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Grep any `json:"grep"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	List any `json:"list"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Task any `json:"task"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	ExternalDirectory any `json:"external_directory"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Todowrite any `json:"todowrite"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Question any `json:"question"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Websearch any `json:"websearch"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Lsp any `json:"lsp"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	DoomLoop any `json:"doom_loop"`
+	// This field can have the runtime type of [string] or [map[string]any].
+	Skill any                  `json:"skill"`
 	JSON  configPermissionJSON `json:"-"`
 }
 
@@ -2910,30 +2910,30 @@ type ConfigPermissionBashUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigPermissionUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigPermissionUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigPermissionAction("")),
+			Type:       reflect.TypeFor[ConfigPermissionAction](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigPermission{}),
+			Type:       reflect.TypeFor[ConfigPermission](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigPermissionBashUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigPermissionBashUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigPermissionBashString("")),
+			Type:       reflect.TypeFor[ConfigPermissionBashString](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigPermissionBashMap{}),
+			Type:       reflect.TypeFor[ConfigPermissionBashMap](),
 		},
 	)
 }
@@ -3120,12 +3120,12 @@ type ConfigProviderModel struct {
 	// any arbitrary string, or the object `{ "field": string }` where the field
 	// name identifies where interleaved reasoning content is located (known values:
 	// "reasoning", "reasoning_content", "reasoning_text"; open string union).
-	// This field can have the runtime type of [bool], [string], [map[string]interface{}].
-	Interleaved interface{}                    `json:"interleaved"`
+	// This field can have the runtime type of [bool], [string], [map[string]any].
+	Interleaved any                            `json:"interleaved"`
 	Limit       ConfigProviderModelsLimit      `json:"limit"`
 	Modalities  ConfigProviderModelsModalities `json:"modalities"`
 	Name        string                         `json:"name"`
-	Options     map[string]interface{}         `json:"options"`
+	Options     map[string]any                 `json:"options"`
 	Provider    ConfigProviderModelsProvider   `json:"provider"`
 	Reasoning   bool                           `json:"reasoning"`
 	ReleaseDate string                         `json:"release_date"`
@@ -3133,7 +3133,7 @@ type ConfigProviderModel struct {
 	Temperature bool                           `json:"temperature"`
 	ToolCall    bool                           `json:"tool_call"`
 	// This field can have the runtime type of object.
-	Variants interface{}             `json:"variants"`
+	Variants any                     `json:"variants"`
 	JSON     configProviderModelJSON `json:"-"`
 }
 
@@ -3358,13 +3358,13 @@ type ConfigProviderOptions struct {
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
 	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	Timeout interface{} `json:"timeout"`
+	Timeout any `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
 	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	HeaderTimeout interface{}               `json:"headerTimeout"`
+	HeaderTimeout any                       `json:"headerTimeout"`
 	ChunkTimeout  int64                     `json:"chunkTimeout"`
-	ExtraFields   map[string]interface{}    `json:"-,extras"`
+	ExtraFields   map[string]any            `json:"-,extras"`
 	JSON          configProviderOptionsJSON `json:"-"`
 }
 
@@ -3401,19 +3401,19 @@ type ConfigProviderOptionsTimeoutUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigProviderOptionsTimeoutUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigProviderOptionsTimeoutUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.Number,
-			Type:       reflect.TypeOf(shared.UnionInt(0)),
+			Type:       reflect.TypeFor[shared.UnionInt](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.True,
-			Type:       reflect.TypeOf(shared.UnionBool(false)),
+			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.False,
-			Type:       reflect.TypeOf(shared.UnionBool(false)),
+			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 	)
 }
@@ -3521,7 +3521,7 @@ type McpRemoteConfig struct {
 	Headers map[string]string `json:"headers"`
 	// OAuth authentication configuration for this MCP server.
 	// This field can have the runtime type of [McpOAuthConfig] or bool (false).
-	OAuth interface{}         `json:"oauth"`
+	OAuth any                 `json:"oauth"`
 	JSON  mcpRemoteConfigJSON `json:"-"`
 }
 
@@ -3587,7 +3587,7 @@ type ConfigUpdateParams struct {
 	// Automatically update to the latest version. Pass true to auto-update,
 	// false to disable, or "notify" to show update notifications.
 	// Accepts [bool] or [string] ("notify").
-	Autoupdate        param.Field[interface{}]                   `json:"autoupdate"`
+	Autoupdate        param.Field[any]                           `json:"autoupdate"`
 	Command           param.Field[map[string]ConfigCommandParam] `json:"command"`
 	Compaction        param.Field[ConfigCompactionParam]         `json:"compaction"`
 	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
@@ -3597,14 +3597,14 @@ type ConfigUpdateParams struct {
 	// Enable or configure formatters. Pass false to disable, true to enable
 	// built-ins, or a map of formatter-name to config to enable with overrides.
 	// Accepts [bool] or [map[string]ConfigFormatter].
-	Formatter    param.Field[interface{}]    `json:"formatter"`
+	Formatter    param.Field[any]            `json:"formatter"`
 	Instructions param.Field[[]string]       `json:"instructions"`
 	Layout       param.Field[ConfigLayout]   `json:"layout"`
 	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
 	// Enable or configure LSP servers. Pass false to disable, true to enable
 	// built-ins, or a map of lsp-name to config to enable with overrides.
 	// Accepts [bool] or [map[string]ConfigLsp].
-	Lsp   param.Field[interface{}]                    `json:"lsp"`
+	Lsp   param.Field[any]                            `json:"lsp"`
 	Mcp   param.Field[map[string]ConfigMcpUnionParam] `json:"mcp"`
 	Mode  param.Field[ConfigModeParam]                `json:"mode"`
 	Model param.Field[string]                         `json:"model"`
@@ -3614,26 +3614,26 @@ type ConfigUpdateParams struct {
 	Permission param.Field[ConfigPermissionUnionParam] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin   param.Field[[]interface{}]                  `json:"plugin"`
+	Plugin   param.Field[[]any]                          `json:"plugin"`
 	Provider param.Field[map[string]ConfigProviderParam] `json:"provider"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference param.Field[map[string]interface{}] `json:"reference"`
+	Reference param.Field[map[string]any] `json:"reference"`
 	// Map of reference name → value. Each value can be a plain [string] (URL/path),
 	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]interface{}] `json:"references"`
-	Share         param.Field[ConfigShare]            `json:"share"`
-	Shell         param.Field[string]                 `json:"shell"`
-	Server        param.Field[ServerConfigParam]      `json:"server"`
-	Skills        param.Field[ConfigSkillsParam]      `json:"skills"`
-	SmallModel    param.Field[string]                 `json:"small_model"`
-	Snapshot      param.Field[bool]                   `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutputParam]  `json:"tool_output"`
-	Tools         param.Field[map[string]bool]        `json:"tools"`
-	Username      param.Field[string]                 `json:"username"`
-	Watcher       param.Field[ConfigWatcherParam]     `json:"watcher"`
-	DefaultAgent  param.Field[string]                 `json:"default_agent"`
-	SubagentDepth param.Field[int64]                  `json:"subagent_depth"`
+	References    param.Field[map[string]any]        `json:"references"`
+	Share         param.Field[ConfigShare]           `json:"share"`
+	Shell         param.Field[string]                `json:"shell"`
+	Server        param.Field[ServerConfigParam]     `json:"server"`
+	Skills        param.Field[ConfigSkillsParam]     `json:"skills"`
+	SmallModel    param.Field[string]                `json:"small_model"`
+	Snapshot      param.Field[bool]                  `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutputParam] `json:"tool_output"`
+	Tools         param.Field[map[string]bool]       `json:"tools"`
+	Username      param.Field[string]                `json:"username"`
+	Watcher       param.Field[ConfigWatcherParam]    `json:"watcher"`
+	DefaultAgent  param.Field[string]                `json:"default_agent"`
+	SubagentDepth param.Field[int64]                 `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -3803,15 +3803,15 @@ func (r ConfigV2ReferenceLocal) implementsConfigV2ReferenceUnion() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigV2ReferenceUnion)(nil)).Elem(),
+		reflect.TypeFor[ConfigV2ReferenceUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigV2ReferenceGit{}),
+			Type:       reflect.TypeFor[ConfigV2ReferenceGit](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigV2ReferenceLocal{}),
+			Type:       reflect.TypeFor[ConfigV2ReferenceLocal](),
 		},
 	)
 }
@@ -3983,21 +3983,21 @@ func (r AttachmentConfigParam) MarshalJSON() (data []byte, err error) {
 // It is also the object variant of the [ConfigPermissionUnionParam] request union.
 type ConfigPermissionParam struct {
 	// Accepts [ConfigPermissionBashString] or [map[string]ConfigPermissionBashMapItem].
-	Bash              param.Field[interface{}] `json:"bash"`
-	Edit              param.Field[interface{}] `json:"edit"`
-	Webfetch          param.Field[interface{}] `json:"webfetch"`
-	Read              param.Field[interface{}] `json:"read"`
-	Glob              param.Field[interface{}] `json:"glob"`
-	Grep              param.Field[interface{}] `json:"grep"`
-	List              param.Field[interface{}] `json:"list"`
-	Task              param.Field[interface{}] `json:"task"`
-	ExternalDirectory param.Field[interface{}] `json:"external_directory"`
-	Todowrite         param.Field[interface{}] `json:"todowrite"`
-	Question          param.Field[interface{}] `json:"question"`
-	Websearch         param.Field[interface{}] `json:"websearch"`
-	Lsp               param.Field[interface{}] `json:"lsp"`
-	DoomLoop          param.Field[interface{}] `json:"doom_loop"`
-	Skill             param.Field[interface{}] `json:"skill"`
+	Bash              param.Field[any] `json:"bash"`
+	Edit              param.Field[any] `json:"edit"`
+	Webfetch          param.Field[any] `json:"webfetch"`
+	Read              param.Field[any] `json:"read"`
+	Glob              param.Field[any] `json:"glob"`
+	Grep              param.Field[any] `json:"grep"`
+	List              param.Field[any] `json:"list"`
+	Task              param.Field[any] `json:"task"`
+	ExternalDirectory param.Field[any] `json:"external_directory"`
+	Todowrite         param.Field[any] `json:"todowrite"`
+	Question          param.Field[any] `json:"question"`
+	Websearch         param.Field[any] `json:"websearch"`
+	Lsp               param.Field[any] `json:"lsp"`
+	DoomLoop          param.Field[any] `json:"doom_loop"`
+	Skill             param.Field[any] `json:"skill"`
 }
 
 func (r ConfigPermissionParam) MarshalJSON() (data []byte, err error) {
@@ -4016,15 +4016,15 @@ type ConfigPermissionUnionParam interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigPermissionUnionParam)(nil)).Elem(),
+		reflect.TypeFor[ConfigPermissionUnionParam](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeOf(ConfigPermissionAction("")),
+			Type:       reflect.TypeFor[ConfigPermissionAction](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigPermissionParam{}),
+			Type:       reflect.TypeFor[ConfigPermissionParam](),
 		},
 	)
 }
@@ -4136,34 +4136,34 @@ type ConfigMcpUnionParam interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ConfigMcpUnionParam)(nil)).Elem(),
+		reflect.TypeFor[ConfigMcpUnionParam](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpLocalConfigParam{}),
+			Type:       reflect.TypeFor[McpLocalConfigParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpRemoteConfigParam{}),
+			Type:       reflect.TypeFor[McpRemoteConfigParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ConfigMcpDisabledParam{}),
+			Type:       reflect.TypeFor[ConfigMcpDisabledParam](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*McpOAuthConfigUnionParam)(nil)).Elem(),
+		reflect.TypeFor[McpOAuthConfigUnionParam](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(McpOAuthConfigParam{}),
+			Type:       reflect.TypeFor[McpOAuthConfigParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.False,
-			Type:       reflect.TypeOf(McpOAuthConfigDisabledParam{}),
+			Type:       reflect.TypeFor[McpOAuthConfigDisabledParam](),
 		},
 	)
 }
@@ -4176,11 +4176,11 @@ type ConfigProviderOptionsParam struct {
 	SetCacheKey   param.Field[bool]   `json:"setCacheKey"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout. Accepts [shared.UnionInt] or [shared.UnionBool].
-	Timeout param.Field[interface{}] `json:"timeout"`
+	Timeout param.Field[any] `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Set to false to disable.
 	// Accepts [shared.UnionInt] or [shared.UnionBool].
-	HeaderTimeout param.Field[interface{}] `json:"headerTimeout"`
-	ChunkTimeout  param.Field[int64]       `json:"chunkTimeout"`
+	HeaderTimeout param.Field[any]   `json:"headerTimeout"`
+	ChunkTimeout  param.Field[int64] `json:"chunkTimeout"`
 }
 
 func (r ConfigProviderOptionsParam) MarshalJSON() (data []byte, err error) {
@@ -4199,9 +4199,9 @@ type ConfigProviderModelParam struct {
 	// any arbitrary string, or the object `{ "field": string }` (use
 	// [ConfigProviderModelsInterleavedFieldParam] for the object variant).
 	// Accepts [bool], [string] or [ConfigProviderModelsInterleavedFieldParam].
-	Interleaved param.Field[interface{}]                         `json:"interleaved"`
+	Interleaved param.Field[any]                                 `json:"interleaved"`
 	Name        param.Field[string]                              `json:"name"`
-	Options     param.Field[map[string]interface{}]              `json:"options"`
+	Options     param.Field[map[string]any]                      `json:"options"`
 	Reasoning   param.Field[bool]                                `json:"reasoning"`
 	ReleaseDate param.Field[string]                              `json:"release_date"`
 	Temperature param.Field[bool]                                `json:"temperature"`
@@ -4212,7 +4212,7 @@ type ConfigProviderModelParam struct {
 	Provider    param.Field[ConfigProviderModelsProviderParam]   `json:"provider"`
 	Status      param.Field[ConfigProviderModelsStatus]          `json:"status"`
 	// Accepts object.
-	Variants param.Field[interface{}] `json:"variants"`
+	Variants param.Field[any] `json:"variants"`
 }
 
 func (r ConfigProviderModelParam) MarshalJSON() (data []byte, err error) {
@@ -4309,7 +4309,7 @@ func (r ConfigProviderParam) MarshalJSON() (data []byte, err error) {
 
 // configAgentSubParam is a shared param shape for all ConfigAgent sub-types
 // (Build, General, Plan, Explore, Title, Summary, Compaction).
-// All sub-agent config structs share the same fields; use interface{} for the
+// All sub-agent config structs share the same fields; use any for the
 // permission field since it accepts a complex per-tool bash/string/map union.
 type configAgentSubParam struct {
 	Description param.Field[string] `json:"description"`
@@ -4317,17 +4317,17 @@ type configAgentSubParam struct {
 	Mode        param.Field[string] `json:"mode"`
 	Model       param.Field[string] `json:"model"`
 	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[interface{}]            `json:"permission"`
-	Prompt      param.Field[string]                 `json:"prompt"`
-	Temperature param.Field[float64]                `json:"temperature"`
-	Tools       param.Field[map[string]bool]        `json:"tools"`
-	TopP        param.Field[float64]                `json:"top_p"`
-	Variant     param.Field[string]                 `json:"variant"`
-	Hidden      param.Field[bool]                   `json:"hidden"`
-	Options     param.Field[map[string]interface{}] `json:"options"`
-	Color       param.Field[string]                 `json:"color"`
-	Steps       param.Field[int64]                  `json:"steps"`
-	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+	Permission  param.Field[any]             `json:"permission"`
+	Prompt      param.Field[string]          `json:"prompt"`
+	Temperature param.Field[float64]         `json:"temperature"`
+	Tools       param.Field[map[string]bool] `json:"tools"`
+	TopP        param.Field[float64]         `json:"top_p"`
+	Variant     param.Field[string]          `json:"variant"`
+	Hidden      param.Field[bool]            `json:"hidden"`
+	Options     param.Field[map[string]any]  `json:"options"`
+	Color       param.Field[string]          `json:"color"`
+	Steps       param.Field[int64]           `json:"steps"`
+	MaxSteps    param.Field[int64]           `json:"maxSteps"`
 }
 
 func (r configAgentSubParam) MarshalJSON() (data []byte, err error) {
@@ -4390,17 +4390,17 @@ type ConfigModeBuildParam struct {
 	Mode        param.Field[string] `json:"mode"`
 	Model       param.Field[string] `json:"model"`
 	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[interface{}]            `json:"permission"`
-	Prompt      param.Field[string]                 `json:"prompt"`
-	Temperature param.Field[float64]                `json:"temperature"`
-	Tools       param.Field[map[string]bool]        `json:"tools"`
-	TopP        param.Field[float64]                `json:"top_p"`
-	Variant     param.Field[string]                 `json:"variant"`
-	Hidden      param.Field[bool]                   `json:"hidden"`
-	Options     param.Field[map[string]interface{}] `json:"options"`
-	Color       param.Field[string]                 `json:"color"`
-	Steps       param.Field[int64]                  `json:"steps"`
-	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+	Permission  param.Field[any]             `json:"permission"`
+	Prompt      param.Field[string]          `json:"prompt"`
+	Temperature param.Field[float64]         `json:"temperature"`
+	Tools       param.Field[map[string]bool] `json:"tools"`
+	TopP        param.Field[float64]         `json:"top_p"`
+	Variant     param.Field[string]          `json:"variant"`
+	Hidden      param.Field[bool]            `json:"hidden"`
+	Options     param.Field[map[string]any]  `json:"options"`
+	Color       param.Field[string]          `json:"color"`
+	Steps       param.Field[int64]           `json:"steps"`
+	MaxSteps    param.Field[int64]           `json:"maxSteps"`
 }
 
 func (r ConfigModeBuildParam) MarshalJSON() (data []byte, err error) {
@@ -4414,17 +4414,17 @@ type ConfigModePlanParam struct {
 	Mode        param.Field[string] `json:"mode"`
 	Model       param.Field[string] `json:"model"`
 	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[interface{}]            `json:"permission"`
-	Prompt      param.Field[string]                 `json:"prompt"`
-	Temperature param.Field[float64]                `json:"temperature"`
-	Tools       param.Field[map[string]bool]        `json:"tools"`
-	TopP        param.Field[float64]                `json:"top_p"`
-	Variant     param.Field[string]                 `json:"variant"`
-	Hidden      param.Field[bool]                   `json:"hidden"`
-	Options     param.Field[map[string]interface{}] `json:"options"`
-	Color       param.Field[string]                 `json:"color"`
-	Steps       param.Field[int64]                  `json:"steps"`
-	MaxSteps    param.Field[int64]                  `json:"maxSteps"`
+	Permission  param.Field[any]             `json:"permission"`
+	Prompt      param.Field[string]          `json:"prompt"`
+	Temperature param.Field[float64]         `json:"temperature"`
+	Tools       param.Field[map[string]bool] `json:"tools"`
+	TopP        param.Field[float64]         `json:"top_p"`
+	Variant     param.Field[string]          `json:"variant"`
+	Hidden      param.Field[bool]            `json:"hidden"`
+	Options     param.Field[map[string]any]  `json:"options"`
+	Color       param.Field[string]          `json:"color"`
+	Steps       param.Field[int64]           `json:"steps"`
+	MaxSteps    param.Field[int64]           `json:"maxSteps"`
 }
 
 func (r ConfigModePlanParam) MarshalJSON() (data []byte, err error) {

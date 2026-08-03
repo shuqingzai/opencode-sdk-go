@@ -183,8 +183,8 @@ type PermissionV2Request struct {
 	Action    string   `json:"action,required"`
 	Resources []string `json:"resources,required"`
 	Save      []string `json:"save"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                     `json:"metadata"`
 	Source   PermissionV2Source      `json:"source"`
 	JSON     permissionV2RequestJSON `json:"-"`
 }

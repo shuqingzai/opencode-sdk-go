@@ -77,7 +77,7 @@ type V2ReferenceInfo struct {
 	Hidden      bool   `json:"hidden"`
 	// This field can have the runtime type of [ReferenceLocalSource],
 	// [ReferenceGitSource].
-	Source      interface{}         `json:"source,required"`
+	Source      any                 `json:"source,required"`
 	JSON        v2ReferenceInfoJSON `json:"-"`
 	sourceUnion ReferenceSourceUnion
 }
@@ -186,17 +186,17 @@ func (r ReferenceGitSource) implementsReferenceSourceUnion() {}
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ReferenceSourceUnion)(nil)).Elem(),
+		reflect.TypeFor[ReferenceSourceUnion](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "local",
-			Type:               reflect.TypeOf(ReferenceLocalSource{}),
+			Type:               reflect.TypeFor[ReferenceLocalSource](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "git",
-			Type:               reflect.TypeOf(ReferenceGitSource{}),
+			Type:               reflect.TypeFor[ReferenceGitSource](),
 		},
 	)
 }

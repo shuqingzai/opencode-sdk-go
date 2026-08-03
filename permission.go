@@ -74,14 +74,14 @@ func (r *PermissionService) Respond(ctx context.Context, sessionID string, permi
 }
 
 type PermissionRequest struct {
-	ID         string                 `json:"id,required"`
-	SessionID  string                 `json:"sessionID,required"`
-	Permission string                 `json:"permission,required"`
-	Patterns   []string               `json:"patterns,required"`
-	Metadata   map[string]interface{} `json:"metadata,required"`
-	Always     []string               `json:"always,required"`
-	Tool       PermissionRequestTool  `json:"tool"`
-	JSON       permissionRequestJSON  `json:"-"`
+	ID         string                `json:"id,required"`
+	SessionID  string                `json:"sessionID,required"`
+	Permission string                `json:"permission,required"`
+	Patterns   []string              `json:"patterns,required"`
+	Metadata   map[string]any        `json:"metadata,required"`
+	Always     []string              `json:"always,required"`
+	Tool       PermissionRequestTool `json:"tool"`
+	JSON       permissionRequestJSON `json:"-"`
 }
 
 // permissionRequestJSON contains the JSON metadata for the struct

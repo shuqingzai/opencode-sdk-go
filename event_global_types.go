@@ -1304,8 +1304,8 @@ type EventListResponseEventSessionNextReasoningStartedProperties struct {
 	AssistantMessageID string `json:"assistantMessageID,required"`
 	SessionID          string `json:"sessionID,required"`
 	ReasoningID        string `json:"reasoningID,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	ProviderMetadata interface{}                                                     `json:"providerMetadata"`
+	// This field can have the runtime type of [map[string]any].
+	ProviderMetadata any                                                             `json:"providerMetadata"`
 	JSON             eventListResponseEventSessionNextReasoningStartedPropertiesJSON `json:"-"`
 }
 
@@ -1442,8 +1442,8 @@ type EventListResponseEventSessionNextReasoningEndedProperties struct {
 	SessionID          string `json:"sessionID,required"`
 	ReasoningID        string `json:"reasoningID,required"`
 	Text               string `json:"text,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	ProviderMetadata interface{}                                                   `json:"providerMetadata"`
+	// This field can have the runtime type of [map[string]any].
+	ProviderMetadata any                                                           `json:"providerMetadata"`
 	JSON             eventListResponseEventSessionNextReasoningEndedPropertiesJSON `json:"-"`
 }
 
@@ -1717,8 +1717,8 @@ type EventListResponseEventSessionNextToolCalledProperties struct {
 	SessionID          string `json:"sessionID,required"`
 	CallID             string `json:"callID,required"`
 	Tool               string `json:"tool,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Input    interface{}                                               `json:"input,required"`
+	// This field can have the runtime type of [map[string]any].
+	Input    any                                                       `json:"input,required"`
 	Provider EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
 	JSON     eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
 }
@@ -1789,10 +1789,10 @@ type EventListResponseEventSessionNextToolProgressProperties struct {
 	AssistantMessageID string `json:"assistantMessageID,required"`
 	SessionID          string `json:"sessionID,required"`
 	CallID             string `json:"callID,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [map[string]any].
+	Structured any `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content []interface{}                                               `json:"content,required"`
+	Content []any                                                       `json:"content,required"`
 	JSON    eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
 }
 
@@ -1861,13 +1861,13 @@ type EventListResponseEventSessionNextToolSuccessProperties struct {
 	AssistantMessageID string `json:"assistantMessageID,required"`
 	SessionID          string `json:"sessionID,required"`
 	CallID             string `json:"callID,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Structured interface{} `json:"structured,required"`
+	// This field can have the runtime type of [map[string]any].
+	Structured any `json:"structured,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     []interface{}                                              `json:"content,required"`
+	Content     []any                                                      `json:"content,required"`
 	OutputPaths []string                                                   `json:"outputPaths"`
 	Provider    EventListResponseEventSessionNextToolCalledProvider        `json:"provider,required"`
-	Result      interface{}                                                `json:"result"`
+	Result      any                                                        `json:"result"`
 	JSON        eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
 }
 
@@ -1941,7 +1941,7 @@ type EventListResponseEventSessionNextToolFailedProperties struct {
 	CallID             string                                                    `json:"callID,required"`
 	Error              SessionErrorUnknown                                       `json:"error,required"`
 	Provider           EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
-	Result             interface{}                                               `json:"result"`
+	Result             any                                                       `json:"result"`
 	JSON               eventListResponseEventSessionNextToolFailedPropertiesJSON `json:"-"`
 }
 
@@ -2290,8 +2290,8 @@ func (r eventListResponseEventSessionNextModelSwitchedModelJSON) RawJSON() strin
 // EventListResponseEventSessionNextToolCalledProvider
 type EventListResponseEventSessionNextToolCalledProvider struct {
 	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}                                             `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                                                     `json:"metadata"`
 	JSON     eventListResponseEventSessionNextToolCalledProviderJSON `json:"-"`
 }
 
@@ -2873,14 +2873,14 @@ func (r EventListResponseEventPermissionV2Asked) implementsEventListResponse()  
 func (r EventListResponseEventPermissionV2Asked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionV2AskedProperties struct {
-	ID        string                 `json:"id,required"`
-	SessionID string                 `json:"sessionID,required"`
-	Action    string                 `json:"action,required"`
-	Resources []string               `json:"resources,required"`
-	Save      []string               `json:"save"`
-	Metadata  map[string]interface{} `json:"metadata"`
+	ID        string         `json:"id,required"`
+	SessionID string         `json:"sessionID,required"`
+	Action    string         `json:"action,required"`
+	Resources []string       `json:"resources,required"`
+	Save      []string       `json:"save"`
+	Metadata  map[string]any `json:"metadata"`
 	// This field can have the runtime type of [EventListResponseEventPermissionV2AskedPropertiesSource].
-	Source interface{}                                           `json:"source"`
+	Source any                                                   `json:"source"`
 	JSON   eventListResponseEventPermissionV2AskedPropertiesJSON `json:"-"`
 }
 
@@ -3081,7 +3081,7 @@ type EventListResponseEventQuestionV2AskedProperties struct {
 	SessionID string                                                     `json:"sessionID,required"`
 	Questions []EventListResponseEventQuestionV2AskedPropertiesQuestions `json:"questions,required"`
 	// This field can have the runtime type of [EventListResponseEventQuestionV2AskedPropertiesTool].
-	Tool interface{}                                         `json:"tool"`
+	Tool any                                                 `json:"tool"`
 	JSON eventListResponseEventQuestionV2AskedPropertiesJSON `json:"-"`
 }
 

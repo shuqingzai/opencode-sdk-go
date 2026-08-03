@@ -583,7 +583,7 @@ func (r OutputFormatTextType) IsKnown() bool {
 
 type OutputFormatJsonSchema struct {
 	Type       param.Field[OutputFormatJsonSchemaType] `json:"type,required"`
-	Schema     param.Field[interface{}]                `json:"schema,required"`
+	Schema     param.Field[any]                        `json:"schema,required"`
 	RetryCount param.Field[int64]                      `json:"retryCount"`
 }
 
@@ -609,15 +609,15 @@ func (r OutputFormatJsonSchemaType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*OutputFormatUnion)(nil)).Elem(),
+		reflect.TypeFor[OutputFormatUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(OutputFormatText{}),
+			Type:       reflect.TypeFor[OutputFormatText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(OutputFormatJsonSchema{}),
+			Type:       reflect.TypeFor[OutputFormatJsonSchema](),
 		},
 	)
 }
@@ -636,7 +636,7 @@ type AssistantMessage struct {
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
 	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
-	Structured interface{}           `json:"structured,omitzero"`
+	Structured any                   `json:"structured,omitzero"`
 	Variant    string                `json:"variant,omitzero"`
 	Finish     string                `json:"finish,omitzero"`
 	Error      AssistantMessageError `json:"error"`
@@ -792,10 +792,10 @@ func (r assistantMessageTokensCacheJSON) RawJSON() string {
 
 type AssistantMessageError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
-	// [shared.UnknownErrorData], [interface{}], [shared.MessageAbortedErrorData],
+	// [shared.UnknownErrorData], [any], [shared.MessageAbortedErrorData],
 	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
 	// [shared.APIErrorData].
-	Data  interface{}               `json:"data,required"`
+	Data  any                       `json:"data,required"`
 	Name  AssistantMessageErrorName `json:"name,required"`
 	JSON  assistantMessageErrorJSON `json:"-"`
 	union AssistantMessageErrorUnion
@@ -845,46 +845,46 @@ type AssistantMessageErrorUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*AssistantMessageErrorUnion)(nil)).Elem(),
+		reflect.TypeFor[AssistantMessageErrorUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ProviderAuthError{}),
+			Type:       reflect.TypeFor[shared.ProviderAuthError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.UnknownError{}),
+			Type:       reflect.TypeFor[shared.UnknownError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.MessageOutputLengthError{}),
+			Type:       reflect.TypeFor[shared.MessageOutputLengthError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.MessageAbortedError{}),
+			Type:       reflect.TypeFor[shared.MessageAbortedError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.StructuredOutputError{}),
+			Type:       reflect.TypeFor[shared.StructuredOutputError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ContentFilterError{}),
+			Type:       reflect.TypeFor[shared.ContentFilterError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ContextOverflowError{}),
+			Type:       reflect.TypeFor[shared.ContextOverflowError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.APIError{}),
+			Type:       reflect.TypeFor[shared.APIError](),
 		},
 	)
 }
 
 type AssistantMessageErrorMessageOutputLengthError struct {
-	// This field can have the runtime type of [map[string]interface{}].
-	Data interface{}                                       `json:"data,required"`
+	// This field can have the runtime type of [map[string]any].
+	Data any                                               `json:"data,required"`
 	Name AssistantMessageErrorMessageOutputLengthErrorName `json:"name,required"`
 	JSON assistantMessageErrorMessageOutputLengthErrorJSON `json:"-"`
 }
@@ -1097,7 +1097,7 @@ type FilePartSource struct {
 	Kind int64              `json:"kind"`
 	Name string             `json:"name"`
 	// This field can have the runtime type of [SymbolSourceRange].
-	Range interface{}        `json:"range"`
+	Range any                `json:"range"`
 	JSON  filePartSourceJSON `json:"-"`
 	union FilePartSourceUnion
 }
@@ -1142,19 +1142,19 @@ type FilePartSourceUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*FilePartSourceUnion)(nil)).Elem(),
+		reflect.TypeFor[FilePartSourceUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(FileSource{}),
+			Type:       reflect.TypeFor[FileSource](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SymbolSource{}),
+			Type:       reflect.TypeFor[SymbolSource](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ResourceSource{}),
+			Type:       reflect.TypeFor[ResourceSource](),
 		},
 	)
 }
@@ -1181,7 +1181,7 @@ type FilePartSourceParam struct {
 	Type  param.Field[FilePartSourceType]      `json:"type,required"`
 	Kind  param.Field[int64]                   `json:"kind"`
 	Name  param.Field[string]                  `json:"name"`
-	Range param.Field[interface{}]             `json:"range"`
+	Range param.Field[any]                     `json:"range"`
 }
 
 func (r FilePartSourceParam) MarshalJSON() (data []byte, err error) {
@@ -1197,23 +1197,23 @@ type FilePartSourceUnionParam interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*FilePartSourceUnionParam)(nil)).Elem(),
+		reflect.TypeFor[FilePartSourceUnionParam](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(FilePartSourceParam{}),
+			Type:       reflect.TypeFor[FilePartSourceParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(FileSourceParam{}),
+			Type:       reflect.TypeFor[FileSourceParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SymbolSourceParam{}),
+			Type:       reflect.TypeFor[SymbolSourceParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ResourceSourceParam{}),
+			Type:       reflect.TypeFor[ResourceSourceParam](),
 		},
 	)
 }
@@ -1312,23 +1312,23 @@ type Message struct {
 	SessionID string      `json:"sessionID,required"`
 	// This field can have the runtime type of [UserMessageTime],
 	// [AssistantMessageTime].
-	Time interface{} `json:"time,required"`
-	Cost float64     `json:"cost"`
+	Time any     `json:"time,required"`
+	Cost float64 `json:"cost"`
 	// This field can have the runtime type of [AssistantMessageError].
-	Error    interface{} `json:"error"`
-	Mode     string      `json:"mode"`
-	ModelID  string      `json:"modelID"`
-	ParentID string      `json:"parentID"`
+	Error    any    `json:"error"`
+	Mode     string `json:"mode"`
+	ModelID  string `json:"modelID"`
+	ParentID string `json:"parentID"`
 	// This field can have the runtime type of [AssistantMessagePath].
-	Path       interface{} `json:"path"`
-	ProviderID string      `json:"providerID"`
+	Path       any    `json:"path"`
+	ProviderID string `json:"providerID"`
 	// This field can have the runtime type of [UserMessageSummary], [bool].
-	Summary interface{} `json:"summary"`
-	Finish  string      `json:"finish"`
+	Summary any    `json:"summary"`
+	Finish  string `json:"finish"`
 	// This field can have the runtime type of [string].
-	System interface{} `json:"system"`
+	System any `json:"system"`
 	// This field can have the runtime type of [AssistantMessageTokens].
-	Tokens interface{} `json:"tokens"`
+	Tokens any         `json:"tokens"`
 	JSON   messageJSON `json:"-"`
 	union  MessageUnion
 }
@@ -1383,15 +1383,15 @@ type MessageUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*MessageUnion)(nil)).Elem(),
+		reflect.TypeFor[MessageUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(UserMessage{}),
+			Type:       reflect.TypeFor[UserMessage](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AssistantMessage{}),
+			Type:       reflect.TypeFor[AssistantMessage](),
 		},
 	)
 }
@@ -1428,8 +1428,8 @@ type Part struct {
 	Files       []string           `json:"files"`
 	Hash        string             `json:"hash"`
 	Ignored     bool               `json:"ignored"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{}      `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any              `json:"metadata"`
 	Mime     string           `json:"mime"`
 	Model    SubtaskPartModel `json:"model"`
 	Name     string           `json:"name"`
@@ -1438,20 +1438,20 @@ type Part struct {
 	Reason   string           `json:"reason"`
 	Snapshot string           `json:"snapshot"`
 	// This field can have the runtime type of [FilePartSource], [AgentPartSource].
-	Source interface{} `json:"source"`
+	Source any `json:"source"`
 	// This field can have the runtime type of [ToolPartState].
-	State       interface{} `json:"state"`
-	Synthetic   bool        `json:"synthetic"`
-	TailStartID string      `json:"tail_start_id"`
-	Text        string      `json:"text"`
+	State       any    `json:"state"`
+	Synthetic   bool   `json:"synthetic"`
+	TailStartID string `json:"tail_start_id"`
+	Text        string `json:"text"`
 	// This field can have the runtime type of [TextPartTime], [ReasoningPartTime],
 	// [PartRetryPartTime].
-	Time interface{} `json:"time"`
+	Time any `json:"time"`
 	// This field can have the runtime type of [StepFinishPartTokens].
-	Tokens interface{} `json:"tokens"`
-	Tool   string      `json:"tool"`
-	URL    string      `json:"url"`
-	JSON   partJSON    `json:"-"`
+	Tokens any      `json:"tokens"`
+	Tool   string   `json:"tool"`
+	URL    string   `json:"url"`
+	JSON   partJSON `json:"-"`
 	union  PartUnion
 }
 
@@ -1526,55 +1526,55 @@ type PartUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*PartUnion)(nil)).Elem(),
+		reflect.TypeFor[PartUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TextPart{}),
+			Type:       reflect.TypeFor[TextPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SubtaskPart{}),
+			Type:       reflect.TypeFor[SubtaskPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ReasoningPart{}),
+			Type:       reflect.TypeFor[ReasoningPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(FilePart{}),
+			Type:       reflect.TypeFor[FilePart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ToolPart{}),
+			Type:       reflect.TypeFor[ToolPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(StepStartPart{}),
+			Type:       reflect.TypeFor[StepStartPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(StepFinishPart{}),
+			Type:       reflect.TypeFor[StepFinishPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SnapshotPart{}),
+			Type:       reflect.TypeFor[SnapshotPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartPatchPart{}),
+			Type:       reflect.TypeFor[PartPatchPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AgentPart{}),
+			Type:       reflect.TypeFor[AgentPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartRetryPart{}),
+			Type:       reflect.TypeFor[PartRetryPart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(CompactionPart{}),
+			Type:       reflect.TypeFor[CompactionPart](),
 		},
 	)
 }
@@ -1786,14 +1786,14 @@ func (r PartType) IsKnown() bool {
 }
 
 type ReasoningPart struct {
-	ID        string                 `json:"id,required"`
-	MessageID string                 `json:"messageID,required"`
-	SessionID string                 `json:"sessionID,required"`
-	Text      string                 `json:"text,required"`
-	Time      ReasoningPartTime      `json:"time,required"`
-	Type      ReasoningPartType      `json:"type,required"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	JSON      reasoningPartJSON      `json:"-"`
+	ID        string            `json:"id,required"`
+	MessageID string            `json:"messageID,required"`
+	SessionID string            `json:"sessionID,required"`
+	Text      string            `json:"text,required"`
+	Time      ReasoningPartTime `json:"time,required"`
+	Type      ReasoningPartType `json:"type,required"`
+	Metadata  map[string]any    `json:"metadata"`
+	JSON      reasoningPartJSON `json:"-"`
 }
 
 // reasoningPartJSON contains the JSON metadata for the struct [ReasoningPart]
@@ -1875,9 +1875,9 @@ type Session struct {
 	Tokens      SessionTokens  `json:"tokens"`
 	WorkspaceID string         `json:"workspaceID"`
 	// This field can have the runtime type of [[]PermissionRuleResponse].
-	Permission interface{} `json:"permission"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
+	Permission any `json:"permission"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any         `json:"metadata"`
 	JSON     sessionJSON `json:"-"`
 }
 
@@ -2485,16 +2485,16 @@ func (r ResourceSourceParam) MarshalJSON() (data []byte, err error) {
 func (r ResourceSourceParam) implementsFilePartSourceUnionParam() {}
 
 type TextPart struct {
-	ID        string                 `json:"id,required"`
-	MessageID string                 `json:"messageID,required"`
-	SessionID string                 `json:"sessionID,required"`
-	Text      string                 `json:"text,required"`
-	Type      TextPartType           `json:"type,required"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	Synthetic bool                   `json:"synthetic"`
-	Ignored   bool                   `json:"ignored"`
-	Time      TextPartTime           `json:"time"`
-	JSON      textPartJSON           `json:"-"`
+	ID        string         `json:"id,required"`
+	MessageID string         `json:"messageID,required"`
+	SessionID string         `json:"sessionID,required"`
+	Text      string         `json:"text,required"`
+	Type      TextPartType   `json:"type,required"`
+	Metadata  map[string]any `json:"metadata"`
+	Synthetic bool           `json:"synthetic"`
+	Ignored   bool           `json:"ignored"`
+	Time      TextPartTime   `json:"time"`
+	JSON      textPartJSON   `json:"-"`
 }
 
 // textPartJSON contains the JSON metadata for the struct [TextPart]
@@ -2681,7 +2681,7 @@ type TextPartInputParam struct {
 	Text      param.Field[string]                 `json:"text,required"`
 	Type      param.Field[TextPartInputType]      `json:"type,required"`
 	ID        param.Field[string]                 `json:"id"`
-	Metadata  param.Field[map[string]interface{}] `json:"metadata"`
+	Metadata  param.Field[map[string]any]         `json:"metadata"`
 	Synthetic param.Field[bool]                   `json:"synthetic"`
 	Ignored   param.Field[bool]                   `json:"ignored"`
 	Time      param.Field[TextPartInputTimeParam] `json:"time"`
@@ -2717,15 +2717,15 @@ func (r TextPartInputTimeParam) MarshalJSON() (data []byte, err error) {
 }
 
 type ToolPart struct {
-	ID        string                 `json:"id,required"`
-	CallID    string                 `json:"callID,required"`
-	MessageID string                 `json:"messageID,required"`
-	SessionID string                 `json:"sessionID,required"`
-	State     ToolPartState          `json:"state,required"`
-	Tool      string                 `json:"tool,required"`
-	Type      ToolPartType           `json:"type,required"`
-	Metadata  map[string]interface{} `json:"metadata"`
-	JSON      toolPartJSON           `json:"-"`
+	ID        string         `json:"id,required"`
+	CallID    string         `json:"callID,required"`
+	MessageID string         `json:"messageID,required"`
+	SessionID string         `json:"sessionID,required"`
+	State     ToolPartState  `json:"state,required"`
+	Tool      string         `json:"tool,required"`
+	Type      ToolPartType   `json:"type,required"`
+	Metadata  map[string]any `json:"metadata"`
+	JSON      toolPartJSON   `json:"-"`
 }
 
 // toolPartJSON contains the JSON metadata for the struct [ToolPart]
@@ -2755,16 +2755,16 @@ func (r ToolPart) implementsPart() {}
 type ToolPartState struct {
 	Status ToolPartStateStatus `json:"status,required"`
 	// This field can have the runtime type of [[]FilePart].
-	Attachments interface{} `json:"attachments"`
-	Error       string      `json:"error"`
-	// This field can have the runtime type of [interface{}], [map[string]interface{}].
-	Input interface{} `json:"input"`
-	// This field can have the runtime type of [map[string]interface{}].
-	Metadata interface{} `json:"metadata"`
-	Output   string      `json:"output"`
+	Attachments any    `json:"attachments"`
+	Error       string `json:"error"`
+	// This field can have the runtime type of [any], [map[string]any].
+	Input any `json:"input"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any    `json:"metadata"`
+	Output   string `json:"output"`
 	// This field can have the runtime type of [ToolStateRunningTime],
 	// [ToolStateCompletedTime], [ToolStateErrorTime].
-	Time  interface{}       `json:"time"`
+	Time  any               `json:"time"`
 	Title string            `json:"title"`
 	JSON  toolPartStateJSON `json:"-"`
 	union ToolPartStateUnion
@@ -2814,23 +2814,23 @@ type ToolPartStateUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ToolPartStateUnion)(nil)).Elem(),
+		reflect.TypeFor[ToolPartStateUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ToolStatePending{}),
+			Type:       reflect.TypeFor[ToolStatePending](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ToolStateRunning{}),
+			Type:       reflect.TypeFor[ToolStateRunning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ToolStateCompleted{}),
+			Type:       reflect.TypeFor[ToolStateCompleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(ToolStateError{}),
+			Type:       reflect.TypeFor[ToolStateError](),
 		},
 	)
 }
@@ -2867,8 +2867,8 @@ func (r ToolPartType) IsKnown() bool {
 }
 
 type ToolStateCompleted struct {
-	Input       map[string]interface{}   `json:"input,required"`
-	Metadata    map[string]interface{}   `json:"metadata,required"`
+	Input       map[string]any           `json:"input,required"`
+	Metadata    map[string]any           `json:"metadata,required"`
 	Output      string                   `json:"output,required"`
 	Status      ToolStateCompletedStatus `json:"status,required"`
 	Time        ToolStateCompletedTime   `json:"time,required"`
@@ -2941,12 +2941,12 @@ func (r toolStateCompletedTimeJSON) RawJSON() string {
 }
 
 type ToolStateError struct {
-	Error    string                 `json:"error,required"`
-	Input    map[string]interface{} `json:"input,required"`
-	Status   ToolStateErrorStatus   `json:"status,required"`
-	Time     ToolStateErrorTime     `json:"time,required"`
-	Metadata map[string]interface{} `json:"metadata"`
-	JSON     toolStateErrorJSON     `json:"-"`
+	Error    string               `json:"error,required"`
+	Input    map[string]any       `json:"input,required"`
+	Status   ToolStateErrorStatus `json:"status,required"`
+	Time     ToolStateErrorTime   `json:"time,required"`
+	Metadata map[string]any       `json:"metadata"`
+	JSON     toolStateErrorJSON   `json:"-"`
 }
 
 // toolStateErrorJSON contains the JSON metadata for the struct [ToolStateError]
@@ -3009,8 +3009,8 @@ func (r toolStateErrorTimeJSON) RawJSON() string {
 
 type ToolStatePending struct {
 	Status ToolStatePendingStatus `json:"status,required"`
-	// This field can have the runtime type of map[string]interface{}.
-	Input interface{}          `json:"input,required"`
+	// This field can have the runtime type of map[string]any.
+	Input any                  `json:"input,required"`
 	Raw   string               `json:"raw,required"`
 	JSON  toolStatePendingJSON `json:"-"`
 }
@@ -3050,11 +3050,11 @@ func (r ToolStatePendingStatus) IsKnown() bool {
 }
 
 type ToolStateRunning struct {
-	// This field can have the runtime type of map[string]interface{}.
-	Input    interface{}            `json:"input,required"`
+	// This field can have the runtime type of map[string]any.
+	Input    any                    `json:"input,required"`
 	Status   ToolStateRunningStatus `json:"status,required"`
 	Time     ToolStateRunningTime   `json:"time,required"`
-	Metadata map[string]interface{} `json:"metadata"`
+	Metadata map[string]any         `json:"metadata"`
 	Title    string                 `json:"title"`
 	JSON     toolStateRunningJSON   `json:"-"`
 }
@@ -3124,7 +3124,7 @@ type UserMessage struct {
 	SessionID string           `json:"sessionID,required"`
 	Time      UserMessageTime  `json:"time,required"`
 	// This field can have the runtime type of [OutputFormatUnion].
-	Format  interface{}        `json:"format,omitzero"`
+	Format  any                `json:"format,omitzero"`
 	System  string             `json:"system,omitzero"`
 	Tools   map[string]bool    `json:"tools,omitzero"`
 	Summary UserMessageSummary `json:"summary"`
@@ -3341,7 +3341,7 @@ type SessionNewParams struct {
 	Model       param.Field[SessionNewParamsModel] `json:"model"`
 	Permission  param.Field[[]PermissionRule]      `json:"permission"`
 	WorkspaceID param.Field[string]                `json:"workspaceID"`
-	Metadata    param.Field[interface{}]           `json:"metadata"`
+	Metadata    param.Field[any]                   `json:"metadata"`
 }
 
 type SessionNewParamsModel struct {
@@ -3372,7 +3372,7 @@ type SessionUpdateParams struct {
 	Title      param.Field[string]                  `json:"title"`
 	Permission param.Field[[]PermissionRule]        `json:"permission"`
 	Time       param.Field[SessionUpdateParamsTime] `json:"time"`
-	Metadata   param.Field[interface{}]             `json:"metadata"`
+	Metadata   param.Field[any]                     `json:"metadata"`
 }
 
 type SessionUpdateParamsTime struct {
@@ -3608,13 +3608,13 @@ type SessionPromptParamsPart struct {
 	Type      param.Field[SessionPromptParamsPartsType] `json:"type,required"`
 	ID        param.Field[string]                       `json:"id"`
 	Filename  param.Field[string]                       `json:"filename"`
-	Metadata  param.Field[interface{}]                  `json:"metadata"`
+	Metadata  param.Field[any]                          `json:"metadata"`
 	Mime      param.Field[string]                       `json:"mime"`
 	Name      param.Field[string]                       `json:"name"`
-	Source    param.Field[interface{}]                  `json:"source"`
+	Source    param.Field[any]                          `json:"source"`
 	Synthetic param.Field[bool]                         `json:"synthetic"`
 	Text      param.Field[string]                       `json:"text"`
-	Time      param.Field[interface{}]                  `json:"time"`
+	Time      param.Field[any]                          `json:"time"`
 	URL       param.Field[string]                       `json:"url"`
 }
 
@@ -3679,7 +3679,7 @@ func (r SessionPromptParamsFormatTextType) IsKnown() bool {
 
 type SessionPromptParamsFormatJsonSchema struct {
 	Type       param.Field[SessionPromptParamsFormatJsonSchemaType] `json:"type,required"`
-	Schema     param.Field[interface{}]                             `json:"schema,required"`
+	Schema     param.Field[any]                                     `json:"schema,required"`
 	RetryCount param.Field[int64]                                   `json:"retryCount"`
 }
 
@@ -3705,42 +3705,42 @@ func (r SessionPromptParamsFormatJsonSchemaType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*SessionPromptParamsPartUnion)(nil)).Elem(),
+		reflect.TypeFor[SessionPromptParamsPartUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TextPartInputParam{}),
+			Type:       reflect.TypeFor[TextPartInputParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(FilePartInputParam{}),
+			Type:       reflect.TypeFor[FilePartInputParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(AgentPartInputParam{}),
+			Type:       reflect.TypeFor[AgentPartInputParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SubtaskPartInputParam{}),
+			Type:       reflect.TypeFor[SubtaskPartInputParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SessionPromptParamsPart{}),
+			Type:       reflect.TypeFor[SessionPromptParamsPart](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*SessionPromptParamsFormatUnion)(nil)).Elem(),
+		reflect.TypeFor[SessionPromptParamsFormatUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SessionPromptParamsFormatText{}),
+			Type:       reflect.TypeFor[SessionPromptParamsFormatText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SessionPromptParamsFormatJsonSchema{}),
+			Type:       reflect.TypeFor[SessionPromptParamsFormatJsonSchema](),
 		},
 	)
 }
@@ -3987,22 +3987,22 @@ func (m *SessionStatusMap) UnmarshalJSON(data []byte) error {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*SessionStatus)(nil)).Elem(),
+		reflect.TypeFor[SessionStatus](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "idle",
-			Type:               reflect.TypeOf(SessionStatusIdle{}),
+			Type:               reflect.TypeFor[SessionStatusIdle](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "retry",
-			Type:               reflect.TypeOf(SessionStatusRetry{}),
+			Type:               reflect.TypeFor[SessionStatusRetry](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "busy",
-			Type:               reflect.TypeOf(SessionStatusBusy{}),
+			Type:               reflect.TypeFor[SessionStatusBusy](),
 		},
 	)
 }

@@ -126,8 +126,8 @@ func TestProviderOauthCallback(t *testing.T) {
 // ProviderConfig.models.*.interleaved, which was narrowed to `enum:[true]` back then).
 //
 // A second, non-schema property this test pins down: at runtime the object variant
-// deserialises to map[string]interface{}, NOT to
-// ProviderModelCapabilitiesInterleavedField, because apijson hands bare interface{}
+// deserialises to map[string]any, NOT to
+// ProviderModelCapabilitiesInterleavedField, because apijson hands bare any
 // fields the raw gjson value (internal/apijson/decoder.go reflect.Interface branch).
 //
 // Run with: go test -run TestProviderModelCapabilitiesInterleavedUnmarshal -v ./...
@@ -138,48 +138,48 @@ func TestProviderModelCapabilitiesInterleavedUnmarshal(t *testing.T) {
 		json         string
 		wantRuntimeT reflect.Type
 		wantBool     bool   // checked only when wantRuntimeT == bool
-		wantFieldVal string // checked only when wantRuntimeT == map[string]interface{}
+		wantFieldVal string // checked only when wantRuntimeT == map[string]any
 	}{
 		// boolean variant — `{"type":"boolean"}`, unchanged since v1.18.4
 		{
 			name:         "bool_true",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":true}`,
-			wantRuntimeT: reflect.TypeOf(true),
+			wantRuntimeT: reflect.TypeFor[bool](),
 			wantBool:     true,
 		},
 		// boolean variant, false — also admitted by `{"type":"boolean"}`
 		{
 			name:         "bool_false",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":false}`,
-			wantRuntimeT: reflect.TypeOf(false),
+			wantRuntimeT: reflect.TypeFor[bool](),
 			wantBool:     false,
 		},
 		// object variant — known field "reasoning"
 		{
 			name:         "object_reasoning",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":{"field":"reasoning"}}`,
-			wantRuntimeT: reflect.TypeOf(map[string]interface{}{}),
+			wantRuntimeT: reflect.TypeFor[map[string]any](),
 			wantFieldVal: "reasoning",
 		},
 		// object variant — known field "reasoning_content"
 		{
 			name:         "object_reasoning_content",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":{"field":"reasoning_content"}}`,
-			wantRuntimeT: reflect.TypeOf(map[string]interface{}{}),
+			wantRuntimeT: reflect.TypeFor[map[string]any](),
 			wantFieldVal: "reasoning_content",
 		},
 		// object variant — known field "reasoning_text"
 		{
 			name:         "object_reasoning_text",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":{"field":"reasoning_text"}}`,
-			wantRuntimeT: reflect.TypeOf(map[string]interface{}{}),
+			wantRuntimeT: reflect.TypeFor[map[string]any](),
 			wantFieldVal: "reasoning_text",
 		},
 		// object variant — open-union: vendor-specific field name (OpenAPI allows any string)
 		{
 			name:         "object_custom_vendor_field",
 			json:         `{"temperature":true,"reasoning":false,"attachment":false,"toolcall":false,"input":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"output":{"text":false,"audio":false,"image":false,"video":false,"pdf":false},"interleaved":{"field":"custom_vendor_field"}}`,
-			wantRuntimeT: reflect.TypeOf(map[string]interface{}{}),
+			wantRuntimeT: reflect.TypeFor[map[string]any](),
 			wantFieldVal: "custom_vendor_field",
 		},
 	}
@@ -196,7 +196,7 @@ func TestProviderModelCapabilitiesInterleavedUnmarshal(t *testing.T) {
 				t.Errorf("Interleaved runtime type: got %v, want %v", gotT, tc.wantRuntimeT)
 			}
 			switch tc.wantRuntimeT {
-			case reflect.TypeOf(true):
+			case reflect.TypeFor[bool]():
 				gotBool, ok := caps.Interleaved.(bool)
 				if !ok {
 					t.Fatalf("expected bool, got %T", caps.Interleaved)
@@ -204,10 +204,10 @@ func TestProviderModelCapabilitiesInterleavedUnmarshal(t *testing.T) {
 				if gotBool != tc.wantBool {
 					t.Errorf("Interleaved bool value: got %v, want %v", gotBool, tc.wantBool)
 				}
-			case reflect.TypeOf(map[string]interface{}{}):
-				m, ok := caps.Interleaved.(map[string]interface{})
+			case reflect.TypeFor[map[string]any]():
+				m, ok := caps.Interleaved.(map[string]any)
 				if !ok {
-					t.Fatalf("expected map[string]interface{}, got %T", caps.Interleaved)
+					t.Fatalf("expected map[string]any, got %T", caps.Interleaved)
 				}
 				gotField, ok := m["field"].(string)
 				if !ok {

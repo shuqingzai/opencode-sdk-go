@@ -73,9 +73,9 @@ func TestConfigUpdate(t *testing.T) {
 //  1. boolean  → runtime type bool
 //  2. enum string ("reasoning"|"reasoning_content"|"reasoning_text") → string
 //  3. open string (any vendor-defined value)  → string
-//  4. object { "field": string } → map[string]interface{}
+//  4. object { "field": string } → map[string]any
 //
-// The field is typed as interface{} with no apijson.RegisterUnion registration
+// The field is typed as any with no apijson.RegisterUnion registration
 // because it is a leaf anyOf carried directly by apijson's reflect.Interface
 // branch (decoder.go:183-191), which hands the gjson native value straight to
 // the field. No t.Skip — these are pure unit tests with no HTTP dependency.
@@ -87,64 +87,64 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 		name         string
 		json         string
 		wantRuntime  reflect.Type
-		wantValue    interface{}
-		wantMapField interface{} // non-nil only for map variant
+		wantValue    any
+		wantMapField any // non-nil only for map variant
 	}{
 		// Variant 1a: boolean true → bool
 		{
 			name:        "bool_true",
 			json:        `{"interleaved":true}`,
-			wantRuntime: reflect.TypeOf(true),
+			wantRuntime: reflect.TypeFor[bool](),
 			wantValue:   true,
 		},
 		// Variant 1b: boolean false → bool
 		{
 			name:        "bool_false",
 			json:        `{"interleaved":false}`,
-			wantRuntime: reflect.TypeOf(false),
+			wantRuntime: reflect.TypeFor[bool](),
 			wantValue:   false,
 		},
 		// Variant 2a: enum string "reasoning" → string
 		{
 			name:        "enum_reasoning",
 			json:        `{"interleaved":"reasoning"}`,
-			wantRuntime: reflect.TypeOf(""),
+			wantRuntime: reflect.TypeFor[string](),
 			wantValue:   "reasoning",
 		},
 		// Variant 2b: enum string "reasoning_content" → string
 		{
 			name:        "enum_reasoning_content",
 			json:        `{"interleaved":"reasoning_content"}`,
-			wantRuntime: reflect.TypeOf(""),
+			wantRuntime: reflect.TypeFor[string](),
 			wantValue:   "reasoning_content",
 		},
 		// Variant 2c: enum string "reasoning_text" → string
 		{
 			name:        "enum_reasoning_text",
 			json:        `{"interleaved":"reasoning_text"}`,
-			wantRuntime: reflect.TypeOf(""),
+			wantRuntime: reflect.TypeFor[string](),
 			wantValue:   "reasoning_text",
 		},
 		// Variant 3: open string (vendor-defined) → string
 		{
 			name:        "open_string",
 			json:        `{"interleaved":"vendor_custom_field"}`,
-			wantRuntime: reflect.TypeOf(""),
+			wantRuntime: reflect.TypeFor[string](),
 			wantValue:   "vendor_custom_field",
 		},
-		// Variant 4a: object with known enum field → map[string]interface{}
+		// Variant 4a: object with known enum field → map[string]any
 		// OpenAPI: { "field": "reasoning"|"reasoning_content"|"reasoning_text"|string }
 		{
 			name:         "object_field_reasoning_text",
 			json:         `{"interleaved":{"field":"reasoning_text"}}`,
-			wantRuntime:  reflect.TypeOf(map[string]interface{}{}),
+			wantRuntime:  reflect.TypeFor[map[string]any](),
 			wantMapField: "reasoning_text",
 		},
-		// Variant 4b: object with open (vendor-custom) field value → map[string]interface{}
+		// Variant 4b: object with open (vendor-custom) field value → map[string]any
 		{
 			name:         "object_field_vendor_custom",
 			json:         `{"interleaved":{"field":"vendor_custom"}}`,
-			wantRuntime:  reflect.TypeOf(map[string]interface{}{}),
+			wantRuntime:  reflect.TypeFor[map[string]any](),
 			wantMapField: "vendor_custom",
 		},
 	}
@@ -161,10 +161,10 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 				t.Errorf("runtime type: got %v, want %v (value: %#v)", gotRuntime, tc.wantRuntime, m.Interleaved)
 			}
 			if tc.wantMapField != nil {
-				// object variant: runtime type must be map[string]interface{}
-				gotMap, ok := m.Interleaved.(map[string]interface{})
+				// object variant: runtime type must be map[string]any
+				gotMap, ok := m.Interleaved.(map[string]any)
 				if !ok {
-					t.Fatalf("expected map[string]interface{}, got %T", m.Interleaved)
+					t.Fatalf("expected map[string]any, got %T", m.Interleaved)
 				}
 				gotField, exists := gotMap["field"]
 				if !exists {
@@ -207,7 +207,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "bool_true",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[interface{}](true),
+				Interleaved: opencode.F[any](true),
 			},
 			wantJSON: `{"interleaved":true}`,
 		},
@@ -215,7 +215,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "string_reasoning_text",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[interface{}]("reasoning_text"),
+				Interleaved: opencode.F[any]("reasoning_text"),
 			},
 			wantJSON: `{"interleaved":"reasoning_text"}`,
 		},
@@ -223,7 +223,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "string_vendor",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[interface{}]("vendor_custom"),
+				Interleaved: opencode.F[any]("vendor_custom"),
 			},
 			wantJSON: `{"interleaved":"vendor_custom"}`,
 		},
@@ -232,7 +232,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "object_field_reasoning_text",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[interface{}](opencode.ConfigProviderModelsInterleavedFieldParam{
+				Interleaved: opencode.F[any](opencode.ConfigProviderModelsInterleavedFieldParam{
 					Field: opencode.F(opencode.ProviderModelCapabilitiesInterleavedFieldField("reasoning_text")),
 				}),
 			},
@@ -242,7 +242,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "object_field_vendor_custom",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[interface{}](opencode.ConfigProviderModelsInterleavedFieldParam{
+				Interleaved: opencode.F[any](opencode.ConfigProviderModelsInterleavedFieldParam{
 					Field: opencode.F(opencode.ProviderModelCapabilitiesInterleavedFieldField("vendor_custom")),
 				}),
 			},
@@ -258,7 +258,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 				t.Fatalf("json.Marshal: %v", err)
 			}
 			// Normalise to map for order-independent comparison
-			var gotMap, wantMap map[string]interface{}
+			var gotMap, wantMap map[string]any
 			if err := json.Unmarshal(got, &gotMap); err != nil {
 				t.Fatalf("re-parse got: %v", err)
 			}

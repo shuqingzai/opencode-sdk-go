@@ -144,7 +144,7 @@ type EventListResponse struct {
 	// [EventListResponseEventSessionNextPromptAdmittedProperties],
 	// [EventListResponseEventSessionNextContextUpdatedProperties],
 	// [EventListResponseEventProjectDirectoriesUpdatedProperties].
-	Properties interface{}           `json:"properties,required"`
+	Properties any                   `json:"properties,required"`
 	Type       EventListResponseType `json:"type,required"`
 	JSON       eventListResponseJSON `json:"-"`
 	union      EventListResponseUnion
@@ -363,364 +363,364 @@ type EventListResponseUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*EventListResponseUnion)(nil)).Elem(),
+		reflect.TypeFor[EventListResponseUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventCommandExecuted{}),
+			Type:       reflect.TypeFor[EventListResponseEventCommandExecuted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventFileEdited{}),
+			Type:       reflect.TypeFor[EventListResponseEventFileEdited](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventFileWatcherUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventFileWatcherUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventGlobalDisposed{}),
+			Type:       reflect.TypeFor[EventListResponseEventGlobalDisposed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdateAvailable{}),
+			Type:       reflect.TypeFor[EventListResponseEventInstallationUpdateAvailable](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventInstallationUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventInstallationUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventLspUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventLspUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMcpBrowserOpenFailed{}),
+			Type:       reflect.TypeFor[EventListResponseEventMcpBrowserOpenFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMcpToolsChanged{}),
+			Type:       reflect.TypeFor[EventListResponseEventMcpToolsChanged](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventModelsDevRefreshed{}),
+			Type:       reflect.TypeFor[EventListResponseEventModelsDevRefreshed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMessagePartDelta{}),
+			Type:       reflect.TypeFor[EventListResponseEventMessagePartDelta](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPermissionAsked{}),
+			Type:       reflect.TypeFor[EventListResponseEventPermissionAsked](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPermissionReplied{}),
+			Type:       reflect.TypeFor[EventListResponseEventPermissionReplied](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventProjectUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventProjectUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPtyCreated{}),
+			Type:       reflect.TypeFor[EventListResponseEventPtyCreated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPtyDeleted{}),
+			Type:       reflect.TypeFor[EventListResponseEventPtyDeleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPtyExited{}),
+			Type:       reflect.TypeFor[EventListResponseEventPtyExited](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPtyUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventPtyUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionAsked{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionAsked](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionRejected{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionRejected](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionReplied{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionReplied](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventServerConnected{}),
+			Type:       reflect.TypeFor[EventListResponseEventServerConnected](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventServerInstanceDisposed{}),
+			Type:       reflect.TypeFor[EventListResponseEventServerInstanceDisposed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionCompacted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionCompacted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionDiff{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionDiff](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionError{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionIdle{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionIdle](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionStatus{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionStatus](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventTodoUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventTodoUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventTuiCommandExecute{}),
+			Type:       reflect.TypeFor[EventListResponseEventTuiCommandExecute](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventTuiPromptAppend{}),
+			Type:       reflect.TypeFor[EventListResponseEventTuiPromptAppend](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventTuiSessionSelect{}),
+			Type:       reflect.TypeFor[EventListResponseEventTuiSessionSelect](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventTuiToastShow{}),
+			Type:       reflect.TypeFor[EventListResponseEventTuiToastShow](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventVcsBranchUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventVcsBranchUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorkspaceFailed{}),
+			Type:       reflect.TypeFor[EventListResponseEventWorkspaceFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorkspaceReady{}),
+			Type:       reflect.TypeFor[EventListResponseEventWorkspaceReady](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorkspaceStatus{}),
+			Type:       reflect.TypeFor[EventListResponseEventWorkspaceStatus](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorktreeFailed{}),
+			Type:       reflect.TypeFor[EventListResponseEventWorktreeFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventWorktreeReady{}),
+			Type:       reflect.TypeFor[EventListResponseEventWorktreeReady](),
 		},
 		// V2 Event types from event_global_types.go
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMessageUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventMessageUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMessageRemoved{}),
+			Type:       reflect.TypeFor[EventListResponseEventMessageRemoved](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMessagePartUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventMessagePartUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventMessagePartRemoved{}),
+			Type:       reflect.TypeFor[EventListResponseEventMessagePartRemoved](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionCreated{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionCreated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionDeleted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionDeleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextAgentSwitched{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextAgentSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextModelSwitched{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextModelSwitched](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextPrompted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextPrompted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextSynthetic{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextSynthetic](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextShellStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextShellEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextShellEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextStepStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextStepEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextStepFailed{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextStepFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextTextStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextDelta{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextTextDelta](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextTextEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextTextEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextReasoningStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningDelta{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextReasoningDelta](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextReasoningEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextReasoningEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolInputStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputDelta{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolInputDelta](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolInputEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolInputEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolCalled{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolCalled](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolProgress{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolProgress](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolSuccess{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolSuccess](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextToolFailed{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextToolFailed](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextRetried{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextRetried](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionStarted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextCompactionStarted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionDelta{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextCompactionDelta](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextCompactionEnded{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextCompactionEnded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPluginAdded{}),
+			Type:       reflect.TypeFor[EventListResponseEventPluginAdded](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventIntegrationUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventIntegrationUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventIntegrationConnectionUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventIntegrationConnectionUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventCatalogUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventCatalogUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Asked{}),
+			Type:       reflect.TypeFor[EventListResponseEventPermissionV2Asked](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventPermissionV2Replied{}),
+			Type:       reflect.TypeFor[EventListResponseEventPermissionV2Replied](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventReferenceUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventReferenceUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Asked{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionV2Asked](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Replied{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionV2Replied](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventQuestionV2Rejected{}),
+			Type:       reflect.TypeFor[EventListResponseEventQuestionV2Rejected](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextMoved{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextMoved](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertStaged{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextRevertStaged](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCleared{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextRevertCleared](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextRevertCommitted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextRevertCommitted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextPromptAdmitted{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextPromptAdmitted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventSessionNextContextUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventSessionNextContextUpdated](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(EventListResponseEventProjectDirectoriesUpdated{}),
+			Type:       reflect.TypeFor[EventListResponseEventProjectDirectoriesUpdated](),
 		},
 	)
 }
@@ -1282,10 +1282,10 @@ func (r eventListResponseEventSessionErrorPropertiesJSON) RawJSON() string {
 
 type EventListResponseEventSessionErrorPropertiesError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
-	// [shared.UnknownErrorData], [interface{}], [shared.MessageAbortedErrorData],
+	// [shared.UnknownErrorData], [any], [shared.MessageAbortedErrorData],
 	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
 	// [shared.APIErrorData], [shared.ContentFilterErrorData].
-	Data  interface{}                                           `json:"data,required"`
+	Data  any                                                   `json:"data,required"`
 	Name  EventListResponseEventSessionErrorPropertiesErrorName `json:"name,required"`
 	JSON  eventListResponseEventSessionErrorPropertiesErrorJSON `json:"-"`
 	union EventListResponseEventSessionErrorPropertiesErrorUnion
@@ -1339,39 +1339,39 @@ type EventListResponseEventSessionErrorPropertiesErrorUnion interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*EventListResponseEventSessionErrorPropertiesErrorUnion)(nil)).Elem(),
+		reflect.TypeFor[EventListResponseEventSessionErrorPropertiesErrorUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ProviderAuthError{}),
+			Type:       reflect.TypeFor[shared.ProviderAuthError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.UnknownError{}),
+			Type:       reflect.TypeFor[shared.UnknownError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.MessageOutputLengthError{}),
+			Type:       reflect.TypeFor[shared.MessageOutputLengthError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.MessageAbortedError{}),
+			Type:       reflect.TypeFor[shared.MessageAbortedError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.StructuredOutputError{}),
+			Type:       reflect.TypeFor[shared.StructuredOutputError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ContentFilterError{}),
+			Type:       reflect.TypeFor[shared.ContentFilterError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.ContextOverflowError{}),
+			Type:       reflect.TypeFor[shared.ContextOverflowError](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(shared.APIError{}),
+			Type:       reflect.TypeFor[shared.APIError](),
 		},
 	)
 }
@@ -1887,14 +1887,14 @@ func (r EventListResponseEventPermissionAsked) implementsEventListResponse() {}
 func (r EventListResponseEventPermissionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionAskedProperties struct {
-	Always     []string               `json:"always,required"`
-	ID         string                 `json:"id,required"`
-	Metadata   map[string]interface{} `json:"metadata,required"`
-	Patterns   []string               `json:"patterns,required"`
-	Permission string                 `json:"permission,required"`
-	SessionID  string                 `json:"sessionID,required"`
+	Always     []string       `json:"always,required"`
+	ID         string         `json:"id,required"`
+	Metadata   map[string]any `json:"metadata,required"`
+	Patterns   []string       `json:"patterns,required"`
+	Permission string         `json:"permission,required"`
+	SessionID  string         `json:"sessionID,required"`
 	// This field can have the runtime type of [EventListResponseEventPermissionAskedPropertiesTool].
-	Tool interface{}                                         `json:"tool"`
+	Tool any                                                 `json:"tool"`
 	JSON eventListResponseEventPermissionAskedPropertiesJSON `json:"-"`
 }
 
@@ -1988,7 +1988,7 @@ type EventListResponseEventSessionStatusProperties struct {
 	SessionID string `json:"sessionID,required"`
 	// This field can have the runtime type of [SessionStatusIdle],
 	// [SessionStatusRetry] or [SessionStatusBusy].
-	Status interface{}                                       `json:"status,required"`
+	Status any                                               `json:"status,required"`
 	JSON   eventListResponseEventSessionStatusPropertiesJSON `json:"-"`
 	// statusUnion holds the typed status payload after [UnmarshalJSON] routes
 	// the raw data through [SessionStatus] registered union variants.
@@ -2073,7 +2073,7 @@ type EventListResponseEventQuestionAskedProperties struct {
 	Questions []EventListResponseEventQuestionAskedPropertiesQuestions `json:"questions,required"`
 	SessionID string                                                   `json:"sessionID,required"`
 	// This field can have the runtime type of [EventListResponseEventQuestionAskedPropertiesTool].
-	Tool interface{}                                       `json:"tool"`
+	Tool any                                               `json:"tool"`
 	JSON eventListResponseEventQuestionAskedPropertiesJSON `json:"-"`
 }
 
@@ -2096,10 +2096,10 @@ func (r eventListResponseEventQuestionAskedPropertiesJSON) RawJSON() string {
 
 type EventListResponseEventQuestionAskedPropertiesQuestions struct {
 	// This field can have the runtime type of [bool].
-	Custom interface{} `json:"custom"`
-	Header string      `json:"header,required"`
+	Custom any    `json:"custom"`
+	Header string `json:"header,required"`
 	// This field can have the runtime type of [bool].
-	Multiple interface{}                                                     `json:"multiple"`
+	Multiple any                                                             `json:"multiple"`
 	Options  []EventListResponseEventQuestionAskedPropertiesQuestionsOptions `json:"options,required"`
 	Question string                                                          `json:"question,required"`
 	JSON     eventListResponseEventQuestionAskedPropertiesQuestionsJSON      `json:"-"`
@@ -2474,10 +2474,10 @@ func (r EventListResponseEventTuiToastShow) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTuiToastShowProperties struct {
 	// This field can have the runtime type of [int64].
-	Duration interface{} `json:"duration"`
-	Message  string      `json:"message,required"`
+	Duration any    `json:"duration"`
+	Message  string `json:"message,required"`
 	// This field can have the runtime type of [string].
-	Title   interface{}                                      `json:"title"`
+	Title   any                                              `json:"title"`
 	Variant TuiToastShowVariant                              `json:"variant,required"`
 	JSON    eventListResponseEventTuiToastShowPropertiesJSON `json:"-"`
 }

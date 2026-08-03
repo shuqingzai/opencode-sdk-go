@@ -518,9 +518,9 @@ func (r TuiControlNextParams) URLQuery() (v url.Values) {
 type TuiControlNextResponse struct {
 	Path string `json:"path,required"`
 	// This field is `unknown` per the OpenAPI schema, so its runtime type is
-	// `interface{}`. The server returns arbitrary JSON in this field (e.g.
+	// `any`. The server returns arbitrary JSON in this field (e.g.
 	// `{text: "queued"}`); callers should type-assert as needed.
-	Body interface{}                `json:"body,required"`
+	Body any                        `json:"body,required"`
 	JSON tuicontrolNextResponseJSON `json:"-"`
 }
 
@@ -540,9 +540,9 @@ func (r tuicontrolNextResponseJSON) RawJSON() string {
 }
 
 type TuiControlResponseParams struct {
-	Directory param.Field[string]      `query:"directory"`
-	Workspace param.Field[string]      `query:"workspace"`
-	Body      param.Field[interface{}] `json:"-"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Body      param.Field[any]    `json:"-"`
 }
 
 func (r TuiControlResponseParams) MarshalJSON() (data []byte, err error) {
@@ -563,23 +563,23 @@ func (r TuiControlResponseParams) URLQuery() (v url.Values) {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*TuiPublishBodyUnion)(nil)).Elem(),
+		reflect.TypeFor[TuiPublishBodyUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TuiPublishBodyPromptAppend{}),
+			Type:       reflect.TypeFor[TuiPublishBodyPromptAppend](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TuiPublishBodyCommandExecute{}),
+			Type:       reflect.TypeFor[TuiPublishBodyCommandExecute](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TuiPublishBodyToastShow{}),
+			Type:       reflect.TypeFor[TuiPublishBodyToastShow](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(TuiPublishBodySessionSelect{}),
+			Type:       reflect.TypeFor[TuiPublishBodySessionSelect](),
 		},
 	)
 }

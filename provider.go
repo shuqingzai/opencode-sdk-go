@@ -142,7 +142,7 @@ type ProviderInfo struct {
 	Source  ProviderInfoSource       `json:"source,required"`
 	Env     []string                 `json:"env,required"`
 	Key     string                   `json:"key"`
-	Options map[string]interface{}   `json:"options,required"`
+	Options map[string]any           `json:"options,required"`
 	Models  map[string]ProviderModel `json:"models,required"`
 	JSON    providerInfoJSON         `json:"-"`
 }
@@ -197,10 +197,10 @@ type ProviderModel struct {
 	Cost         ProviderModelCost         `json:"cost,required"`
 	Limit        ProviderModelLimit        `json:"limit,required"`
 	Status       ProviderModelStatus       `json:"status,required"`
-	Options      map[string]interface{}    `json:"options,required"`
+	Options      map[string]any            `json:"options,required"`
 	Headers      map[string]string         `json:"headers,required"`
 	ReleaseDate  string                    `json:"release_date,required"`
-	Variants     map[string]interface{}    `json:"variants"`
+	Variants     map[string]any            `json:"variants"`
 	JSON         providerModelJSON         `json:"-"`
 }
 
@@ -288,8 +288,8 @@ type ProviderModelCapabilities struct {
 	// "reasoning_content", "reasoning_text"; the schema also admits any other
 	// string). Unlike `ProviderConfig.models.*.interleaved` this path has no
 	// standalone string variant.
-	// This field can have the runtime type of [bool], [map[string]interface{}].
-	Interleaved interface{}                   `json:"interleaved,required"`
+	// This field can have the runtime type of [bool], [map[string]any].
+	Interleaved any                           `json:"interleaved,required"`
 	JSON        providerModelCapabilitiesJSON `json:"-"`
 }
 
@@ -350,8 +350,8 @@ func (r providerModelCapabilitiesModalitiesJSON) RawJSON() string {
 // object variant explicitly, e.g. json.Unmarshal on the raw bytes.
 //
 // Note that [ProviderModelCapabilities.Interleaved] never holds this type at runtime:
-// it is a bare interface{} and therefore receives map[string]interface{} for the object
-// variant. Asserting it to this type panics — assert to map[string]interface{} instead.
+// it is a bare any and therefore receives map[string]any for the object
+// variant. Asserting it to this type panics — assert to map[string]any instead.
 type ProviderModelCapabilitiesInterleavedField struct {
 	Field ProviderModelCapabilitiesInterleavedFieldField `json:"field,required"`
 	JSON  providerModelCapabilitiesInterleavedFieldJSON  `json:"-"`
@@ -620,17 +620,17 @@ type ProviderAuthMethodPrompt interface {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*ProviderAuthMethodPrompt)(nil)).Elem(),
+		reflect.TypeFor[ProviderAuthMethodPrompt](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "text",
-			Type:               reflect.TypeOf(ProviderAuthMethodPromptText{}),
+			Type:               reflect.TypeFor[ProviderAuthMethodPromptText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "select",
-			Type:               reflect.TypeOf(ProviderAuthMethodPromptSelect{}),
+			Type:               reflect.TypeFor[ProviderAuthMethodPromptSelect](),
 		},
 	)
 }

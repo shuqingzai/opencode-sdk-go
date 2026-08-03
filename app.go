@@ -71,7 +71,7 @@ type AppLogParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 	// Additional metadata for the log entry
-	Extra param.Field[map[string]interface{}] `json:"extra"`
+	Extra param.Field[map[string]any] `json:"extra"`
 }
 
 func (r AppLogParams) MarshalJSON() (data []byte, err error) {

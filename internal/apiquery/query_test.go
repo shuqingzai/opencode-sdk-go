@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-func P[T any](v T) *T { return &v }
+//go:fix inline
+func P[T any](v T) *T { return new(v) }
 
 type Primitives struct {
 	A bool    `query:"a"`
@@ -27,8 +28,8 @@ type PrimitivePointers struct {
 }
 
 type Slices struct {
-	Slice []Primitives  `query:"slices"`
-	Mixed []interface{} `query:"mixed"`
+	Slice []Primitives `query:"slices"`
+	Mixed []any        `query:"mixed"`
 }
 
 type DateTime struct {
@@ -37,8 +38,8 @@ type DateTime struct {
 }
 
 type AdditionalProperties struct {
-	A      bool                   `query:"a"`
-	Extras map[string]interface{} `query:"-,inline"`
+	A      bool           `query:"a"`
+	Extras map[string]any `query:"-,inline"`
 }
 
 type Recursive struct {
@@ -47,7 +48,7 @@ type Recursive struct {
 }
 
 type UnknownStruct struct {
-	Unknown interface{} `query:"unknown"`
+	Unknown any `query:"unknown"`
 }
 
 type UnionStruct struct {
@@ -103,7 +104,7 @@ type DeeplyNested3 struct {
 
 var tests = map[string]struct {
 	enc      string
-	val      interface{}
+	val      any
 	settings QuerySettings
 }{
 	"primitives": {
@@ -119,7 +120,7 @@ var tests = map[string]struct {
 				{A: false, B: 237628372683, C: uint(654), D: 9999.43, E: 43.76, F: []int{1, 2, 3, 4}},
 				{A: false, B: 237628372683, C: uint(654), D: 9999.43, E: 43.76, F: []int{1, 2, 3, 4}},
 			},
-			Mixed: []interface{}{1, 2.3, "hello"},
+			Mixed: []any{1, 2.3, "hello"},
 		},
 		QuerySettings{ArrayFormat: ArrayQueryFormatBrackets},
 	},
@@ -127,7 +128,7 @@ var tests = map[string]struct {
 	"slices_comma": {
 		`mixed=1,2.3,hello`,
 		Slices{
-			Mixed: []interface{}{1, 2.3, "hello"},
+			Mixed: []any{1, 2.3, "hello"},
 		},
 		QuerySettings{ArrayFormat: ArrayQueryFormatComma},
 	},
@@ -139,7 +140,7 @@ var tests = map[string]struct {
 				{A: false, B: 237628372683, C: uint(654), D: 9999.43, E: 43.76, F: []int{1, 2, 3, 4}},
 				{A: false, B: 237628372683, C: uint(654), D: 9999.43, E: 43.76, F: []int{1, 2, 3, 4}},
 			},
-			Mixed: []interface{}{1, 2.3, "hello"},
+			Mixed: []any{1, 2.3, "hello"},
 		},
 		QuerySettings{ArrayFormat: ArrayQueryFormatRepeat},
 	},
@@ -147,11 +148,11 @@ var tests = map[string]struct {
 	"primitive_pointer_struct": {
 		"a=false&b=237628372683&c=654&d=9999.43&e=43.7599983215332&f=1,2,3,4,5",
 		PrimitivePointers{
-			A: P(false),
-			B: P(237628372683),
-			C: P(uint(654)),
-			D: P(9999.43),
-			E: P(float32(43.76)),
+			A: new(false),
+			B: new(237628372683),
+			C: new(uint(654)),
+			D: new(9999.43),
+			E: new(float32(43.76)),
 			F: &[]int{1, 2, 3, 4, 5},
 		},
 		QuerySettings{},
@@ -170,7 +171,7 @@ var tests = map[string]struct {
 		`a=true&bar=value&foo=true`,
 		AdditionalProperties{
 			A: true,
-			Extras: map[string]interface{}{
+			Extras: map[string]any{
 				"bar": "value",
 				"foo": true,
 			},
@@ -201,7 +202,7 @@ var tests = map[string]struct {
 	"unknown_struct_map_brackets": {
 		`unknown[foo]=bar`,
 		UnknownStruct{
-			Unknown: map[string]interface{}{
+			Unknown: map[string]any{
 				"foo": "bar",
 			},
 		},
@@ -211,7 +212,7 @@ var tests = map[string]struct {
 	"unknown_struct_map_dots": {
 		`unknown.foo=bar`,
 		UnknownStruct{
-			Unknown: map[string]interface{}{
+			Unknown: map[string]any{
 				"foo": "bar",
 			},
 		},
@@ -271,7 +272,7 @@ var tests = map[string]struct {
 			A: DeeplyNested1{
 				B: DeeplyNested2{
 					C: DeeplyNested3{
-						D: P("hello"),
+						D: new("hello"),
 					},
 				},
 			},
@@ -285,7 +286,7 @@ var tests = map[string]struct {
 			A: DeeplyNested1{
 				B: DeeplyNested2{
 					C: DeeplyNested3{
-						D: P("hello"),
+						D: new("hello"),
 					},
 				},
 			},

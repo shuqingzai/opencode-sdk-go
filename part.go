@@ -136,7 +136,7 @@ type PartUpdatePartText struct {
 	Text      param.Field[string]                 `json:"text,required"`
 	Type      param.Field[PartUpdatePartTextType] `json:"type,required"`
 	Ignored   param.Field[bool]                   `json:"ignored"`
-	Metadata  param.Field[map[string]interface{}] `json:"metadata"`
+	Metadata  param.Field[map[string]any]         `json:"metadata"`
 	Synthetic param.Field[bool]                   `json:"synthetic"`
 	Time      param.Field[PartUpdatePartTextTime] `json:"time"`
 }
@@ -218,7 +218,7 @@ type PartUpdatePartReasoning struct {
 	Text      param.Field[string]                      `json:"text,required"`
 	Time      param.Field[PartUpdatePartReasoningTime] `json:"time,required"`
 	Type      param.Field[PartUpdatePartReasoningType] `json:"type,required"`
-	Metadata  param.Field[map[string]interface{}]      `json:"metadata"`
+	Metadata  param.Field[map[string]any]              `json:"metadata"`
 }
 
 func (r PartUpdatePartReasoning) MarshalJSON() (data []byte, err error) {
@@ -259,8 +259,8 @@ type PartUpdatePartFile struct {
 	URL       param.Field[string]                 `json:"url,required"`
 	Filename  param.Field[string]                 `json:"filename"`
 	// Source of the file (e.g. symbol, resource, or inline file source).
-	// Accepts [map[string]interface{}] or an appropriate FilePartSource variant.
-	Source param.Field[interface{}] `json:"source"`
+	// Accepts [map[string]any] or an appropriate FilePartSource variant.
+	Source param.Field[any] `json:"source"`
 }
 
 func (r PartUpdatePartFile) MarshalJSON() (data []byte, err error) {
@@ -291,7 +291,7 @@ type PartUpdatePartTool struct {
 	State     param.Field[PartUpdatePartToolStateUnion] `json:"state,required"`
 	Tool      param.Field[string]                       `json:"tool,required"`
 	Type      param.Field[PartUpdatePartToolType]       `json:"type,required"`
-	Metadata  param.Field[map[string]interface{}]       `json:"metadata"`
+	Metadata  param.Field[map[string]any]               `json:"metadata"`
 }
 
 func (r PartUpdatePartTool) MarshalJSON() (data []byte, err error) {
@@ -332,7 +332,7 @@ type PartUpdatePartToolStateRunning struct {
 	Status   param.Field[PartUpdatePartToolStateRunningStatus] `json:"status,required"`
 	Time     param.Field[PartUpdatePartToolStateRunningTime]   `json:"time,required"`
 	Title    param.Field[string]                               `json:"title"`
-	Metadata param.Field[map[string]interface{}]               `json:"metadata"`
+	Metadata param.Field[map[string]any]                       `json:"metadata"`
 }
 
 func (r PartUpdatePartToolStateRunning) MarshalJSON() (data []byte, err error) {
@@ -366,8 +366,8 @@ func (r PartUpdatePartToolStateRunningTime) MarshalJSON() (data []byte, err erro
 // PartUpdatePartToolStateCompleted represents the completed variant of
 // [PartUpdatePartToolStateUnion].
 type PartUpdatePartToolStateCompleted struct {
-	Input    param.Field[map[string]interface{}]                 `json:"input,required"`
-	Metadata param.Field[map[string]interface{}]                 `json:"metadata"`
+	Input    param.Field[map[string]any]                         `json:"input,required"`
+	Metadata param.Field[map[string]any]                         `json:"metadata"`
 	Output   param.Field[string]                                 `json:"output"`
 	Status   param.Field[PartUpdatePartToolStateCompletedStatus] `json:"status,required"`
 	Time     param.Field[PartUpdatePartToolStateCompletedTime]   `json:"time,required"`
@@ -407,10 +407,10 @@ func (r PartUpdatePartToolStateCompletedTime) MarshalJSON() (data []byte, err er
 // [PartUpdatePartToolStateUnion].
 type PartUpdatePartToolStateError struct {
 	Error    param.Field[string]                             `json:"error,required"`
-	Input    param.Field[map[string]interface{}]             `json:"input,required"`
+	Input    param.Field[map[string]any]                     `json:"input,required"`
 	Status   param.Field[PartUpdatePartToolStateErrorStatus] `json:"status,required"`
 	Time     param.Field[PartUpdatePartToolStateErrorTime]   `json:"time,required"`
-	Metadata param.Field[map[string]interface{}]             `json:"metadata"`
+	Metadata param.Field[map[string]any]                     `json:"metadata"`
 }
 
 func (r PartUpdatePartToolStateError) MarshalJSON() (data []byte, err error) {
@@ -736,78 +736,78 @@ func (r PartUpdatePartCompactionType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*PartUpdatePartUnion)(nil)).Elem(),
+		reflect.TypeFor[PartUpdatePartUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartText{}),
+			Type:       reflect.TypeFor[PartUpdatePartText](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartSubtask{}),
+			Type:       reflect.TypeFor[PartUpdatePartSubtask](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartReasoning{}),
+			Type:       reflect.TypeFor[PartUpdatePartReasoning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartFile{}),
+			Type:       reflect.TypeFor[PartUpdatePartFile](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartTool{}),
+			Type:       reflect.TypeFor[PartUpdatePartTool](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartStepStart{}),
+			Type:       reflect.TypeFor[PartUpdatePartStepStart](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartStepFinish{}),
+			Type:       reflect.TypeFor[PartUpdatePartStepFinish](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartSnapshot{}),
+			Type:       reflect.TypeFor[PartUpdatePartSnapshot](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartPatch{}),
+			Type:       reflect.TypeFor[PartUpdatePartPatch](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartAgent{}),
+			Type:       reflect.TypeFor[PartUpdatePartAgent](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartRetry{}),
+			Type:       reflect.TypeFor[PartUpdatePartRetry](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartCompaction{}),
+			Type:       reflect.TypeFor[PartUpdatePartCompaction](),
 		},
 	)
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeOf((*PartUpdatePartToolStateUnion)(nil)).Elem(),
+		reflect.TypeFor[PartUpdatePartToolStateUnion](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartToolStatePending{}),
+			Type:       reflect.TypeFor[PartUpdatePartToolStatePending](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartToolStateRunning{}),
+			Type:       reflect.TypeFor[PartUpdatePartToolStateRunning](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartToolStateCompleted{}),
+			Type:       reflect.TypeFor[PartUpdatePartToolStateCompleted](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(PartUpdatePartToolStateError{}),
+			Type:       reflect.TypeFor[PartUpdatePartToolStateError](),
 		},
 	)
 }
