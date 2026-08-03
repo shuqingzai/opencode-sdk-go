@@ -3115,8 +3115,12 @@ type ConfigProviderModel struct {
 	Experimental bool                     `json:"experimental"`
 	Family       string                   `json:"family"`
 	Headers      map[string]string        `json:"headers"`
-	// This field can have the runtime type of [bool], [string],
-	// [ProviderModelCapabilitiesInterleavedField].
+	// Per OpenAPI `ProviderConfig.models.*.interleaved` is an anyOf of four
+	// variants: boolean, the enum "reasoning"|"reasoning_content"|"reasoning_text",
+	// any arbitrary string, or the object `{ "field": string }` where the field
+	// name identifies where interleaved reasoning content is located (known values:
+	// "reasoning", "reasoning_content", "reasoning_text"; open string union).
+	// This field can have the runtime type of [bool], [string], [map[string]interface{}].
 	Interleaved interface{}                    `json:"interleaved"`
 	Limit       ConfigProviderModelsLimit      `json:"limit"`
 	Modalities  ConfigProviderModelsModalities `json:"modalities"`
@@ -4190,7 +4194,11 @@ type ConfigProviderModelParam struct {
 	Experimental param.Field[bool]              `json:"experimental"`
 	Family       param.Field[string]            `json:"family"`
 	Headers      param.Field[map[string]string] `json:"headers"`
-	// Accepts [bool], [string] or [ProviderModelCapabilitiesInterleavedField].
+	// Per OpenAPI `ProviderConfig.models.*.interleaved` is an anyOf of four
+	// variants: boolean, the enum "reasoning"|"reasoning_content"|"reasoning_text",
+	// any arbitrary string, or the object `{ "field": string }` (use
+	// [ConfigProviderModelsInterleavedFieldParam] for the object variant).
+	// Accepts [bool], [string] or [ConfigProviderModelsInterleavedFieldParam].
 	Interleaved param.Field[interface{}]                         `json:"interleaved"`
 	Name        param.Field[string]                              `json:"name"`
 	Options     param.Field[map[string]interface{}]              `json:"options"`
@@ -4269,6 +4277,16 @@ type ConfigProviderModelsProviderParam struct {
 }
 
 func (r ConfigProviderModelsProviderParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigProviderModelsInterleavedFieldParam is the request-side counterpart of the
+// `{ "field": ... }` variant of ProviderConfig.models.*.interleaved.
+type ConfigProviderModelsInterleavedFieldParam struct {
+	Field param.Field[ProviderModelCapabilitiesInterleavedFieldField] `json:"field,required"`
+}
+
+func (r ConfigProviderModelsInterleavedFieldParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

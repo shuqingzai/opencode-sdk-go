@@ -282,7 +282,13 @@ type ProviderModelCapabilities struct {
 	ToolCall    bool                                `json:"toolcall,required"`
 	Input       ProviderModelCapabilitiesModalities `json:"input,required"`
 	Output      ProviderModelCapabilitiesModalities `json:"output,required"`
-	// This field can have the runtime type of [bool], [ProviderModelCapabilitiesInterleavedField].
+	// Per OpenAPI `Model.capabilities.interleaved` is an anyOf of two variants: a
+	// boolean, or the object `{ "field": string }` whose `field` identifies where
+	// interleaved reasoning content is located (known values: "reasoning",
+	// "reasoning_content", "reasoning_text"; the schema also admits any other
+	// string). Unlike `ProviderConfig.models.*.interleaved` this path has no
+	// standalone string variant.
+	// This field can have the runtime type of [bool], [map[string]interface{}].
 	Interleaved interface{}                   `json:"interleaved,required"`
 	JSON        providerModelCapabilitiesJSON `json:"-"`
 }
@@ -340,7 +346,12 @@ func (r providerModelCapabilitiesModalitiesJSON) RawJSON() string {
 }
 
 // ProviderModelCapabilitiesInterleavedField represents the field name used for interleaved
-// reasoning content.
+// reasoning content. It is a convenience type for callers that want to decode the
+// object variant explicitly, e.g. json.Unmarshal on the raw bytes.
+//
+// Note that [ProviderModelCapabilities.Interleaved] never holds this type at runtime:
+// it is a bare interface{} and therefore receives map[string]interface{} for the object
+// variant. Asserting it to this type panics — assert to map[string]interface{} instead.
 type ProviderModelCapabilitiesInterleavedField struct {
 	Field ProviderModelCapabilitiesInterleavedFieldField `json:"field,required"`
 	JSON  providerModelCapabilitiesInterleavedFieldJSON  `json:"-"`
@@ -363,7 +374,11 @@ func (r providerModelCapabilitiesInterleavedFieldJSON) RawJSON() string {
 }
 
 // ProviderModelCapabilitiesInterleavedFieldField represents the field name where interleaved
-// reasoning content is located.
+// reasoning content is located. The OpenAPI schema is an open union of
+// anyOf[enum("reasoning"|"reasoning_content"|"reasoning_text"), string], so
+// vendors may supply arbitrary field names beyond the three known values.
+// [ProviderModelCapabilitiesInterleavedFieldField.IsKnown] returns false for any
+// value not in the known constant set.
 type ProviderModelCapabilitiesInterleavedFieldField string
 
 const (
