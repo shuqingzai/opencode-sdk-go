@@ -3115,7 +3115,8 @@ type ConfigProviderModel struct {
 	Experimental bool                     `json:"experimental"`
 	Family       string                   `json:"family"`
 	Headers      map[string]string        `json:"headers"`
-	// This field can have the runtime type of [bool] or object.
+	// This field can have the runtime type of [bool], [string],
+	// [ProviderModelCapabilitiesInterleavedField].
 	Interleaved interface{}                    `json:"interleaved"`
 	Limit       ConfigProviderModelsLimit      `json:"limit"`
 	Modalities  ConfigProviderModelsModalities `json:"modalities"`
@@ -4189,7 +4190,7 @@ type ConfigProviderModelParam struct {
 	Experimental param.Field[bool]              `json:"experimental"`
 	Family       param.Field[string]            `json:"family"`
 	Headers      param.Field[map[string]string] `json:"headers"`
-	// Accepts bool or object.
+	// Accepts [bool], [string] or [ProviderModelCapabilitiesInterleavedField].
 	Interleaved param.Field[interface{}]                         `json:"interleaved"`
 	Name        param.Field[string]                              `json:"name"`
 	Options     param.Field[map[string]interface{}]              `json:"options"`

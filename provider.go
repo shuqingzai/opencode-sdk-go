@@ -369,14 +369,14 @@ type ProviderModelCapabilitiesInterleavedFieldField string
 const (
 	ProviderModelCapabilitiesInterleavedFieldFieldReasoning        ProviderModelCapabilitiesInterleavedFieldField = "reasoning"
 	ProviderModelCapabilitiesInterleavedFieldFieldReasoningContent ProviderModelCapabilitiesInterleavedFieldField = "reasoning_content"
-	ProviderModelCapabilitiesInterleavedFieldFieldReasoningDetails ProviderModelCapabilitiesInterleavedFieldField = "reasoning_details"
+	ProviderModelCapabilitiesInterleavedFieldFieldReasoningText    ProviderModelCapabilitiesInterleavedFieldField = "reasoning_text"
 )
 
 func (r ProviderModelCapabilitiesInterleavedFieldField) IsKnown() bool {
 	switch r {
 	case ProviderModelCapabilitiesInterleavedFieldFieldReasoning,
 		ProviderModelCapabilitiesInterleavedFieldFieldReasoningContent,
-		ProviderModelCapabilitiesInterleavedFieldFieldReasoningDetails:
+		ProviderModelCapabilitiesInterleavedFieldFieldReasoningText:
 		return true
 	}
 	return false
