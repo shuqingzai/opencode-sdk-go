@@ -595,14 +595,15 @@ func (r v2SessionMessageModelSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageUser struct {
-	ID       string                    `json:"id,required"`
-	Time     V2SessionMessageTime      `json:"time,required"`
-	Text     string                    `json:"text,required"`
-	Type     string                    `json:"type,required"`
-	Files    []V2PromptFileAttachment  `json:"files"`
-	Agents   []V2PromptAgentAttachment `json:"agents"`
-	Metadata any                       `json:"metadata"`
-	JSON     v2SessionMessageUserJSON  `json:"-"`
+	ID     string                    `json:"id,required"`
+	Time   V2SessionMessageTime      `json:"time,required"`
+	Text   string                    `json:"text,required"`
+	Type   string                    `json:"type,required"`
+	Files  []V2PromptFileAttachment  `json:"files"`
+	Agents []V2PromptAgentAttachment `json:"agents"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                      `json:"metadata"`
+	JSON     v2SessionMessageUserJSON `json:"-"`
 }
 
 type v2SessionMessageUserJSON struct {
@@ -626,13 +627,14 @@ func (r v2SessionMessageUserJSON) RawJSON() string {
 }
 
 type V2SessionMessageSynthetic struct {
-	ID        string                        `json:"id,required"`
-	Time      V2SessionMessageTime          `json:"time,required"`
-	SessionID string                        `json:"sessionID,required"`
-	Text      string                        `json:"text,required"`
-	Type      string                        `json:"type,required"`
-	Metadata  any                           `json:"metadata"`
-	JSON      v2SessionMessageSyntheticJSON `json:"-"`
+	ID        string               `json:"id,required"`
+	Time      V2SessionMessageTime `json:"time,required"`
+	SessionID string               `json:"sessionID,required"`
+	Text      string               `json:"text,required"`
+	Type      string               `json:"type,required"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                           `json:"metadata"`
+	JSON     v2SessionMessageSyntheticJSON `json:"-"`
 }
 
 type v2SessionMessageSyntheticJSON struct {
@@ -702,8 +704,9 @@ type V2SessionMessageAssistant struct {
 	Cost     float64                            `json:"cost"`
 	Tokens   V2SessionMessageTokens             `json:"tokens"`
 	Error    SessionErrorUnknown                `json:"error"`
-	Metadata any                                `json:"metadata"`
-	JSON     v2SessionMessageAssistantJSON      `json:"-"`
+	// This field can have the runtime type of [map[string]any].
+	Metadata any                           `json:"metadata"`
+	JSON     v2SessionMessageAssistantJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantJSON struct {
@@ -1010,15 +1013,18 @@ func (r v2SessionMessageAssistantSnapshotJSON) RawJSON() string {
 type V2SessionMessageToolProvider struct {
 	Executed bool `json:"executed,required"`
 	// This field can have the runtime type of [map[string]any].
-	Metadata any                              `json:"metadata"`
-	JSON     v2SessionMessageToolProviderJSON `json:"-"`
+	Metadata any `json:"metadata"`
+	// This field can have the runtime type of [map[string]any].
+	ResultMetadata any                              `json:"resultMetadata"`
+	JSON           v2SessionMessageToolProviderJSON `json:"-"`
 }
 
 type v2SessionMessageToolProviderJSON struct {
-	Executed    apijson.Field
-	Metadata    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Executed       apijson.Field
+	Metadata       apijson.Field
+	ResultMetadata apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
 }
 
 func (r *V2SessionMessageToolProvider) UnmarshalJSON(data []byte) (err error) {

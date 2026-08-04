@@ -171,13 +171,13 @@ func (r SyncStartParams) URLQuery() (v url.Values) {
 }
 
 type SyncReplayParams struct {
-	Directory param.Field[string]  `query:"directory"`
-	Workspace param.Field[string]  `query:"workspace"`
-	Body      SyncReplayParamsBody `json:"-"`
+	Directory param.Field[string]               `query:"directory"`
+	Workspace param.Field[string]               `query:"workspace"`
+	Body      param.Field[SyncReplayParamsBody] `json:"-"`
 }
 
 func (r SyncReplayParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.Directory.Present || len(r.Body.Events.Value) > 0 {
+	if r.Body.Present {
 		return apijson.MarshalRoot(r.Body)
 	}
 	return nil, nil
@@ -213,13 +213,13 @@ func (r SyncReplayParamsBodyEvent) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncStealParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Body      SyncStealParamsBody `json:"-"`
+	Directory param.Field[string]              `query:"directory"`
+	Workspace param.Field[string]              `query:"workspace"`
+	Body      param.Field[SyncStealParamsBody] `json:"-"`
 }
 
 func (r SyncStealParams) MarshalJSON() (data []byte, err error) {
-	if r.Body.SessionID.Present {
+	if r.Body.Present {
 		return apijson.MarshalRoot(r.Body)
 	}
 	return nil, nil

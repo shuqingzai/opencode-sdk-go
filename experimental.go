@@ -48,6 +48,13 @@ func (r *ExperimentalService) WorkspaceList(ctx context.Context, query Experimen
 	return r.Workspace.List(ctx, query, opts...)
 }
 
+// WorkspaceNew creates a workspace in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.New] instead.
+func (r *ExperimentalService) WorkspaceNew(ctx context.Context, body ExperimentalWorkspaceNewParams, opts ...option.RequestOption) (res *Workspace, err error) {
+	return r.Workspace.New(ctx, body, opts...)
+}
+
 // WorkspaceRemove removes a workspace in the experimental API.
 //
 // Deprecated: Use [ExperimentalService.Workspace.Remove] instead.
@@ -57,8 +64,15 @@ func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, qu
 
 // AdapterList lists workspace adapters in the experimental API.
 //
-// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead.
+// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead. See also [ExperimentalService.WorkspaceAdapterList].
 func (r *ExperimentalService) AdapterList(ctx context.Context, query ExperimentalAdapterListParams, opts ...option.RequestOption) (res *[]WorkspaceAdapter, err error) {
+	return r.Workspace.Adapter.List(ctx, query, opts...)
+}
+
+// WorkspaceAdapterList lists workspace adapters in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead.
+func (r *ExperimentalService) WorkspaceAdapterList(ctx context.Context, query ExperimentalAdapterListParams, opts ...option.RequestOption) (res *[]WorkspaceAdapter, err error) {
 	return r.Workspace.Adapter.List(ctx, query, opts...)
 }
 
@@ -71,8 +85,15 @@ func (r *ExperimentalService) WorkspaceStatus(ctx context.Context, query Experim
 
 // Warp warps a workspace in the experimental API.
 //
-// Deprecated: Use [ExperimentalService.Workspace.Warp] instead.
+// Deprecated: Use [ExperimentalService.Workspace.Warp] instead. See also [ExperimentalService.WorkspaceWarp].
 func (r *ExperimentalService) Warp(ctx context.Context, params ExperimentalWarpParams, opts ...option.RequestOption) (err error) {
+	return r.Workspace.Warp(ctx, params, opts...)
+}
+
+// WorkspaceWarp warps a workspace in the experimental API.
+//
+// Deprecated: Use [ExperimentalService.Workspace.Warp] instead.
+func (r *ExperimentalService) WorkspaceWarp(ctx context.Context, params ExperimentalWarpParams, opts ...option.RequestOption) (err error) {
 	return r.Workspace.Warp(ctx, params, opts...)
 }
 
@@ -100,7 +121,7 @@ func (r *ExperimentalService) ConsoleListOrgs(ctx context.Context, query Experim
 // ConsoleSwitchOrg switches the active Console org in the experimental API.
 //
 // Deprecated: Use [ExperimentalService.Console.SwitchOrg] instead.
-func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body ExperimentalConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
 	return r.Console.SwitchOrg(ctx, body, opts...)
 }
 

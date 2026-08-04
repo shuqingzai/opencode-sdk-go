@@ -4,12 +4,14 @@ package opencode
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"slices"
 
 	"github.com/sst/opencode-sdk-go/internal/apijson"
+	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/tidwall/gjson"
@@ -35,10 +37,10 @@ func NewAuthService(opts ...option.RequestOption) (r *AuthService) {
 }
 
 // Set authentication credentials for a provider
-func (r *AuthService) Set(ctx context.Context, providerID string, body Auth, opts ...option.RequestOption) (res *bool, err error) {
+func (r *AuthService) Set(ctx context.Context, providerID string, body AuthParam, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
-		err = fmt.Errorf("missing required providerID parameter")
+		err = errors.New("missing required providerID parameter")
 		return
 	}
 	path := fmt.Sprintf("auth/%s", providerID)
@@ -50,7 +52,7 @@ func (r *AuthService) Set(ctx context.Context, providerID string, body Auth, opt
 func (r *AuthService) Remove(ctx context.Context, providerID string, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if providerID == "" {
-		err = fmt.Errorf("missing required providerID parameter")
+		err = errors.New("missing required providerID parameter")
 		return
 	}
 	path := fmt.Sprintf("auth/%s", providerID)
@@ -81,6 +83,25 @@ func init() {
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "wellknown",
 			Type:               reflect.TypeFor[WellKnownAuth](),
+		},
+	)
+	apijson.RegisterUnion(
+		reflect.TypeFor[AuthParam](),
+		"type",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "oauth",
+			Type:               reflect.TypeFor[OAuthParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "api",
+			Type:               reflect.TypeFor[ApiAuthParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "wellknown",
+			Type:               reflect.TypeFor[WellKnownAuthParam](),
 		},
 	)
 }
@@ -168,3 +189,50 @@ func (r wellKnownAuthJSON) RawJSON() string {
 }
 
 func (r WellKnownAuth) implementsAuth() {}
+
+// Satisfied by [OAuthParam], [ApiAuthParam], or [WellKnownAuthParam].
+type AuthParam interface {
+	implementsAuthParam()
+}
+
+// OAuthParam is the request-side counterpart of [OAuth] (OpenAPI OAuth schema).
+type OAuthParam struct {
+	Type          param.Field[string] `json:"type,required"`
+	Refresh       param.Field[string] `json:"refresh,required"`
+	Access        param.Field[string] `json:"access,required"`
+	Expires       param.Field[int64]  `json:"expires,required"`
+	AccountID     param.Field[string] `json:"accountId"`
+	EnterpriseURL param.Field[string] `json:"enterpriseUrl"`
+}
+
+func (r OAuthParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r OAuthParam) implementsAuthParam() {}
+
+// ApiAuthParam is the request-side counterpart of [ApiAuth] (OpenAPI ApiAuth schema).
+type ApiAuthParam struct {
+	Type     param.Field[string]            `json:"type,required"`
+	Key      param.Field[string]            `json:"key,required"`
+	Metadata param.Field[map[string]string] `json:"metadata"`
+}
+
+func (r ApiAuthParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ApiAuthParam) implementsAuthParam() {}
+
+// WellKnownAuthParam is the request-side counterpart of [WellKnownAuth] (OpenAPI WellKnownAuth schema).
+type WellKnownAuthParam struct {
+	Type  param.Field[string] `json:"type,required"`
+	Key   param.Field[string] `json:"key,required"`
+	Token param.Field[string] `json:"token,required"`
+}
+
+func (r WellKnownAuthParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r WellKnownAuthParam) implementsAuthParam() {}

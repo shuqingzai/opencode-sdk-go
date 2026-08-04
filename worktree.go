@@ -111,13 +111,17 @@ func (r WorktreeNewParams) URLQuery() (v url.Values) {
 	})
 }
 
+// WorktreeRemoveParams contains the body and query parameters for removing a worktree.
 type WorktreeRemoveParams struct {
-	Directory param.Field[string] `json:"directory,required" query:"directory"`
+	// query: routing context — which opencode instance to target (optional)
+	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	// Body contains the worktree path to remove (required, distinct from the query directory above)
+	Body WorktreeRemoveParamsBody `json:"-"`
 }
 
 func (r WorktreeRemoveParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [WorktreeRemoveParams]'s query parameters as `url.Values`.
@@ -128,13 +132,27 @@ func (r WorktreeRemoveParams) URLQuery() (v url.Values) {
 	})
 }
 
+// WorktreeRemoveParamsBody contains the body fields for the remove worktree request.
+type WorktreeRemoveParamsBody struct {
+	// Directory is the absolute path of the worktree to remove (required)
+	Directory param.Field[string] `json:"directory,required"`
+}
+
+func (r WorktreeRemoveParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// WorktreeResetParams contains the body and query parameters for resetting a worktree.
 type WorktreeResetParams struct {
-	Directory param.Field[string] `json:"directory,required" query:"directory"`
+	// query: routing context — which opencode instance to target (optional)
+	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
+	// Body contains the worktree path to reset (required, distinct from the query directory above)
+	Body WorktreeResetParamsBody `json:"-"`
 }
 
 func (r WorktreeResetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
+	return apijson.MarshalRoot(r.Body)
 }
 
 // URLQuery serializes [WorktreeResetParams]'s query parameters as `url.Values`.
@@ -143,6 +161,16 @@ func (r WorktreeResetParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// WorktreeResetParamsBody contains the body fields for the reset worktree request.
+type WorktreeResetParamsBody struct {
+	// Directory is the absolute path of the worktree to reset (required)
+	Directory param.Field[string] `json:"directory,required"`
+}
+
+func (r WorktreeResetParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type WorktreeListParams struct {

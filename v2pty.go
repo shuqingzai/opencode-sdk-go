@@ -270,6 +270,7 @@ type V2PtyListParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2PtyListParams]'s query parameters as `url.Values`.
 func (r V2PtyListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -287,6 +288,7 @@ type V2PtyNewParams struct {
 	Location param.Field[V2LocationParam]   `query:"location"`
 }
 
+// MarshalJSON serializes [V2PtyNewParams] into JSON.
 func (r V2PtyNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -304,6 +306,7 @@ type V2PtyGetParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2PtyGetParams]'s query parameters as `url.Values`.
 func (r V2PtyGetParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -318,6 +321,7 @@ type V2PtyUpdateParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// MarshalJSON serializes [V2PtyUpdateParams] into JSON.
 func (r V2PtyUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -330,21 +334,16 @@ func (r V2PtyUpdateParams) URLQuery() (v url.Values) {
 	})
 }
 
-// V2PtySize represents the terminal size for a PTY.
-type V2PtySize struct {
-	Rows param.Field[int64] `json:"rows,required"`
-	Cols param.Field[int64] `json:"cols,required"`
-}
-
-func (r V2PtySize) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
+// V2PtySize is an alias for [PtySize]. Both v1 and v2 endpoints share the same
+// inline size schema (rows/cols integer), so a single definition is canonical.
+type V2PtySize = PtySize
 
 // V2PtyRemoveParams contains the query parameters for removing a v2 PTY.
 type V2PtyRemoveParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2PtyRemoveParams]'s query parameters as `url.Values`.
 func (r V2PtyRemoveParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -359,6 +358,7 @@ type V2PtyConnectParams struct {
 	Ticket   param.Field[string]          `query:"ticket"`
 }
 
+// URLQuery serializes [V2PtyConnectParams]'s query parameters as `url.Values`.
 func (r V2PtyConnectParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -371,6 +371,7 @@ type V2PtyConnectTokenParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2PtyConnectTokenParams]'s query parameters as `url.Values`.
 func (r V2PtyConnectTokenParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

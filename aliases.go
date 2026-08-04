@@ -453,3 +453,9 @@ type ProjectCopyErrorName = shared.ProjectCopyErrorName
 
 // This is an alias to an internal value.
 const ProjectCopyErrorNameProjectCopyError = shared.ProjectCopyErrorNameProjectCopyError
+
+// This is an alias to an internal type.
+type UnionBool = shared.UnionBool
+
+// This is an alias to an internal type.
+type UnionInt = shared.UnionInt

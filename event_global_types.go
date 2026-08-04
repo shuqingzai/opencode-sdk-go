@@ -612,8 +612,8 @@ const (
 
 func (r EventListResponseEventSessionNextPromptedDelivery) IsKnown() bool {
 	switch r {
-	case EventListResponseEventSessionNextPromptedDeliverySteer:
-	case EventListResponseEventSessionNextPromptedDeliveryQueue:
+	case EventListResponseEventSessionNextPromptedDeliverySteer,
+		EventListResponseEventSessionNextPromptedDeliveryQueue:
 		return true
 	}
 	return false
@@ -2213,8 +2213,8 @@ const (
 
 func (r EventListResponseEventSessionNextCompactionEndedReason) IsKnown() bool {
 	switch r {
-	case EventListResponseEventSessionNextCompactionEndedReasonAuto:
-	case EventListResponseEventSessionNextCompactionEndedReasonManual:
+	case EventListResponseEventSessionNextCompactionEndedReasonAuto,
+		EventListResponseEventSessionNextCompactionEndedReasonManual:
 		return true
 	}
 	return false
@@ -3547,12 +3547,12 @@ func (r EventListResponseEventSessionNextPromptAdmitted) implementsEventListResp
 func (r EventListResponseEventSessionNextPromptAdmitted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextPromptAdmittedProperties struct {
-	Timestamp int64                                                           `json:"timestamp,required"`
-	SessionID string                                                          `json:"sessionID,required"`
-	MessageID string                                                          `json:"messageID,required"`
-	Prompt    EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt `json:"prompt,required"`
-	Delivery  string                                                          `json:"delivery,required"`
-	JSON      eventListResponseEventSessionNextPromptAdmittedPropertiesJSON   `json:"-"`
+	Timestamp int64                                                             `json:"timestamp,required"`
+	SessionID string                                                            `json:"sessionID,required"`
+	MessageID string                                                            `json:"messageID,required"`
+	Prompt    EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt   `json:"prompt,required"`
+	Delivery  EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery `json:"delivery,required"`
+	JSON      eventListResponseEventSessionNextPromptAdmittedPropertiesJSON     `json:"-"`
 }
 
 type eventListResponseEventSessionNextPromptAdmittedPropertiesJSON struct {
@@ -3605,6 +3605,22 @@ const (
 func (r EventListResponseEventSessionNextPromptAdmittedType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventSessionNextPromptAdmittedTypeSessionNextPromptAdmitted:
+		return true
+	}
+	return false
+}
+
+type EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery string
+
+const (
+	EventListResponseEventSessionNextPromptAdmittedPropertiesDeliverySteer EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery = "steer"
+	EventListResponseEventSessionNextPromptAdmittedPropertiesDeliveryQueue EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery = "queue"
+)
+
+func (r EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery) IsKnown() bool {
+	switch r {
+	case EventListResponseEventSessionNextPromptAdmittedPropertiesDeliverySteer,
+		EventListResponseEventSessionNextPromptAdmittedPropertiesDeliveryQueue:
 		return true
 	}
 	return false

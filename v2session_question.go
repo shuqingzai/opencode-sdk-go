@@ -96,11 +96,7 @@ func (r V2SessionQuestionReplyParams) MarshalJSON() (data []byte, err error) {
 
 // QuestionV2Answer represents the answer type for v2 question replies.
 // Each answer is an array of selected label strings.
-type QuestionV2Answer []string
-
-func (r QuestionV2Answer) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
+type QuestionV2Answer = []string
 
 // ===== Response Types =====
 

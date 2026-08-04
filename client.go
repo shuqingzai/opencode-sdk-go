@@ -120,10 +120,10 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.V2ProjectCopy = NewV2ProjectCopyService(opts...)
 	r.Tool = NewToolService(opts...)
 	r.Part = NewPartService(opts...)
+	r.V2Permission = NewV2PermissionService(opts...)
 	r.V2Pty = NewV2PtyService(opts...)
 	r.V2Event = NewV2EventService(opts...)
 	r.V2Fs = NewV2FsService(opts...)
-	r.V2Permission = NewV2PermissionService(opts...)
 
 	return
 }

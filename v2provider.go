@@ -246,14 +246,16 @@ func (r V2ProviderInfoApiNativeType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2ProviderInfoApiUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2ProviderInfoApiAisdk](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "aisdk",
+			Type:               reflect.TypeFor[V2ProviderInfoApiAisdk](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2ProviderInfoApiNative](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "native",
+			Type:               reflect.TypeFor[V2ProviderInfoApiNative](),
 		},
 	)
 }

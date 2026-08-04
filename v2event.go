@@ -3355,8 +3355,8 @@ const (
 
 func (r V2EventSessionNextCompactionEndedReason) IsKnown() bool {
 	switch r {
-	case V2EventSessionNextCompactionEndedReasonAuto:
-	case V2EventSessionNextCompactionEndedReasonManual:
+	case V2EventSessionNextCompactionEndedReasonAuto,
+		V2EventSessionNextCompactionEndedReasonManual:
 		return true
 	}
 	return false
@@ -3445,8 +3445,8 @@ const (
 
 func (r V2EventSessionNextCompactionStartedReason) IsKnown() bool {
 	switch r {
-	case V2EventSessionNextCompactionStartedReasonAuto:
-	case V2EventSessionNextCompactionStartedReasonManual:
+	case V2EventSessionNextCompactionStartedReasonAuto,
+		V2EventSessionNextCompactionStartedReasonManual:
 		return true
 	}
 	return false
@@ -3741,8 +3741,8 @@ const (
 
 func (r V2EventSessionNextPromptAdmittedDelivery) IsKnown() bool {
 	switch r {
-	case V2EventSessionNextPromptAdmittedDeliverySteer:
-	case V2EventSessionNextPromptAdmittedDeliveryQueue:
+	case V2EventSessionNextPromptAdmittedDeliverySteer,
+		V2EventSessionNextPromptAdmittedDeliveryQueue:
 		return true
 	}
 	return false
@@ -3830,8 +3830,8 @@ const (
 
 func (r V2EventSessionNextPromptedDelivery) IsKnown() bool {
 	switch r {
-	case V2EventSessionNextPromptedDeliverySteer:
-	case V2EventSessionNextPromptedDeliveryQueue:
+	case V2EventSessionNextPromptedDeliverySteer,
+		V2EventSessionNextPromptedDeliveryQueue:
 		return true
 	}
 	return false
@@ -6094,10 +6094,10 @@ const (
 
 func (r V2EventTuiToastShowVariant) IsKnown() bool {
 	switch r {
-	case V2EventTuiToastShowVariantInfo:
-	case V2EventTuiToastShowVariantSuccess:
-	case V2EventTuiToastShowVariantWarning:
-	case V2EventTuiToastShowVariantError:
+	case V2EventTuiToastShowVariantInfo,
+		V2EventTuiToastShowVariantSuccess,
+		V2EventTuiToastShowVariantWarning,
+		V2EventTuiToastShowVariantError:
 		return true
 	}
 	return false
@@ -6376,10 +6376,10 @@ const (
 
 func (r V2EventWorkspaceStatusStatus) IsKnown() bool {
 	switch r {
-	case V2EventWorkspaceStatusStatusConnected:
-	case V2EventWorkspaceStatusStatusConnecting:
-	case V2EventWorkspaceStatusStatusDisconnected:
-	case V2EventWorkspaceStatusStatusError:
+	case V2EventWorkspaceStatusStatusConnected,
+		V2EventWorkspaceStatusStatusConnecting,
+		V2EventWorkspaceStatusStatusDisconnected,
+		V2EventWorkspaceStatusStatusError:
 		return true
 	}
 	return false
@@ -6604,22 +6604,22 @@ const (
 
 func (r V2EventTuiCommandExecuteCommand) IsKnown() bool {
 	switch r {
-	case V2EventTuiCommandExecuteCommandCommandSessionList:
-	case V2EventTuiCommandExecuteCommandCommandSessionNew:
-	case V2EventTuiCommandExecuteCommandCommandSessionShare:
-	case V2EventTuiCommandExecuteCommandCommandSessionInterrupt:
-	case V2EventTuiCommandExecuteCommandCommandSessionCompact:
-	case V2EventTuiCommandExecuteCommandCommandSessionPageUp:
-	case V2EventTuiCommandExecuteCommandCommandSessionPageDown:
-	case V2EventTuiCommandExecuteCommandCommandSessionLineUp:
-	case V2EventTuiCommandExecuteCommandCommandSessionLineDown:
-	case V2EventTuiCommandExecuteCommandCommandSessionHalfPageUp:
-	case V2EventTuiCommandExecuteCommandCommandSessionHalfPageDown:
-	case V2EventTuiCommandExecuteCommandCommandSessionFirst:
-	case V2EventTuiCommandExecuteCommandCommandSessionLast:
-	case V2EventTuiCommandExecuteCommandCommandPromptClear:
-	case V2EventTuiCommandExecuteCommandCommandPromptSubmit:
-	case V2EventTuiCommandExecuteCommandCommandAgentCycle:
+	case V2EventTuiCommandExecuteCommandCommandSessionList,
+		V2EventTuiCommandExecuteCommandCommandSessionNew,
+		V2EventTuiCommandExecuteCommandCommandSessionShare,
+		V2EventTuiCommandExecuteCommandCommandSessionInterrupt,
+		V2EventTuiCommandExecuteCommandCommandSessionCompact,
+		V2EventTuiCommandExecuteCommandCommandSessionPageUp,
+		V2EventTuiCommandExecuteCommandCommandSessionPageDown,
+		V2EventTuiCommandExecuteCommandCommandSessionLineUp,
+		V2EventTuiCommandExecuteCommandCommandSessionLineDown,
+		V2EventTuiCommandExecuteCommandCommandSessionHalfPageUp,
+		V2EventTuiCommandExecuteCommandCommandSessionHalfPageDown,
+		V2EventTuiCommandExecuteCommandCommandSessionFirst,
+		V2EventTuiCommandExecuteCommandCommandSessionLast,
+		V2EventTuiCommandExecuteCommandCommandPromptClear,
+		V2EventTuiCommandExecuteCommandCommandPromptSubmit,
+		V2EventTuiCommandExecuteCommandCommandAgentCycle:
 		return true
 	}
 	return false

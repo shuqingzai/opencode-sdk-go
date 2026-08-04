@@ -35,11 +35,18 @@ func NewToolService(opts ...option.RequestOption) (r *ToolService) {
 }
 
 // List tool IDs
-func (r *ToolService) Ids(ctx context.Context, query ToolIdsParams, opts ...option.RequestOption) (res *[]string, err error) {
+func (r *ToolService) IDs(ctx context.Context, query ToolIDsParams, opts ...option.RequestOption) (res *[]string, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/tool/ids"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
+}
+
+// List tool IDs
+//
+// Deprecated: Use [ToolService.IDs] instead.
+func (r *ToolService) Ids(ctx context.Context, query ToolIDsParams, opts ...option.RequestOption) (res *[]string, err error) {
+	return r.IDs(ctx, query, opts...)
 }
 
 // List tools
@@ -74,18 +81,21 @@ func (r toolListItemJSON) RawJSON() string {
 	return r.raw
 }
 
-type ToolIdsParams struct {
+type ToolIDsParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 
-// URLQuery serializes [ToolIdsParams]'s query parameters as `url.Values`.
-func (r ToolIdsParams) URLQuery() (v url.Values) {
+// URLQuery serializes [ToolIDsParams]'s query parameters as `url.Values`.
+func (r ToolIDsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+// Deprecated: Use [ToolIDsParams] instead.
+type ToolIdsParams = ToolIDsParams
 
 type ToolListParams struct {
 	Directory param.Field[string] `query:"directory"`

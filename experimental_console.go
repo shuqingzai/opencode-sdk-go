@@ -51,7 +51,7 @@ func (r *ExperimentalConsoleService) ListOrgs(ctx context.Context, query Experim
 }
 
 // Switch active Console org
-func (r *ExperimentalConsoleService) SwitchOrg(ctx context.Context, body ConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
+func (r *ExperimentalConsoleService) SwitchOrg(ctx context.Context, body ExperimentalConsoleSwitchOrgParams, opts ...option.RequestOption) (res *bool, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/console/switch"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -60,7 +60,7 @@ func (r *ExperimentalConsoleService) SwitchOrg(ctx context.Context, body Console
 
 type ConsoleState struct {
 	ConsoleManagedProviders []string         `json:"consoleManagedProviders,required"`
-	ActiveOrgName           string           `json:"activeOrgName,omitempty"`
+	ActiveOrgName           string           `json:"activeOrgName"`
 	SwitchableOrgCount      int64            `json:"switchableOrgCount,required"`
 	JSON                    consoleStateJSON `json:"-"`
 }
@@ -153,30 +153,36 @@ func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
 	})
 }
 
-// ConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
-type ConsoleSwitchOrgParams struct {
-	Directory param.Field[string]   `query:"directory"`
-	Workspace param.Field[string]   `query:"workspace"`
-	Body      ConsoleSwitchOrgInput `json:"-"`
+// ExperimentalConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
+type ExperimentalConsoleSwitchOrgParams struct {
+	Directory param.Field[string]               `query:"directory"`
+	Workspace param.Field[string]               `query:"workspace"`
+	Body      ExperimentalConsoleSwitchOrgInput `json:"-"`
 }
 
-func (r ConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
+func (r ExperimentalConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r.Body)
 }
 
-// URLQuery serializes [ConsoleSwitchOrgParams]'s query parameters as `url.Values`.
-func (r ConsoleSwitchOrgParams) URLQuery() (v url.Values) {
+// URLQuery serializes [ExperimentalConsoleSwitchOrgParams]'s query parameters as `url.Values`.
+func (r ExperimentalConsoleSwitchOrgParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-type ConsoleSwitchOrgInput struct {
+// ConsoleSwitchOrgParams is an alias for [ExperimentalConsoleSwitchOrgParams] for backward compatibility.
+type ConsoleSwitchOrgParams = ExperimentalConsoleSwitchOrgParams
+
+type ExperimentalConsoleSwitchOrgInput struct {
 	AccountID param.Field[string] `json:"accountID,required"`
 	OrgID     param.Field[string] `json:"orgID,required"`
 }
 
-func (r ConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
+func (r ExperimentalConsoleSwitchOrgInput) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+// ConsoleSwitchOrgInput is an alias for [ExperimentalConsoleSwitchOrgInput] for backward compatibility.
+type ConsoleSwitchOrgInput = ExperimentalConsoleSwitchOrgInput

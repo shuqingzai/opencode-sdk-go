@@ -4,6 +4,7 @@ package opencode_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -76,8 +77,11 @@ func TestWorktreeRemove(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Worktree.Remove(context.TODO(), opencode.WorktreeRemoveParams{
-		Directory: opencode.F("/path/to/worktree"),
+		Directory: opencode.F("routing-directory"),
 		Workspace: opencode.F("workspace"),
+		Body: opencode.WorktreeRemoveParamsBody{
+			Directory: opencode.F("/path/to/worktree"),
+		},
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -101,8 +105,11 @@ func TestWorktreeReset(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Worktree.Reset(context.TODO(), opencode.WorktreeResetParams{
-		Directory: opencode.F("/path/to/worktree"),
+		Directory: opencode.F("routing-directory"),
 		Workspace: opencode.F("workspace"),
+		Body: opencode.WorktreeResetParamsBody{
+			Directory: opencode.F("/path/to/worktree"),
+		},
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -110,5 +117,125 @@ func TestWorktreeReset(t *testing.T) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
 		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+// TestWorktreeRemoveParamsSeparation verifies that WorktreeRemoveParams correctly
+// separates the routing query directory from the worktree body directory.
+// The body must only contain the worktree path; the query must only contain
+// the routing context — they must not pollute each other.
+func TestWorktreeRemoveParamsSeparation(t *testing.T) {
+	t.Parallel()
+
+	params := opencode.WorktreeRemoveParams{
+		Directory: opencode.F("routing-dir"),
+		Workspace: opencode.F("ws-1"),
+		Body: opencode.WorktreeRemoveParamsBody{
+			Directory: opencode.F("/actual/worktree/path"),
+		},
+	}
+
+	// 1. Body serialisation must only contain the worktree directory
+	bodyBytes, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal body: %v", err)
+	}
+	var bodyMap map[string]any
+	if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
+		t.Fatalf("re-parse body JSON: %v", err)
+	}
+	if got, ok := bodyMap["directory"]; !ok || got != "/actual/worktree/path" {
+		t.Errorf("body: expected directory=/actual/worktree/path, got %v", bodyMap)
+	}
+	if _, ok := bodyMap["workspace"]; ok {
+		t.Errorf("body must not contain workspace, got %v", bodyMap)
+	}
+
+	// 2. Query serialisation must only contain routing context fields
+	query := params.URLQuery()
+	if got := query.Get("directory"); got != "routing-dir" {
+		t.Errorf("query: expected directory=routing-dir, got %q", got)
+	}
+	if got := query.Get("workspace"); got != "ws-1" {
+		t.Errorf("query: expected workspace=ws-1, got %q", got)
+	}
+
+	// 3. Query must not contain worktree-path value in directory
+	if query.Get("directory") == "/actual/worktree/path" {
+		t.Errorf("query directory must be routing context, not worktree path")
+	}
+}
+
+// TestWorktreeResetParamsSeparation verifies that WorktreeResetParams correctly
+// separates the routing query directory from the worktree body directory.
+func TestWorktreeResetParamsSeparation(t *testing.T) {
+	t.Parallel()
+
+	params := opencode.WorktreeResetParams{
+		Directory: opencode.F("routing-dir"),
+		Workspace: opencode.F("ws-2"),
+		Body: opencode.WorktreeResetParamsBody{
+			Directory: opencode.F("/actual/worktree/reset/path"),
+		},
+	}
+
+	// 1. Body serialisation must only contain the worktree directory
+	bodyBytes, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal body: %v", err)
+	}
+	var bodyMap map[string]any
+	if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
+		t.Fatalf("re-parse body JSON: %v", err)
+	}
+	if got, ok := bodyMap["directory"]; !ok || got != "/actual/worktree/reset/path" {
+		t.Errorf("body: expected directory=/actual/worktree/reset/path, got %v", bodyMap)
+	}
+	if _, ok := bodyMap["workspace"]; ok {
+		t.Errorf("body must not contain workspace, got %v", bodyMap)
+	}
+
+	// 2. Query serialisation must only contain routing context fields
+	query := params.URLQuery()
+	if got := query.Get("directory"); got != "routing-dir" {
+		t.Errorf("query: expected directory=routing-dir, got %q", got)
+	}
+	if got := query.Get("workspace"); got != "ws-2" {
+		t.Errorf("query: expected workspace=ws-2, got %q", got)
+	}
+
+	// 3. Query must not contain worktree-path value in directory
+	if query.Get("directory") == "/actual/worktree/reset/path" {
+		t.Errorf("query directory must be routing context, not worktree path")
+	}
+}
+
+// TestWorktreeRemoveParamsBodyOnlyInBody verifies that when query directory is
+// absent but body directory is set, the body still serialises the worktree path.
+func TestWorktreeRemoveParamsBodyOnlyInBody(t *testing.T) {
+	t.Parallel()
+
+	params := opencode.WorktreeRemoveParams{
+		// No routing directory set
+		Body: opencode.WorktreeRemoveParamsBody{
+			Directory: opencode.F("/standalone/worktree"),
+		},
+	}
+
+	bodyBytes, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var bodyMap map[string]any
+	if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	if got, ok := bodyMap["directory"]; !ok || got != "/standalone/worktree" {
+		t.Errorf("body: expected directory=/standalone/worktree, got %v", bodyMap)
+	}
+
+	query := params.URLQuery()
+	if got := query.Get("directory"); got != "" {
+		t.Errorf("query directory should be empty when not set, got %q", got)
 	}
 }

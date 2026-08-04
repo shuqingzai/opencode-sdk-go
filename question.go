@@ -71,7 +71,7 @@ type QuestionRequest struct {
 	ID        string              `json:"id,required"`
 	SessionID string              `json:"sessionID,required"`
 	Questions []QuestionInfo      `json:"questions,required"`
-	Tool      QuestionRequestTool `json:"tool"`
+	Tool      QuestionTool        `json:"tool"`
 	JSON      questionRequestJSON `json:"-"`
 }
 
@@ -146,28 +146,31 @@ func (r questionOptionJSON) RawJSON() string {
 	return r.raw
 }
 
-type QuestionRequestTool struct {
-	MessageID string                  `json:"messageID,required"`
-	CallID    string                  `json:"callID,required"`
-	JSON      questionRequestToolJSON `json:"-"`
+type QuestionTool struct {
+	MessageID string           `json:"messageID,required"`
+	CallID    string           `json:"callID,required"`
+	JSON      questionToolJSON `json:"-"`
 }
 
-// questionRequestToolJSON contains the JSON metadata for the struct
-// [QuestionRequestTool]
-type questionRequestToolJSON struct {
+// questionToolJSON contains the JSON metadata for the struct [QuestionTool]
+type questionToolJSON struct {
 	MessageID   apijson.Field
 	CallID      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *QuestionRequestTool) UnmarshalJSON(data []byte) (err error) {
+func (r *QuestionTool) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r questionRequestToolJSON) RawJSON() string {
+func (r questionToolJSON) RawJSON() string {
 	return r.raw
 }
+
+// QuestionRequestTool is an alias for [QuestionTool] preserved for backwards
+// compatibility.
+type QuestionRequestTool = QuestionTool
 
 type QuestionAnswer = []string
 

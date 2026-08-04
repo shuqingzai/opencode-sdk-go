@@ -4,6 +4,7 @@ package opencode_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -231,5 +232,138 @@ func TestTuiSubmitPromptWithOptionalParams(t *testing.T) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
 		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+// TestTuiPublishBodyPromptAppendSerialization verifies that the PromptAppend variant
+// serializes correctly with type discriminator "tui.prompt.append" and required fields.
+func TestTuiPublishBodyPromptAppendSerialization(t *testing.T) {
+	t.Parallel()
+	params := opencode.TuiPublishParams{
+		Body: opencode.F[opencode.TuiPublishBodyUnion](opencode.TuiPublishBodyPromptAppend{
+			Type: opencode.F(opencode.TuiPublishBodyPromptAppendTypeTuiPromptAppend),
+			Properties: opencode.F(opencode.TuiPublishBodyPromptAppendProperties{
+				Text: opencode.F("hello world"),
+			}),
+		}),
+	}
+	data, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var got map[string]interface{}
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got["type"] != "tui.prompt.append" {
+		t.Errorf("type: got %v, want %q", got["type"], "tui.prompt.append")
+	}
+	props, ok := got["properties"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("properties: expected object, got %T", got["properties"])
+	}
+	if props["text"] != "hello world" {
+		t.Errorf("properties.text: got %v, want %q", props["text"], "hello world")
+	}
+}
+
+// TestTuiPublishBodyCommandExecuteSerialization verifies the CommandExecute variant.
+func TestTuiPublishBodyCommandExecuteSerialization(t *testing.T) {
+	t.Parallel()
+	params := opencode.TuiPublishParams{
+		Body: opencode.F[opencode.TuiPublishBodyUnion](opencode.TuiPublishBodyCommandExecute{
+			Type: opencode.F(opencode.TuiPublishBodyCommandExecuteTypeTuiCommandExecute),
+			Properties: opencode.F(opencode.TuiPublishBodyCommandExecuteProperties{
+				Command: opencode.F("agent.cycle"),
+			}),
+		}),
+	}
+	data, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var got map[string]interface{}
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got["type"] != "tui.command.execute" {
+		t.Errorf("type: got %v, want %q", got["type"], "tui.command.execute")
+	}
+	props, ok := got["properties"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("properties: expected object, got %T", got["properties"])
+	}
+	if props["command"] != "agent.cycle" {
+		t.Errorf("properties.command: got %v, want %q", props["command"], "agent.cycle")
+	}
+}
+
+// TestTuiPublishBodyToastShowSerialization verifies the ToastShow variant.
+func TestTuiPublishBodyToastShowSerialization(t *testing.T) {
+	t.Parallel()
+	params := opencode.TuiPublishParams{
+		Body: opencode.F[opencode.TuiPublishBodyUnion](opencode.TuiPublishBodyToastShow{
+			Type: opencode.F(opencode.TuiPublishBodyToastShowTypeTuiToastShow),
+			Properties: opencode.F(opencode.TuiPublishBodyToastShowProperties{
+				Message: opencode.F("Operation complete"),
+				Variant: opencode.F(opencode.TuiPublishBodyToastShowPropertiesVariantSuccess),
+				Title:   opencode.F("Done"),
+			}),
+		}),
+	}
+	data, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var got map[string]interface{}
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got["type"] != "tui.toast.show" {
+		t.Errorf("type: got %v, want %q", got["type"], "tui.toast.show")
+	}
+	props, ok := got["properties"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("properties: expected object, got %T", got["properties"])
+	}
+	if props["message"] != "Operation complete" {
+		t.Errorf("properties.message: got %v, want %q", props["message"], "Operation complete")
+	}
+	if props["variant"] != "success" {
+		t.Errorf("properties.variant: got %v, want %q", props["variant"], "success")
+	}
+	if props["title"] != "Done" {
+		t.Errorf("properties.title: got %v, want %q", props["title"], "Done")
+	}
+}
+
+// TestTuiPublishBodySessionSelectSerialization verifies the SessionSelect variant.
+func TestTuiPublishBodySessionSelectSerialization(t *testing.T) {
+	t.Parallel()
+	params := opencode.TuiPublishParams{
+		Body: opencode.F[opencode.TuiPublishBodyUnion](opencode.TuiPublishBodySessionSelect{
+			Type: opencode.F(opencode.TuiPublishBodySessionSelectTypeTuiSessionSelect),
+			Properties: opencode.F(opencode.TuiPublishBodySessionSelectProperties{
+				SessionID: opencode.F("ses_abc123"),
+			}),
+		}),
+	}
+	data, err := json.Marshal(params)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var got map[string]interface{}
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got["type"] != "tui.session.select" {
+		t.Errorf("type: got %v, want %q", got["type"], "tui.session.select")
+	}
+	props, ok := got["properties"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("properties: expected object, got %T", got["properties"])
+	}
+	if props["sessionID"] != "ses_abc123" {
+		t.Errorf("properties.sessionID: got %v, want %q", props["sessionID"], "ses_abc123")
 	}
 }

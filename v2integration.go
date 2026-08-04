@@ -619,11 +619,11 @@ func (r IntegrationAttemptMode) IsKnown() bool {
 // IntegrationAttemptTime represents the timing information for an integration attempt.
 type IntegrationAttemptTime struct {
 	// The creation timestamp as a Unix timestamp. This field can have the runtime type
-	// of float64, "NaN", "Infinity", or "-Infinity".
-	Created float64 `json:"created,required"`
+	// of [float64], [string] (one of "NaN", "Infinity", "-Infinity").
+	Created any `json:"created,required"`
 	// The expiration timestamp as a Unix timestamp. This field can have the runtime
-	// type of float64, "NaN", "Infinity", or "-Infinity".
-	Expires float64                    `json:"expires,required"`
+	// type of [float64], [string] (one of "NaN", "Infinity", "-Infinity").
+	Expires any                        `json:"expires,required"`
 	JSON    integrationAttemptTimeJSON `json:"-"`
 }
 

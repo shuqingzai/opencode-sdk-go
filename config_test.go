@@ -183,6 +183,160 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 	}
 }
 
+// TestConfigPermissionEditUnmarshal verifies that ConfigPermission.Edit correctly
+// deserialises both OpenAPI PermissionRuleConfig variants:
+//
+//  1. string form ("ask"|"allow"|"deny") → runtime type string
+//  2. map form ({"src/**": "allow", "**": "ask"}) → runtime type map[string]any
+//
+// This guards against the regression where Edit was typed as ConfigPermissionEdit
+// (a concrete string type) which caused silent data loss when a map was received.
+//
+// Run with: go test -run TestConfigPermissionEditUnmarshal -v ./...
+func TestConfigPermissionEditUnmarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name        string
+		json        string
+		wantRuntime reflect.Type
+		wantValue   any
+	}{
+		// String form: "ask"
+		{
+			name:        "string_ask",
+			json:        `{"edit":"ask"}`,
+			wantRuntime: reflect.TypeFor[string](),
+			wantValue:   "ask",
+		},
+		// String form: "allow"
+		{
+			name:        "string_allow",
+			json:        `{"edit":"allow"}`,
+			wantRuntime: reflect.TypeFor[string](),
+			wantValue:   "allow",
+		},
+		// String form: "deny"
+		{
+			name:        "string_deny",
+			json:        `{"edit":"deny"}`,
+			wantRuntime: reflect.TypeFor[string](),
+			wantValue:   "deny",
+		},
+		// Map form: {"src/**": "allow", "**": "ask"}
+		{
+			name:        "map_form",
+			json:        `{"edit":{"src/**":"allow","**":"ask"}}`,
+			wantRuntime: reflect.TypeFor[map[string]any](),
+			wantValue:   nil, // checked separately below
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var p opencode.ConfigPermission
+			if err := json.Unmarshal([]byte(tc.json), &p); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			gotRuntime := reflect.TypeOf(p.Edit)
+			if gotRuntime != tc.wantRuntime {
+				t.Errorf("runtime type: got %v, want %v (value: %#v)", gotRuntime, tc.wantRuntime, p.Edit)
+			}
+			if tc.wantValue != nil {
+				if p.Edit != tc.wantValue {
+					t.Errorf("value: got %#v, want %#v", p.Edit, tc.wantValue)
+				}
+			} else {
+				// map form: verify key/value
+				gotMap, ok := p.Edit.(map[string]any)
+				if !ok {
+					t.Fatalf("expected map[string]any, got %T", p.Edit)
+				}
+				if gotMap["src/**"] != "allow" {
+					t.Errorf("map[\"src/**\"]: got %q, want \"allow\"", gotMap["src/**"])
+				}
+				if gotMap["**"] != "ask" {
+					t.Errorf("map[\"**\"]: got %q, want \"ask\"", gotMap["**"])
+				}
+			}
+		})
+	}
+}
+
+// TestConfigAgentBuildPermissionUnmarshal verifies that ConfigAgentBuild.Permission
+// correctly deserialises both OpenAPI PermissionConfig anyOf variants:
+//
+//  1. string form ("ask"|"allow"|"deny") → runtime type ConfigPermissionAction
+//  2. object form ({...per-tool rules...}) → runtime type ConfigAgentBuildPermission
+//
+// This guards against the regression where Permission was typed as
+// ConfigAgentBuildPermission (a concrete struct) which caused silent data loss
+// when the server returned the short string form.
+//
+// Run with: go test -run TestConfigAgentBuildPermissionUnmarshal -v ./...
+func TestConfigAgentBuildPermissionUnmarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name        string
+		json        string
+		wantRuntime reflect.Type
+	}{
+		// String form
+		{
+			name:        "string_ask",
+			json:        `{"permission":"ask"}`,
+			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
+		},
+		{
+			name:        "string_allow",
+			json:        `{"permission":"allow"}`,
+			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
+		},
+		{
+			name:        "string_deny",
+			json:        `{"permission":"deny"}`,
+			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
+		},
+		// Object form: per-tool rules
+		{
+			name:        "object_form",
+			json:        `{"permission":{"edit":"ask","bash":"allow"}}`,
+			wantRuntime: reflect.TypeFor[opencode.ConfigAgentBuildPermission](),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var a opencode.ConfigAgentBuild
+			if err := json.Unmarshal([]byte(tc.json), &a); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			gotRuntime := reflect.TypeOf(a.Permission)
+			if gotRuntime != tc.wantRuntime {
+				t.Errorf("runtime type: got %v, want %v (value: %#v)", gotRuntime, tc.wantRuntime, a.Permission)
+			}
+			// For string form: verify value
+			if tc.wantRuntime == reflect.TypeFor[opencode.ConfigPermissionAction]() {
+				action, ok := a.Permission.(opencode.ConfigPermissionAction)
+				if !ok {
+					t.Fatalf("expected ConfigPermissionAction, got %T", a.Permission)
+				}
+				if !action.IsKnown() {
+					t.Errorf("ConfigPermissionAction.IsKnown() returned false for %q", action)
+				}
+			}
+			// For object form: verify it's the right struct
+			if tc.wantRuntime == reflect.TypeFor[opencode.ConfigAgentBuildPermission]() {
+				_, ok := a.Permission.(opencode.ConfigAgentBuildPermission)
+				if !ok {
+					t.Fatalf("expected ConfigAgentBuildPermission, got %T", a.Permission)
+				}
+			}
+		})
+	}
+}
+
 // TestConfigProviderModelParamInterleavedMarshal verifies that
 // ConfigProviderModelParam.Interleaved correctly serialises all four OpenAPI
 // anyOf variants to the expected wire-format JSON:
@@ -195,6 +349,144 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 // (F3) produces the correct wire format and that the Request/Response
 // separation is sound.
 //
+// Run with: go test -run TestConfigAgentAllPermissionUnionUnmarshal -v ./...
+func TestConfigAgentAllPermissionUnionUnmarshal(t *testing.T) {
+	t.Parallel()
+	// Verifies that all 9 ConfigAgent*/ConfigMode* types correctly deserialise
+	// the PermissionConfig anyOf union (string or object form).
+	// OpenAPI: components.schemas.PermissionConfig anyOf[string, object].
+	cases := []struct {
+		name        string
+		stringJSON  string
+		objectJSON  string
+		into        func([]byte) (any, error)
+		wantObjType reflect.Type
+	}{
+		{
+			name:       "ConfigAgentGeneral",
+			stringJSON: `{"permission":"ask"}`,
+			objectJSON: `{"permission":{"edit":"allow","bash":"ask"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentGeneral
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentGeneralPermission](),
+		},
+		{
+			name:       "ConfigAgentPlan",
+			stringJSON: `{"permission":"allow"}`,
+			objectJSON: `{"permission":{"edit":"deny"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentPlan
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentPlanPermission](),
+		},
+		{
+			name:       "ConfigAgentExplore",
+			stringJSON: `{"permission":"deny"}`,
+			objectJSON: `{"permission":{"edit":"ask"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentExplore
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentExplorePermission](),
+		},
+		{
+			name:       "ConfigAgentTitle",
+			stringJSON: `{"permission":"ask"}`,
+			objectJSON: `{"permission":{"edit":"allow"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentTitle
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentTitlePermission](),
+		},
+		{
+			name:       "ConfigAgentSummary",
+			stringJSON: `{"permission":"allow"}`,
+			objectJSON: `{"permission":{"edit":"deny"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentSummary
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentSummaryPermission](),
+		},
+		{
+			name:       "ConfigAgentCompaction",
+			stringJSON: `{"permission":"deny"}`,
+			objectJSON: `{"permission":{"edit":"ask"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigAgentCompaction
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigAgentCompactionPermission](),
+		},
+		{
+			name:       "ConfigModeBuild",
+			stringJSON: `{"permission":"ask"}`,
+			objectJSON: `{"permission":{"edit":"allow"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigModeBuild
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigModeBuildPermission](),
+		},
+		{
+			name:       "ConfigModePlan",
+			stringJSON: `{"permission":"allow"}`,
+			objectJSON: `{"permission":{"edit":"deny"}}`,
+			into: func(data []byte) (any, error) {
+				var v opencode.ConfigModePlan
+				return &v, json.Unmarshal(data, &v)
+			},
+			wantObjType: reflect.TypeFor[opencode.ConfigModePlanPermission](),
+		},
+	}
+
+	permField := func(v any) any {
+		// All ConfigAgent*/ConfigMode* types embed Permission as an any field.
+		// Use reflect to access it generically.
+		rv := reflect.ValueOf(v).Elem()
+		f := rv.FieldByName("Permission")
+		if !f.IsValid() {
+			return nil
+		}
+		return f.Interface()
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// String form → ConfigPermissionAction
+			v, err := tc.into([]byte(tc.stringJSON))
+			if err != nil {
+				t.Fatalf("string form unmarshal: %v", err)
+			}
+			perm := permField(v)
+			if _, ok := perm.(opencode.ConfigPermissionAction); !ok {
+				t.Errorf("string form: Permission runtime type = %T, want ConfigPermissionAction", perm)
+			}
+			action, _ := perm.(opencode.ConfigPermissionAction)
+			if !action.IsKnown() {
+				t.Errorf("string form: ConfigPermissionAction.IsKnown() = false for %q", action)
+			}
+
+			// Object form → specific Permission struct
+			v2, err := tc.into([]byte(tc.objectJSON))
+			if err != nil {
+				t.Fatalf("object form unmarshal: %v", err)
+			}
+			perm2 := permField(v2)
+			gotType := reflect.TypeOf(perm2)
+			if gotType != tc.wantObjType {
+				t.Errorf("object form: Permission runtime type = %v, want %v", gotType, tc.wantObjType)
+			}
+		})
+	}
+}
+
 // Run with: go test -run TestConfigProviderModelParamInterleavedMarshal -v ./...
 func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 	t.Parallel()

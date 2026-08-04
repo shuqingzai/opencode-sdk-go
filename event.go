@@ -883,10 +883,10 @@ func (r EventListResponseEventPermissionReplied) implementsEventListResponse() {
 func (r EventListResponseEventPermissionReplied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionRepliedProperties struct {
-	RequestID string                                                `json:"requestID,required"`
-	Reply     PermissionReplyParamsReply                            `json:"reply,required"`
-	SessionID string                                                `json:"sessionID,required"`
-	JSON      eventListResponseEventPermissionRepliedPropertiesJSON `json:"-"`
+	RequestID string                                                 `json:"requestID,required"`
+	Reply     EventListResponseEventPermissionRepliedPropertiesReply `json:"reply,required"`
+	SessionID string                                                 `json:"sessionID,required"`
+	JSON      eventListResponseEventPermissionRepliedPropertiesJSON  `json:"-"`
 }
 
 // eventListResponseEventPermissionRepliedPropertiesJSON contains the JSON metadata
@@ -916,6 +916,25 @@ const (
 func (r EventListResponseEventPermissionRepliedType) IsKnown() bool {
 	switch r {
 	case EventListResponseEventPermissionRepliedTypePermissionReplied:
+		return true
+	}
+	return false
+}
+
+// PermissionReplyType represents the reply type for permission requests.
+type EventListResponseEventPermissionRepliedPropertiesReply string
+
+const (
+	EventListResponseEventPermissionRepliedPropertiesReplyOnce   EventListResponseEventPermissionRepliedPropertiesReply = "once"
+	EventListResponseEventPermissionRepliedPropertiesReplyAlways EventListResponseEventPermissionRepliedPropertiesReply = "always"
+	EventListResponseEventPermissionRepliedPropertiesReplyReject EventListResponseEventPermissionRepliedPropertiesReply = "reject"
+)
+
+func (r EventListResponseEventPermissionRepliedPropertiesReply) IsKnown() bool {
+	switch r {
+	case EventListResponseEventPermissionRepliedPropertiesReplyOnce,
+		EventListResponseEventPermissionRepliedPropertiesReplyAlways,
+		EventListResponseEventPermissionRepliedPropertiesReplyReject:
 		return true
 	}
 	return false
@@ -2002,13 +2021,27 @@ type eventListResponseEventSessionStatusPropertiesJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
+// eventListResponseEventSessionStatusPropertiesShadow mirrors
+// [EventListResponseEventSessionStatusProperties] with the status field declared
+// as the registered [SessionStatus] union so apijson routes the nested status
+// object to its matching variant instead of decoding it into a generic map.
+type eventListResponseEventSessionStatusPropertiesShadow struct {
+	SessionID string                                            `json:"sessionID,required"`
+	Status    SessionStatus                                     `json:"status,required"`
+	JSON      eventListResponseEventSessionStatusPropertiesJSON `json:"-"`
+}
+
 func (r *EventListResponseEventSessionStatusProperties) UnmarshalJSON(data []byte) (err error) {
 	*r = EventListResponseEventSessionStatusProperties{}
-	if err = apijson.UnmarshalRoot(data, &r.statusUnion); err != nil {
+	var shadow eventListResponseEventSessionStatusPropertiesShadow
+	if err = apijson.UnmarshalRoot(data, &shadow); err != nil {
 		return err
 	}
-	r.Status = r.statusUnion
-	return apijson.Port(r.statusUnion, r)
+	r.SessionID = shadow.SessionID
+	r.Status = shadow.Status
+	r.JSON = shadow.JSON
+	r.statusUnion = shadow.Status
+	return nil
 }
 
 func (r eventListResponseEventSessionStatusPropertiesJSON) RawJSON() string {
@@ -2473,13 +2506,11 @@ func (r EventListResponseEventTuiToastShow) implementsEventListResponse() {}
 func (r EventListResponseEventTuiToastShow) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTuiToastShowProperties struct {
-	// This field can have the runtime type of [int64].
-	Duration any    `json:"duration"`
-	Message  string `json:"message,required"`
-	// This field can have the runtime type of [string].
-	Title   any                                              `json:"title"`
-	Variant TuiToastShowVariant                              `json:"variant,required"`
-	JSON    eventListResponseEventTuiToastShowPropertiesJSON `json:"-"`
+	Duration int64                                               `json:"duration"`
+	Message  string                                              `json:"message,required"`
+	Title    string                                              `json:"title"`
+	Variant  EventListResponseEventTuiToastShowPropertiesVariant `json:"variant,required"`
+	JSON     eventListResponseEventTuiToastShowPropertiesJSON    `json:"-"`
 }
 
 type eventListResponseEventTuiToastShowPropertiesJSON struct {
@@ -2513,22 +2544,35 @@ func (r EventListResponseEventTuiToastShowType) IsKnown() bool {
 	return false
 }
 
-type TuiToastShowVariant string
+type EventListResponseEventTuiToastShowPropertiesVariant string
 
 const (
-	TuiToastShowVariantInfo    TuiToastShowVariant = "info"
-	TuiToastShowVariantSuccess TuiToastShowVariant = "success"
-	TuiToastShowVariantWarning TuiToastShowVariant = "warning"
-	TuiToastShowVariantError   TuiToastShowVariant = "error"
+	EventListResponseEventTuiToastShowPropertiesVariantInfo    EventListResponseEventTuiToastShowPropertiesVariant = "info"
+	EventListResponseEventTuiToastShowPropertiesVariantSuccess EventListResponseEventTuiToastShowPropertiesVariant = "success"
+	EventListResponseEventTuiToastShowPropertiesVariantWarning EventListResponseEventTuiToastShowPropertiesVariant = "warning"
+	EventListResponseEventTuiToastShowPropertiesVariantError   EventListResponseEventTuiToastShowPropertiesVariant = "error"
 )
 
-func (r TuiToastShowVariant) IsKnown() bool {
+func (r EventListResponseEventTuiToastShowPropertiesVariant) IsKnown() bool {
 	switch r {
-	case TuiToastShowVariantInfo, TuiToastShowVariantSuccess, TuiToastShowVariantWarning, TuiToastShowVariantError:
+	case EventListResponseEventTuiToastShowPropertiesVariantInfo,
+		EventListResponseEventTuiToastShowPropertiesVariantSuccess,
+		EventListResponseEventTuiToastShowPropertiesVariantWarning,
+		EventListResponseEventTuiToastShowPropertiesVariantError:
 		return true
 	}
 	return false
 }
+
+// TuiToastShowVariant is an alias for EventListResponseEventTuiToastShowPropertiesVariant for backward compatibility.
+type TuiToastShowVariant = EventListResponseEventTuiToastShowPropertiesVariant
+
+const (
+	TuiToastShowVariantInfo    = EventListResponseEventTuiToastShowPropertiesVariantInfo
+	TuiToastShowVariantSuccess = EventListResponseEventTuiToastShowPropertiesVariantSuccess
+	TuiToastShowVariantWarning = EventListResponseEventTuiToastShowPropertiesVariantWarning
+	TuiToastShowVariantError   = EventListResponseEventTuiToastShowPropertiesVariantError
+)
 
 // =============================================================================
 // EventListResponseEventTuiSessionSelect

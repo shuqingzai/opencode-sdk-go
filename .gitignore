@@ -6,3 +6,4 @@ Brewfile.lock.json
 *.test
 *.log
 tmp/
+testdata/

@@ -829,16 +829,16 @@ func (r *AssistantMessageError) UnmarshalJSON(data []byte) (err error) {
 // Possible runtime types of the union are [shared.ProviderAuthError],
 // [shared.UnknownError], [shared.MessageOutputLengthError],
 // [shared.MessageAbortedError], [shared.StructuredOutputError],
-// [shared.ContextOverflowError], [shared.APIError],
-// [shared.ContentFilterError].
+// [shared.ContentFilterError], [shared.ContextOverflowError],
+// [shared.APIError].
 func (r AssistantMessageError) AsUnion() AssistantMessageErrorUnion {
 	return r.union
 }
 
 // Union satisfied by [shared.ProviderAuthError], [shared.UnknownError],
 // [shared.MessageOutputLengthError], [shared.MessageAbortedError],
-// [shared.StructuredOutputError], [shared.ContextOverflowError] or
-// [shared.APIError].
+// [shared.StructuredOutputError], [shared.ContentFilterError],
+// [shared.ContextOverflowError] or [shared.APIError].
 type AssistantMessageErrorUnion interface {
 	ImplementsAssistantMessageError()
 }
@@ -880,114 +880,6 @@ func init() {
 			Type:       reflect.TypeFor[shared.APIError](),
 		},
 	)
-}
-
-type AssistantMessageErrorMessageOutputLengthError struct {
-	// This field can have the runtime type of [map[string]any].
-	Data any                                               `json:"data,required"`
-	Name AssistantMessageErrorMessageOutputLengthErrorName `json:"name,required"`
-	JSON assistantMessageErrorMessageOutputLengthErrorJSON `json:"-"`
-}
-
-// assistantMessageErrorMessageOutputLengthErrorJSON contains the JSON metadata for
-// the struct [AssistantMessageErrorMessageOutputLengthError]
-type assistantMessageErrorMessageOutputLengthErrorJSON struct {
-	Data        apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AssistantMessageErrorMessageOutputLengthError) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r assistantMessageErrorMessageOutputLengthErrorJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r AssistantMessageErrorMessageOutputLengthError) ImplementsAssistantMessageError() {}
-
-type AssistantMessageErrorMessageOutputLengthErrorName string
-
-const (
-	AssistantMessageErrorMessageOutputLengthErrorNameMessageOutputLengthError AssistantMessageErrorMessageOutputLengthErrorName = "MessageOutputLengthError"
-)
-
-func (r AssistantMessageErrorMessageOutputLengthErrorName) IsKnown() bool {
-	switch r {
-	case AssistantMessageErrorMessageOutputLengthErrorNameMessageOutputLengthError:
-		return true
-	}
-	return false
-}
-
-type AssistantMessageErrorAPIError struct {
-	Data AssistantMessageErrorAPIErrorData `json:"data,required"`
-	Name AssistantMessageErrorAPIErrorName `json:"name,required"`
-	JSON assistantMessageErrorAPIErrorJSON `json:"-"`
-}
-
-// assistantMessageErrorAPIErrorJSON contains the JSON metadata for the struct
-// [AssistantMessageErrorAPIError]
-type assistantMessageErrorAPIErrorJSON struct {
-	Data        apijson.Field
-	Name        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *AssistantMessageErrorAPIError) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r assistantMessageErrorAPIErrorJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r AssistantMessageErrorAPIError) ImplementsAssistantMessageError() {}
-
-type AssistantMessageErrorAPIErrorData struct {
-	IsRetryable     bool                                  `json:"isRetryable,required"`
-	Message         string                                `json:"message,required"`
-	ResponseBody    string                                `json:"responseBody"`
-	ResponseHeaders map[string]string                     `json:"responseHeaders"`
-	StatusCode      int64                                 `json:"statusCode"`
-	JSON            assistantMessageErrorAPIErrorDataJSON `json:"-"`
-}
-
-// assistantMessageErrorAPIErrorDataJSON contains the JSON metadata for the struct
-// [AssistantMessageErrorAPIErrorData]
-type assistantMessageErrorAPIErrorDataJSON struct {
-	IsRetryable     apijson.Field
-	Message         apijson.Field
-	ResponseBody    apijson.Field
-	ResponseHeaders apijson.Field
-	StatusCode      apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
-}
-
-func (r *AssistantMessageErrorAPIErrorData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r assistantMessageErrorAPIErrorDataJSON) RawJSON() string {
-	return r.raw
-}
-
-type AssistantMessageErrorAPIErrorName string
-
-const (
-	AssistantMessageErrorAPIErrorNameAPIError AssistantMessageErrorAPIErrorName = "APIError"
-)
-
-func (r AssistantMessageErrorAPIErrorName) IsKnown() bool {
-	switch r {
-	case AssistantMessageErrorAPIErrorNameAPIError:
-		return true
-	}
-	return false
 }
 
 type AssistantMessageErrorName string
@@ -1130,12 +1022,13 @@ func (r *FilePartSource) UnmarshalJSON(data []byte) (err error) {
 // AsUnion returns a [FilePartSourceUnion] interface which you can cast to the
 // specific types for more type safety.
 //
-// Possible runtime types of the union are [FileSource], [SymbolSource].
+// Possible runtime types of the union are [FileSource], [SymbolSource],
+// [ResourceSource].
 func (r FilePartSource) AsUnion() FilePartSourceUnion {
 	return r.union
 }
 
-// Union satisfied by [FileSource] or [SymbolSource].
+// Union satisfied by [FileSource], [SymbolSource] or [ResourceSource].
 type FilePartSourceUnion interface {
 	implementsFilePartSource()
 }
@@ -1510,9 +1403,9 @@ func (r *Part) UnmarshalJSON(data []byte) (err error) {
 // AsUnion returns a [PartUnion] interface which you can cast to the specific types
 // for more type safety.
 //
-// Possible runtime types of the union are [TextPart], [ReasoningPart], [FilePart],
-// [ToolPart], [StepStartPart], [StepFinishPart], [SnapshotPart], [PartPatchPart],
-// [AgentPart], [PartRetryPart].
+// Possible runtime types of the union are [TextPart], [SubtaskPart], [ReasoningPart],
+// [FilePart], [ToolPart], [StepStartPart], [StepFinishPart], [SnapshotPart],
+// [PartPatchPart], [AgentPart], [PartRetryPart], [CompactionPart].
 func (r Part) AsUnion() PartUnion {
 	return r.union
 }
@@ -1685,6 +1578,7 @@ func (r partRetryPartErrorJSON) RawJSON() string {
 type PartRetryPartErrorData struct {
 	IsRetryable     bool                       `json:"isRetryable,required"`
 	Message         string                     `json:"message,required"`
+	Metadata        map[string]string          `json:"metadata"`
 	ResponseBody    string                     `json:"responseBody"`
 	ResponseHeaders map[string]string          `json:"responseHeaders"`
 	StatusCode      int64                      `json:"statusCode"`
@@ -1696,6 +1590,7 @@ type PartRetryPartErrorData struct {
 type partRetryPartErrorDataJSON struct {
 	IsRetryable     apijson.Field
 	Message         apijson.Field
+	Metadata        apijson.Field
 	ResponseBody    apijson.Field
 	ResponseHeaders apijson.Field
 	StatusCode      apijson.Field
@@ -1857,25 +1752,24 @@ func (r ReasoningPartType) IsKnown() bool {
 }
 
 type Session struct {
-	ID          string         `json:"id,required"`
-	Directory   string         `json:"directory,required"`
-	ProjectID   string         `json:"projectID,required"`
-	Time        SessionTime    `json:"time,required"`
-	Title       string         `json:"title,required"`
-	Version     string         `json:"version,required"`
-	Agent       string         `json:"agent"`
-	Cost        float64        `json:"cost"`
-	Model       SessionModel   `json:"model"`
-	ParentID    string         `json:"parentID"`
-	Path        string         `json:"path"`
-	Revert      SessionRevert  `json:"revert"`
-	Share       SessionShare   `json:"share"`
-	Slug        string         `json:"slug,required"`
-	Summary     SessionSummary `json:"summary"`
-	Tokens      SessionTokens  `json:"tokens"`
-	WorkspaceID string         `json:"workspaceID"`
-	// This field can have the runtime type of [[]PermissionRuleResponse].
-	Permission any `json:"permission"`
+	ID          string            `json:"id,required"`
+	Directory   string            `json:"directory,required"`
+	ProjectID   string            `json:"projectID,required"`
+	Time        SessionTime       `json:"time,required"`
+	Title       string            `json:"title,required"`
+	Version     string            `json:"version,required"`
+	Agent       string            `json:"agent"`
+	Cost        float64           `json:"cost"`
+	Model       SessionModel      `json:"model"`
+	ParentID    string            `json:"parentID"`
+	Path        string            `json:"path"`
+	Revert      SessionRevert     `json:"revert"`
+	Share       SessionShare      `json:"share"`
+	Slug        string            `json:"slug,required"`
+	Summary     SessionSummary    `json:"summary"`
+	Tokens      SessionTokens     `json:"tokens"`
+	WorkspaceID string            `json:"workspaceID"`
+	Permission  PermissionRuleset `json:"permission"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any         `json:"metadata"`
 	JSON     sessionJSON `json:"-"`
@@ -2757,11 +2651,12 @@ type ToolPartState struct {
 	// This field can have the runtime type of [[]FilePart].
 	Attachments any    `json:"attachments"`
 	Error       string `json:"error"`
-	// This field can have the runtime type of [any], [map[string]any].
+	// This field can have the runtime type of [map[string]any].
 	Input any `json:"input"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any    `json:"metadata"`
 	Output   string `json:"output"`
+	Raw      string `json:"raw"`
 	// This field can have the runtime type of [ToolStateRunningTime],
 	// [ToolStateCompletedTime], [ToolStateErrorTime].
 	Time  any               `json:"time"`
@@ -2778,6 +2673,7 @@ type toolPartStateJSON struct {
 	Input       apijson.Field
 	Metadata    apijson.Field
 	Output      apijson.Field
+	Raw         apijson.Field
 	Time        apijson.Field
 	Title       apijson.Field
 	raw         string
@@ -3009,10 +2905,9 @@ func (r toolStateErrorTimeJSON) RawJSON() string {
 
 type ToolStatePending struct {
 	Status ToolStatePendingStatus `json:"status,required"`
-	// This field can have the runtime type of map[string]any.
-	Input any                  `json:"input,required"`
-	Raw   string               `json:"raw,required"`
-	JSON  toolStatePendingJSON `json:"-"`
+	Input  map[string]any         `json:"input,required"`
+	Raw    string                 `json:"raw,required"`
+	JSON   toolStatePendingJSON   `json:"-"`
 }
 
 // toolStatePendingJSON contains the JSON metadata for the struct
@@ -3050,8 +2945,7 @@ func (r ToolStatePendingStatus) IsKnown() bool {
 }
 
 type ToolStateRunning struct {
-	// This field can have the runtime type of map[string]any.
-	Input    any                    `json:"input,required"`
+	Input    map[string]any         `json:"input,required"`
 	Status   ToolStateRunningStatus `json:"status,required"`
 	Time     ToolStateRunningTime   `json:"time,required"`
 	Metadata map[string]any         `json:"metadata"`
@@ -3123,7 +3017,7 @@ type UserMessage struct {
 	Role      UserMessageRole  `json:"role,required"`
 	SessionID string           `json:"sessionID,required"`
 	Time      UserMessageTime  `json:"time,required"`
-	// This field can have the runtime type of [OutputFormatUnion].
+	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
 	Format  any                `json:"format,omitzero"`
 	System  string             `json:"system,omitzero"`
 	Tools   map[string]bool    `json:"tools,omitzero"`
@@ -3396,14 +3290,14 @@ func (r SessionUpdateParams) URLQuery() (v url.Values) {
 }
 
 type SessionListParams struct {
-	Directory param.Field[string] `query:"directory"`
-	Workspace param.Field[string] `query:"workspace"`
-	Scope     param.Field[string] `query:"scope"`
-	Path      param.Field[string] `query:"path"`
-	Roots     param.Field[bool]   `query:"roots"`
-	Start     param.Field[int64]  `query:"start"`
-	Search    param.Field[string] `query:"search"`
-	Limit     param.Field[int64]  `query:"limit"`
+	Directory param.Field[string]                 `query:"directory"`
+	Workspace param.Field[string]                 `query:"workspace"`
+	Scope     param.Field[SessionListParamsScope] `query:"scope"`
+	Path      param.Field[string]                 `query:"path"`
+	Roots     param.Field[bool]                   `query:"roots"`
+	Start     param.Field[int64]                  `query:"start"`
+	Search    param.Field[string]                 `query:"search"`
+	Limit     param.Field[int64]                  `query:"limit"`
 }
 
 // URLQuery serializes [SessionListParams]'s query parameters as `url.Values`.
@@ -3412,6 +3306,20 @@ func (r SessionListParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type SessionListParamsScope string
+
+const (
+	SessionListParamsScopeProject SessionListParamsScope = "project"
+)
+
+func (r SessionListParamsScope) IsKnown() bool {
+	switch r {
+	case SessionListParamsScopeProject:
+		return true
+	}
+	return false
 }
 
 type SessionDeleteParams struct {

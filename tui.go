@@ -131,7 +131,9 @@ type TuiControlService struct {
 	Options []option.RequestOption
 }
 
-// NewTuiControlService creates a new TuiControlService.
+// NewTuiControlService generates a new service that applies the given options to
+// each request. These options are applied after the parent client's options (if
+// there is one), and before any request-specific options.
 func NewTuiControlService(opts ...option.RequestOption) (r *TuiControlService) {
 	r = &TuiControlService{}
 	r.Options = opts
@@ -508,6 +510,7 @@ type TuiControlNextParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [TuiControlNextParams]'s query parameters as `url.Values`.
 func (r TuiControlNextParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

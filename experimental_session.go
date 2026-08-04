@@ -96,21 +96,21 @@ type GlobalSession struct {
 	Title     string            `json:"title,required"`
 	Version   string            `json:"version,required"`
 	Time      GlobalSessionTime `json:"time,required"`
-	// This field can have the runtime type of [ProjectSummary].
+	// This field can have the runtime type of [ProjectSummary, nil].
 	Project     any                  `json:"project,required"`
-	WorkspaceID string               `json:"workspaceID,omitempty"`
-	Path        string               `json:"path,omitempty"`
-	ParentID    string               `json:"parentID,omitempty"`
+	WorkspaceID string               `json:"workspaceID"`
+	Path        string               `json:"path"`
+	ParentID    string               `json:"parentID"`
 	Summary     GlobalSessionSummary `json:"summary"`
-	Cost        float64              `json:"cost,omitempty"`
+	Cost        float64              `json:"cost"`
 	Tokens      GlobalSessionTokens  `json:"tokens"`
 	Share       GlobalSessionShare   `json:"share"`
-	Agent       string               `json:"agent,omitempty"`
+	Agent       string               `json:"agent"`
 	Model       GlobalSessionModel   `json:"model"`
-	Permission  PermissionRuleset    `json:"permission,omitempty"`
+	Permission  PermissionRuleset    `json:"permission"`
 	Revert      GlobalSessionRevert  `json:"revert"`
 	// This field can have the runtime type of [map[string]any].
-	Metadata any               `json:"metadata,omitempty"`
+	Metadata any               `json:"metadata"`
 	JSON     globalSessionJSON `json:"-"`
 }
 
@@ -151,8 +151,8 @@ func (r globalSessionJSON) RawJSON() string {
 type GlobalSessionTime struct {
 	Created    int64                 `json:"created,required"`
 	Updated    int64                 `json:"updated,required"`
-	Compacting int64                 `json:"compacting,omitempty"`
-	Archived   int64                 `json:"archived,omitempty"`
+	Compacting int64                 `json:"compacting"`
+	Archived   int64                 `json:"archived"`
 	JSON       globalSessionTimeJSON `json:"-"`
 }
 
@@ -246,7 +246,7 @@ func (r globalSessionShareJSON) RawJSON() string {
 type GlobalSessionModel struct {
 	ID         string                 `json:"id,required"`
 	ProviderID string                 `json:"providerID,required"`
-	Variant    string                 `json:"variant,omitempty"`
+	Variant    string                 `json:"variant"`
 	JSON       globalSessionModelJSON `json:"-"`
 }
 
@@ -269,9 +269,9 @@ func (r globalSessionModelJSON) RawJSON() string {
 
 type GlobalSessionRevert struct {
 	MessageID string                  `json:"messageID,required"`
-	PartID    string                  `json:"partID,omitempty"`
-	Snapshot  string                  `json:"snapshot,omitempty"`
-	Diff      string                  `json:"diff,omitempty"`
+	PartID    string                  `json:"partID"`
+	Snapshot  string                  `json:"snapshot"`
+	Diff      string                  `json:"diff"`
 	JSON      globalSessionRevertJSON `json:"-"`
 }
 
@@ -297,7 +297,7 @@ type GlobalSessionSummary struct {
 	Additions int64                    `json:"additions,required"`
 	Deletions int64                    `json:"deletions,required"`
 	Files     int64                    `json:"files,required"`
-	Diffs     []SnapshotFileDiff       `json:"diffs,omitempty"`
+	Diffs     []SnapshotFileDiff       `json:"diffs"`
 	JSON      globalSessionSummaryJSON `json:"-"`
 }
 
@@ -321,7 +321,7 @@ func (r globalSessionSummaryJSON) RawJSON() string {
 type ProjectSummary struct {
 	ID       string             `json:"id,required"`
 	Worktree string             `json:"worktree,required"`
-	Name     string             `json:"name,omitempty"`
+	Name     string             `json:"name"`
 	JSON     projectSummaryJSON `json:"-"`
 }
 

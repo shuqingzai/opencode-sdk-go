@@ -132,8 +132,7 @@ func (r *V2ModelInfo) AsAPIUnion() V2ModelInfoApiUnion {
 }
 
 // V2ModelInfoApiUnion represents the api configuration of a model.
-// OpenAPI anyOf has no discriminator; variants are selected by structural matching
-// on the type enum field.
+// Variants are selected via the "type" discriminator field ("aisdk" / "native").
 // Possible runtime types are [V2ModelInfoApiAisdk], [V2ModelInfoApiNative].
 type V2ModelInfoApiUnion interface {
 	implementsV2ModelInfoApiUnion()
@@ -228,14 +227,16 @@ func (r V2ModelInfoApiNativeType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2ModelInfoApiUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2ModelInfoApiAisdk](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "aisdk",
+			Type:               reflect.TypeFor[V2ModelInfoApiAisdk](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[V2ModelInfoApiNative](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "native",
+			Type:               reflect.TypeFor[V2ModelInfoApiNative](),
 		},
 	)
 }
@@ -456,6 +457,7 @@ type V2ModelListParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2ModelListParams]'s query parameters as `url.Values`.
 func (r V2ModelListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

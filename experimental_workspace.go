@@ -240,6 +240,7 @@ type ExperimentalAdapterListParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [ExperimentalAdapterListParams]'s query parameters as `url.Values`.
 func (r ExperimentalAdapterListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -247,49 +248,67 @@ func (r ExperimentalAdapterListParams) URLQuery() (v url.Values) {
 	})
 }
 
-type WorkspaceStatusItem struct {
-	WorkspaceID string                    `json:"workspaceID,required"`
-	Status      WorkspaceStatusItemStatus `json:"status,required"`
-	JSON        workspaceStatusItemJSON   `json:"-"`
+// WorkspaceEventConnectionStatus represents the connection status of a workspace.
+// This corresponds to the OpenAPI schema name WorkspaceEventConnectionStatus.
+type WorkspaceEventConnectionStatus struct {
+	WorkspaceID string                               `json:"workspaceID,required"`
+	Status      WorkspaceEventConnectionStatusStatus `json:"status,required"`
+	JSON        workspaceEventConnectionStatusJSON   `json:"-"`
 }
 
-type workspaceStatusItemJSON struct {
+// workspaceEventConnectionStatusJSON contains the JSON metadata for the struct
+// [WorkspaceEventConnectionStatus]
+type workspaceEventConnectionStatusJSON struct {
 	WorkspaceID apijson.Field
 	Status      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *WorkspaceStatusItem) UnmarshalJSON(data []byte) (err error) {
+func (r *WorkspaceEventConnectionStatus) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r workspaceStatusItemJSON) RawJSON() string {
+func (r workspaceEventConnectionStatusJSON) RawJSON() string {
 	return r.raw
 }
 
-type WorkspaceStatusItemStatus string
+// WorkspaceStatusItem is a backward-compatible alias for [WorkspaceEventConnectionStatus].
+type WorkspaceStatusItem = WorkspaceEventConnectionStatus
+
+type WorkspaceEventConnectionStatusStatus string
 
 const (
-	WorkspaceStatusItemStatusConnected    WorkspaceStatusItemStatus = "connected"
-	WorkspaceStatusItemStatusConnecting   WorkspaceStatusItemStatus = "connecting"
-	WorkspaceStatusItemStatusDisconnected WorkspaceStatusItemStatus = "disconnected"
-	WorkspaceStatusItemStatusError        WorkspaceStatusItemStatus = "error"
+	WorkspaceEventConnectionStatusStatusConnected    WorkspaceEventConnectionStatusStatus = "connected"
+	WorkspaceEventConnectionStatusStatusConnecting   WorkspaceEventConnectionStatusStatus = "connecting"
+	WorkspaceEventConnectionStatusStatusDisconnected WorkspaceEventConnectionStatusStatus = "disconnected"
+	WorkspaceEventConnectionStatusStatusError        WorkspaceEventConnectionStatusStatus = "error"
 )
 
-func (r WorkspaceStatusItemStatus) IsKnown() bool {
+func (r WorkspaceEventConnectionStatusStatus) IsKnown() bool {
 	switch r {
-	case WorkspaceStatusItemStatusConnected, WorkspaceStatusItemStatusConnecting, WorkspaceStatusItemStatusDisconnected, WorkspaceStatusItemStatusError:
+	case WorkspaceEventConnectionStatusStatusConnected, WorkspaceEventConnectionStatusStatusConnecting, WorkspaceEventConnectionStatusStatusDisconnected, WorkspaceEventConnectionStatusStatusError:
 		return true
 	}
 	return false
 }
+
+// WorkspaceStatusItemStatus is a backward-compatible alias for [WorkspaceEventConnectionStatusStatus].
+type WorkspaceStatusItemStatus = WorkspaceEventConnectionStatusStatus
+
+const (
+	WorkspaceStatusItemStatusConnected    = WorkspaceEventConnectionStatusStatusConnected
+	WorkspaceStatusItemStatusConnecting   = WorkspaceEventConnectionStatusStatusConnecting
+	WorkspaceStatusItemStatusDisconnected = WorkspaceEventConnectionStatusStatusDisconnected
+	WorkspaceStatusItemStatusError        = WorkspaceEventConnectionStatusStatusError
+)
 
 type ExperimentalWorkspaceStatusParams struct {
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [ExperimentalWorkspaceStatusParams]'s query parameters as `url.Values`.
 func (r ExperimentalWorkspaceStatusParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -309,6 +328,7 @@ func (r ExperimentalWarpParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// URLQuery serializes [ExperimentalWarpParams]'s query parameters as `url.Values`.
 func (r ExperimentalWarpParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

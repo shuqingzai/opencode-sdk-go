@@ -134,6 +134,7 @@ type PtyNewParams struct {
 	Workspace param.Field[string]            `query:"workspace"`
 }
 
+// MarshalJSON serializes [PtyNewParams] into JSON.
 func (r PtyNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -166,6 +167,7 @@ type PtyUpdateParams struct {
 	Workspace param.Field[string]  `query:"workspace"`
 }
 
+// MarshalJSON serializes [PtyUpdateParams] into JSON.
 func (r PtyUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -183,6 +185,7 @@ type PtySize struct {
 	Cols param.Field[int64] `json:"cols,required"`
 }
 
+// MarshalJSON serializes [PtySize] into JSON.
 func (r PtySize) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
@@ -233,6 +236,7 @@ type PtyShellsParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [PtyShellsParams]'s query parameters as `url.Values`.
 func (r PtyShellsParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -268,6 +272,7 @@ type PtyConnectTokenParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [PtyConnectTokenParams]'s query parameters as `url.Values`.
 func (r PtyConnectTokenParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
@@ -275,23 +280,6 @@ func (r PtyConnectTokenParams) URLQuery() (v url.Values) {
 	})
 }
 
-type PtyConnectTokenResponse struct {
-	Ticket    string                      `json:"ticket,required"`
-	ExpiresIn int64                       `json:"expires_in,required"`
-	JSON      ptyConnectTokenResponseJSON `json:"-"`
-}
-
-type ptyConnectTokenResponseJSON struct {
-	Ticket      apijson.Field
-	ExpiresIn   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *PtyConnectTokenResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r ptyConnectTokenResponseJSON) RawJSON() string {
-	return r.raw
-}
+// PtyConnectTokenResponse is an alias for [PtyConnectToken]. Both v1 and v2
+// connect-token endpoints reference the same OpenAPI schema (PtyTicketConnectToken).
+type PtyConnectTokenResponse = PtyConnectToken

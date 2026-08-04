@@ -415,7 +415,7 @@ func (r mcpOAuthConfigJSON) RawJSON() string {
 	return r.raw
 }
 
-// Satisfied by [McpAddParamsConfigLocal], [McpAddParamsConfigRemote].
+// Satisfied by [McpLocalConfigParam], [McpRemoteConfigParam].
 type McpAddParamsConfigUnion interface {
 	implementsMcpAddParamsConfigUnion()
 }
@@ -426,117 +426,37 @@ func init() {
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpAddParamsConfigLocal](),
+			Type:       reflect.TypeFor[McpLocalConfigParam](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpAddParamsConfigRemote](),
+			Type:       reflect.TypeFor[McpRemoteConfigParam](),
 		},
 	)
 }
 
-// McpAddParamsConfigLocal represents local MCP server configuration in a
-// request to add an MCP server.
-type McpAddParamsConfigLocal struct {
-	// Type of MCP server connection
-	Type param.Field[McpLocalConfigType] `json:"type,required"`
-	// Command and arguments to run the MCP server
-	Command param.Field[[]string] `json:"command,required"`
-	// Cwd is the working directory for the MCP server process.
-	Cwd param.Field[string] `json:"cwd"`
-	// Enable or disable the MCP server on startup
-	Enabled param.Field[bool] `json:"enabled"`
-	// Environment variables to set when running the MCP server
-	Environment param.Field[map[string]string] `json:"environment"`
-	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout param.Field[int64] `json:"timeout"`
-}
+// implementsMcpAddParamsConfigUnion marks [McpLocalConfigParam] as a valid
+// variant of [McpAddParamsConfigUnion] for the POST /mcp request body.
+func (r McpLocalConfigParam) implementsMcpAddParamsConfigUnion() {}
 
-func (r McpAddParamsConfigLocal) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
+// implementsMcpAddParamsConfigUnion marks [McpRemoteConfigParam] as a valid
+// variant of [McpAddParamsConfigUnion] for the POST /mcp request body.
+func (r McpRemoteConfigParam) implementsMcpAddParamsConfigUnion() {}
 
-func (r McpAddParamsConfigLocal) implementsMcpAddParamsConfigUnion() {}
+// Deprecated: use [McpLocalConfigParam] instead.
+type McpAddParamsConfigLocal = McpLocalConfigParam
 
-// McpAddParamsConfigRemote represents remote MCP server configuration in a
-// request to add an MCP server.
-type McpAddParamsConfigRemote struct {
-	// Type of MCP server connection
-	Type param.Field[McpRemoteConfigType] `json:"type,required"`
-	// URL of the remote MCP server
-	URL param.Field[string] `json:"url,required"`
-	// Enable or disable the MCP server on startup
-	Enabled param.Field[bool] `json:"enabled"`
-	// Headers to send with the request
-	Headers param.Field[map[string]string] `json:"headers"`
-	// OAuth authentication configuration for this MCP server.
-	//
-	// Per the OpenAPI schema, this field can be either [McpAddParamsConfigRemoteOAuth]
-	// (a complete OAuth config) or [McpAddParamsConfigRemoteOAuthDisabled] (a scalar
-	// `false` value explicitly disabling OAuth).
-	OAuth param.Field[McpAddParamsConfigRemoteOAuthUnion] `json:"oauth"`
-	// Timeout in ms for MCP server requests. Defaults to 5000 (5 seconds) if not specified.
-	Timeout param.Field[int64] `json:"timeout"`
-}
+// Deprecated: use [McpRemoteConfigParam] instead.
+type McpAddParamsConfigRemote = McpRemoteConfigParam
 
-func (r McpAddParamsConfigRemote) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
+// Deprecated: use [McpOAuthConfigParam] instead.
+type McpAddParamsConfigRemoteOAuth = McpOAuthConfigParam
 
-func (r McpAddParamsConfigRemote) implementsMcpAddParamsConfigUnion() {}
+// Deprecated: use [McpOAuthConfigDisabledParam] instead.
+type McpAddParamsConfigRemoteOAuthDisabled = McpOAuthConfigDisabledParam
 
-// McpAddParamsConfigRemoteOAuth represents the OAuth configuration for a remote
-// MCP server (OpenAPI McpOAuthConfig schema).
-type McpAddParamsConfigRemoteOAuth struct {
-	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
-	ClientID param.Field[string] `json:"clientId"`
-	// OAuth client secret (if required by the authorization server)
-	ClientSecret param.Field[string] `json:"clientSecret"`
-	// OAuth scopes to request during authorization
-	Scope param.Field[string] `json:"scope"`
-	// OAuth callback port for the local HTTP server
-	CallbackPort param.Field[int64] `json:"callbackPort"`
-	// OAuth redirect URI
-	RedirectURI param.Field[string] `json:"redirectUri"`
-}
-
-func (r McpAddParamsConfigRemoteOAuth) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r McpAddParamsConfigRemoteOAuth) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
-
-// McpAddParamsConfigRemoteOAuthDisabled represents the explicit `false` value
-// for OAuth, disabling OAuth auto-detection (OpenAPI boolean enum: [false]).
-type McpAddParamsConfigRemoteOAuthDisabled struct {
-}
-
-func (r McpAddParamsConfigRemoteOAuthDisabled) MarshalJSON() (data []byte, err error) {
-	return []byte("false"), nil
-}
-
-func (r McpAddParamsConfigRemoteOAuthDisabled) implementsMcpAddParamsConfigRemoteOAuthUnion() {}
-
-// Satisfied by [McpAddParamsConfigRemoteOAuth],
-// [McpAddParamsConfigRemoteOAuthDisabled].
-type McpAddParamsConfigRemoteOAuthUnion interface {
-	implementsMcpAddParamsConfigRemoteOAuthUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[McpAddParamsConfigRemoteOAuthUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpAddParamsConfigRemoteOAuth](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[McpAddParamsConfigRemoteOAuthDisabled](),
-		},
-	)
-}
+// Deprecated: use [McpOAuthConfigUnionParam] instead.
+type McpAddParamsConfigRemoteOAuthUnion = McpOAuthConfigUnionParam
 
 // McpAuthStartResponse represents the response from starting OAuth authentication.
 type McpAuthStartResponse struct {
@@ -598,10 +518,11 @@ func (r McpStatusParams) URLQuery() (v url.Values) {
 
 // McpAddParams contains the parameters for adding an MCP server.
 type McpAddParams struct {
-	Directory param.Field[string]                  `query:"directory"`
-	Workspace param.Field[string]                  `query:"workspace"`
-	Name      param.Field[string]                  `json:"name,required"`
-	Config    param.Field[McpAddParamsConfigUnion] `json:"config,required"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	Name      param.Field[string] `json:"name,required"`
+	// Satisfied by [McpLocalConfigParam], [McpRemoteConfigParam].
+	Config param.Field[McpAddParamsConfigUnion] `json:"config,required"`
 }
 
 // MarshalJSON serializes [McpAddParams] omitting query parameters.

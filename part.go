@@ -303,6 +303,8 @@ func (r PartUpdatePartTool) implementsPartUpdatePartUnion() {}
 // PartUpdatePartToolStatePending represents the pending variant of
 // [PartUpdatePartToolStateUnion].
 type PartUpdatePartToolStatePending struct {
+	Input  param.Field[map[string]any]                       `json:"input,required"`
+	Raw    param.Field[string]                               `json:"raw,required"`
 	Status param.Field[PartUpdatePartToolStatePendingStatus] `json:"status,required"`
 }
 
@@ -329,10 +331,11 @@ func (r PartUpdatePartToolStatePendingStatus) IsKnown() bool {
 // PartUpdatePartToolStateRunning represents the running variant of
 // [PartUpdatePartToolStateUnion].
 type PartUpdatePartToolStateRunning struct {
+	Input    param.Field[map[string]any]                       `json:"input,required"`
 	Status   param.Field[PartUpdatePartToolStateRunningStatus] `json:"status,required"`
 	Time     param.Field[PartUpdatePartToolStateRunningTime]   `json:"time,required"`
-	Title    param.Field[string]                               `json:"title"`
 	Metadata param.Field[map[string]any]                       `json:"metadata"`
+	Title    param.Field[string]                               `json:"title"`
 }
 
 func (r PartUpdatePartToolStateRunning) MarshalJSON() (data []byte, err error) {
@@ -367,11 +370,13 @@ func (r PartUpdatePartToolStateRunningTime) MarshalJSON() (data []byte, err erro
 // [PartUpdatePartToolStateUnion].
 type PartUpdatePartToolStateCompleted struct {
 	Input    param.Field[map[string]any]                         `json:"input,required"`
-	Metadata param.Field[map[string]any]                         `json:"metadata"`
-	Output   param.Field[string]                                 `json:"output"`
+	Metadata param.Field[map[string]any]                         `json:"metadata,required"`
+	Output   param.Field[string]                                 `json:"output,required"`
 	Status   param.Field[PartUpdatePartToolStateCompletedStatus] `json:"status,required"`
 	Time     param.Field[PartUpdatePartToolStateCompletedTime]   `json:"time,required"`
-	Title    param.Field[string]                                 `json:"title"`
+	Title    param.Field[string]                                 `json:"title,required"`
+	// Attachments is an optional list of file parts attached to the tool result.
+	Attachments param.Field[[]FilePartInputParam] `json:"attachments"`
 }
 
 func (r PartUpdatePartToolStateCompleted) MarshalJSON() (data []byte, err error) {
@@ -395,8 +400,9 @@ func (r PartUpdatePartToolStateCompletedStatus) IsKnown() bool {
 }
 
 type PartUpdatePartToolStateCompletedTime struct {
-	Start param.Field[int64] `json:"start,required"`
-	End   param.Field[int64] `json:"end,required"`
+	End       param.Field[int64] `json:"end,required"`
+	Start     param.Field[int64] `json:"start,required"`
+	Compacted param.Field[int64] `json:"compacted"`
 }
 
 func (r PartUpdatePartToolStateCompletedTime) MarshalJSON() (data []byte, err error) {

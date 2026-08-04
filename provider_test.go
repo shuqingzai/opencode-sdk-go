@@ -15,6 +15,216 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
+// TestProviderAuthMethodPromptsUnmarshal verifies that ProviderAuthMethod.Prompts
+// (now typed as any) correctly deserialises from JSON. After the fix, callers
+// receive the raw decoded value ([]interface{} containing map[string]any elements)
+// and must cast each element manually. The test also confirms that the
+// ProviderAuthMethodPromptText and ProviderAuthMethodPromptSelect types still
+// unmarshal correctly on their own.
+//
+// Run with: go test -run TestProviderAuthMethodPromptsUnmarshal -v ./...
+func TestProviderAuthMethodPromptsUnmarshal(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name           string
+		json           string
+		wantType       opencode.ProviderAuthMethodType
+		wantLabel      string
+		wantPromptsNil bool
+		wantPromptsLen int
+	}{
+		{
+			name:           "no_prompts",
+			json:           `{"type":"oauth","label":"OAuth"}`,
+			wantType:       opencode.ProviderAuthMethodTypeOauth,
+			wantLabel:      "OAuth",
+			wantPromptsNil: true,
+		},
+		{
+			name:           "text_prompt",
+			json:           `{"type":"api","label":"API Key","prompts":[{"type":"text","key":"api_key","message":"Enter your API key"}]}`,
+			wantType:       opencode.ProviderAuthMethodTypeAPI,
+			wantLabel:      "API Key",
+			wantPromptsLen: 1,
+		},
+		{
+			name:           "select_prompt",
+			json:           `{"type":"api","label":"Select Region","prompts":[{"type":"select","key":"region","message":"Select region","options":[{"label":"US","value":"us"},{"label":"EU","value":"eu"}]}]}`,
+			wantType:       opencode.ProviderAuthMethodTypeAPI,
+			wantLabel:      "Select Region",
+			wantPromptsLen: 1,
+		},
+		{
+			name:           "mixed_prompts",
+			json:           `{"type":"api","label":"Mixed","prompts":[{"type":"text","key":"api_key","message":"Enter key"},{"type":"select","key":"region","message":"Region","options":[{"label":"US","value":"us"}]}]}`,
+			wantType:       opencode.ProviderAuthMethodTypeAPI,
+			wantLabel:      "Mixed",
+			wantPromptsLen: 2,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var pam opencode.ProviderAuthMethod
+			if err := json.Unmarshal([]byte(tc.json), &pam); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			if pam.Type != tc.wantType {
+				t.Errorf("Type: got %q, want %q", pam.Type, tc.wantType)
+			}
+			if pam.Label != tc.wantLabel {
+				t.Errorf("Label: got %q, want %q", pam.Label, tc.wantLabel)
+			}
+			if tc.wantPromptsNil {
+				if pam.Prompts != nil {
+					t.Errorf("Prompts: expected nil, got %v", pam.Prompts)
+				}
+				return
+			}
+			// After fix, Prompts is any — cast to []interface{}
+			prompts, ok := pam.Prompts.([]interface{})
+			if !ok {
+				t.Fatalf("Prompts runtime type: got %T, want []interface{}", pam.Prompts)
+			}
+			if len(prompts) != tc.wantPromptsLen {
+				t.Errorf("Prompts length: got %d, want %d", len(prompts), tc.wantPromptsLen)
+			}
+			// Each element should be a map[string]interface{} with a "type" key
+			for i, p := range prompts {
+				m, ok := p.(map[string]interface{})
+				if !ok {
+					t.Errorf("Prompts[%d]: expected map[string]interface{}, got %T", i, p)
+					continue
+				}
+				if _, hasType := m["type"]; !hasType {
+					t.Errorf("Prompts[%d]: missing 'type' key in %v", i, m)
+				}
+			}
+		})
+	}
+}
+
+// TestProviderAuthMethodPromptTextUnmarshal verifies that ProviderAuthMethodPromptText
+// still deserialises correctly on its own (regression guard for Task 1 change).
+func TestProviderAuthMethodPromptTextUnmarshal(t *testing.T) {
+	t.Parallel()
+	const raw = `{"type":"text","key":"api_key","message":"Enter your API key","placeholder":"sk-..."}`
+	var p opencode.ProviderAuthMethodPromptText
+	if err := json.Unmarshal([]byte(raw), &p); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if p.Type != opencode.ProviderAuthMethodPromptTextTypeText {
+		t.Errorf("Type: got %q, want %q", p.Type, opencode.ProviderAuthMethodPromptTextTypeText)
+	}
+	if p.Key != "api_key" {
+		t.Errorf("Key: got %q, want api_key", p.Key)
+	}
+	if p.Message != "Enter your API key" {
+		t.Errorf("Message: got %q", p.Message)
+	}
+	if p.Placeholder != "sk-..." {
+		t.Errorf("Placeholder: got %q, want sk-...", p.Placeholder)
+	}
+}
+
+// TestProviderAuthMethodPromptSelectUnmarshal verifies that ProviderAuthMethodPromptSelect
+// still deserialises correctly on its own (regression guard for Task 1 change).
+func TestProviderAuthMethodPromptSelectUnmarshal(t *testing.T) {
+	t.Parallel()
+	const raw = `{"type":"select","key":"region","message":"Select region","options":[{"label":"US East","value":"us-east-1","hint":"Lower latency"},{"label":"EU West","value":"eu-west-1"}]}`
+	var p opencode.ProviderAuthMethodPromptSelect
+	if err := json.Unmarshal([]byte(raw), &p); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if p.Type != opencode.ProviderAuthMethodPromptSelectTypeSelect {
+		t.Errorf("Type: got %q, want %q", p.Type, opencode.ProviderAuthMethodPromptSelectTypeSelect)
+	}
+	if p.Key != "region" {
+		t.Errorf("Key: got %q, want region", p.Key)
+	}
+	if len(p.Options) != 2 {
+		t.Fatalf("Options length: got %d, want 2", len(p.Options))
+	}
+	if p.Options[0].Label != "US East" || p.Options[0].Value != "us-east-1" || p.Options[0].Hint != "Lower latency" {
+		t.Errorf("Options[0]: %+v", p.Options[0])
+	}
+	if p.Options[1].Label != "EU West" || p.Options[1].Value != "eu-west-1" {
+		t.Errorf("Options[1]: %+v", p.Options[1])
+	}
+}
+
+// TestProviderInfoSourceAPIIsKnown verifies the renamed constant ProviderInfoSourceAPI
+// (formerly ProviderInfoSourceApi) and its deprecated alias both resolve to "api".
+func TestProviderInfoSourceAPIIsKnown(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name  string
+		value opencode.ProviderInfoSource
+		want  bool
+	}{
+		{name: "env", value: opencode.ProviderInfoSourceEnv, want: true},
+		{name: "config", value: opencode.ProviderInfoSourceConfig, want: true},
+		{name: "custom", value: opencode.ProviderInfoSourceCustom, want: true},
+		// new canonical name
+		{name: "api_new", value: opencode.ProviderInfoSourceAPI, want: true},
+		// deprecated alias — must equal the new constant
+		{name: "api_deprecated", value: opencode.ProviderInfoSourceApi, want: true},
+		// unknown
+		{name: "unknown", value: "unknown", want: false},
+		{name: "empty", value: "", want: false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := tc.value.IsKnown()
+			if got != tc.want {
+				t.Errorf("IsKnown(%q): got %v, want %v", tc.value, got, tc.want)
+			}
+		})
+	}
+	// Alias equality guard
+	if opencode.ProviderInfoSourceApi != opencode.ProviderInfoSourceAPI {
+		t.Errorf("ProviderInfoSourceApi alias != ProviderInfoSourceAPI: %q vs %q",
+			opencode.ProviderInfoSourceApi, opencode.ProviderInfoSourceAPI)
+	}
+}
+
+// TestProviderAuthMethodTypeAPIIsKnown verifies the renamed constant ProviderAuthMethodTypeAPI
+// (formerly ProviderAuthMethodTypeApi) and its deprecated alias both resolve to "api".
+func TestProviderAuthMethodTypeAPIIsKnown(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name  string
+		value opencode.ProviderAuthMethodType
+		want  bool
+	}{
+		{name: "oauth", value: opencode.ProviderAuthMethodTypeOauth, want: true},
+		// new canonical name
+		{name: "api_new", value: opencode.ProviderAuthMethodTypeAPI, want: true},
+		// deprecated alias
+		{name: "api_deprecated", value: opencode.ProviderAuthMethodTypeApi, want: true},
+		// unknown
+		{name: "unknown", value: "unknown", want: false},
+		{name: "empty", value: "", want: false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := tc.value.IsKnown()
+			if got != tc.want {
+				t.Errorf("IsKnown(%q): got %v, want %v", tc.value, got, tc.want)
+			}
+		})
+	}
+	// Alias equality guard
+	if opencode.ProviderAuthMethodTypeApi != opencode.ProviderAuthMethodTypeAPI {
+		t.Errorf("ProviderAuthMethodTypeApi alias != ProviderAuthMethodTypeAPI: %q vs %q",
+			opencode.ProviderAuthMethodTypeApi, opencode.ProviderAuthMethodTypeAPI)
+	}
+}
+
 func TestProviderList(t *testing.T) {
 	t.Skip("Prism tests are disabled")
 	baseURL := "http://localhost:4010"

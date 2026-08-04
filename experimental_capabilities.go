@@ -70,6 +70,7 @@ type ExperimentalCapabilitiesGetParams struct {
 	Workspace param.Field[string] `query:"workspace"`
 }
 
+// URLQuery serializes [ExperimentalCapabilitiesGetParams]'s query parameters as `url.Values`.
 func (r ExperimentalCapabilitiesGetParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

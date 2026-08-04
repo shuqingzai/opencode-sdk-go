@@ -45,11 +45,11 @@ func (r *CommandService) List(ctx context.Context, query CommandListParams, opts
 type Command struct {
 	Name        string        `json:"name,required"`
 	Template    string        `json:"template,required"`
-	Source      CommandSource `json:"source"`
 	Hints       []string      `json:"hints,required"`
 	Agent       string        `json:"agent"`
 	Description string        `json:"description"`
 	Model       string        `json:"model"`
+	Source      CommandSource `json:"source"`
 	Subtask     bool          `json:"subtask"`
 	JSON        commandJSON   `json:"-"`
 }
@@ -58,11 +58,11 @@ type Command struct {
 type commandJSON struct {
 	Name        apijson.Field
 	Template    apijson.Field
-	Source      apijson.Field
 	Hints       apijson.Field
 	Agent       apijson.Field
 	Description apijson.Field
 	Model       apijson.Field
+	Source      apijson.Field
 	Subtask     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field

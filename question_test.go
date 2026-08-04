@@ -4,6 +4,7 @@ package opencode_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -80,5 +81,61 @@ func TestQuestionReject(t *testing.T) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
 		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+// TestQuestionToolUnmarshal verifies that QuestionTool (renamed from
+// QuestionRequestTool) deserializes correctly from JSON.
+func TestQuestionToolUnmarshal(t *testing.T) {
+	raw := `{"messageID": "msg_001", "callID": "call_abc"}`
+	var tool opencode.QuestionTool
+	if err := json.Unmarshal([]byte(raw), &tool); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
+	if tool.MessageID != "msg_001" {
+		t.Errorf("expected messageID=msg_001, got %q", tool.MessageID)
+	}
+	if tool.CallID != "call_abc" {
+		t.Errorf("expected callID=call_abc, got %q", tool.CallID)
+	}
+}
+
+// TestQuestionRequestToolAliasUsable verifies that the backwards-compatibility
+// alias QuestionRequestTool still refers to QuestionTool.
+func TestQuestionRequestToolAliasUsable(t *testing.T) {
+	raw := `{"messageID": "msg_002", "callID": "call_xyz"}`
+	var tool opencode.QuestionRequestTool // alias = QuestionTool
+	if err := json.Unmarshal([]byte(raw), &tool); err != nil {
+		t.Fatalf("Unmarshal error using alias: %v", err)
+	}
+	if tool.MessageID != "msg_002" {
+		t.Errorf("expected messageID=msg_002, got %q", tool.MessageID)
+	}
+}
+
+// TestQuestionRequestUnmarshal verifies that QuestionRequest (which embeds
+// QuestionTool as the tool field) deserializes correctly.
+func TestQuestionRequestUnmarshal(t *testing.T) {
+	raw := `{
+		"id": "que_001",
+		"sessionID": "ses_001",
+		"questions": [
+			{
+				"question": "Choose",
+				"header": "Hdr",
+				"options": [{"label": "Yes", "description": "Affirm"}]
+			}
+		],
+		"tool": {"messageID": "msg_003", "callID": "call_003"}
+	}`
+	var req opencode.QuestionRequest
+	if err := json.Unmarshal([]byte(raw), &req); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
+	if req.ID != "que_001" {
+		t.Errorf("expected id=que_001, got %q", req.ID)
+	}
+	if req.Tool.MessageID != "msg_003" {
+		t.Errorf("expected tool.messageID=msg_003, got %q", req.Tool.MessageID)
 	}
 }

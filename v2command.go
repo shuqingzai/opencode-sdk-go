@@ -100,6 +100,7 @@ type V2CommandListParams struct {
 	Location param.Field[V2LocationParam] `query:"location"`
 }
 
+// URLQuery serializes [V2CommandListParams]'s query parameters as `url.Values`.
 func (r V2CommandListParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,

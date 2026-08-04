@@ -121,9 +121,10 @@ func (r GlobalUpgradeBody) MarshalJSON() ([]byte, error) {
 
 type GlobalUpgradeResponse struct {
 	Success bool                      `json:"success,required"`
-	Version string                    `json:"version,omitempty"`
-	Error   string                    `json:"error,omitempty"`
+	Version string                    `json:"version"`
+	Error   string                    `json:"error"`
 	JSON    globalUpgradeResponseJSON `json:"-"`
+	union   GlobalUpgradeResponseUnion
 }
 
 // globalUpgradeResponseJSON contains the JSON metadata for the struct [GlobalUpgradeResponse]
@@ -135,13 +136,99 @@ type globalUpgradeResponseJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *GlobalUpgradeResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 func (r globalUpgradeResponseJSON) RawJSON() string {
 	return r.raw
 }
+
+func (r *GlobalUpgradeResponse) UnmarshalJSON(data []byte) (err error) {
+	*r = GlobalUpgradeResponse{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [GlobalUpgradeResponseUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [GlobalUpgradeSuccess],
+// [GlobalUpgradeError].
+func (r GlobalUpgradeResponse) AsUnion() GlobalUpgradeResponseUnion {
+	return r.union
+}
+
+// Union satisfied by [GlobalUpgradeSuccess] or [GlobalUpgradeError].
+type GlobalUpgradeResponseUnion interface {
+	implementsGlobalUpgradeResponse()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[GlobalUpgradeResponseUnion](),
+		"success",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: true,
+			Type:               reflect.TypeFor[GlobalUpgradeSuccess](),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: false,
+			Type:               reflect.TypeFor[GlobalUpgradeError](),
+		},
+	)
+}
+
+// GlobalUpgradeSuccess is returned when the upgrade succeeded (success=true).
+type GlobalUpgradeSuccess struct {
+	Success bool                     `json:"success,required"`
+	Version string                   `json:"version,required"`
+	JSON    globalUpgradeSuccessJSON `json:"-"`
+}
+
+// globalUpgradeSuccessJSON contains the JSON metadata for the struct [GlobalUpgradeSuccess]
+type globalUpgradeSuccessJSON struct {
+	Success     apijson.Field
+	Version     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r globalUpgradeSuccessJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *GlobalUpgradeSuccess) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r GlobalUpgradeSuccess) implementsGlobalUpgradeResponse() {}
+
+// GlobalUpgradeError is returned when the upgrade failed (success=false).
+type GlobalUpgradeError struct {
+	Success bool                   `json:"success,required"`
+	Error   string                 `json:"error,required"`
+	JSON    globalUpgradeErrorJSON `json:"-"`
+}
+
+// globalUpgradeErrorJSON contains the JSON metadata for the struct [GlobalUpgradeError]
+type globalUpgradeErrorJSON struct {
+	Success     apijson.Field
+	Error       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r globalUpgradeErrorJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *GlobalUpgradeError) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r GlobalUpgradeError) implementsGlobalUpgradeResponse() {}
 
 // GlobalConfigUpdateParams contains the parameters for updating global configuration.
 // All fields are optional for PATCH semantics.

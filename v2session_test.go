@@ -341,3 +341,51 @@ func TestRevertStateFilesType(t *testing.T) {
 		t.Errorf("expected /a, got %s", rs.Files[0].Path)
 	}
 }
+
+func TestV2SessionMessageToolProviderResultMetadata(t *testing.T) {
+	t.Parallel()
+	jsonStr := `{
+		"executed": true,
+		"metadata": {"key": "value"},
+		"resultMetadata": {"result_key": "result_value"}
+	}`
+	var provider V2SessionMessageToolProvider
+	if err := provider.UnmarshalJSON([]byte(jsonStr)); err != nil {
+		t.Fatal(err)
+	}
+	if !provider.Executed {
+		t.Error("expected Executed to be true")
+	}
+	metadata, ok := provider.Metadata.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected Metadata to be map[string]interface{}, got %T", provider.Metadata)
+	}
+	if metadata["key"] != "value" {
+		t.Errorf("expected metadata key=value, got %v", metadata["key"])
+	}
+	resultMetadata, ok := provider.ResultMetadata.(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected ResultMetadata to be map[string]interface{}, got %T", provider.ResultMetadata)
+	}
+	if resultMetadata["result_key"] != "result_value" {
+		t.Errorf("expected resultMetadata result_key=result_value, got %v", resultMetadata["result_key"])
+	}
+}
+
+func TestV2SessionMessageToolProviderWithoutResultMetadata(t *testing.T) {
+	t.Parallel()
+	jsonStr := `{"executed": false}`
+	var provider V2SessionMessageToolProvider
+	if err := provider.UnmarshalJSON([]byte(jsonStr)); err != nil {
+		t.Fatal(err)
+	}
+	if provider.Executed {
+		t.Error("expected Executed to be false")
+	}
+	if provider.Metadata != nil {
+		t.Errorf("expected Metadata to be nil, got %v", provider.Metadata)
+	}
+	if provider.ResultMetadata != nil {
+		t.Errorf("expected ResultMetadata to be nil, got %v", provider.ResultMetadata)
+	}
+}

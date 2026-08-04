@@ -6,8 +6,155 @@ import (
 	"testing"
 )
 
+func TestPartToolStateSerialization(t *testing.T) {
+	t.Parallel()
+	// Task 1: PartUpdatePartToolStatePending must include status, input, raw (all required).
+	t.Run("ToolStatePending serializes status+input+raw", func(t *testing.T) {
+		t.Parallel()
+		state := PartUpdatePartToolStatePending{
+			Status: F(PartUpdatePartToolStatePendingStatusPending),
+			Input:  F(map[string]any{"tool_call_id": "tc_1"}),
+			Raw:    F(`{"tool_call_id":"tc_1"}`),
+		}
+		b, err := json.Marshal(state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{`"status":"pending"`, `"input"`, `"raw"`} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	// Task 2: PartUpdatePartToolStateRunning must include input (required alongside status and time).
+	t.Run("ToolStateRunning serializes input", func(t *testing.T) {
+		t.Parallel()
+		state := PartUpdatePartToolStateRunning{
+			Status: F(PartUpdatePartToolStateRunningStatusRunning),
+			Input:  F(map[string]any{"cmd": "ls"}),
+			Time:   F(PartUpdatePartToolStateRunningTime{Start: F(int64(1000))}),
+		}
+		b, err := json.Marshal(state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{`"status":"running"`, `"input"`, `"time"`} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	// Task 3: PartUpdatePartToolStateCompleted must include all 6 required keys;
+	// optional attachments are serialized when set.
+	t.Run("ToolStateCompleted serializes all required keys", func(t *testing.T) {
+		t.Parallel()
+		state := PartUpdatePartToolStateCompleted{
+			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
+			Input:    F(map[string]any{"cmd": "ls"}),
+			Output:   F("file.txt\n"),
+			Title:    F("List files"),
+			Metadata: F(map[string]any{"duration": 42}),
+			Time: F(PartUpdatePartToolStateCompletedTime{
+				Start: F(int64(1000)),
+				End:   F(int64(2000)),
+			}),
+		}
+		b, err := json.Marshal(state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{
+			`"status":"completed"`,
+			`"input"`,
+			`"output":"file.txt\n"`,
+			`"title":"List files"`,
+			`"metadata"`,
+			`"time"`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	t.Run("ToolStateCompleted serializes optional attachments", func(t *testing.T) {
+		t.Parallel()
+		state := PartUpdatePartToolStateCompleted{
+			Status:   F(PartUpdatePartToolStateCompletedStatusCompleted),
+			Input:    F(map[string]any{}),
+			Output:   F("result"),
+			Title:    F("run"),
+			Metadata: F(map[string]any{}),
+			Time: F(PartUpdatePartToolStateCompletedTime{
+				Start: F(int64(1000)),
+				End:   F(int64(2000)),
+			}),
+			Attachments: F([]FilePartInputParam{
+				{
+					Mime: F("image/png"),
+					Type: F(FilePartInputTypeFile),
+					URL:  F("file:///out.png"),
+				},
+			}),
+		}
+		b, err := json.Marshal(state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{`"attachments"`, `"mime":"image/png"`, `"type":"file"`} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	// Task 4: PartUpdatePartToolStateCompletedTime must serialize optional compacted field.
+	t.Run("ToolStateCompletedTime serializes compacted", func(t *testing.T) {
+		t.Parallel()
+		timeVal := PartUpdatePartToolStateCompletedTime{
+			Start:     F(int64(1000)),
+			End:       F(int64(2000)),
+			Compacted: F(int64(500)),
+		}
+		b, err := json.Marshal(timeVal)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{`"start":1000`, `"end":2000`, `"compacted":500`} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	t.Run("ToolStateCompletedTime omits compacted when not set", func(t *testing.T) {
+		t.Parallel()
+		timeVal := PartUpdatePartToolStateCompletedTime{
+			Start: F(int64(1000)),
+			End:   F(int64(2000)),
+		}
+		b, err := json.Marshal(timeVal)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		if strings.Contains(got, `"compacted"`) {
+			t.Errorf("unexpected \"compacted\" key in %s", got)
+		}
+	})
+}
+
 func TestPartUpdateParamsBodySerialization(t *testing.T) {
+	t.Parallel()
 	t.Run("Part set — Text variant serializes at root", func(t *testing.T) {
+		t.Parallel()
 		params := PartUpdateParams{
 			Part: F(PartUpdatePartUnion(PartUpdatePartText{
 				ID:        F("prt_1"),
@@ -29,6 +176,7 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 	})
 
 	t.Run("Part not set — MarshalJSON returns nil (no body sent)", func(t *testing.T) {
+		t.Parallel()
 		params := PartUpdateParams{}
 		b, err := params.MarshalJSON()
 		if err != nil {
@@ -40,6 +188,7 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 	})
 
 	t.Run("Directory/Workspace set, Part not set — MarshalJSON still nil body", func(t *testing.T) {
+		t.Parallel()
 		params := PartUpdateParams{
 			Directory: F("d"),
 			Workspace: F("w"),
@@ -54,6 +203,7 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 	})
 
 	t.Run("Part set — File variant serializes at root", func(t *testing.T) {
+		t.Parallel()
 		params := PartUpdateParams{
 			Part: F(PartUpdatePartUnion(PartUpdatePartFile{
 				ID:        F("prt_2"),
@@ -83,6 +233,7 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 	})
 
 	t.Run("Part set — Compaction variant with tail_start_id", func(t *testing.T) {
+		t.Parallel()
 		params := PartUpdateParams{
 			Part: F(PartUpdatePartUnion(PartUpdatePartCompaction{
 				ID:          F("prt_3"),

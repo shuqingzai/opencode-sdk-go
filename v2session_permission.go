@@ -102,14 +102,13 @@ func (r *V2SessionPermissionService) Reply(ctx context.Context, sessionID string
 // ===== Param Types =====
 
 type V2SessionPermissionNewParams struct {
-	ID        param.Field[string]   `json:"id"`
-	Action    param.Field[string]   `json:"action,required"`
-	Resources param.Field[[]string] `json:"resources,required"`
-	Save      param.Field[[]string] `json:"save"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata param.Field[any]                     `json:"metadata"`
-	Source   param.Field[PermissionV2SourceParam] `json:"source"`
-	Agent    param.Field[string]                  `json:"agent"`
+	ID        param.Field[string]                  `json:"id"`
+	Action    param.Field[string]                  `json:"action,required"`
+	Resources param.Field[[]string]                `json:"resources,required"`
+	Save      param.Field[[]string]                `json:"save"`
+	Metadata  param.Field[any]                     `json:"metadata"`
+	Source    param.Field[PermissionV2SourceParam] `json:"source"`
+	Agent     param.Field[string]                  `json:"agent"`
 }
 
 func (r V2SessionPermissionNewParams) MarshalJSON() (data []byte, err error) {
