@@ -2324,12 +2324,11 @@ func (r V2EventQuestionAskedType) IsKnown() bool {
 }
 
 type V2EventQuestionAskedData struct {
-	ID        string         `json:"id,required"`
-	Questions []QuestionInfo `json:"questions,required"`
-	SessionID string         `json:"sessionID,required"`
-	// This field can have the runtime type of [V2EventPermissionAskedDataTool].
-	Tool any                          `json:"tool"`
-	JSON v2EventQuestionAskedDataJSON `json:"-"`
+	ID        string                       `json:"id,required"`
+	Questions []QuestionInfo               `json:"questions,required"`
+	SessionID string                       `json:"sessionID,required"`
+	Tool      QuestionTool                 `json:"tool"`
+	JSON      v2EventQuestionAskedDataJSON `json:"-"`
 }
 
 type v2EventQuestionAskedDataJSON struct {
@@ -3125,6 +3124,9 @@ type V2EventSessionErrorData struct {
 	Error     any                         `json:"error"`
 	SessionID string                      `json:"sessionID"`
 	JSON      v2EventSessionErrorDataJSON `json:"-"`
+	// errorUnion holds the typed payload after [UnmarshalJSON] routes the raw
+	// data through the registered [V2EventSessionErrorDataErrorUnion] variants.
+	errorUnion V2EventSessionErrorDataErrorUnion
 }
 
 type v2EventSessionErrorDataJSON struct {
@@ -3135,11 +3137,77 @@ type v2EventSessionErrorDataJSON struct {
 }
 
 func (r *V2EventSessionErrorData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = V2EventSessionErrorData{}
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
+		return err
+	}
+	errorData := gjson.GetBytes(data, "error").Raw
+	if errorData != "" && errorData != "null" {
+		if err = apijson.UnmarshalRoot([]byte(errorData), &r.errorUnion); err != nil {
+			return err
+		}
+		r.Error = r.errorUnion
+	}
+	return nil
 }
 
 func (r v2EventSessionErrorDataJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsError returns the error field as a typed union.
+//
+// Possible runtime types of the union are [ProviderAuthError], [UnknownError],
+// [MessageOutputLengthError], [MessageAbortedError], [StructuredOutputError],
+// [ContextOverflowError], [ContentFilterError], [APIError].
+func (r *V2EventSessionErrorData) AsError() V2EventSessionErrorDataErrorUnion {
+	return r.errorUnion
+}
+
+// Union satisfied by [ProviderAuthError], [UnknownError], [MessageOutputLengthError],
+// [MessageAbortedError], [StructuredOutputError], [ContextOverflowError],
+// [ContentFilterError] or [APIError].
+type V2EventSessionErrorDataErrorUnion interface {
+	ImplementsEventListResponseEventSessionErrorPropertiesError()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[V2EventSessionErrorDataErrorUnion](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ProviderAuthError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[UnknownError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[MessageOutputLengthError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[MessageAbortedError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[StructuredOutputError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ContextOverflowError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ContentFilterError](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[APIError](),
+		},
+	)
 }
 
 type V2EventSessionIdle struct {
@@ -3796,8 +3864,7 @@ func (r V2EventSessionNextPromptAdmittedType) IsKnown() bool {
 type V2EventSessionNextPromptAdmittedData struct {
 	Delivery  V2EventSessionNextPromptAdmittedDelivery `json:"delivery,required"`
 	MessageID string                                   `json:"messageID,required"`
-	// This field can have the runtime type of [V2SessionInputPrompt].
-	Prompt    any                                      `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt                     `json:"prompt,required"`
 	SessionID string                                   `json:"sessionID,required"`
 	Timestamp int64                                    `json:"timestamp,required"`
 	JSON      v2EventSessionNextPromptAdmittedDataJSON `json:"-"`
@@ -3885,8 +3952,7 @@ func (r V2EventSessionNextPromptedType) IsKnown() bool {
 type V2EventSessionNextPromptedData struct {
 	Delivery  V2EventSessionNextPromptedDelivery `json:"delivery,required"`
 	MessageID string                             `json:"messageID,required"`
-	// This field can have the runtime type of [V2SessionInputPrompt].
-	Prompt    any                                `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt               `json:"prompt,required"`
 	SessionID string                             `json:"sessionID,required"`
 	Timestamp int64                              `json:"timestamp,required"`
 	JSON      v2EventSessionNextPromptedDataJSON `json:"-"`
@@ -4176,12 +4242,11 @@ func (r V2EventSessionNextRetriedType) IsKnown() bool {
 }
 
 type V2EventSessionNextRetriedData struct {
-	Attempt int64 `json:"attempt,required"`
-	// This field can have the runtime type of [EventListResponseEventSessionNextRetriedError].
-	Error     any                               `json:"error,required"`
-	SessionID string                            `json:"sessionID,required"`
-	Timestamp int64                             `json:"timestamp,required"`
-	JSON      v2EventSessionNextRetriedDataJSON `json:"-"`
+	Attempt   int64                                         `json:"attempt,required"`
+	Error     EventListResponseEventSessionNextRetriedError `json:"error,required"`
+	SessionID string                                        `json:"sessionID,required"`
+	Timestamp int64                                         `json:"timestamp,required"`
+	JSON      v2EventSessionNextRetriedDataJSON             `json:"-"`
 }
 
 type v2EventSessionNextRetriedDataJSON struct {

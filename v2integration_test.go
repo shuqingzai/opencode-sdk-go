@@ -10,6 +10,80 @@ import (
 	"github.com/sst/opencode-sdk-go"
 )
 
+// TestIntegrationOAuthMethodPromptsDecoding verifies that IntegrationOAuthMethod.Prompts
+// decodes to []IntegrationPromptUnion with concrete element types, not []interface{}.
+func TestIntegrationOAuthMethodPromptsDecoding(t *testing.T) {
+	t.Parallel()
+
+	t.Run("MixedPrompts", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{
+			"id":"oauth_1",
+			"type":"oauth",
+			"label":"My OAuth",
+			"prompts":[
+				{"type":"text","key":"api_key","label":"API Key","placeholder":"Enter key","description":"Your API key","required":true},
+				{"type":"select","key":"region","label":"Region","options":["us","eu"]}
+			]
+		}`
+		var m opencode.IntegrationOAuthMethod
+		if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if len(m.Prompts) != 2 {
+			t.Fatalf("expected 2 prompts, got %d", len(m.Prompts))
+		}
+		textPrompt, ok := m.Prompts[0].(opencode.IntegrationTextPrompt)
+		if !ok {
+			t.Errorf("Prompts[0]: expected IntegrationTextPrompt, got %T", m.Prompts[0])
+		} else if textPrompt.Key != "api_key" {
+			t.Errorf("Prompts[0].Key: expected api_key, got %q", textPrompt.Key)
+		}
+		selectPrompt, ok := m.Prompts[1].(opencode.IntegrationSelectPrompt)
+		if !ok {
+			t.Errorf("Prompts[1]: expected IntegrationSelectPrompt, got %T", m.Prompts[1])
+		} else if selectPrompt.Key != "region" {
+			t.Errorf("Prompts[1].Key: expected region, got %q", selectPrompt.Key)
+		}
+	})
+
+	t.Run("EmptyPrompts", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"id":"oauth_2","type":"oauth","label":"No prompts","prompts":[]}`
+		var m opencode.IntegrationOAuthMethod
+		if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if len(m.Prompts) != 0 {
+			t.Errorf("expected 0 prompts, got %d", len(m.Prompts))
+		}
+	})
+
+	t.Run("NullPrompts", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"id":"oauth_3","type":"oauth","label":"Null prompts","prompts":null}`
+		var m opencode.IntegrationOAuthMethod
+		if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if m.Prompts != nil {
+			t.Errorf("expected nil prompts, got %v", m.Prompts)
+		}
+	})
+
+	t.Run("AbsentPrompts", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"id":"oauth_4","type":"oauth","label":"No prompts field"}`
+		var m opencode.IntegrationOAuthMethod
+		if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if m.Prompts != nil {
+			t.Errorf("expected nil prompts on absent field, got %v", m.Prompts)
+		}
+	})
+}
+
 // TestIntegrationAttemptTimeUnmarshal verifies that IntegrationAttemptTime
 // correctly deserializes all four value variants defined by the OpenAPI schema:
 //

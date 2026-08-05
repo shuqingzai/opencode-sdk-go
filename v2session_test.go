@@ -389,3 +389,107 @@ func TestV2SessionMessageToolProviderWithoutResultMetadata(t *testing.T) {
 		t.Errorf("expected ResultMetadata to be nil, got %v", provider.ResultMetadata)
 	}
 }
+
+// TestToolStateContentUnionDecoding verifies that the Content field on
+// V2SessionMessageToolStateRunning / Completed / Error decodes as
+// []LLMToolContentUnion with concrete element types, not []interface{}.
+func TestToolStateContentUnionDecoding(t *testing.T) {
+	t.Parallel()
+
+	mixedContent := `[{"type":"text","text":"hello"},{"type":"file","uri":"file:///a.txt","mime":"text/plain","name":"a.txt"}]`
+
+	t.Run("Running", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"status":"running","input":{},"structured":{},"content":` + mixedContent + `}`
+		var state V2SessionMessageToolStateRunning
+		if err := state.UnmarshalJSON([]byte(jsonStr)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if len(state.Content) != 2 {
+			t.Fatalf("expected 2 content items, got %d", len(state.Content))
+		}
+		textItem, ok := state.Content[0].(ToolTextContent)
+		if !ok {
+			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
+		} else if textItem.Text != "hello" {
+			t.Errorf("element[0].Text: expected hello, got %q", textItem.Text)
+		}
+		fileItem, ok := state.Content[1].(ToolFileContent)
+		if !ok {
+			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
+		} else if fileItem.URI != "file:///a.txt" {
+			t.Errorf("element[1].URI: expected file:///a.txt, got %q", fileItem.URI)
+		}
+	})
+
+	t.Run("Completed", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"status":"completed","input":{},"structured":{},"content":` + mixedContent + `}`
+		var state V2SessionMessageToolStateCompleted
+		if err := state.UnmarshalJSON([]byte(jsonStr)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if len(state.Content) != 2 {
+			t.Fatalf("expected 2 content items, got %d", len(state.Content))
+		}
+		if _, ok := state.Content[0].(ToolTextContent); !ok {
+			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
+		}
+		if _, ok := state.Content[1].(ToolFileContent); !ok {
+			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
+		}
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"status":"error","input":{},"structured":{},"content":` + mixedContent + `,"error":{"type":"unknown","message":"boom"}}`
+		var state V2SessionMessageToolStateError
+		if err := state.UnmarshalJSON([]byte(jsonStr)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if len(state.Content) != 2 {
+			t.Fatalf("expected 2 content items, got %d", len(state.Content))
+		}
+		if _, ok := state.Content[0].(ToolTextContent); !ok {
+			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
+		}
+		if _, ok := state.Content[1].(ToolFileContent); !ok {
+			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
+		}
+	})
+
+	t.Run("EmptyContent", func(t *testing.T) {
+		t.Parallel()
+		jsonStr := `{"status":"completed","input":{},"structured":{},"content":[]}`
+		var state V2SessionMessageToolStateCompleted
+		if err := state.UnmarshalJSON([]byte(jsonStr)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if len(state.Content) != 0 {
+			t.Errorf("expected empty content, got %d items", len(state.Content))
+		}
+	})
+
+	t.Run("ViaToolState", func(t *testing.T) {
+		// Verify decoding through the parent V2SessionMessageToolState union.
+		t.Parallel()
+		jsonStr := `{"status":"completed","input":{},"structured":{},"content":[{"type":"text","text":"world"}]}`
+		var state V2SessionMessageToolState
+		if err := state.UnmarshalJSON([]byte(jsonStr)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		completed, ok := state.AsUnion().(V2SessionMessageToolStateCompleted)
+		if !ok {
+			t.Fatalf("expected V2SessionMessageToolStateCompleted, got %T", state.AsUnion())
+		}
+		if len(completed.Content) != 1 {
+			t.Fatalf("expected 1 content item, got %d", len(completed.Content))
+		}
+		textItem, ok := completed.Content[0].(ToolTextContent)
+		if !ok {
+			t.Errorf("element[0]: expected ToolTextContent, got %T", completed.Content[0])
+		} else if textItem.Text != "world" {
+			t.Errorf("element[0].Text: expected world, got %q", textItem.Text)
+		}
+	})
+}

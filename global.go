@@ -260,9 +260,9 @@ type GlobalConfigUpdateParams struct {
 	Mode  param.Field[ConfigModeParam]                `json:"mode"`
 	Model param.Field[string]                         `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
-	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
-	// (a string constant) or [ConfigPermissionParam].
-	Permission param.Field[ConfigPermissionUnionParam] `json:"permission"`
+	// object with per-action permission rule overrides. Accepts
+	// [PermissionActionConfig] (a string constant) or [PermissionConfigObjectParam].
+	Permission param.Field[PermissionConfigUnionParam] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
 	Plugin   param.Field[[]any]                          `json:"plugin"`

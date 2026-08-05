@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/sst/opencode-sdk-go"
@@ -183,308 +184,945 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 	}
 }
 
-// TestConfigPermissionEditUnmarshal verifies that ConfigPermission.Edit correctly
-// deserialises both OpenAPI PermissionRuleConfig variants:
+// TestPermissionConfigObjectRuleUnmarshal verifies that every OpenAPI
+// `PermissionConfig` object property typed as `PermissionRuleConfig` accepts both
+// wire shapes:
 //
-//  1. string form ("ask"|"allow"|"deny") → runtime type string
-//  2. map form ({"src/**": "allow", "**": "ask"}) → runtime type map[string]any
+//  1. string form ("ask"|"allow"|"deny")
+//  2. map form ({"src/**": "allow"})
 //
-// This guards against the regression where Edit was typed as ConfigPermissionEdit
-// (a concrete string type) which caused silent data loss when a map was received.
+// OpenAPI: components.schemas.PermissionConfig.anyOf[1].properties.
 //
-// Run with: go test -run TestConfigPermissionEditUnmarshal -v ./...
-func TestConfigPermissionEditUnmarshal(t *testing.T) {
+// The rule fields are statically typed as [opencode.PermissionRuleConfigUnion], so
+// apijson resolves the registered union and callers get the concrete variant type
+// directly — no `any` type-switching on Go's generic JSON types.
+//
+// Run with: go test -run TestPermissionConfigObjectRuleUnmarshal -v ./...
+func TestPermissionConfigObjectRuleUnmarshal(t *testing.T) {
 	t.Parallel()
-	cases := []struct {
-		name        string
-		json        string
-		wantRuntime reflect.Type
-		wantValue   any
+	ruleFields := []struct {
+		key string
+		get func(opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion
 	}{
-		// String form: "ask"
-		{
-			name:        "string_ask",
-			json:        `{"edit":"ask"}`,
-			wantRuntime: reflect.TypeFor[string](),
-			wantValue:   "ask",
-		},
-		// String form: "allow"
-		{
-			name:        "string_allow",
-			json:        `{"edit":"allow"}`,
-			wantRuntime: reflect.TypeFor[string](),
-			wantValue:   "allow",
-		},
-		// String form: "deny"
-		{
-			name:        "string_deny",
-			json:        `{"edit":"deny"}`,
-			wantRuntime: reflect.TypeFor[string](),
-			wantValue:   "deny",
-		},
-		// Map form: {"src/**": "allow", "**": "ask"}
-		{
-			name:        "map_form",
-			json:        `{"edit":{"src/**":"allow","**":"ask"}}`,
-			wantRuntime: reflect.TypeFor[map[string]any](),
-			wantValue:   nil, // checked separately below
-		},
+		{"read", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Read }},
+		{"edit", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Edit }},
+		{"glob", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Glob }},
+		{"grep", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Grep }},
+		{"list", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.List }},
+		{"bash", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Bash }},
+		{"task", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Task }},
+		{"external_directory", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.ExternalDirectory }},
+		{"lsp", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Lsp }},
+		{"skill", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Skill }},
+	}
+	if len(ruleFields) != 10 {
+		t.Fatalf("OpenAPI defines 10 PermissionRuleConfig properties, test covers %d", len(ruleFields))
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, rf := range ruleFields {
+		t.Run(rf.key+"_string", func(t *testing.T) {
 			t.Parallel()
-			var p opencode.ConfigPermission
-			if err := json.Unmarshal([]byte(tc.json), &p); err != nil {
+			var p opencode.PermissionConfigObject
+			if err := json.Unmarshal([]byte(`{"`+rf.key+`":"allow"}`), &p); err != nil {
 				t.Fatalf("json.Unmarshal: %v", err)
 			}
-			gotRuntime := reflect.TypeOf(p.Edit)
-			if gotRuntime != tc.wantRuntime {
-				t.Errorf("runtime type: got %v, want %v (value: %#v)", gotRuntime, tc.wantRuntime, p.Edit)
+			got, ok := rf.get(p).(opencode.PermissionActionConfig)
+			if !ok {
+				t.Fatalf("runtime type = %T, want opencode.PermissionActionConfig", rf.get(p))
 			}
-			if tc.wantValue != nil {
-				if p.Edit != tc.wantValue {
-					t.Errorf("value: got %#v, want %#v", p.Edit, tc.wantValue)
+			if got != opencode.PermissionActionConfigAllow {
+				t.Errorf("value = %q, want %q", got, opencode.PermissionActionConfigAllow)
+			}
+			if !got.IsKnown() {
+				t.Errorf("PermissionActionConfig(%q).IsKnown() = false", got)
+			}
+		})
+
+		t.Run(rf.key+"_map", func(t *testing.T) {
+			t.Parallel()
+			var p opencode.PermissionConfigObject
+			if err := json.Unmarshal([]byte(`{"`+rf.key+`":{"src/**":"allow","**":"ask"}}`), &p); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			obj, ok := rf.get(p).(opencode.PermissionObjectConfig)
+			if !ok {
+				t.Fatalf("runtime type = %T, want opencode.PermissionObjectConfig", rf.get(p))
+			}
+			if obj["src/**"] != opencode.PermissionActionConfigAllow {
+				t.Errorf(`["src/**"] = %q, want "allow"`, obj["src/**"])
+			}
+			if obj["**"] != opencode.PermissionActionConfigAsk {
+				t.Errorf(`["**"] = %q, want "ask"`, obj["**"])
+			}
+		})
+
+		t.Run(rf.key+"_null_and_absent", func(t *testing.T) {
+			t.Parallel()
+			for _, body := range []string{`{"` + rf.key + `":null}`, `{}`} {
+				var p opencode.PermissionConfigObject
+				if err := json.Unmarshal([]byte(body), &p); err != nil {
+					t.Fatalf("%s: json.Unmarshal: %v", body, err)
 				}
-			} else {
-				// map form: verify key/value
-				gotMap, ok := p.Edit.(map[string]any)
-				if !ok {
-					t.Fatalf("expected map[string]any, got %T", p.Edit)
-				}
-				if gotMap["src/**"] != "allow" {
-					t.Errorf("map[\"src/**\"]: got %q, want \"allow\"", gotMap["src/**"])
-				}
-				if gotMap["**"] != "ask" {
-					t.Errorf("map[\"**\"]: got %q, want \"ask\"", gotMap["**"])
+				if rf.get(p) != nil {
+					t.Errorf("%s: got %#v, want nil", body, rf.get(p))
 				}
 			}
 		})
 	}
 }
 
-// TestConfigAgentBuildPermissionUnmarshal verifies that ConfigAgentBuild.Permission
-// correctly deserialises both OpenAPI PermissionConfig anyOf variants:
+// TestPermissionConfigObjectActionFields verifies that the five OpenAPI
+// `PermissionConfig` properties typed as plain `PermissionActionConfig`
+// (todowrite/question/webfetch/websearch/doom_loop) decode as typed enums.
+// These tools take no matchable argument, so the spec forbids the map form.
 //
-//  1. string form ("ask"|"allow"|"deny") → runtime type ConfigPermissionAction
-//  2. object form ({...per-tool rules...}) → runtime type ConfigAgentBuildPermission
+// Run with: go test -run TestPermissionConfigObjectActionFields -v ./...
+func TestPermissionConfigObjectActionFields(t *testing.T) {
+	t.Parallel()
+	const raw = `{"todowrite":"allow","question":"ask","webfetch":"deny","websearch":"allow","doom_loop":"ask"}`
+	var p opencode.PermissionConfigObject
+	if err := json.Unmarshal([]byte(raw), &p); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	for name, got := range map[string]opencode.PermissionActionConfig{
+		"todowrite": p.Todowrite,
+		"question":  p.Question,
+		"webfetch":  p.Webfetch,
+		"websearch": p.Websearch,
+		"doom_loop": p.DoomLoop,
+	} {
+		if !got.IsKnown() {
+			t.Errorf("%s: IsKnown() = false for %q", name, got)
+		}
+	}
+	if p.Todowrite != opencode.PermissionActionConfigAllow {
+		t.Errorf("todowrite = %q, want allow", p.Todowrite)
+	}
+	if p.Question != opencode.PermissionActionConfigAsk {
+		t.Errorf("question = %q, want ask", p.Question)
+	}
+	if p.Webfetch != opencode.PermissionActionConfigDeny {
+		t.Errorf("webfetch = %q, want deny", p.Webfetch)
+	}
+	if p.JSON.RawJSON() != raw {
+		t.Errorf("RawJSON() = %q, want %q", p.JSON.RawJSON(), raw)
+	}
+}
+
+// TestPermissionConfigObjectExtraFields verifies the OpenAPI
+// `PermissionConfig.additionalProperties -> PermissionRuleConfig` mapping.
 //
-// This guards against the regression where Permission was typed as
-// ConfigAgentBuildPermission (a concrete struct) which caused silent data loss
-// when the server returned the short string form.
+// Run with: go test -run TestPermissionConfigObjectExtraFields -v ./...
+func TestPermissionConfigObjectExtraFields(t *testing.T) {
+	t.Parallel()
+	var p opencode.PermissionConfigObject
+	if err := json.Unmarshal([]byte(`{"edit":"ask","custom_tool":"deny","other_tool":{"a/**":"allow"}}`), &p); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if len(p.ExtraFields) != 2 {
+		t.Fatalf("len(ExtraFields) = %d, want 2 (got %#v)", len(p.ExtraFields), p.ExtraFields)
+	}
+	action, ok := p.ExtraFields["custom_tool"].(opencode.PermissionActionConfig)
+	if !ok {
+		t.Fatalf(`ExtraFields["custom_tool"] type = %T, want opencode.PermissionActionConfig`, p.ExtraFields["custom_tool"])
+	}
+	if action != opencode.PermissionActionConfigDeny {
+		t.Errorf(`ExtraFields["custom_tool"] = %q, want "deny"`, action)
+	}
+	obj, ok := p.ExtraFields["other_tool"].(opencode.PermissionObjectConfig)
+	if !ok {
+		t.Fatalf(`ExtraFields["other_tool"] type = %T, want opencode.PermissionObjectConfig`, p.ExtraFields["other_tool"])
+	}
+	if obj["a/**"] != opencode.PermissionActionConfigAllow {
+		t.Errorf(`ExtraFields["other_tool"]["a/**"] = %q, want "allow"`, obj["a/**"])
+	}
+	// Named properties must never leak into ExtraFields.
+	if _, bad := p.ExtraFields["edit"]; bad {
+		t.Error(`named property "edit" leaked into ExtraFields`)
+	}
+}
+
+// TestAgentConfigPermissionUnmarshal verifies that [opencode.AgentConfig].Permission
+// deserialises both OpenAPI `PermissionConfig` anyOf variants:
 //
-// Run with: go test -run TestConfigAgentBuildPermissionUnmarshal -v ./...
-func TestConfigAgentBuildPermissionUnmarshal(t *testing.T) {
+//  1. string form ("ask"|"allow"|"deny") -> [opencode.PermissionActionConfig]
+//  2. object form ({...per-tool rules...}) -> [opencode.PermissionConfigObject]
+//
+// Run with: go test -run TestAgentConfigPermissionUnmarshal -v ./...
+func TestAgentConfigPermissionUnmarshal(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
 		name        string
 		json        string
 		wantRuntime reflect.Type
 	}{
-		// String form
-		{
-			name:        "string_ask",
-			json:        `{"permission":"ask"}`,
-			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
-		},
-		{
-			name:        "string_allow",
-			json:        `{"permission":"allow"}`,
-			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
-		},
-		{
-			name:        "string_deny",
-			json:        `{"permission":"deny"}`,
-			wantRuntime: reflect.TypeFor[opencode.ConfigPermissionAction](),
-		},
-		// Object form: per-tool rules
-		{
-			name:        "object_form",
-			json:        `{"permission":{"edit":"ask","bash":"allow"}}`,
-			wantRuntime: reflect.TypeFor[opencode.ConfigAgentBuildPermission](),
-		},
+		{"string_ask", `{"permission":"ask"}`, reflect.TypeFor[opencode.PermissionActionConfig]()},
+		{"string_allow", `{"permission":"allow"}`, reflect.TypeFor[opencode.PermissionActionConfig]()},
+		{"string_deny", `{"permission":"deny"}`, reflect.TypeFor[opencode.PermissionActionConfig]()},
+		{"object_form", `{"permission":{"edit":"allow","bash":{"git *":"allow"}}}`, reflect.TypeFor[opencode.PermissionConfigObject]()},
+		{"empty_object", `{"permission":{}}`, reflect.TypeFor[opencode.PermissionConfigObject]()},
+		{"null", `{"permission":null}`, nil},
+		{"absent", `{}`, nil},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			var a opencode.ConfigAgentBuild
+			var a opencode.AgentConfig
 			if err := json.Unmarshal([]byte(tc.json), &a); err != nil {
 				t.Fatalf("json.Unmarshal: %v", err)
 			}
-			gotRuntime := reflect.TypeOf(a.Permission)
-			if gotRuntime != tc.wantRuntime {
-				t.Errorf("runtime type: got %v, want %v (value: %#v)", gotRuntime, tc.wantRuntime, a.Permission)
+			if got := reflect.TypeOf(a.Permission); got != tc.wantRuntime {
+				t.Fatalf("Permission runtime type = %v, want %v", got, tc.wantRuntime)
 			}
-			// For string form: verify value
-			if tc.wantRuntime == reflect.TypeFor[opencode.ConfigPermissionAction]() {
-				action, ok := a.Permission.(opencode.ConfigPermissionAction)
-				if !ok {
-					t.Fatalf("expected ConfigPermissionAction, got %T", a.Permission)
-				}
-				if !action.IsKnown() {
-					t.Errorf("ConfigPermissionAction.IsKnown() returned false for %q", action)
-				}
+			if got := reflect.TypeOf(a.AsPermission()); got != tc.wantRuntime {
+				t.Errorf("AsPermission() runtime type = %v, want %v", got, tc.wantRuntime)
 			}
-			// For object form: verify it's the right struct
-			if tc.wantRuntime == reflect.TypeFor[opencode.ConfigAgentBuildPermission]() {
-				_, ok := a.Permission.(opencode.ConfigAgentBuildPermission)
-				if !ok {
-					t.Fatalf("expected ConfigAgentBuildPermission, got %T", a.Permission)
-				}
+			if action, ok := a.Permission.(opencode.PermissionActionConfig); ok && !action.IsKnown() {
+				t.Errorf("PermissionActionConfig.IsKnown() = false for %q", action)
 			}
 		})
 	}
 }
 
-// TestConfigProviderModelParamInterleavedMarshal verifies that
-// ConfigProviderModelParam.Interleaved correctly serialises all four OpenAPI
-// anyOf variants to the expected wire-format JSON:
+// TestConfigTopLevelPermissionUnmarshal mirrors the AgentConfig test for the
+// top-level `Config.permission` field, including the `null` case the live server
+// actually returns.
 //
-//  1. bool       → {"interleaved":true}
-//  2. string     → {"interleaved":"reasoning_text"}
-//  3. ConfigProviderModelsInterleavedFieldParam → {"interleaved":{"field":"reasoning_text"}}
-//
-// This validates that the new ConfigProviderModelsInterleavedFieldParam type
-// (F3) produces the correct wire format and that the Request/Response
-// separation is sound.
-//
-// Run with: go test -run TestConfigAgentAllPermissionUnionUnmarshal -v ./...
-func TestConfigAgentAllPermissionUnionUnmarshal(t *testing.T) {
+// Run with: go test -run TestConfigTopLevelPermissionUnmarshal -v ./...
+func TestConfigTopLevelPermissionUnmarshal(t *testing.T) {
 	t.Parallel()
-	// Verifies that all 9 ConfigAgent*/ConfigMode* types correctly deserialise
-	// the PermissionConfig anyOf union (string or object form).
-	// OpenAPI: components.schemas.PermissionConfig anyOf[string, object].
 	cases := []struct {
 		name        string
-		stringJSON  string
-		objectJSON  string
-		into        func([]byte) (any, error)
-		wantObjType reflect.Type
+		json        string
+		wantRuntime reflect.Type
 	}{
-		{
-			name:       "ConfigAgentGeneral",
-			stringJSON: `{"permission":"ask"}`,
-			objectJSON: `{"permission":{"edit":"allow","bash":"ask"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentGeneral
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentGeneralPermission](),
-		},
-		{
-			name:       "ConfigAgentPlan",
-			stringJSON: `{"permission":"allow"}`,
-			objectJSON: `{"permission":{"edit":"deny"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentPlan
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentPlanPermission](),
-		},
-		{
-			name:       "ConfigAgentExplore",
-			stringJSON: `{"permission":"deny"}`,
-			objectJSON: `{"permission":{"edit":"ask"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentExplore
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentExplorePermission](),
-		},
-		{
-			name:       "ConfigAgentTitle",
-			stringJSON: `{"permission":"ask"}`,
-			objectJSON: `{"permission":{"edit":"allow"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentTitle
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentTitlePermission](),
-		},
-		{
-			name:       "ConfigAgentSummary",
-			stringJSON: `{"permission":"allow"}`,
-			objectJSON: `{"permission":{"edit":"deny"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentSummary
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentSummaryPermission](),
-		},
-		{
-			name:       "ConfigAgentCompaction",
-			stringJSON: `{"permission":"deny"}`,
-			objectJSON: `{"permission":{"edit":"ask"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigAgentCompaction
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigAgentCompactionPermission](),
-		},
-		{
-			name:       "ConfigModeBuild",
-			stringJSON: `{"permission":"ask"}`,
-			objectJSON: `{"permission":{"edit":"allow"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigModeBuild
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigModeBuildPermission](),
-		},
-		{
-			name:       "ConfigModePlan",
-			stringJSON: `{"permission":"allow"}`,
-			objectJSON: `{"permission":{"edit":"deny"}}`,
-			into: func(data []byte) (any, error) {
-				var v opencode.ConfigModePlan
-				return &v, json.Unmarshal(data, &v)
-			},
-			wantObjType: reflect.TypeFor[opencode.ConfigModePlanPermission](),
-		},
+		{"string_ask", `{"permission":"ask"}`, reflect.TypeFor[opencode.PermissionActionConfig]()},
+		{"string_deny", `{"permission":"deny"}`, reflect.TypeFor[opencode.PermissionActionConfig]()},
+		{"object_form", `{"permission":{"edit":"allow"}}`, reflect.TypeFor[opencode.PermissionConfigObject]()},
+		{"empty_object", `{"permission":{}}`, reflect.TypeFor[opencode.PermissionConfigObject]()},
+		// The live OpenCode server returns `"permission": null` for GET /config
+		// without a directory; this must not fail to decode.
+		{"null", `{"permission":null}`, nil},
+		{"absent", `{"model":"a/b"}`, nil},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var c opencode.Config
+			if err := json.Unmarshal([]byte(tc.json), &c); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			if got := reflect.TypeOf(c.Permission); got != tc.wantRuntime {
+				t.Errorf("Config.Permission runtime type = %v, want %v", got, tc.wantRuntime)
+			}
+			if got := reflect.TypeOf(c.AsPermission()); got != tc.wantRuntime {
+				t.Errorf("Config.AsPermission() runtime type = %v, want %v", got, tc.wantRuntime)
+			}
+		})
+	}
+}
+
+// TestConfigAgentSlotsShareAgentConfig asserts that every agent slot of
+// [opencode.ConfigAgent] and [opencode.ConfigMode] uses the single
+// [opencode.AgentConfig] type, matching the OpenAPI spec where all of
+// `Config.agent.{plan,build,general,explore,title,summary,compaction}` and
+// `Config.mode.{build,plan}` are `$ref: AgentConfig`.
+//
+// Run with: go test -run TestConfigAgentSlotsShareAgentConfig -v ./...
+func TestConfigAgentSlotsShareAgentConfig(t *testing.T) {
+	t.Parallel()
+	want := reflect.TypeFor[opencode.AgentConfig]()
+	wantMap := reflect.TypeFor[map[string]opencode.AgentConfig]()
+
+	agentT := reflect.TypeFor[opencode.ConfigAgent]()
+	for _, name := range []string{"Build", "Compaction", "Explore", "General", "Plan", "Summary", "Title"} {
+		f, ok := agentT.FieldByName(name)
+		if !ok {
+			t.Fatalf("ConfigAgent.%s: field missing", name)
+		}
+		if f.Type != want {
+			t.Errorf("ConfigAgent.%s type = %v, want %v", name, f.Type, want)
+		}
+	}
+	if f, _ := agentT.FieldByName("ExtraFields"); f.Type != wantMap {
+		t.Errorf("ConfigAgent.ExtraFields type = %v, want %v", f.Type, wantMap)
 	}
 
-	permField := func(v any) any {
-		// All ConfigAgent*/ConfigMode* types embed Permission as an any field.
-		// Use reflect to access it generically.
-		rv := reflect.ValueOf(v).Elem()
-		f := rv.FieldByName("Permission")
-		if !f.IsValid() {
-			return nil
+	modeT := reflect.TypeFor[opencode.ConfigMode]()
+	for _, name := range []string{"Build", "Plan"} {
+		f, ok := modeT.FieldByName(name)
+		if !ok {
+			t.Fatalf("ConfigMode.%s: field missing", name)
 		}
-		return f.Interface()
+		if f.Type != want {
+			t.Errorf("ConfigMode.%s type = %v, want %v", name, f.Type, want)
+		}
+	}
+	if f, _ := modeT.FieldByName("ExtraFields"); f.Type != wantMap {
+		t.Errorf("ConfigMode.ExtraFields type = %v, want %v", f.Type, wantMap)
+	}
+}
+
+// TestConfigAgentCustomAgentUnmarshal is the regression test for the
+// `Config.agent.additionalProperties -> AgentConfig` mapping. Previously
+// ConfigAgent.ExtraFields was typed map[string]ConfigAgent, which corrupted every
+// user-defined agent: each scalar property was decoded into a whole empty
+// ConfigAgent instead of the agent's own field.
+//
+// Run with: go test -run TestConfigAgentCustomAgentUnmarshal -v ./...
+func TestConfigAgentCustomAgentUnmarshal(t *testing.T) {
+	t.Parallel()
+	const raw = `{
+		"build":{"model":"anthropic/claude-sonnet-4-6"},
+		"reviewer":{
+			"model":"openai/gpt-5",
+			"temperature":0.3,
+			"top_p":0.9,
+			"mode":"subagent",
+			"description":"Reviews code",
+			"prompt":"You are a reviewer",
+			"disable":false,
+			"hidden":true,
+			"color":"#FF5733",
+			"steps":12,
+			"maxSteps":34,
+			"tools":{"bash":true,"edit":false},
+			"options":{"k":"v"},
+			"permission":{"edit":"deny"},
+			"name":"reviewer"
+		}
+	}`
+
+	var a opencode.ConfigAgent
+	if err := json.Unmarshal([]byte(raw), &a); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	if a.Build.Model != "anthropic/claude-sonnet-4-6" {
+		t.Errorf("Build.Model = %q, want %q", a.Build.Model, "anthropic/claude-sonnet-4-6")
+	}
+	// Named slots absent from the payload must stay zero-valued.
+	if a.Plan.Model != "" {
+		t.Errorf("Plan.Model = %q, want empty", a.Plan.Model)
+	}
+	// Named slots must never leak into ExtraFields.
+	if _, bad := a.ExtraFields["build"]; bad {
+		t.Error(`named slot "build" leaked into ExtraFields`)
+	}
+
+	rev, ok := a.ExtraFields["reviewer"]
+	if !ok {
+		t.Fatalf(`ExtraFields["reviewer"] missing; got %v`, sortedTestKeys(a.ExtraFields))
+	}
+	if len(a.ExtraFields) != 1 {
+		t.Errorf("len(ExtraFields) = %d, want 1", len(a.ExtraFields))
+	}
+
+	if rev.Model != "openai/gpt-5" {
+		t.Errorf("reviewer.Model = %q, want %q", rev.Model, "openai/gpt-5")
+	}
+	if rev.Temperature != 0.3 {
+		t.Errorf("reviewer.Temperature = %v, want 0.3", rev.Temperature)
+	}
+	if rev.TopP != 0.9 {
+		t.Errorf("reviewer.TopP = %v, want 0.9", rev.TopP)
+	}
+	if rev.Mode != opencode.AgentConfigModeSubagent {
+		t.Errorf("reviewer.Mode = %q, want %q", rev.Mode, opencode.AgentConfigModeSubagent)
+	}
+	if !rev.Mode.IsKnown() {
+		t.Errorf("reviewer.Mode.IsKnown() = false for %q", rev.Mode)
+	}
+	if rev.Description != "Reviews code" {
+		t.Errorf("reviewer.Description = %q", rev.Description)
+	}
+	if rev.Prompt != "You are a reviewer" {
+		t.Errorf("reviewer.Prompt = %q", rev.Prompt)
+	}
+	if rev.Disable {
+		t.Error("reviewer.Disable = true, want false")
+	}
+	if !rev.Hidden {
+		t.Error("reviewer.Hidden = false, want true")
+	}
+	if rev.Color != "#FF5733" {
+		t.Errorf("reviewer.Color = %q", rev.Color)
+	}
+	if rev.Steps != 12 {
+		t.Errorf("reviewer.Steps = %d, want 12", rev.Steps)
+	}
+	if rev.MaxSteps != 34 {
+		t.Errorf("reviewer.MaxSteps = %d, want 34", rev.MaxSteps)
+	}
+	if !rev.Tools["bash"] || rev.Tools["edit"] {
+		t.Errorf("reviewer.Tools = %#v, want {bash:true, edit:false}", rev.Tools)
+	}
+	if rev.Options["k"] != "v" {
+		t.Errorf("reviewer.Options = %#v", rev.Options)
+	}
+	perm, ok := rev.Permission.(opencode.PermissionConfigObject)
+	if !ok {
+		t.Fatalf("reviewer.Permission type = %T, want opencode.PermissionConfigObject", rev.Permission)
+	}
+	if edit, _ := perm.Edit.(opencode.PermissionActionConfig); edit != opencode.PermissionActionConfigDeny {
+		t.Errorf("reviewer.Permission.Edit = %#v, want PermissionActionConfigDeny", perm.Edit)
+	}
+	// `name` is not part of the OpenAPI AgentConfig schema; AgentConfig allows
+	// arbitrary additional properties, so it must land in AgentConfig.ExtraFields.
+	if rev.ExtraFields["name"] != "reviewer" {
+		t.Errorf(`reviewer.ExtraFields["name"] = %#v, want "reviewer"`, rev.ExtraFields["name"])
+	}
+	if rev.JSON.RawJSON() == "" {
+		t.Error("reviewer.JSON.RawJSON() is empty")
+	}
+}
+
+// TestConfigModeCustomEntryUnmarshal covers the deprecated `Config.mode` map,
+// which shares the same `additionalProperties -> AgentConfig` mapping.
+//
+// Run with: go test -run TestConfigModeCustomEntryUnmarshal -v ./...
+func TestConfigModeCustomEntryUnmarshal(t *testing.T) {
+	t.Parallel()
+	var m opencode.ConfigMode
+	if err := json.Unmarshal([]byte(`{"build":{"model":"a/b"},"custom":{"model":"c/d","temperature":0.7}}`), &m); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if m.Build.Model != "a/b" {
+		t.Errorf("Build.Model = %q, want a/b", m.Build.Model)
+	}
+	custom, ok := m.ExtraFields["custom"]
+	if !ok {
+		t.Fatal(`ExtraFields["custom"] missing`)
+	}
+	if custom.Model != "c/d" {
+		t.Errorf("custom.Model = %q, want c/d", custom.Model)
+	}
+	if custom.Temperature != 0.7 {
+		t.Errorf("custom.Temperature = %v, want 0.7", custom.Temperature)
+	}
+}
+
+// TestAgentConfigEnumsAndEdgeValues covers AgentConfigMode / PermissionActionConfig
+// enum coverage plus numeric, unicode and RawJSON edge cases.
+//
+// Run with: go test -run TestAgentConfigEnumsAndEdgeValues -v ./...
+func TestAgentConfigEnumsAndEdgeValues(t *testing.T) {
+	t.Parallel()
+
+	t.Run("AgentConfigMode_IsKnown", func(t *testing.T) {
+		t.Parallel()
+		for _, m := range []opencode.AgentConfigMode{
+			opencode.AgentConfigModeSubagent, opencode.AgentConfigModePrimary, opencode.AgentConfigModeAll,
+		} {
+			if !m.IsKnown() {
+				t.Errorf("IsKnown() = false for known %q", m)
+			}
+		}
+		if opencode.AgentConfigMode("bogus").IsKnown() {
+			t.Error(`IsKnown() = true for unknown "bogus"`)
+		}
+	})
+
+	t.Run("PermissionActionConfig_IsKnown", func(t *testing.T) {
+		t.Parallel()
+		for _, a := range []opencode.PermissionActionConfig{
+			opencode.PermissionActionConfigAsk, opencode.PermissionActionConfigAllow, opencode.PermissionActionConfigDeny,
+		} {
+			if !a.IsKnown() {
+				t.Errorf("IsKnown() = false for known %q", a)
+			}
+		}
+		if opencode.PermissionActionConfig("bogus").IsKnown() {
+			t.Error(`IsKnown() = true for unknown "bogus"`)
+		}
+	})
+
+	t.Run("numeric_and_unicode_edges", func(t *testing.T) {
+		t.Parallel()
+		const raw = `{"steps":9223372036854775807,"maxSteps":-1,"temperature":1,"top_p":0,` +
+			`"model":"提供商/模型-名称","color":"#FF5733","prompt":"你好世界"}`
+		var a opencode.AgentConfig
+		if err := json.Unmarshal([]byte(raw), &a); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if a.Steps != 9223372036854775807 {
+			t.Errorf("Steps = %d, want max int64", a.Steps)
+		}
+		if a.MaxSteps != -1 {
+			t.Errorf("MaxSteps = %d, want -1", a.MaxSteps)
+		}
+		// integer 1 on the wire must widen to float64 1.0
+		if a.Temperature != 1 {
+			t.Errorf("Temperature = %v, want 1", a.Temperature)
+		}
+		if a.Model != "提供商/模型-名称" {
+			t.Errorf("Model = %q", a.Model)
+		}
+		if a.Prompt != "你好世界" {
+			t.Errorf("Prompt = %q", a.Prompt)
+		}
+		if a.JSON.RawJSON() != raw {
+			t.Errorf("RawJSON() mismatch\n got: %s\nwant: %s", a.JSON.RawJSON(), raw)
+		}
+	})
+
+	t.Run("unknown_properties_go_to_ExtraFields", func(t *testing.T) {
+		t.Parallel()
+		var a opencode.AgentConfig
+		if err := json.Unmarshal([]byte(`{"model":"a/b","name":"x","future_field":42}`), &a); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if a.Model != "a/b" {
+			t.Errorf("Model = %q", a.Model)
+		}
+		if a.ExtraFields["name"] != "x" {
+			t.Errorf(`ExtraFields["name"] = %#v`, a.ExtraFields["name"])
+		}
+		if a.ExtraFields["future_field"] != float64(42) {
+			t.Errorf(`ExtraFields["future_field"] = %#v`, a.ExtraFields["future_field"])
+		}
+		if _, bad := a.ExtraFields["model"]; bad {
+			t.Error(`named property "model" leaked into ExtraFields`)
+		}
+	})
+}
+
+// TestAgentConfigParamMarshal verifies the request-side [opencode.AgentConfigParam]
+// serialises exactly the OpenAPI `AgentConfig` property names, and that unset
+// fields are omitted (PATCH semantics).
+//
+// Run with: go test -run TestAgentConfigParamMarshal -v ./...
+func TestAgentConfigParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.AgentConfigParam
+		wantJSON string
+	}{
+		{
+			name:     "empty_omits_everything",
+			param:    opencode.AgentConfigParam{},
+			wantJSON: `{}`,
+		},
+		{
+			name: "scalar_fields",
+			param: opencode.AgentConfigParam{
+				Model:       opencode.F("openai/gpt-5"),
+				Temperature: opencode.F(0.25),
+				TopP:        opencode.F(0.9),
+				Mode:        opencode.F(opencode.AgentConfigModeSubagent),
+				Steps:       opencode.F(int64(7)),
+				MaxSteps:    opencode.F(int64(9)),
+			},
+			wantJSON: `{"maxSteps":9,"mode":"subagent","model":"openai/gpt-5","steps":7,"temperature":0.25,"top_p":0.9}`,
+		},
+		{
+			name: "permission_string_variant",
+			param: opencode.AgentConfigParam{
+				Permission: opencode.F[opencode.PermissionConfigUnionParam](opencode.PermissionActionConfigAsk),
+			},
+			wantJSON: `{"permission":"ask"}`,
+		},
+		{
+			name: "permission_object_variant",
+			param: opencode.AgentConfigParam{
+				Permission: opencode.F[opencode.PermissionConfigUnionParam](opencode.PermissionConfigObjectParam{
+					Edit:      opencode.F[opencode.PermissionRuleConfigUnionParam](opencode.PermissionActionConfigDeny),
+					Bash:      opencode.F[opencode.PermissionRuleConfigUnionParam](opencode.PermissionObjectConfig{"git *": opencode.PermissionActionConfigAllow}),
+					Todowrite: opencode.F(opencode.PermissionActionConfigAllow),
+				}),
+			},
+			wantJSON: `{"permission":{"bash":{"git *":"allow"},"edit":"deny","todowrite":"allow"}}`,
+		},
+		{
+			name: "extra_properties",
+			param: opencode.AgentConfigParam{
+				Model:       opencode.F("a/b"),
+				ExtraFields: map[string]any{"name": "reviewer"},
+			},
+			wantJSON: `{"model":"a/b","name":"reviewer"}`,
+		},
+		{
+			name: "tools_and_options",
+			param: opencode.AgentConfigParam{
+				Tools:   opencode.F(map[string]bool{"bash": true}),
+				Options: opencode.F(map[string]any{"k": "v"}),
+			},
+			wantJSON: `{"options":{"k":"v"},"tools":{"bash":true}}`,
+		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-
-			// String form → ConfigPermissionAction
-			v, err := tc.into([]byte(tc.stringJSON))
+			got, err := json.Marshal(tc.param)
 			if err != nil {
-				t.Fatalf("string form unmarshal: %v", err)
+				t.Fatalf("json.Marshal: %v", err)
 			}
-			perm := permField(v)
-			if _, ok := perm.(opencode.ConfigPermissionAction); !ok {
-				t.Errorf("string form: Permission runtime type = %T, want ConfigPermissionAction", perm)
-			}
-			action, _ := perm.(opencode.ConfigPermissionAction)
-			if !action.IsKnown() {
-				t.Errorf("string form: ConfigPermissionAction.IsKnown() = false for %q", action)
-			}
-
-			// Object form → specific Permission struct
-			v2, err := tc.into([]byte(tc.objectJSON))
-			if err != nil {
-				t.Fatalf("object form unmarshal: %v", err)
-			}
-			perm2 := permField(v2)
-			gotType := reflect.TypeOf(perm2)
-			if gotType != tc.wantObjType {
-				t.Errorf("object form: Permission runtime type = %v, want %v", gotType, tc.wantObjType)
+			if string(got) != tc.wantJSON {
+				t.Errorf("got  %s\nwant %s", got, tc.wantJSON)
 			}
 		})
 	}
+}
+
+// TestPermissionConfigObjectParamMarshal verifies the request-side per-tool
+// permission object, including both PermissionRuleConfig variants and extras.
+//
+// Run with: go test -run TestPermissionConfigObjectParamMarshal -v ./...
+func TestPermissionConfigObjectParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.PermissionConfigObjectParam
+		wantJSON string
+	}{
+		{"empty", opencode.PermissionConfigObjectParam{}, `{}`},
+		{
+			"rule_string_variant",
+			opencode.PermissionConfigObjectParam{
+				Read: opencode.F[opencode.PermissionRuleConfigUnionParam](opencode.PermissionActionConfigAsk),
+				Bash: opencode.F[opencode.PermissionRuleConfigUnionParam](opencode.PermissionActionConfigAllow),
+			},
+			`{"bash":"allow","read":"ask"}`,
+		},
+		{
+			"rule_object_variant",
+			opencode.PermissionConfigObjectParam{
+				Bash: opencode.F[opencode.PermissionRuleConfigUnionParam](
+					opencode.PermissionObjectConfig{"git *": opencode.PermissionActionConfigAllow, "rm *": opencode.PermissionActionConfigDeny}),
+			},
+			`{"bash":{"git *":"allow","rm *":"deny"}}`,
+		},
+		{
+			"action_only_tools",
+			opencode.PermissionConfigObjectParam{
+				Todowrite: opencode.F(opencode.PermissionActionConfigAllow),
+				DoomLoop:  opencode.F(opencode.PermissionActionConfigDeny),
+			},
+			`{"doom_loop":"deny","todowrite":"allow"}`,
+		},
+		{
+			"extra_tool",
+			opencode.PermissionConfigObjectParam{
+				Read:        opencode.F[opencode.PermissionRuleConfigUnionParam](opencode.PermissionActionConfigAllow),
+				ExtraFields: map[string]opencode.PermissionRuleConfigUnionParam{"my_tool": opencode.PermissionActionConfigAsk},
+			},
+			`{"read":"allow","my_tool":"ask"}`,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			if string(got) != tc.wantJSON {
+				t.Errorf("got  %s\nwant %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigAgentParamMarshal verifies that [opencode.ConfigAgentParam] emits
+// named agent slots plus user-defined agents (additionalProperties).
+//
+// Run with: go test -run TestConfigAgentParamMarshal -v ./...
+func TestConfigAgentParamMarshal(t *testing.T) {
+	t.Parallel()
+	p := opencode.ConfigAgentParam{
+		Build: opencode.F(opencode.AgentConfigParam{
+			Model: opencode.F("anthropic/claude-sonnet-4-6"),
+		}),
+		ExtraFields: map[string]opencode.AgentConfigParam{
+			"reviewer": {
+				Model:       opencode.F("openai/gpt-5"),
+				Temperature: opencode.F(0.3),
+			},
+		},
+	}
+	got, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	const want = `{"build":{"model":"anthropic/claude-sonnet-4-6"},"reviewer":{"model":"openai/gpt-5","temperature":0.3}}`
+	if string(got) != want {
+		t.Errorf("got  %s\nwant %s", got, want)
+	}
+
+	m := opencode.ConfigModeParam{
+		Build:       opencode.F(opencode.AgentConfigParam{Model: opencode.F("a/b")}),
+		ExtraFields: map[string]opencode.AgentConfigParam{"custom": {Prompt: opencode.F("p")}},
+	}
+	gotMode, err := json.Marshal(m)
+	if err != nil {
+		t.Fatalf("json.Marshal(mode): %v", err)
+	}
+	const wantMode = `{"build":{"model":"a/b"},"custom":{"prompt":"p"}}`
+	if string(gotMode) != wantMode {
+		t.Errorf("mode: got  %s\nwant %s", gotMode, wantMode)
+	}
+}
+
+// TestConfigRoundTripRawJSON asserts Config and every nested AgentConfig preserve
+// the exact bytes received from the server.
+//
+// Run with: go test -run TestConfigRoundTripRawJSON -v ./...
+func TestConfigRoundTripRawJSON(t *testing.T) {
+	t.Parallel()
+	const raw = `{"model":"a/b","agent":{"build":{"model":"c/d"},"custom":{"model":"e/f","temperature":0.5}},"permission":null}`
+	var c opencode.Config
+	if err := json.Unmarshal([]byte(raw), &c); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if c.JSON.RawJSON() != raw {
+		t.Errorf("Config.RawJSON() mismatch\n got: %s\nwant: %s", c.JSON.RawJSON(), raw)
+	}
+	if got, want := c.Agent.Build.JSON.RawJSON(), `{"model":"c/d"}`; got != want {
+		t.Errorf("Agent.Build.RawJSON() = %s, want %s", got, want)
+	}
+	custom := c.Agent.ExtraFields["custom"]
+	if got, want := custom.JSON.RawJSON(), `{"model":"e/f","temperature":0.5}`; got != want {
+		t.Errorf("custom agent RawJSON() = %s, want %s", got, want)
+	}
+	if c.Permission != nil {
+		t.Errorf("Config.Permission = %#v, want nil", c.Permission)
+	}
+}
+
+// TestConfigProviderOptionsTimeoutUnion verifies the OpenAPI
+// `ProviderConfig.options.timeout` / `headerTimeout` anyOf:
+//
+//	anyOf: [ {type: integer, exclusiveMinimum: 0}, {type: boolean, enum: [false]} ]
+//
+// Both fields are statically typed as [opencode.ConfigProviderOptionsTimeoutUnion]
+// so the registered union resolves to [shared.UnionInt] (int64 milliseconds) or
+// [shared.UnionBool]. Declaring them `any` would silently yield float64 / bool,
+// violating the OpenAPI `integer` contract and losing precision above 2^53.
+//
+// Run with: go test -run TestConfigProviderOptionsTimeoutUnion -v ./...
+func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("integer_variant", func(t *testing.T) {
+		t.Parallel()
+		var o opencode.ConfigProviderOptions
+		if err := json.Unmarshal([]byte(`{"timeout":600000,"headerTimeout":30000}`), &o); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		ms, ok := o.Timeout.(opencode.UnionInt)
+		if !ok {
+			t.Fatalf("Timeout runtime type = %T, want shared.UnionInt", o.Timeout)
+		}
+		if int64(ms) != 600000 {
+			t.Errorf("Timeout = %d, want 600000", int64(ms))
+		}
+		hms, ok := o.HeaderTimeout.(opencode.UnionInt)
+		if !ok {
+			t.Fatalf("HeaderTimeout runtime type = %T, want shared.UnionInt", o.HeaderTimeout)
+		}
+		if int64(hms) != 30000 {
+			t.Errorf("HeaderTimeout = %d, want 30000", int64(hms))
+		}
+	})
+
+	t.Run("false_variant", func(t *testing.T) {
+		t.Parallel()
+		var o opencode.ConfigProviderOptions
+		if err := json.Unmarshal([]byte(`{"timeout":false,"headerTimeout":false}`), &o); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		for name, got := range map[string]any{"timeout": o.Timeout, "headerTimeout": o.HeaderTimeout} {
+			v, ok := got.(opencode.UnionBool)
+			if !ok {
+				t.Fatalf("%s runtime type = %T, want shared.UnionBool", name, got)
+			}
+			if bool(v) {
+				t.Errorf("%s = true, want false", name)
+			}
+		}
+	})
+
+	t.Run("int64_precision_above_2pow53", func(t *testing.T) {
+		t.Parallel()
+		// float64 would round 9007199254740993 (2^53+1) down to ...992.
+		var o opencode.ConfigProviderOptions
+		if err := json.Unmarshal([]byte(`{"timeout":9007199254740993}`), &o); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		got, ok := o.Timeout.(opencode.UnionInt)
+		if !ok {
+			t.Fatalf("runtime type = %T, want shared.UnionInt", o.Timeout)
+		}
+		if int64(got) != 9007199254740993 {
+			t.Errorf("Timeout = %d, want 9007199254740993 (int64 precision lost)", int64(got))
+		}
+	})
+
+	t.Run("null_and_absent", func(t *testing.T) {
+		t.Parallel()
+		for _, body := range []string{`{"timeout":null}`, `{}`} {
+			var o opencode.ConfigProviderOptions
+			if err := json.Unmarshal([]byte(body), &o); err != nil {
+				t.Fatalf("%s: json.Unmarshal: %v", body, err)
+			}
+			if o.Timeout != nil {
+				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout)
+			}
+			if o.HeaderTimeout != nil {
+				t.Errorf("%s: HeaderTimeout = %#v, want nil", body, o.HeaderTimeout)
+			}
+		}
+	})
+
+	t.Run("unexpected_shapes_degrade_to_nil", func(t *testing.T) {
+		t.Parallel()
+		for _, body := range []string{`{"timeout":"weird"}`, `{"timeout":[1]}`, `{"timeout":{"a":1}}`} {
+			var o opencode.ConfigProviderOptions
+			if err := json.Unmarshal([]byte(body), &o); err != nil {
+				t.Fatalf("%s: must not fail the whole decode: %v", body, err)
+			}
+			if o.Timeout != nil {
+				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout)
+			}
+		}
+	})
+
+	t.Run("param_marshal", func(t *testing.T) {
+		t.Parallel()
+		cases := []struct {
+			param    opencode.ConfigProviderOptionsParam
+			wantJSON string
+		}{
+			{opencode.ConfigProviderOptionsParam{}, `{}`},
+			{opencode.ConfigProviderOptionsParam{
+				Timeout: opencode.F[opencode.ConfigProviderOptionsTimeoutUnion](opencode.UnionInt(600000)),
+			}, `{"timeout":600000}`},
+			{opencode.ConfigProviderOptionsParam{
+				HeaderTimeout: opencode.F[opencode.ConfigProviderOptionsTimeoutUnion](opencode.UnionBool(false)),
+			}, `{"headerTimeout":false}`},
+		}
+		for _, tc := range cases {
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			if string(got) != tc.wantJSON {
+				t.Errorf("got %s, want %s", got, tc.wantJSON)
+			}
+		}
+	})
+
+	t.Run("response_value_reusable_as_request", func(t *testing.T) {
+		t.Parallel()
+		var src opencode.ConfigProviderOptions
+		if err := json.Unmarshal([]byte(`{"timeout":5000,"headerTimeout":false}`), &src); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		got, err := json.Marshal(opencode.ConfigProviderOptionsParam{
+			Timeout:       opencode.F(src.Timeout),
+			HeaderTimeout: opencode.F(src.HeaderTimeout),
+		})
+		if err != nil {
+			t.Fatalf("json.Marshal: %v", err)
+		}
+		const want = `{"headerTimeout":false,"timeout":5000}`
+		if string(got) != want {
+			t.Errorf("got %s, want %s", got, want)
+		}
+	})
+}
+
+// TestMcpRemoteConfigOAuthUnion verifies the OpenAPI
+// `McpRemoteConfig.oauth` anyOf:
+//
+//	anyOf: [ {$ref: McpOAuthConfig}, {type: boolean, enum: [false]} ]
+//
+// McpRemoteConfig is itself a registered variant of ConfigMcpUnion, so its
+// UnmarshalJSON is bypassed by apijson (internal/apijson/decoder.go:145-148).
+// The field must therefore be statically typed as the union for the registry
+// lookup to hit.
+//
+// Run with: go test -run TestMcpRemoteConfigOAuthUnion -v ./...
+func TestMcpRemoteConfigOAuthUnion(t *testing.T) {
+	t.Parallel()
+
+	t.Run("object_variant", func(t *testing.T) {
+		t.Parallel()
+		var v opencode.McpRemoteConfig
+		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":{"clientId":"cid","callbackPort":4096}}`), &v); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		c, ok := v.OAuth.(opencode.McpOAuthConfig)
+		if !ok {
+			t.Fatalf("OAuth runtime type = %T, want opencode.McpOAuthConfig", v.OAuth)
+		}
+		if c.ClientID != "cid" {
+			t.Errorf("ClientID = %q, want cid", c.ClientID)
+		}
+		if c.CallbackPort != 4096 {
+			t.Errorf("CallbackPort = %d, want 4096", c.CallbackPort)
+		}
+	})
+
+	t.Run("false_variant", func(t *testing.T) {
+		t.Parallel()
+		var v opencode.McpRemoteConfig
+		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":false}`), &v); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		b, ok := v.OAuth.(opencode.UnionBool)
+		if !ok {
+			t.Fatalf("OAuth runtime type = %T, want shared.UnionBool", v.OAuth)
+		}
+		if bool(b) {
+			t.Error("OAuth = true, want false")
+		}
+	})
+
+	t.Run("null_and_absent", func(t *testing.T) {
+		t.Parallel()
+		for _, body := range []string{`{"type":"remote","url":"u","oauth":null}`, `{"type":"remote","url":"u"}`} {
+			var v opencode.McpRemoteConfig
+			if err := json.Unmarshal([]byte(body), &v); err != nil {
+				t.Fatalf("%s: json.Unmarshal: %v", body, err)
+			}
+			if v.OAuth != nil {
+				t.Errorf("%s: OAuth = %#v, want nil", body, v.OAuth)
+			}
+		}
+	})
+
+	// ConfigMcp is the union carrier for Config.mcp values; apijson.Port must
+	// carry the typed OAuth value through to the carrier's any field.
+	t.Run("through_ConfigMcp_carrier", func(t *testing.T) {
+		t.Parallel()
+		var cm opencode.ConfigMcp
+		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":{"clientId":"c"}}`), &cm); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if _, ok := cm.OAuth.(opencode.McpOAuthConfig); !ok {
+			t.Errorf("ConfigMcp.OAuth runtime type = %T, want opencode.McpOAuthConfig", cm.OAuth)
+		}
+		rc, ok := cm.AsUnion().(opencode.McpRemoteConfig)
+		if !ok {
+			t.Fatalf("AsUnion() = %T, want opencode.McpRemoteConfig", cm.AsUnion())
+		}
+		if _, ok := rc.OAuth.(opencode.McpOAuthConfig); !ok {
+			t.Errorf("McpRemoteConfig.OAuth runtime type = %T", rc.OAuth)
+		}
+	})
+}
+
+func sortedTestKeys[T any](m map[string]T) []string {
+	ks := make([]string, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	return ks
 }
 
 // Run with: go test -run TestConfigProviderModelParamInterleavedMarshal -v ./...

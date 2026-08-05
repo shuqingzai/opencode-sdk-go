@@ -407,6 +407,8 @@ type mcpOAuthConfigJSON struct {
 	ExtraFields  map[string]apijson.Field
 }
 
+func (r McpOAuthConfig) ImplementsMcpOAuthConfigUnion() {}
+
 func (r *McpOAuthConfig) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }

@@ -352,3 +352,108 @@ func TestEventVariantIDFieldsExist(t *testing.T) {
 		}
 	}
 }
+
+// TestSSEPropertiesTypedFields verifies the four SSE `properties` sub-fields
+// that were previously `any` with a "runtime type of" comment but decoded to
+// map[string]any (apijson cannot resolve registered unions through `any`).
+//
+// OpenAPI declares these as single `$ref`s (not anyOf), so the standard fix is
+// to declare the field with the concrete type — no union routing needed.
+//
+// Run with: go test -run TestSSEPropertiesTypedFields -v ./...
+func TestSSEPropertiesTypedFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("permission_asked_tool", func(t *testing.T) {
+		t.Parallel()
+		var e EventListResponse
+		if err := json.Unmarshal([]byte(`{"type":"permission.asked","properties":{"id":"i","sessionID":"s","messageID":"m","callID":"c","title":"t","always":[],"patterns":[],"permission":"ask","tool":{"messageID":"mm","callID":"cc"}}}`), &e); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		p, ok := e.Properties.(EventListResponseEventPermissionAskedProperties)
+		if !ok {
+			t.Fatalf("Properties = %T, want EventListResponseEventPermissionAskedProperties", e.Properties)
+		}
+		if p.Tool == nil {
+			t.Fatalf("Tool = nil, want non-nil")
+		}
+		if p.Tool.MessageID != "mm" {
+			t.Errorf("Tool.MessageID = %q, want mm", p.Tool.MessageID)
+		}
+		if p.Tool.CallID != "cc" {
+			t.Errorf("Tool.CallID = %q, want cc", p.Tool.CallID)
+		}
+	})
+
+	t.Run("question_asked_tool", func(t *testing.T) {
+		t.Parallel()
+		var e EventListResponse
+		if err := json.Unmarshal([]byte(`{"type":"question.asked","properties":{"id":"i","sessionID":"s","questions":[],"tool":{"messageID":"mm","callID":"cc"}}}`), &e); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		p, ok := e.Properties.(EventListResponseEventQuestionAskedProperties)
+		if !ok {
+			t.Fatalf("Properties = %T, want EventListResponseEventQuestionAskedProperties", e.Properties)
+		}
+		if p.Tool == nil {
+			t.Fatalf("Tool = nil, want non-nil")
+		}
+		if p.Tool.MessageID != "mm" || p.Tool.CallID != "cc" {
+			t.Errorf("Tool = %#v, want MessageID=mm CallID=cc", p.Tool)
+		}
+	})
+
+	t.Run("permission_v2_asked_source", func(t *testing.T) {
+		t.Parallel()
+		var g GlobalEvent
+		if err := json.Unmarshal([]byte(`{"type":"permission.v2.asked","payload":{"type":"permission.v2.asked","properties":{"id":"i","sessionID":"s","action":"open","resources":["/a"],"source":{"type":"tool","messageID":"m","callID":"c"}}}}`), &g); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		p, ok := g.Payload.(EventListResponseEventPermissionV2Asked)
+		if !ok {
+			t.Fatalf("Payload = %T, want EventListResponseEventPermissionV2Asked", g.Payload)
+		}
+		if p.Properties.Source == nil {
+			t.Fatalf("Source = nil, want non-nil")
+		}
+		if p.Properties.Source.MessageID != "m" {
+			t.Errorf("Source.MessageID = %q, want m", p.Properties.Source.MessageID)
+		}
+		if p.Properties.Source.CallID != "c" {
+			t.Errorf("Source.CallID = %q, want c", p.Properties.Source.CallID)
+		}
+	})
+
+	t.Run("question_v2_asked_tool", func(t *testing.T) {
+		t.Parallel()
+		var g GlobalEvent
+		if err := json.Unmarshal([]byte(`{"type":"question.v2.asked","payload":{"type":"question.v2.asked","properties":{"id":"i","sessionID":"s","questions":[],"tool":{"messageID":"m","callID":"c"}}}}`), &g); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		p, ok := g.Payload.(EventListResponseEventQuestionV2Asked)
+		if !ok {
+			t.Fatalf("Payload = %T, want EventListResponseEventQuestionV2Asked", g.Payload)
+		}
+		if p.Properties.Tool == nil {
+			t.Fatalf("Tool = nil, want non-nil")
+		}
+		if p.Properties.Tool.MessageID != "m" || p.Properties.Tool.CallID != "c" {
+			t.Errorf("Tool = %#v, want MessageID=m CallID=c", p.Properties.Tool)
+		}
+	})
+
+	t.Run("optional_field_absent", func(t *testing.T) {
+		t.Parallel()
+		var e EventListResponse
+		if err := json.Unmarshal([]byte(`{"type":"permission.asked","properties":{"id":"i","sessionID":"s","messageID":"m","callID":"c","title":"t","always":[],"patterns":[],"permission":"ask"}}`), &e); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		p, ok := e.Properties.(EventListResponseEventPermissionAskedProperties)
+		if !ok {
+			t.Fatalf("Properties = %T", e.Properties)
+		}
+		if p.Tool != nil {
+			t.Errorf("Tool = %#v, want nil (absent)", p.Tool)
+		}
+	})
+}

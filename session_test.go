@@ -647,3 +647,242 @@ func TestSessionListParamsScopeEnum(t *testing.T) {
 		t.Error("unknown scope.IsKnown() should return false")
 	}
 }
+
+// TestUserMessageFormatUnionDecoding verifies that [UserMessage.Format] is
+// correctly decoded into the typed Response union variants
+// ([OutputFormatText] and [OutputFormatJsonSchema]) rather than
+// falling back to map[string]any.
+//
+// Root cause fixed: apijson routes by the static type of the field; an `any`
+// field always resolves to interface{} → generic map. The custom UnmarshalJSON
+// on UserMessage now explicitly decodes the "format" key through the registered
+// OutputFormatUnion, so the typed assertion succeeds.
+//
+// Run with: go test -run TestUserMessageFormatUnionDecoding -v ./...
+func TestUserMessageFormatUnionDecoding(t *testing.T) {
+	t.Parallel()
+
+	baseMsg := func(formatJSON string) string {
+		return `{
+			"id": "msg_001",
+			"sessionID": "ses_001",
+			"role": "user",
+			"time": {"created": 1234567890},
+			"agent": "test",
+			"model": {"providerID": "openai", "modelID": "gpt-4"},
+			"format": ` + formatJSON + `
+		}`
+	}
+
+	t.Run("text variant decodes to OutputFormatText", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.UserMessage
+		if err := json.Unmarshal([]byte(baseMsg(`{"type":"text"}`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		// runtime type must be OutputFormatText
+		ft, ok := msg.Format.(opencode.OutputFormatText)
+		if !ok {
+			t.Fatalf("Format: got %T, want opencode.OutputFormatText", msg.Format)
+		}
+		if ft.Type != "text" {
+			t.Errorf("Type: got %q, want %q", ft.Type, "text")
+		}
+		// AsFormat() must return the same typed value
+		af, ok2 := msg.AsFormat().(opencode.OutputFormatText)
+		if !ok2 {
+			t.Fatalf("AsFormat(): got %T, want opencode.OutputFormatText", msg.AsFormat())
+		}
+		if af.Type != "text" {
+			t.Errorf("AsFormat().Type: got %q, want %q", af.Type, "text")
+		}
+	})
+
+	t.Run("json_schema variant decodes to OutputFormatJsonSchema", func(t *testing.T) {
+		t.Parallel()
+		payload := `{"type":"json_schema","schema":{"type":"object","properties":{"name":{"type":"string"}}},"retryCount":3}`
+		var msg opencode.UserMessage
+		if err := json.Unmarshal([]byte(baseMsg(payload)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		fj, ok := msg.Format.(opencode.OutputFormatJsonSchema)
+		if !ok {
+			t.Fatalf("Format: got %T, want opencode.OutputFormatJsonSchema", msg.Format)
+		}
+		if fj.Type != "json_schema" {
+			t.Errorf("Type: got %q, want %q", fj.Type, "json_schema")
+		}
+		if fj.RetryCount != 3 {
+			t.Errorf("RetryCount: got %d, want 3", fj.RetryCount)
+		}
+		if _, ok := fj.Schema["type"]; !ok {
+			t.Error("Schema should contain 'type' key")
+		}
+		// AsFormat() must return the same typed value
+		if _, ok2 := msg.AsFormat().(opencode.OutputFormatJsonSchema); !ok2 {
+			t.Fatalf("AsFormat(): got %T, want opencode.OutputFormatJsonSchema", msg.AsFormat())
+		}
+	})
+
+	t.Run("null format field leaves Format nil", func(t *testing.T) {
+		t.Parallel()
+		raw := `{
+			"id": "msg_002",
+			"sessionID": "ses_001",
+			"role": "user",
+			"time": {"created": 1234567890},
+			"agent": "test",
+			"model": {"providerID": "openai", "modelID": "gpt-4"},
+			"format": null
+		}`
+		var msg opencode.UserMessage
+		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if msg.Format != nil {
+			t.Errorf("Format: got %T, want nil", msg.Format)
+		}
+		if msg.AsFormat() != nil {
+			t.Errorf("AsFormat(): got %T, want nil", msg.AsFormat())
+		}
+	})
+
+	t.Run("missing format field leaves Format nil", func(t *testing.T) {
+		t.Parallel()
+		raw := `{
+			"id": "msg_003",
+			"sessionID": "ses_001",
+			"role": "user",
+			"time": {"created": 1234567890},
+			"agent": "test",
+			"model": {"providerID": "openai", "modelID": "gpt-4"}
+		}`
+		var msg opencode.UserMessage
+		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if msg.Format != nil {
+			t.Errorf("Format: got %T, want nil", msg.Format)
+		}
+	})
+
+	t.Run("other required fields unaffected by custom UnmarshalJSON", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.UserMessage
+		if err := json.Unmarshal([]byte(baseMsg(`{"type":"text"}`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if msg.ID != "msg_001" {
+			t.Errorf("ID: got %q, want %q", msg.ID, "msg_001")
+		}
+		if msg.Agent != "test" {
+			t.Errorf("Agent: got %q, want %q", msg.Agent, "test")
+		}
+		if msg.Model.ProviderID != "openai" {
+			t.Errorf("Model.ProviderID: got %q, want %q", msg.Model.ProviderID, "openai")
+		}
+		if msg.Model.ModelID != "gpt-4" {
+			t.Errorf("Model.ModelID: got %q, want %q", msg.Model.ModelID, "gpt-4")
+		}
+	})
+}
+
+// TestAssistantMessageStructuredIsUnknown verifies that [AssistantMessage.Structured]
+// accepts arbitrary JSON values, consistent with the OpenAPI schema `{}` (empty =
+// unknown). The field must NOT be typed as a fixed union — it may hold any shape.
+//
+// Run with: go test -run TestAssistantMessageStructuredIsUnknown -v ./...
+func TestAssistantMessageStructuredIsUnknown(t *testing.T) {
+	t.Parallel()
+
+	baseMsg := func(structuredJSON string) string {
+		return `{
+			"id": "msg_002",
+			"sessionID": "ses_001",
+			"role": "assistant",
+			"time": {"created": 1234567890},
+			"parentID": "msg_001",
+			"modelID": "gpt-4",
+			"providerID": "openai",
+			"mode": "auto",
+			"agent": "test",
+			"path": {"cwd": "/work", "root": "/work"},
+			"cost": 0.01,
+			"tokens": {"input": 10, "output": 20, "reasoning": 0, "cache": {"read": 0, "write": 0}},
+			"structured": ` + structuredJSON + `
+		}`
+	}
+
+	t.Run("object value decodes to map[string]any", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.AssistantMessage
+		if err := json.Unmarshal([]byte(baseMsg(`{"key":"value","num":42}`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		m, ok := msg.Structured.(map[string]any)
+		if !ok {
+			t.Fatalf("Structured: got %T, want map[string]any", msg.Structured)
+		}
+		if m["key"] != "value" {
+			t.Errorf("Structured[key]: got %v, want %q", m["key"], "value")
+		}
+	})
+
+	t.Run("string value decodes to string", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.AssistantMessage
+		if err := json.Unmarshal([]byte(baseMsg(`"hello"`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if s, ok := msg.Structured.(string); !ok || s != "hello" {
+			t.Errorf("Structured: got %T(%v), want string(hello)", msg.Structured, msg.Structured)
+		}
+	})
+
+	t.Run("array value decodes to []any", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.AssistantMessage
+		if err := json.Unmarshal([]byte(baseMsg(`[1,2,3]`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if _, ok := msg.Structured.([]any); !ok {
+			t.Fatalf("Structured: got %T, want []any", msg.Structured)
+		}
+	})
+
+	t.Run("null value leaves Structured nil", func(t *testing.T) {
+		t.Parallel()
+		var msg opencode.AssistantMessage
+		if err := json.Unmarshal([]byte(baseMsg(`null`)), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if msg.Structured != nil {
+			t.Errorf("Structured: got %T, want nil", msg.Structured)
+		}
+	})
+
+	t.Run("missing structured field leaves Structured nil", func(t *testing.T) {
+		t.Parallel()
+		raw := `{
+			"id": "msg_002",
+			"sessionID": "ses_001",
+			"role": "assistant",
+			"time": {"created": 1234567890},
+			"parentID": "msg_001",
+			"modelID": "gpt-4",
+			"providerID": "openai",
+			"mode": "auto",
+			"agent": "test",
+			"path": {"cwd": "/work", "root": "/work"},
+			"cost": 0.01,
+			"tokens": {"input": 10, "output": 20, "reasoning": 0, "cache": {"read": 0, "write": 0}}
+		}`
+		var msg opencode.AssistantMessage
+		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if msg.Structured != nil {
+			t.Errorf("Structured: got %T, want nil", msg.Structured)
+		}
+	})
+}

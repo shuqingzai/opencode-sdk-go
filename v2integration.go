@@ -315,9 +315,8 @@ type IntegrationOAuthMethod struct {
 	ID    string                     `json:"id,required"`
 	Type  IntegrationOAuthMethodType `json:"type,required"`
 	Label string                     `json:"label,required"`
-	// This field can have the runtime type of [[]IntegrationTextPrompt],
-	// [[]IntegrationSelectPrompt].
-	Prompts any                        `json:"prompts"`
+	// Each element can be [IntegrationTextPrompt] or [IntegrationSelectPrompt].
+	Prompts []IntegrationPromptUnion   `json:"prompts"`
 	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 

@@ -11,63 +11,60 @@ import (
 	"testing"
 
 	"github.com/sst/opencode-sdk-go"
-	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/testutil"
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-func TestEventOptionalObjectFieldsUseInterfaces(t *testing.T) {
+func TestEventOptionalObjectFieldsUseConcreteTypes(t *testing.T) {
+	// OpenAPI declares these SSE properties fields as single objects (not anyOf):
+	//
+	//	PermissionAsked.data.tool        -> inline {messageID, callID}
+	//	QuestionAsked.data.tool          -> $ref QuestionTool
+	//	PermissionV2Asked.data.source    -> $ref PermissionV2Source
+	//	QuestionV2Asked.data.tool        -> $ref QuestionV2Tool
+	//
+	// Following the OpenAPI fact, the Go fields are declared with the concrete
+	// struct type so apijson decodes them directly (no `any`, no routing).
 	tests := []struct {
 		name  string
 		typ   reflect.Type
 		field string
+		want  reflect.Type
 	}{
 		{
 			name:  "permission asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionAskedProperties](),
 			field: "Tool",
+			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventPermissionAskedPropertiesTool]()),
 		},
 		{
 			name:  "question asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionAskedProperties](),
 			field: "Tool",
+			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventQuestionAskedPropertiesTool]()),
 		},
 		{
 			name:  "permission v2 asked source",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionV2AskedProperties](),
 			field: "Source",
+			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventPermissionV2AskedPropertiesSource]()),
 		},
 		{
 			name:  "question v2 asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionV2AskedProperties](),
 			field: "Tool",
+			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventQuestionV2AskedPropertiesTool]()),
 		},
 	}
 
-	interfaceType := reflect.TypeFor[any]()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			field, ok := tt.typ.FieldByName(tt.field)
 			if !ok {
 				t.Fatalf("missing %s field", tt.field)
 			}
-			if field.Type != interfaceType {
-				t.Fatalf("%s field type = %s, want any", tt.field, field.Type)
-			}
-
-			jsonField, ok := tt.typ.FieldByName("JSON")
-			if !ok {
-				t.Fatal("missing JSON metadata field")
-			}
-			// The metadata must still include the field so the apijson
-			// framework can track it; the field is just typed as
-			// any at runtime instead of a concrete pointer.
-			jsonFieldEntry, ok := jsonField.Type.FieldByName(tt.field)
-			if !ok {
-				t.Fatalf("JSON metadata must contain %s field", tt.field)
-			}
-			if jsonFieldEntry.Type != reflect.TypeFor[apijson.Field]() {
-				t.Fatalf("JSON metadata field %s type = %s, want apijson.Field", tt.field, jsonFieldEntry.Type)
+			if field.Type != tt.want {
+				t.Fatalf("%s field type = %s, want %s", tt.field, field.Type, tt.want)
 			}
 		})
 	}

@@ -552,20 +552,22 @@ func (r AgentPartInputSourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Satisfied by [OutputFormatText], [OutputFormatJsonSchema].
-type OutputFormatUnion interface {
-	implementsOutputFormatUnion()
+// OutputFormatUnionParam is the request-side counterpart of [OutputFormatUnion].
+//
+// Satisfied by [OutputFormatTextParam], [OutputFormatJsonSchemaParam].
+type OutputFormatUnionParam interface {
+	implementsOutputFormatUnionParam()
 }
 
-type OutputFormatText struct {
+type OutputFormatTextParam struct {
 	Type param.Field[OutputFormatTextType] `json:"type,required"`
 }
 
-func (r OutputFormatText) MarshalJSON() (data []byte, err error) {
+func (r OutputFormatTextParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r OutputFormatText) implementsOutputFormatUnion() {}
+func (r OutputFormatTextParam) implementsOutputFormatUnionParam() {}
 
 type OutputFormatTextType string
 
@@ -581,17 +583,17 @@ func (r OutputFormatTextType) IsKnown() bool {
 	return false
 }
 
-type OutputFormatJsonSchema struct {
+type OutputFormatJsonSchemaParam struct {
 	Type       param.Field[OutputFormatJsonSchemaType] `json:"type,required"`
 	Schema     param.Field[any]                        `json:"schema,required"`
 	RetryCount param.Field[int64]                      `json:"retryCount"`
 }
 
-func (r OutputFormatJsonSchema) MarshalJSON() (data []byte, err error) {
+func (r OutputFormatJsonSchemaParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r OutputFormatJsonSchema) implementsOutputFormatUnion() {}
+func (r OutputFormatJsonSchemaParam) implementsOutputFormatUnionParam() {}
 
 type OutputFormatJsonSchemaType string
 
@@ -606,6 +608,83 @@ func (r OutputFormatJsonSchemaType) IsKnown() bool {
 	}
 	return false
 }
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[OutputFormatUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[OutputFormatTextParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[OutputFormatJsonSchemaParam](),
+		},
+	)
+}
+
+// OutputFormatUnion is the OpenAPI `OutputFormat` anyOf union, used by
+// [UserMessage.Format].
+//
+// Satisfied by [OutputFormatText], [OutputFormatJsonSchema].
+type OutputFormatUnion interface {
+	implementsOutputFormatUnion()
+}
+
+// OutputFormatText is the Response-side representation of the OpenAPI
+// OutputFormatTextParam schema (`type: "text"`).
+type OutputFormatText struct {
+	Type OutputFormatTextType `json:"type,required"`
+	JSON outputFormatTextJSON `json:"-"`
+}
+
+// outputFormatTextJSON contains the JSON metadata for the struct
+// [OutputFormatText]
+type outputFormatTextJSON struct {
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OutputFormatText) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r outputFormatTextJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r OutputFormatText) implementsOutputFormatUnion() {}
+
+// OutputFormatJsonSchema is the Response-side representation of the
+// OpenAPI OutputFormatJsonSchemaParam schema (`type: "json_schema"`).
+type OutputFormatJsonSchema struct {
+	Schema     map[string]any             `json:"schema,required"`
+	Type       OutputFormatJsonSchemaType `json:"type,required"`
+	RetryCount int64                      `json:"retryCount"`
+	JSON       outputFormatJsonSchemaJSON `json:"-"`
+}
+
+// outputFormatJsonSchemaJSON contains the JSON metadata for the struct
+// [OutputFormatJsonSchema]
+type outputFormatJsonSchemaJSON struct {
+	Schema      apijson.Field
+	Type        apijson.Field
+	RetryCount  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OutputFormatJsonSchema) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r outputFormatJsonSchemaJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r OutputFormatJsonSchema) implementsOutputFormatUnion() {}
 
 func init() {
 	apijson.RegisterUnion(
@@ -635,7 +714,9 @@ type AssistantMessage struct {
 	SessionID  string                 `json:"sessionID,required"`
 	Time       AssistantMessageTime   `json:"time,required"`
 	Tokens     AssistantMessageTokens `json:"tokens,required"`
-	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
 	Structured any                   `json:"structured,omitzero"`
 	Variant    string                `json:"variant,omitzero"`
 	Finish     string                `json:"finish,omitzero"`
@@ -3017,12 +3098,16 @@ type UserMessage struct {
 	Role      UserMessageRole  `json:"role,required"`
 	SessionID string           `json:"sessionID,required"`
 	Time      UserMessageTime  `json:"time,required"`
-	// This field can have the runtime type of [OutputFormatText], [OutputFormatJsonSchema].
+	// This field can have the runtime type of [OutputFormatText],
+	// [OutputFormatJsonSchema].
 	Format  any                `json:"format,omitzero"`
 	System  string             `json:"system,omitzero"`
 	Tools   map[string]bool    `json:"tools,omitzero"`
 	Summary UserMessageSummary `json:"summary"`
 	JSON    userMessageJSON    `json:"-"`
+	// formatUnion holds the typed payload after [UnmarshalJSON] routes the raw
+	// data through the registered [OutputFormatUnion] variants.
+	formatUnion OutputFormatUnion
 }
 
 // userMessageJSON contains the JSON metadata for the struct [UserMessage]
@@ -3042,12 +3127,29 @@ type userMessageJSON struct {
 }
 
 func (r *UserMessage) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = UserMessage{}
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
+		return err
+	}
+	formatData := gjson.GetBytes(data, "format").Raw
+	if formatData != "" && formatData != "null" {
+		if err = apijson.UnmarshalRoot([]byte(formatData), &r.formatUnion); err != nil {
+			return err
+		}
+		r.Format = r.formatUnion
+	}
+	return nil
 }
 
 func (r userMessageJSON) RawJSON() string {
 	return r.raw
 }
+
+// AsFormat returns the format field as a typed union.
+//
+// Possible runtime types of the union are [OutputFormatText],
+// [OutputFormatJsonSchema].
+func (r *UserMessage) AsFormat() OutputFormatUnion { return r.formatUnion }
 
 func (r UserMessage) implementsMessage() {}
 

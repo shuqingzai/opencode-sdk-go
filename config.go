@@ -107,8 +107,8 @@ type Config struct {
 	Model string `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
 	// object with per-action permission rule overrides.
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigPermission].
+	// This field can have the runtime type of [PermissionActionConfig],
+	// [PermissionConfigObject].
 	Permission any `json:"permission"`
 	// This field can have the runtime type of [string] or [][2]any{string, object}.
 	Plugin []any `json:"plugin"`
@@ -150,8 +150,8 @@ type Config struct {
 	SubagentDepth int64      `json:"subagent_depth"`
 	JSON          configJSON `json:"-"`
 	// permissionUnion holds the typed permission payload after [UnmarshalJSON]
-	// routes the raw data through [ConfigPermissionUnion] registered variants.
-	permissionUnion ConfigPermissionUnion
+	// routes the raw data through [PermissionConfigUnion] registered variants.
+	permissionUnion PermissionConfigUnion
 }
 
 // configJSON contains the JSON metadata for the struct [Config]
@@ -202,7 +202,7 @@ func (r *Config) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
+	if permissionData != "" && permissionData != "null" {
 		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
 			return err
 		}
@@ -217,57 +217,159 @@ func (r configJSON) RawJSON() string {
 
 // AsPermission returns the permission field as a typed union.
 //
-// Possible runtime types of the union are [string] (PermissionActionConfig:
-// "ask"|"allow"|"deny") or [ConfigPermission].
-func (r *Config) AsPermission() ConfigPermissionUnion {
+// Possible runtime types of the union are [PermissionActionConfig] (a short
+// string "ask"|"allow"|"deny") or [PermissionConfigObject].
+func (r *Config) AsPermission() PermissionConfigUnion {
 	return r.permissionUnion
 }
 
-// ConfigPermissionUnion represents the OpenAPI PermissionConfig anyOf union.
-//
-// Satisfied by [ConfigPermission], [ConfigPermissionAction] (a short string
-// permission: "ask"|"allow"|"deny").
-type ConfigPermissionUnion interface {
-	implementsConfigPermissionUnion()
-}
-
-// ConfigPermissionAction is a short string permission, e.g. "ask" / "allow" /
-// "deny", corresponding to OpenAPI [PermissionActionConfig].
-type ConfigPermissionAction string
+// PermissionActionConfig is the OpenAPI `PermissionActionConfig` schema: a short
+// string permission, one of "ask" / "allow" / "deny".
+type PermissionActionConfig string
 
 const (
-	ConfigPermissionActionAsk   ConfigPermissionAction = "ask"
-	ConfigPermissionActionAllow ConfigPermissionAction = "allow"
-	ConfigPermissionActionDeny  ConfigPermissionAction = "deny"
+	PermissionActionConfigAsk   PermissionActionConfig = "ask"
+	PermissionActionConfigAllow PermissionActionConfig = "allow"
+	PermissionActionConfigDeny  PermissionActionConfig = "deny"
 )
 
-func (r ConfigPermissionAction) IsKnown() bool {
+func (r PermissionActionConfig) IsKnown() bool {
 	switch r {
-	case ConfigPermissionActionAsk, ConfigPermissionActionAllow, ConfigPermissionActionDeny:
+	case PermissionActionConfigAsk, PermissionActionConfigAllow, PermissionActionConfigDeny:
 		return true
 	}
 	return false
 }
 
-func (r *ConfigPermissionAction) UnmarshalJSON(data []byte) (err error) {
+func (r *PermissionActionConfig) UnmarshalJSON(data []byte) (err error) {
 	var raw string
 	if err = apijson.UnmarshalRoot(data, &raw); err != nil {
 		return err
 	}
-	*r = ConfigPermissionAction(raw)
+	*r = PermissionActionConfig(raw)
 	return nil
 }
 
-func (r ConfigPermissionAction) implementsConfigPermissionUnion()                {}
-func (r ConfigPermissionAction) implementsConfigAgentBuildPermissionUnion()      {}
-func (r ConfigPermissionAction) implementsConfigAgentGeneralPermissionUnion()    {}
-func (r ConfigPermissionAction) implementsConfigAgentPlanPermissionUnion()       {}
-func (r ConfigPermissionAction) implementsConfigAgentExplorePermissionUnion()    {}
-func (r ConfigPermissionAction) implementsConfigAgentTitlePermissionUnion()      {}
-func (r ConfigPermissionAction) implementsConfigAgentSummaryPermissionUnion()    {}
-func (r ConfigPermissionAction) implementsConfigAgentCompactionPermissionUnion() {}
-func (r ConfigPermissionAction) implementsConfigModeBuildPermissionUnion()       {}
-func (r ConfigPermissionAction) implementsConfigModePlanPermissionUnion()        {}
+func (r PermissionActionConfig) implementsPermissionConfigUnion()          {}
+func (r PermissionActionConfig) implementsPermissionRuleConfigUnion()      {}
+func (r PermissionActionConfig) implementsPermissionConfigUnionParam()     {}
+func (r PermissionActionConfig) implementsPermissionRuleConfigUnionParam() {}
+
+// PermissionObjectConfig is the OpenAPI `PermissionObjectConfig` schema: a map of
+// pattern to [PermissionActionConfig].
+type PermissionObjectConfig map[string]PermissionActionConfig
+
+func (r PermissionObjectConfig) implementsPermissionRuleConfigUnion()      {}
+func (r PermissionObjectConfig) implementsPermissionRuleConfigUnionParam() {}
+
+// PermissionRuleConfigUnion is the OpenAPI `PermissionRuleConfig` anyOf union,
+// used by the per-tool rule properties of [PermissionConfigObject].
+//
+// Union satisfied by [PermissionActionConfig] (a short string
+// "ask"|"allow"|"deny") or [PermissionObjectConfig] (a map of pattern to action).
+type PermissionRuleConfigUnion interface {
+	implementsPermissionRuleConfigUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[PermissionRuleConfigUnion](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[PermissionActionConfig](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[PermissionObjectConfig](),
+		},
+	)
+}
+
+// PermissionConfigUnion is the OpenAPI `PermissionConfig` anyOf union.
+//
+// Satisfied by [PermissionActionConfig] (a short string "ask"|"allow"|"deny") or
+// [PermissionConfigObject] (per-tool permission rule overrides).
+type PermissionConfigUnion interface {
+	implementsPermissionConfigUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[PermissionConfigUnion](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[PermissionActionConfig](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[PermissionConfigObject](),
+		},
+	)
+}
+
+// PermissionConfigObject is the object variant of the OpenAPI `PermissionConfig`
+// anyOf union: per-tool permission rule overrides.
+//
+// The ten tools that accept a matchable argument (paths, commands, skill names)
+// are typed as [PermissionRuleConfigUnion] and resolve at decode time to either
+// [PermissionActionConfig] or [PermissionObjectConfig]. The remaining five tools
+// take no argument and are therefore plain [PermissionActionConfig], exactly as
+// the OpenAPI `PermissionConfig.anyOf[1]` schema declares.
+type PermissionConfigObject struct {
+	Read              PermissionRuleConfigUnion `json:"read"`
+	Edit              PermissionRuleConfigUnion `json:"edit"`
+	Glob              PermissionRuleConfigUnion `json:"glob"`
+	Grep              PermissionRuleConfigUnion `json:"grep"`
+	List              PermissionRuleConfigUnion `json:"list"`
+	Bash              PermissionRuleConfigUnion `json:"bash"`
+	Task              PermissionRuleConfigUnion `json:"task"`
+	ExternalDirectory PermissionRuleConfigUnion `json:"external_directory"`
+	Lsp               PermissionRuleConfigUnion `json:"lsp"`
+	Skill             PermissionRuleConfigUnion `json:"skill"`
+	Todowrite         PermissionActionConfig    `json:"todowrite"`
+	Question          PermissionActionConfig    `json:"question"`
+	Webfetch          PermissionActionConfig    `json:"webfetch"`
+	Websearch         PermissionActionConfig    `json:"websearch"`
+	DoomLoop          PermissionActionConfig    `json:"doom_loop"`
+	// Additional per-tool rules beyond the properties listed above, per the OpenAPI
+	// `PermissionConfig.additionalProperties` -> `PermissionRuleConfig` mapping.
+	ExtraFields map[string]PermissionRuleConfigUnion `json:"-,extras"`
+	JSON        permissionConfigObjectJSON           `json:"-"`
+}
+
+// permissionConfigObjectJSON contains the JSON metadata for the struct
+// [PermissionConfigObject]
+type permissionConfigObjectJSON struct {
+	Read              apijson.Field
+	Edit              apijson.Field
+	Glob              apijson.Field
+	Grep              apijson.Field
+	List              apijson.Field
+	Bash              apijson.Field
+	Task              apijson.Field
+	ExternalDirectory apijson.Field
+	Lsp               apijson.Field
+	Skill             apijson.Field
+	Todowrite         apijson.Field
+	Question          apijson.Field
+	Webfetch          apijson.Field
+	Websearch         apijson.Field
+	DoomLoop          apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *PermissionConfigObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r permissionConfigObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r PermissionConfigObject) implementsPermissionConfigUnion() {}
 
 type ConfigLogLevel string
 
@@ -380,16 +482,112 @@ func (r enterpriseConfigJSON) RawJSON() string {
 	return r.raw
 }
 
+// AgentConfig is the OpenAPI `AgentConfig` schema. It is shared by every agent
+// slot of [ConfigAgent] and [ConfigMode], and by their user-defined entries.
+type AgentConfig struct {
+	Model       string          `json:"model"`
+	Variant     string          `json:"variant"`
+	Temperature float64         `json:"temperature"`
+	TopP        float64         `json:"top_p"`
+	Prompt      string          `json:"prompt"`
+	Tools       map[string]bool `json:"tools"`
+	Disable     bool            `json:"disable"`
+	Description string          `json:"description"`
+	Mode        AgentConfigMode `json:"mode"`
+	Hidden      bool            `json:"hidden"`
+	Options     map[string]any  `json:"options"`
+	// Hex color code (e.g., #FF5733) or theme color (e.g., primary)
+	Color    string `json:"color"`
+	Steps    int64  `json:"steps"`
+	MaxSteps int64  `json:"maxSteps"`
+	// This field can have the runtime type of [PermissionActionConfig],
+	// [PermissionConfigObject].
+	Permission any `json:"permission"`
+	// Additional agent properties not listed above. The OpenAPI `AgentConfig`
+	// schema allows arbitrary extra properties.
+	ExtraFields map[string]any  `json:"-,extras"`
+	JSON        agentConfigJSON `json:"-"`
+	// permissionUnion holds the typed permission payload after UnmarshalJSON
+	// routes the raw data through the registered [PermissionConfigUnion] variants.
+	permissionUnion PermissionConfigUnion
+}
+
+// agentConfigJSON contains the JSON metadata for the struct [AgentConfig]
+type agentConfigJSON struct {
+	Model       apijson.Field
+	Variant     apijson.Field
+	Temperature apijson.Field
+	TopP        apijson.Field
+	Prompt      apijson.Field
+	Tools       apijson.Field
+	Disable     apijson.Field
+	Description apijson.Field
+	Mode        apijson.Field
+	Hidden      apijson.Field
+	Options     apijson.Field
+	Color       apijson.Field
+	Steps       apijson.Field
+	MaxSteps    apijson.Field
+	Permission  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AgentConfig) UnmarshalJSON(data []byte) (err error) {
+	*r = AgentConfig{}
+	if err = apijson.UnmarshalRoot(data, r); err != nil {
+		return err
+	}
+	permissionData := gjson.GetBytes(data, "permission").Raw
+	if permissionData != "" && permissionData != "null" {
+		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
+			return err
+		}
+		r.Permission = r.permissionUnion
+	}
+	return nil
+}
+
+func (r agentConfigJSON) RawJSON() string {
+	return r.raw
+}
+
+// AsPermission returns the permission field as a typed union.
+//
+// Possible runtime types of the union are [PermissionActionConfig] (a short
+// string "ask"|"allow"|"deny") or [PermissionConfigObject].
+func (r *AgentConfig) AsPermission() PermissionConfigUnion {
+	return r.permissionUnion
+}
+
+type AgentConfigMode string
+
+const (
+	AgentConfigModeSubagent AgentConfigMode = "subagent"
+	AgentConfigModePrimary  AgentConfigMode = "primary"
+	AgentConfigModeAll      AgentConfigMode = "all"
+)
+
+func (r AgentConfigMode) IsKnown() bool {
+	switch r {
+	case AgentConfigModeSubagent, AgentConfigModePrimary, AgentConfigModeAll:
+		return true
+	}
+	return false
+}
+
 // Agent configuration, see https://opencode.ai/docs/agent
 type ConfigAgent struct {
-	Build       ConfigAgentBuild       `json:"build"`
-	Compaction  ConfigAgentCompaction  `json:"compaction"`
-	Explore     ConfigAgentExplore     `json:"explore"`
-	General     ConfigAgentGeneral     `json:"general"`
-	Plan        ConfigAgentPlan        `json:"plan"`
-	Summary     ConfigAgentSummary     `json:"summary"`
-	Title       ConfigAgentTitle       `json:"title"`
-	ExtraFields map[string]ConfigAgent `json:"-,extras"`
+	Build      AgentConfig `json:"build"`
+	Compaction AgentConfig `json:"compaction"`
+	Explore    AgentConfig `json:"explore"`
+	General    AgentConfig `json:"general"`
+	Plan       AgentConfig `json:"plan"`
+	Summary    AgentConfig `json:"summary"`
+	Title      AgentConfig `json:"title"`
+	// User-defined agents keyed by agent name, per the OpenAPI
+	// `Config.agent.additionalProperties` -> `AgentConfig` mapping.
+	ExtraFields map[string]AgentConfig `json:"-,extras"`
 	JSON        configAgentJSON        `json:"-"`
 }
 
@@ -412,1905 +610,6 @@ func (r *ConfigAgent) UnmarshalJSON(data []byte) (err error) {
 
 func (r configAgentJSON) RawJSON() string {
 	return r.raw
-}
-
-type ConfigAgentBuild struct {
-	// Description of when to use the agent
-	Description string               `json:"description"`
-	Disable     bool                 `json:"disable"`
-	Mode        ConfigAgentBuildMode `json:"mode"`
-	Model       string               `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentBuildPermission].
-	Permission  any                  `json:"permission"`
-	Prompt      string               `json:"prompt"`
-	Temperature float64              `json:"temperature"`
-	Tools       map[string]bool      `json:"tools"`
-	TopP        float64              `json:"top_p"`
-	Variant     string               `json:"variant"`
-	Hidden      bool                 `json:"hidden"`
-	Options     map[string]any       `json:"options"`
-	Color       string               `json:"color"`
-	Steps       int64                `json:"steps"`
-	MaxSteps    int64                `json:"maxSteps"`
-	ExtraFields map[string]any       `json:"-,extras"`
-	JSON        configAgentBuildJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentBuildPermissionUnion registered variants.
-	permissionUnion ConfigAgentBuildPermissionUnion
-}
-
-// configAgentBuildJSON contains the JSON metadata for the struct
-// [ConfigAgentBuild]
-type configAgentBuildJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentBuild) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentBuild{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentBuildJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentBuildPermission].
-func (r *ConfigAgentBuild) AsPermission() ConfigAgentBuildPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentBuildPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentBuild.
-//
-// Satisfied by [ConfigAgentBuildPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentBuildPermissionUnion interface {
-	implementsConfigAgentBuildPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentBuildPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentBuildPermission](),
-		},
-	)
-}
-
-func (r ConfigAgentBuildPermission) implementsConfigAgentBuildPermissionUnion() {}
-
-type ConfigAgentBuildMode string
-
-const (
-	ConfigAgentBuildModeSubagent ConfigAgentBuildMode = "subagent"
-	ConfigAgentBuildModePrimary  ConfigAgentBuildMode = "primary"
-	ConfigAgentBuildModeAll      ConfigAgentBuildMode = "all"
-)
-
-func (r ConfigAgentBuildMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentBuildModeSubagent, ConfigAgentBuildModePrimary, ConfigAgentBuildModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentBuildPermission struct {
-	// This field can have the runtime type of [ConfigAgentBuildPermissionBashString], [ConfigAgentBuildPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                            `json:"skill"`
-	JSON  configAgentBuildPermissionJSON `json:"-"`
-}
-
-// configAgentBuildPermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentBuildPermission]
-type configAgentBuildPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentBuildPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentBuildPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentBuildPermissionBashString] or
-// [ConfigAgentBuildPermissionBashMap].
-type ConfigAgentBuildPermissionBashUnion interface {
-	implementsConfigAgentBuildPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentBuildPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentBuildPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentBuildPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentBuildPermissionBashString string
-
-const (
-	ConfigAgentBuildPermissionBashStringAsk   ConfigAgentBuildPermissionBashString = "ask"
-	ConfigAgentBuildPermissionBashStringAllow ConfigAgentBuildPermissionBashString = "allow"
-	ConfigAgentBuildPermissionBashStringDeny  ConfigAgentBuildPermissionBashString = "deny"
-)
-
-func (r ConfigAgentBuildPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentBuildPermissionBashStringAsk, ConfigAgentBuildPermissionBashStringAllow, ConfigAgentBuildPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentBuildPermissionBashString) implementsConfigAgentBuildPermissionBashUnion() {}
-
-type ConfigAgentBuildPermissionBashMap map[string]ConfigAgentBuildPermissionBashMapItem
-
-func (r ConfigAgentBuildPermissionBashMap) implementsConfigAgentBuildPermissionBashUnion() {}
-
-type ConfigAgentBuildPermissionBashMapItem string
-
-const (
-	ConfigAgentBuildPermissionBashMapAsk   ConfigAgentBuildPermissionBashMapItem = "ask"
-	ConfigAgentBuildPermissionBashMapAllow ConfigAgentBuildPermissionBashMapItem = "allow"
-	ConfigAgentBuildPermissionBashMapDeny  ConfigAgentBuildPermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentBuildPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentBuildPermissionBashMapAsk, ConfigAgentBuildPermissionBashMapAllow, ConfigAgentBuildPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentBuildPermissionEdit string
-
-const (
-	ConfigAgentBuildPermissionEditAsk   ConfigAgentBuildPermissionEdit = "ask"
-	ConfigAgentBuildPermissionEditAllow ConfigAgentBuildPermissionEdit = "allow"
-	ConfigAgentBuildPermissionEditDeny  ConfigAgentBuildPermissionEdit = "deny"
-)
-
-func (r ConfigAgentBuildPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentBuildPermissionEditAsk, ConfigAgentBuildPermissionEditAllow, ConfigAgentBuildPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentBuildPermissionWebfetch string
-
-const (
-	ConfigAgentBuildPermissionWebfetchAsk   ConfigAgentBuildPermissionWebfetch = "ask"
-	ConfigAgentBuildPermissionWebfetchAllow ConfigAgentBuildPermissionWebfetch = "allow"
-	ConfigAgentBuildPermissionWebfetchDeny  ConfigAgentBuildPermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentBuildPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentBuildPermissionWebfetchAsk, ConfigAgentBuildPermissionWebfetchAllow, ConfigAgentBuildPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentGeneral struct {
-	// Description of when to use the agent
-	Description string                 `json:"description"`
-	Disable     bool                   `json:"disable"`
-	Mode        ConfigAgentGeneralMode `json:"mode"`
-	Model       string                 `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentGeneralPermission].
-	Permission  any                    `json:"permission"`
-	Prompt      string                 `json:"prompt"`
-	Temperature float64                `json:"temperature"`
-	Tools       map[string]bool        `json:"tools"`
-	TopP        float64                `json:"top_p"`
-	Variant     string                 `json:"variant"`
-	Hidden      bool                   `json:"hidden"`
-	Options     map[string]any         `json:"options"`
-	Color       string                 `json:"color"`
-	Steps       int64                  `json:"steps"`
-	MaxSteps    int64                  `json:"maxSteps"`
-	ExtraFields map[string]any         `json:"-,extras"`
-	JSON        configAgentGeneralJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentGeneralPermissionUnion registered variants.
-	permissionUnion ConfigAgentGeneralPermissionUnion
-}
-
-// configAgentGeneralJSON contains the JSON metadata for the struct
-// [ConfigAgentGeneral]
-type configAgentGeneralJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentGeneral) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentGeneral{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentGeneralJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentGeneralPermission].
-func (r *ConfigAgentGeneral) AsPermission() ConfigAgentGeneralPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentGeneralPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentGeneral.
-//
-// Satisfied by [ConfigAgentGeneralPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentGeneralPermissionUnion interface {
-	implementsConfigAgentGeneralPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentGeneralPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentGeneralPermission](),
-		},
-	)
-}
-
-func (r ConfigAgentGeneralPermission) implementsConfigAgentGeneralPermissionUnion() {}
-
-type ConfigAgentGeneralMode string
-
-const (
-	ConfigAgentGeneralModeSubagent ConfigAgentGeneralMode = "subagent"
-	ConfigAgentGeneralModePrimary  ConfigAgentGeneralMode = "primary"
-	ConfigAgentGeneralModeAll      ConfigAgentGeneralMode = "all"
-)
-
-func (r ConfigAgentGeneralMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentGeneralModeSubagent, ConfigAgentGeneralModePrimary, ConfigAgentGeneralModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentGeneralPermission struct {
-	// This field can have the runtime type of [ConfigAgentGeneralPermissionBashString], [ConfigAgentGeneralPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                              `json:"skill"`
-	JSON  configAgentGeneralPermissionJSON `json:"-"`
-}
-
-// configAgentGeneralPermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentGeneralPermission]
-type configAgentGeneralPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentGeneralPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentGeneralPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentGeneralPermissionBashString] or
-// [ConfigAgentGeneralPermissionBashMap].
-type ConfigAgentGeneralPermissionBashUnion interface {
-	implementsConfigAgentGeneralPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentGeneralPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentGeneralPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentGeneralPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentGeneralPermissionBashString string
-
-const (
-	ConfigAgentGeneralPermissionBashStringAsk   ConfigAgentGeneralPermissionBashString = "ask"
-	ConfigAgentGeneralPermissionBashStringAllow ConfigAgentGeneralPermissionBashString = "allow"
-	ConfigAgentGeneralPermissionBashStringDeny  ConfigAgentGeneralPermissionBashString = "deny"
-)
-
-func (r ConfigAgentGeneralPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentGeneralPermissionBashStringAsk, ConfigAgentGeneralPermissionBashStringAllow, ConfigAgentGeneralPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentGeneralPermissionBashString) implementsConfigAgentGeneralPermissionBashUnion() {}
-
-type ConfigAgentGeneralPermissionBashMap map[string]ConfigAgentGeneralPermissionBashMapItem
-
-func (r ConfigAgentGeneralPermissionBashMap) implementsConfigAgentGeneralPermissionBashUnion() {}
-
-type ConfigAgentGeneralPermissionBashMapItem string
-
-const (
-	ConfigAgentGeneralPermissionBashMapAsk   ConfigAgentGeneralPermissionBashMapItem = "ask"
-	ConfigAgentGeneralPermissionBashMapAllow ConfigAgentGeneralPermissionBashMapItem = "allow"
-	ConfigAgentGeneralPermissionBashMapDeny  ConfigAgentGeneralPermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentGeneralPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentGeneralPermissionBashMapAsk, ConfigAgentGeneralPermissionBashMapAllow, ConfigAgentGeneralPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentGeneralPermissionEdit string
-
-const (
-	ConfigAgentGeneralPermissionEditAsk   ConfigAgentGeneralPermissionEdit = "ask"
-	ConfigAgentGeneralPermissionEditAllow ConfigAgentGeneralPermissionEdit = "allow"
-	ConfigAgentGeneralPermissionEditDeny  ConfigAgentGeneralPermissionEdit = "deny"
-)
-
-func (r ConfigAgentGeneralPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentGeneralPermissionEditAsk, ConfigAgentGeneralPermissionEditAllow, ConfigAgentGeneralPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentGeneralPermissionWebfetch string
-
-const (
-	ConfigAgentGeneralPermissionWebfetchAsk   ConfigAgentGeneralPermissionWebfetch = "ask"
-	ConfigAgentGeneralPermissionWebfetchAllow ConfigAgentGeneralPermissionWebfetch = "allow"
-	ConfigAgentGeneralPermissionWebfetchDeny  ConfigAgentGeneralPermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentGeneralPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentGeneralPermissionWebfetchAsk, ConfigAgentGeneralPermissionWebfetchAllow, ConfigAgentGeneralPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentPlan struct {
-	// Description of when to use the agent
-	Description string              `json:"description"`
-	Disable     bool                `json:"disable"`
-	Mode        ConfigAgentPlanMode `json:"mode"`
-	Model       string              `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentPlanPermission].
-	Permission  any                 `json:"permission"`
-	Prompt      string              `json:"prompt"`
-	Temperature float64             `json:"temperature"`
-	Tools       map[string]bool     `json:"tools"`
-	TopP        float64             `json:"top_p"`
-	Variant     string              `json:"variant"`
-	Hidden      bool                `json:"hidden"`
-	Options     map[string]any      `json:"options"`
-	Color       string              `json:"color"`
-	Steps       int64               `json:"steps"`
-	MaxSteps    int64               `json:"maxSteps"`
-	ExtraFields map[string]any      `json:"-,extras"`
-	JSON        configAgentPlanJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentPlanPermissionUnion registered variants.
-	permissionUnion ConfigAgentPlanPermissionUnion
-}
-
-// configAgentPlanJSON contains the JSON metadata for the struct [ConfigAgentPlan]
-type configAgentPlanJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentPlan) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentPlan{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentPlanJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentPlanPermission].
-func (r *ConfigAgentPlan) AsPermission() ConfigAgentPlanPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentPlanPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentPlan.
-//
-// Satisfied by [ConfigAgentPlanPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentPlanPermissionUnion interface {
-	implementsConfigAgentPlanPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentPlanPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentPlanPermission](),
-		},
-	)
-}
-
-func (r ConfigAgentPlanPermission) implementsConfigAgentPlanPermissionUnion() {}
-
-type ConfigAgentPlanMode string
-
-const (
-	ConfigAgentPlanModeSubagent ConfigAgentPlanMode = "subagent"
-	ConfigAgentPlanModePrimary  ConfigAgentPlanMode = "primary"
-	ConfigAgentPlanModeAll      ConfigAgentPlanMode = "all"
-)
-
-func (r ConfigAgentPlanMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentPlanModeSubagent, ConfigAgentPlanModePrimary, ConfigAgentPlanModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentPlanPermission struct {
-	// This field can have the runtime type of [ConfigAgentPlanPermissionBashString], [ConfigAgentPlanPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                           `json:"skill"`
-	JSON  configAgentPlanPermissionJSON `json:"-"`
-}
-
-// configAgentPlanPermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentPlanPermission]
-type configAgentPlanPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentPlanPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentPlanPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentPlanPermissionBashString] or
-// [ConfigAgentPlanPermissionBashMap].
-type ConfigAgentPlanPermissionBashUnion interface {
-	implementsConfigAgentPlanPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentPlanPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentPlanPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentPlanPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentPlanPermissionBashString string
-
-const (
-	ConfigAgentPlanPermissionBashStringAsk   ConfigAgentPlanPermissionBashString = "ask"
-	ConfigAgentPlanPermissionBashStringAllow ConfigAgentPlanPermissionBashString = "allow"
-	ConfigAgentPlanPermissionBashStringDeny  ConfigAgentPlanPermissionBashString = "deny"
-)
-
-func (r ConfigAgentPlanPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentPlanPermissionBashStringAsk, ConfigAgentPlanPermissionBashStringAllow, ConfigAgentPlanPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentPlanPermissionBashString) implementsConfigAgentPlanPermissionBashUnion() {}
-
-type ConfigAgentPlanPermissionBashMap map[string]ConfigAgentPlanPermissionBashMapItem
-
-func (r ConfigAgentPlanPermissionBashMap) implementsConfigAgentPlanPermissionBashUnion() {}
-
-type ConfigAgentPlanPermissionBashMapItem string
-
-const (
-	ConfigAgentPlanPermissionBashMapAsk   ConfigAgentPlanPermissionBashMapItem = "ask"
-	ConfigAgentPlanPermissionBashMapAllow ConfigAgentPlanPermissionBashMapItem = "allow"
-	ConfigAgentPlanPermissionBashMapDeny  ConfigAgentPlanPermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentPlanPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentPlanPermissionBashMapAsk, ConfigAgentPlanPermissionBashMapAllow, ConfigAgentPlanPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentPlanPermissionEdit string
-
-const (
-	ConfigAgentPlanPermissionEditAsk   ConfigAgentPlanPermissionEdit = "ask"
-	ConfigAgentPlanPermissionEditAllow ConfigAgentPlanPermissionEdit = "allow"
-	ConfigAgentPlanPermissionEditDeny  ConfigAgentPlanPermissionEdit = "deny"
-)
-
-func (r ConfigAgentPlanPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentPlanPermissionEditAsk, ConfigAgentPlanPermissionEditAllow, ConfigAgentPlanPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentPlanPermissionWebfetch string
-
-const (
-	ConfigAgentPlanPermissionWebfetchAsk   ConfigAgentPlanPermissionWebfetch = "ask"
-	ConfigAgentPlanPermissionWebfetchAllow ConfigAgentPlanPermissionWebfetch = "allow"
-	ConfigAgentPlanPermissionWebfetchDeny  ConfigAgentPlanPermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentPlanPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentPlanPermissionWebfetchAsk, ConfigAgentPlanPermissionWebfetchAllow, ConfigAgentPlanPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentExplore struct {
-	Description string                 `json:"description"`
-	Disable     bool                   `json:"disable"`
-	Mode        ConfigAgentExploreMode `json:"mode"`
-	Model       string                 `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentExplorePermission].
-	Permission  any                    `json:"permission"`
-	Prompt      string                 `json:"prompt"`
-	Temperature float64                `json:"temperature"`
-	Tools       map[string]bool        `json:"tools"`
-	TopP        float64                `json:"top_p"`
-	Variant     string                 `json:"variant"`
-	Hidden      bool                   `json:"hidden"`
-	Options     map[string]any         `json:"options"`
-	Color       string                 `json:"color"`
-	Steps       int64                  `json:"steps"`
-	MaxSteps    int64                  `json:"maxSteps"`
-	ExtraFields map[string]any         `json:"-,extras"`
-	JSON        configAgentExploreJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentExplorePermissionUnion registered variants.
-	permissionUnion ConfigAgentExplorePermissionUnion
-}
-
-// configAgentExploreJSON contains the JSON metadata for the struct
-// [ConfigAgentExplore]
-type configAgentExploreJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentExplore) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentExplore{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentExploreJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentExplorePermission].
-func (r *ConfigAgentExplore) AsPermission() ConfigAgentExplorePermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentExplorePermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentExplore.
-//
-// Satisfied by [ConfigAgentExplorePermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentExplorePermissionUnion interface {
-	implementsConfigAgentExplorePermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentExplorePermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentExplorePermission](),
-		},
-	)
-}
-
-func (r ConfigAgentExplorePermission) implementsConfigAgentExplorePermissionUnion() {}
-
-type ConfigAgentExploreMode string
-
-const (
-	ConfigAgentExploreModeSubagent ConfigAgentExploreMode = "subagent"
-	ConfigAgentExploreModePrimary  ConfigAgentExploreMode = "primary"
-	ConfigAgentExploreModeAll      ConfigAgentExploreMode = "all"
-)
-
-func (r ConfigAgentExploreMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentExploreModeSubagent, ConfigAgentExploreModePrimary, ConfigAgentExploreModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentExplorePermission struct {
-	// This field can have the runtime type of [ConfigAgentExplorePermissionBashString], [ConfigAgentExplorePermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                              `json:"skill"`
-	JSON  configAgentExplorePermissionJSON `json:"-"`
-}
-
-// configAgentExplorePermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentExplorePermission]
-type configAgentExplorePermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentExplorePermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentExplorePermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentExplorePermissionBashString] or
-// [ConfigAgentExplorePermissionBashMap].
-type ConfigAgentExplorePermissionBashUnion interface {
-	implementsConfigAgentExplorePermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentExplorePermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentExplorePermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentExplorePermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentExplorePermissionBashString string
-
-const (
-	ConfigAgentExplorePermissionBashStringAsk   ConfigAgentExplorePermissionBashString = "ask"
-	ConfigAgentExplorePermissionBashStringAllow ConfigAgentExplorePermissionBashString = "allow"
-	ConfigAgentExplorePermissionBashStringDeny  ConfigAgentExplorePermissionBashString = "deny"
-)
-
-func (r ConfigAgentExplorePermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentExplorePermissionBashStringAsk, ConfigAgentExplorePermissionBashStringAllow, ConfigAgentExplorePermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentExplorePermissionBashString) implementsConfigAgentExplorePermissionBashUnion() {}
-
-type ConfigAgentExplorePermissionBashMap map[string]ConfigAgentExplorePermissionBashMapItem
-
-func (r ConfigAgentExplorePermissionBashMap) implementsConfigAgentExplorePermissionBashUnion() {}
-
-type ConfigAgentExplorePermissionBashMapItem string
-
-const (
-	ConfigAgentExplorePermissionBashMapAsk   ConfigAgentExplorePermissionBashMapItem = "ask"
-	ConfigAgentExplorePermissionBashMapAllow ConfigAgentExplorePermissionBashMapItem = "allow"
-	ConfigAgentExplorePermissionBashMapDeny  ConfigAgentExplorePermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentExplorePermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentExplorePermissionBashMapAsk, ConfigAgentExplorePermissionBashMapAllow, ConfigAgentExplorePermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentExplorePermissionEdit string
-
-const (
-	ConfigAgentExplorePermissionEditAsk   ConfigAgentExplorePermissionEdit = "ask"
-	ConfigAgentExplorePermissionEditAllow ConfigAgentExplorePermissionEdit = "allow"
-	ConfigAgentExplorePermissionEditDeny  ConfigAgentExplorePermissionEdit = "deny"
-)
-
-func (r ConfigAgentExplorePermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentExplorePermissionEditAsk, ConfigAgentExplorePermissionEditAllow, ConfigAgentExplorePermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentExplorePermissionWebfetch string
-
-const (
-	ConfigAgentExplorePermissionWebfetchAsk   ConfigAgentExplorePermissionWebfetch = "ask"
-	ConfigAgentExplorePermissionWebfetchAllow ConfigAgentExplorePermissionWebfetch = "allow"
-	ConfigAgentExplorePermissionWebfetchDeny  ConfigAgentExplorePermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentExplorePermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentExplorePermissionWebfetchAsk, ConfigAgentExplorePermissionWebfetchAllow, ConfigAgentExplorePermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentTitle struct {
-	Description string               `json:"description"`
-	Disable     bool                 `json:"disable"`
-	Mode        ConfigAgentTitleMode `json:"mode"`
-	Model       string               `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentTitlePermission].
-	Permission  any                  `json:"permission"`
-	Prompt      string               `json:"prompt"`
-	Temperature float64              `json:"temperature"`
-	Tools       map[string]bool      `json:"tools"`
-	TopP        float64              `json:"top_p"`
-	Variant     string               `json:"variant"`
-	Hidden      bool                 `json:"hidden"`
-	Options     map[string]any       `json:"options"`
-	Color       string               `json:"color"`
-	Steps       int64                `json:"steps"`
-	MaxSteps    int64                `json:"maxSteps"`
-	ExtraFields map[string]any       `json:"-,extras"`
-	JSON        configAgentTitleJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentTitlePermissionUnion registered variants.
-	permissionUnion ConfigAgentTitlePermissionUnion
-}
-
-// configAgentTitleJSON contains the JSON metadata for the struct [ConfigAgentTitle]
-type configAgentTitleJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentTitle) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentTitle{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentTitleJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentTitlePermission].
-func (r *ConfigAgentTitle) AsPermission() ConfigAgentTitlePermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentTitlePermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentTitle.
-//
-// Satisfied by [ConfigAgentTitlePermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentTitlePermissionUnion interface {
-	implementsConfigAgentTitlePermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentTitlePermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentTitlePermission](),
-		},
-	)
-}
-
-func (r ConfigAgentTitlePermission) implementsConfigAgentTitlePermissionUnion() {}
-
-type ConfigAgentTitleMode string
-
-const (
-	ConfigAgentTitleModeSubagent ConfigAgentTitleMode = "subagent"
-	ConfigAgentTitleModePrimary  ConfigAgentTitleMode = "primary"
-	ConfigAgentTitleModeAll      ConfigAgentTitleMode = "all"
-)
-
-func (r ConfigAgentTitleMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentTitleModeSubagent, ConfigAgentTitleModePrimary, ConfigAgentTitleModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentTitlePermission struct {
-	// This field can have the runtime type of [ConfigAgentTitlePermissionBashString], [ConfigAgentTitlePermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                            `json:"skill"`
-	JSON  configAgentTitlePermissionJSON `json:"-"`
-}
-
-// configAgentTitlePermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentTitlePermission]
-type configAgentTitlePermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentTitlePermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentTitlePermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentTitlePermissionBashString] or
-// [ConfigAgentTitlePermissionBashMap].
-type ConfigAgentTitlePermissionBashUnion interface {
-	implementsConfigAgentTitlePermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentTitlePermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentTitlePermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentTitlePermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentTitlePermissionBashString string
-
-const (
-	ConfigAgentTitlePermissionBashStringAsk   ConfigAgentTitlePermissionBashString = "ask"
-	ConfigAgentTitlePermissionBashStringAllow ConfigAgentTitlePermissionBashString = "allow"
-	ConfigAgentTitlePermissionBashStringDeny  ConfigAgentTitlePermissionBashString = "deny"
-)
-
-func (r ConfigAgentTitlePermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentTitlePermissionBashStringAsk, ConfigAgentTitlePermissionBashStringAllow, ConfigAgentTitlePermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentTitlePermissionBashString) implementsConfigAgentTitlePermissionBashUnion() {}
-
-type ConfigAgentTitlePermissionBashMap map[string]ConfigAgentTitlePermissionBashMapItem
-
-func (r ConfigAgentTitlePermissionBashMap) implementsConfigAgentTitlePermissionBashUnion() {}
-
-type ConfigAgentTitlePermissionBashMapItem string
-
-const (
-	ConfigAgentTitlePermissionBashMapAsk   ConfigAgentTitlePermissionBashMapItem = "ask"
-	ConfigAgentTitlePermissionBashMapAllow ConfigAgentTitlePermissionBashMapItem = "allow"
-	ConfigAgentTitlePermissionBashMapDeny  ConfigAgentTitlePermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentTitlePermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentTitlePermissionBashMapAsk, ConfigAgentTitlePermissionBashMapAllow, ConfigAgentTitlePermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentTitlePermissionEdit string
-
-const (
-	ConfigAgentTitlePermissionEditAsk   ConfigAgentTitlePermissionEdit = "ask"
-	ConfigAgentTitlePermissionEditAllow ConfigAgentTitlePermissionEdit = "allow"
-	ConfigAgentTitlePermissionEditDeny  ConfigAgentTitlePermissionEdit = "deny"
-)
-
-func (r ConfigAgentTitlePermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentTitlePermissionEditAsk, ConfigAgentTitlePermissionEditAllow, ConfigAgentTitlePermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentTitlePermissionWebfetch string
-
-const (
-	ConfigAgentTitlePermissionWebfetchAsk   ConfigAgentTitlePermissionWebfetch = "ask"
-	ConfigAgentTitlePermissionWebfetchAllow ConfigAgentTitlePermissionWebfetch = "allow"
-	ConfigAgentTitlePermissionWebfetchDeny  ConfigAgentTitlePermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentTitlePermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentTitlePermissionWebfetchAsk, ConfigAgentTitlePermissionWebfetchAllow, ConfigAgentTitlePermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentSummary struct {
-	Description string                 `json:"description"`
-	Disable     bool                   `json:"disable"`
-	Mode        ConfigAgentSummaryMode `json:"mode"`
-	Model       string                 `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentSummaryPermission].
-	Permission  any                    `json:"permission"`
-	Prompt      string                 `json:"prompt"`
-	Temperature float64                `json:"temperature"`
-	Tools       map[string]bool        `json:"tools"`
-	TopP        float64                `json:"top_p"`
-	Variant     string                 `json:"variant"`
-	Hidden      bool                   `json:"hidden"`
-	Options     map[string]any         `json:"options"`
-	Color       string                 `json:"color"`
-	Steps       int64                  `json:"steps"`
-	MaxSteps    int64                  `json:"maxSteps"`
-	ExtraFields map[string]any         `json:"-,extras"`
-	JSON        configAgentSummaryJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentSummaryPermissionUnion registered variants.
-	permissionUnion ConfigAgentSummaryPermissionUnion
-}
-
-// configAgentSummaryJSON contains the JSON metadata for the struct [ConfigAgentSummary]
-type configAgentSummaryJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentSummary) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentSummary{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentSummaryJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentSummaryPermission].
-func (r *ConfigAgentSummary) AsPermission() ConfigAgentSummaryPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentSummaryPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentSummary.
-//
-// Satisfied by [ConfigAgentSummaryPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentSummaryPermissionUnion interface {
-	implementsConfigAgentSummaryPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentSummaryPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentSummaryPermission](),
-		},
-	)
-}
-
-func (r ConfigAgentSummaryPermission) implementsConfigAgentSummaryPermissionUnion() {}
-
-type ConfigAgentSummaryMode string
-
-const (
-	ConfigAgentSummaryModeSubagent ConfigAgentSummaryMode = "subagent"
-	ConfigAgentSummaryModePrimary  ConfigAgentSummaryMode = "primary"
-	ConfigAgentSummaryModeAll      ConfigAgentSummaryMode = "all"
-)
-
-func (r ConfigAgentSummaryMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentSummaryModeSubagent, ConfigAgentSummaryModePrimary, ConfigAgentSummaryModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentSummaryPermission struct {
-	// This field can have the runtime type of [ConfigAgentSummaryPermissionBashString], [ConfigAgentSummaryPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                              `json:"skill"`
-	JSON  configAgentSummaryPermissionJSON `json:"-"`
-}
-
-// configAgentSummaryPermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentSummaryPermission]
-type configAgentSummaryPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentSummaryPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentSummaryPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentSummaryPermissionBashString] or
-// [ConfigAgentSummaryPermissionBashMap].
-type ConfigAgentSummaryPermissionBashUnion interface {
-	implementsConfigAgentSummaryPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentSummaryPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentSummaryPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentSummaryPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentSummaryPermissionBashString string
-
-const (
-	ConfigAgentSummaryPermissionBashStringAsk   ConfigAgentSummaryPermissionBashString = "ask"
-	ConfigAgentSummaryPermissionBashStringAllow ConfigAgentSummaryPermissionBashString = "allow"
-	ConfigAgentSummaryPermissionBashStringDeny  ConfigAgentSummaryPermissionBashString = "deny"
-)
-
-func (r ConfigAgentSummaryPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentSummaryPermissionBashStringAsk, ConfigAgentSummaryPermissionBashStringAllow, ConfigAgentSummaryPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentSummaryPermissionBashString) implementsConfigAgentSummaryPermissionBashUnion() {}
-
-type ConfigAgentSummaryPermissionBashMap map[string]ConfigAgentSummaryPermissionBashMapItem
-
-func (r ConfigAgentSummaryPermissionBashMap) implementsConfigAgentSummaryPermissionBashUnion() {}
-
-type ConfigAgentSummaryPermissionBashMapItem string
-
-const (
-	ConfigAgentSummaryPermissionBashMapAsk   ConfigAgentSummaryPermissionBashMapItem = "ask"
-	ConfigAgentSummaryPermissionBashMapAllow ConfigAgentSummaryPermissionBashMapItem = "allow"
-	ConfigAgentSummaryPermissionBashMapDeny  ConfigAgentSummaryPermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentSummaryPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentSummaryPermissionBashMapAsk, ConfigAgentSummaryPermissionBashMapAllow, ConfigAgentSummaryPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentSummaryPermissionEdit string
-
-const (
-	ConfigAgentSummaryPermissionEditAsk   ConfigAgentSummaryPermissionEdit = "ask"
-	ConfigAgentSummaryPermissionEditAllow ConfigAgentSummaryPermissionEdit = "allow"
-	ConfigAgentSummaryPermissionEditDeny  ConfigAgentSummaryPermissionEdit = "deny"
-)
-
-func (r ConfigAgentSummaryPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentSummaryPermissionEditAsk, ConfigAgentSummaryPermissionEditAllow, ConfigAgentSummaryPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentSummaryPermissionWebfetch string
-
-const (
-	ConfigAgentSummaryPermissionWebfetchAsk   ConfigAgentSummaryPermissionWebfetch = "ask"
-	ConfigAgentSummaryPermissionWebfetchAllow ConfigAgentSummaryPermissionWebfetch = "allow"
-	ConfigAgentSummaryPermissionWebfetchDeny  ConfigAgentSummaryPermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentSummaryPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentSummaryPermissionWebfetchAsk, ConfigAgentSummaryPermissionWebfetchAllow, ConfigAgentSummaryPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentCompaction struct {
-	Description string                    `json:"description"`
-	Disable     bool                      `json:"disable"`
-	Mode        ConfigAgentCompactionMode `json:"mode"`
-	Model       string                    `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigAgentCompactionPermission].
-	Permission  any                       `json:"permission"`
-	Prompt      string                    `json:"prompt"`
-	Temperature float64                   `json:"temperature"`
-	Tools       map[string]bool           `json:"tools"`
-	TopP        float64                   `json:"top_p"`
-	Variant     string                    `json:"variant"`
-	Hidden      bool                      `json:"hidden"`
-	Options     map[string]any            `json:"options"`
-	Color       string                    `json:"color"`
-	Steps       int64                     `json:"steps"`
-	MaxSteps    int64                     `json:"maxSteps"`
-	ExtraFields map[string]any            `json:"-,extras"`
-	JSON        configAgentCompactionJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigAgentCompactionPermissionUnion registered variants.
-	permissionUnion ConfigAgentCompactionPermissionUnion
-}
-
-// configAgentCompactionJSON contains the JSON metadata for the struct
-// [ConfigAgentCompaction]
-type configAgentCompactionJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigAgentCompaction) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigAgentCompaction{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configAgentCompactionJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigAgentCompactionPermission].
-func (r *ConfigAgentCompaction) AsPermission() ConfigAgentCompactionPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigAgentCompactionPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigAgentCompaction.
-//
-// Satisfied by [ConfigAgentCompactionPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigAgentCompactionPermissionUnion interface {
-	implementsConfigAgentCompactionPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentCompactionPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentCompactionPermission](),
-		},
-	)
-}
-
-func (r ConfigAgentCompactionPermission) implementsConfigAgentCompactionPermissionUnion() {}
-
-type ConfigAgentCompactionMode string
-
-const (
-	ConfigAgentCompactionModeSubagent ConfigAgentCompactionMode = "subagent"
-	ConfigAgentCompactionModePrimary  ConfigAgentCompactionMode = "primary"
-	ConfigAgentCompactionModeAll      ConfigAgentCompactionMode = "all"
-)
-
-func (r ConfigAgentCompactionMode) IsKnown() bool {
-	switch r {
-	case ConfigAgentCompactionModeSubagent, ConfigAgentCompactionModePrimary, ConfigAgentCompactionModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentCompactionPermission struct {
-	// This field can have the runtime type of [ConfigAgentCompactionPermissionBashString], [ConfigAgentCompactionPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                                 `json:"skill"`
-	JSON  configAgentCompactionPermissionJSON `json:"-"`
-}
-
-// configAgentCompactionPermissionJSON contains the JSON metadata for the struct
-// [ConfigAgentCompactionPermission]
-type configAgentCompactionPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigAgentCompactionPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configAgentCompactionPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigAgentCompactionPermissionBashString] or
-// [ConfigAgentCompactionPermissionBashMap].
-type ConfigAgentCompactionPermissionBashUnion interface {
-	implementsConfigAgentCompactionPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigAgentCompactionPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigAgentCompactionPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigAgentCompactionPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigAgentCompactionPermissionBashString string
-
-const (
-	ConfigAgentCompactionPermissionBashStringAsk   ConfigAgentCompactionPermissionBashString = "ask"
-	ConfigAgentCompactionPermissionBashStringAllow ConfigAgentCompactionPermissionBashString = "allow"
-	ConfigAgentCompactionPermissionBashStringDeny  ConfigAgentCompactionPermissionBashString = "deny"
-)
-
-func (r ConfigAgentCompactionPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigAgentCompactionPermissionBashStringAsk, ConfigAgentCompactionPermissionBashStringAllow, ConfigAgentCompactionPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigAgentCompactionPermissionBashString) implementsConfigAgentCompactionPermissionBashUnion() {
-}
-
-type ConfigAgentCompactionPermissionBashMap map[string]ConfigAgentCompactionPermissionBashMapItem
-
-func (r ConfigAgentCompactionPermissionBashMap) implementsConfigAgentCompactionPermissionBashUnion() {
-}
-
-type ConfigAgentCompactionPermissionBashMapItem string
-
-const (
-	ConfigAgentCompactionPermissionBashMapAsk   ConfigAgentCompactionPermissionBashMapItem = "ask"
-	ConfigAgentCompactionPermissionBashMapAllow ConfigAgentCompactionPermissionBashMapItem = "allow"
-	ConfigAgentCompactionPermissionBashMapDeny  ConfigAgentCompactionPermissionBashMapItem = "deny"
-)
-
-func (r ConfigAgentCompactionPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigAgentCompactionPermissionBashMapAsk, ConfigAgentCompactionPermissionBashMapAllow, ConfigAgentCompactionPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentCompactionPermissionEdit string
-
-const (
-	ConfigAgentCompactionPermissionEditAsk   ConfigAgentCompactionPermissionEdit = "ask"
-	ConfigAgentCompactionPermissionEditAllow ConfigAgentCompactionPermissionEdit = "allow"
-	ConfigAgentCompactionPermissionEditDeny  ConfigAgentCompactionPermissionEdit = "deny"
-)
-
-func (r ConfigAgentCompactionPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigAgentCompactionPermissionEditAsk, ConfigAgentCompactionPermissionEditAllow, ConfigAgentCompactionPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigAgentCompactionPermissionWebfetch string
-
-const (
-	ConfigAgentCompactionPermissionWebfetchAsk   ConfigAgentCompactionPermissionWebfetch = "ask"
-	ConfigAgentCompactionPermissionWebfetchAllow ConfigAgentCompactionPermissionWebfetch = "allow"
-	ConfigAgentCompactionPermissionWebfetchDeny  ConfigAgentCompactionPermissionWebfetch = "deny"
-)
-
-func (r ConfigAgentCompactionPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigAgentCompactionPermissionWebfetchAsk, ConfigAgentCompactionPermissionWebfetchAllow, ConfigAgentCompactionPermissionWebfetchDeny:
-		return true
-	}
-	return false
 }
 
 type ConfigCommand struct {
@@ -2734,9 +1033,11 @@ func (r ConfigMcpType) IsKnown() bool {
 
 // @deprecated Use `agent` field instead.
 type ConfigMode struct {
-	Build       ConfigModeBuild        `json:"build"`
-	Plan        ConfigModePlan         `json:"plan"`
-	ExtraFields map[string]ConfigAgent `json:"-,extras"`
+	Build AgentConfig `json:"build"`
+	Plan  AgentConfig `json:"plan"`
+	// User-defined modes keyed by mode name, per the OpenAPI
+	// `Config.mode.additionalProperties` -> `AgentConfig` mapping.
+	ExtraFields map[string]AgentConfig `json:"-,extras"`
 	JSON        configModeJSON         `json:"-"`
 }
 
@@ -2754,782 +1055,6 @@ func (r *ConfigMode) UnmarshalJSON(data []byte) (err error) {
 
 func (r configModeJSON) RawJSON() string {
 	return r.raw
-}
-
-type ConfigModeBuild struct {
-	// Description of when to use the agent
-	Description string              `json:"description"`
-	Disable     bool                `json:"disable"`
-	Mode        ConfigModeBuildMode `json:"mode"`
-	Model       string              `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigModeBuildPermission].
-	Permission  any                 `json:"permission"`
-	Prompt      string              `json:"prompt"`
-	Temperature float64             `json:"temperature"`
-	Tools       map[string]bool     `json:"tools"`
-	TopP        float64             `json:"top_p"`
-	Variant     string              `json:"variant"`
-	Hidden      bool                `json:"hidden"`
-	Options     map[string]any      `json:"options"`
-	Color       string              `json:"color"`
-	Steps       int64               `json:"steps"`
-	MaxSteps    int64               `json:"maxSteps"`
-	ExtraFields map[string]any      `json:"-,extras"`
-	JSON        configModeBuildJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigModeBuildPermissionUnion registered variants.
-	permissionUnion ConfigModeBuildPermissionUnion
-}
-
-// configModeBuildJSON contains the JSON metadata for the struct [ConfigModeBuild]
-type configModeBuildJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigModeBuild) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigModeBuild{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configModeBuildJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigModeBuildPermission].
-func (r *ConfigModeBuild) AsPermission() ConfigModeBuildPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigModeBuildPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigModeBuild.
-//
-// Satisfied by [ConfigModeBuildPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigModeBuildPermissionUnion interface {
-	implementsConfigModeBuildPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigModeBuildPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigModeBuildPermission](),
-		},
-	)
-}
-
-func (r ConfigModeBuildPermission) implementsConfigModeBuildPermissionUnion() {}
-
-type ConfigModeBuildMode string
-
-const (
-	ConfigModeBuildModeSubagent ConfigModeBuildMode = "subagent"
-	ConfigModeBuildModePrimary  ConfigModeBuildMode = "primary"
-	ConfigModeBuildModeAll      ConfigModeBuildMode = "all"
-)
-
-func (r ConfigModeBuildMode) IsKnown() bool {
-	switch r {
-	case ConfigModeBuildModeSubagent, ConfigModeBuildModePrimary, ConfigModeBuildModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigModeBuildPermission struct {
-	// This field can have the runtime type of [ConfigModeBuildPermissionBashString], [ConfigModeBuildPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                           `json:"skill"`
-	JSON  configModeBuildPermissionJSON `json:"-"`
-}
-
-// configModeBuildPermissionJSON contains the JSON metadata for the struct
-// [ConfigModeBuildPermission]
-type configModeBuildPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigModeBuildPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configModeBuildPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigModeBuildPermissionBashString] or
-// [ConfigModeBuildPermissionBashMap].
-type ConfigModeBuildPermissionBashUnion interface {
-	implementsConfigModeBuildPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigModeBuildPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigModeBuildPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigModeBuildPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigModeBuildPermissionBashString string
-
-const (
-	ConfigModeBuildPermissionBashStringAsk   ConfigModeBuildPermissionBashString = "ask"
-	ConfigModeBuildPermissionBashStringAllow ConfigModeBuildPermissionBashString = "allow"
-	ConfigModeBuildPermissionBashStringDeny  ConfigModeBuildPermissionBashString = "deny"
-)
-
-func (r ConfigModeBuildPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigModeBuildPermissionBashStringAsk, ConfigModeBuildPermissionBashStringAllow, ConfigModeBuildPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigModeBuildPermissionBashString) implementsConfigModeBuildPermissionBashUnion() {}
-
-type ConfigModeBuildPermissionBashMap map[string]ConfigModeBuildPermissionBashMapItem
-
-func (r ConfigModeBuildPermissionBashMap) implementsConfigModeBuildPermissionBashUnion() {}
-
-type ConfigModeBuildPermissionBashMapItem string
-
-const (
-	ConfigModeBuildPermissionBashMapAsk   ConfigModeBuildPermissionBashMapItem = "ask"
-	ConfigModeBuildPermissionBashMapAllow ConfigModeBuildPermissionBashMapItem = "allow"
-	ConfigModeBuildPermissionBashMapDeny  ConfigModeBuildPermissionBashMapItem = "deny"
-)
-
-func (r ConfigModeBuildPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigModeBuildPermissionBashMapAsk, ConfigModeBuildPermissionBashMapAllow, ConfigModeBuildPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigModeBuildPermissionEdit string
-
-const (
-	ConfigModeBuildPermissionEditAsk   ConfigModeBuildPermissionEdit = "ask"
-	ConfigModeBuildPermissionEditAllow ConfigModeBuildPermissionEdit = "allow"
-	ConfigModeBuildPermissionEditDeny  ConfigModeBuildPermissionEdit = "deny"
-)
-
-func (r ConfigModeBuildPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigModeBuildPermissionEditAsk, ConfigModeBuildPermissionEditAllow, ConfigModeBuildPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigModeBuildPermissionWebfetch string
-
-const (
-	ConfigModeBuildPermissionWebfetchAsk   ConfigModeBuildPermissionWebfetch = "ask"
-	ConfigModeBuildPermissionWebfetchAllow ConfigModeBuildPermissionWebfetch = "allow"
-	ConfigModeBuildPermissionWebfetchDeny  ConfigModeBuildPermissionWebfetch = "deny"
-)
-
-func (r ConfigModeBuildPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigModeBuildPermissionWebfetchAsk, ConfigModeBuildPermissionWebfetchAllow, ConfigModeBuildPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigModePlan struct {
-	// Description of when to use the agent
-	Description string             `json:"description"`
-	Disable     bool               `json:"disable"`
-	Mode        ConfigModePlanMode `json:"mode"`
-	Model       string             `json:"model"`
-	// This field can have the runtime type of [ConfigPermissionAction],
-	// [ConfigModePlanPermission].
-	Permission  any                `json:"permission"`
-	Prompt      string             `json:"prompt"`
-	Temperature float64            `json:"temperature"`
-	Tools       map[string]bool    `json:"tools"`
-	TopP        float64            `json:"top_p"`
-	Variant     string             `json:"variant"`
-	Hidden      bool               `json:"hidden"`
-	Options     map[string]any     `json:"options"`
-	Color       string             `json:"color"`
-	Steps       int64              `json:"steps"`
-	MaxSteps    int64              `json:"maxSteps"`
-	ExtraFields map[string]any     `json:"-,extras"`
-	JSON        configModePlanJSON `json:"-"`
-	// permissionUnion holds the typed permission payload after UnmarshalJSON
-	// routes the raw data through ConfigModePlanPermissionUnion registered variants.
-	permissionUnion ConfigModePlanPermissionUnion
-}
-
-// configModePlanJSON contains the JSON metadata for the struct [ConfigModePlan]
-type configModePlanJSON struct {
-	Description apijson.Field
-	Disable     apijson.Field
-	Mode        apijson.Field
-	Model       apijson.Field
-	Permission  apijson.Field
-	Prompt      apijson.Field
-	Temperature apijson.Field
-	Tools       apijson.Field
-	TopP        apijson.Field
-	Variant     apijson.Field
-	Hidden      apijson.Field
-	Options     apijson.Field
-	Color       apijson.Field
-	Steps       apijson.Field
-	MaxSteps    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *ConfigModePlan) UnmarshalJSON(data []byte) (err error) {
-	*r = ConfigModePlan{}
-	if err = apijson.UnmarshalRoot(data, r); err != nil {
-		return err
-	}
-	permissionData := gjson.GetBytes(data, "permission").Raw
-	if permissionData != "" {
-		if err = apijson.UnmarshalRoot([]byte(permissionData), &r.permissionUnion); err != nil {
-			return err
-		}
-		r.Permission = r.permissionUnion
-	}
-	return nil
-}
-
-func (r configModePlanJSON) RawJSON() string {
-	return r.raw
-}
-
-// AsPermission returns the permission field as a typed union.
-//
-// Possible runtime types of the union are [ConfigPermissionAction] (a short
-// string "ask"|"allow"|"deny") or [ConfigModePlanPermission].
-func (r *ConfigModePlan) AsPermission() ConfigModePlanPermissionUnion {
-	return r.permissionUnion
-}
-
-// ConfigModePlanPermissionUnion represents the OpenAPI PermissionConfig anyOf
-// union for ConfigModePlan.
-//
-// Satisfied by [ConfigModePlanPermission], [ConfigPermissionAction] (a short
-// string permission: "ask"|"allow"|"deny").
-type ConfigModePlanPermissionUnion interface {
-	implementsConfigModePlanPermissionUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigModePlanPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigModePlanPermission](),
-		},
-	)
-}
-
-func (r ConfigModePlanPermission) implementsConfigModePlanPermissionUnion() {}
-
-type ConfigModePlanMode string
-
-const (
-	ConfigModePlanModeSubagent ConfigModePlanMode = "subagent"
-	ConfigModePlanModePrimary  ConfigModePlanMode = "primary"
-	ConfigModePlanModeAll      ConfigModePlanMode = "all"
-)
-
-func (r ConfigModePlanMode) IsKnown() bool {
-	switch r {
-	case ConfigModePlanModeSubagent, ConfigModePlanModePrimary, ConfigModePlanModeAll:
-		return true
-	}
-	return false
-}
-
-type ConfigModePlanPermission struct {
-	// This field can have the runtime type of [ConfigModePlanPermissionBashString], [ConfigModePlanPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit any `json:"edit"`
-	// This field can have the runtime type of [string].
-	Webfetch any `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                          `json:"skill"`
-	JSON  configModePlanPermissionJSON `json:"-"`
-}
-
-// configModePlanPermissionJSON contains the JSON metadata for the struct
-// [ConfigModePlanPermission]
-type configModePlanPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigModePlanPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configModePlanPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-// Union satisfied by [ConfigModePlanPermissionBashString] or
-// [ConfigModePlanPermissionBashMap].
-type ConfigModePlanPermissionBashUnion interface {
-	implementsConfigModePlanPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigModePlanPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigModePlanPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigModePlanPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigModePlanPermissionBashString string
-
-const (
-	ConfigModePlanPermissionBashStringAsk   ConfigModePlanPermissionBashString = "ask"
-	ConfigModePlanPermissionBashStringAllow ConfigModePlanPermissionBashString = "allow"
-	ConfigModePlanPermissionBashStringDeny  ConfigModePlanPermissionBashString = "deny"
-)
-
-func (r ConfigModePlanPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigModePlanPermissionBashStringAsk, ConfigModePlanPermissionBashStringAllow, ConfigModePlanPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigModePlanPermissionBashString) implementsConfigModePlanPermissionBashUnion() {}
-
-type ConfigModePlanPermissionBashMap map[string]ConfigModePlanPermissionBashMapItem
-
-func (r ConfigModePlanPermissionBashMap) implementsConfigModePlanPermissionBashUnion() {}
-
-type ConfigModePlanPermissionBashMapItem string
-
-const (
-	ConfigModePlanPermissionBashMapAsk   ConfigModePlanPermissionBashMapItem = "ask"
-	ConfigModePlanPermissionBashMapAllow ConfigModePlanPermissionBashMapItem = "allow"
-	ConfigModePlanPermissionBashMapDeny  ConfigModePlanPermissionBashMapItem = "deny"
-)
-
-func (r ConfigModePlanPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigModePlanPermissionBashMapAsk, ConfigModePlanPermissionBashMapAllow, ConfigModePlanPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigModePlanPermissionEdit string
-
-const (
-	ConfigModePlanPermissionEditAsk   ConfigModePlanPermissionEdit = "ask"
-	ConfigModePlanPermissionEditAllow ConfigModePlanPermissionEdit = "allow"
-	ConfigModePlanPermissionEditDeny  ConfigModePlanPermissionEdit = "deny"
-)
-
-func (r ConfigModePlanPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigModePlanPermissionEditAsk, ConfigModePlanPermissionEditAllow, ConfigModePlanPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigModePlanPermissionWebfetch string
-
-const (
-	ConfigModePlanPermissionWebfetchAsk   ConfigModePlanPermissionWebfetch = "ask"
-	ConfigModePlanPermissionWebfetchAllow ConfigModePlanPermissionWebfetch = "allow"
-	ConfigModePlanPermissionWebfetchDeny  ConfigModePlanPermissionWebfetch = "deny"
-)
-
-func (r ConfigModePlanPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigModePlanPermissionWebfetchAsk, ConfigModePlanPermissionWebfetchAllow, ConfigModePlanPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermission struct {
-	// This field can have the runtime type of [ConfigPermissionBashString], [ConfigPermissionBashMap].
-	Bash any `json:"bash"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Edit     any                      `json:"edit"`
-	Webfetch ConfigPermissionWebfetch `json:"webfetch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Read any `json:"read"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Glob any `json:"glob"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Grep any `json:"grep"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	List any `json:"list"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Task any `json:"task"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	ExternalDirectory any `json:"external_directory"`
-	// This field can have the runtime type of [string].
-	Todowrite any `json:"todowrite"`
-	// This field can have the runtime type of [string].
-	Question any `json:"question"`
-	// This field can have the runtime type of [string].
-	Websearch any `json:"websearch"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Lsp any `json:"lsp"`
-	// This field can have the runtime type of [string].
-	DoomLoop any `json:"doom_loop"`
-	// This field can have the runtime type of [string] or [map[string]any].
-	Skill any                  `json:"skill"`
-	JSON  configPermissionJSON `json:"-"`
-}
-
-// configPermissionJSON contains the JSON metadata for the struct
-// [ConfigPermission]
-type configPermissionJSON struct {
-	Bash              apijson.Field
-	Edit              apijson.Field
-	Webfetch          apijson.Field
-	Read              apijson.Field
-	Glob              apijson.Field
-	Grep              apijson.Field
-	List              apijson.Field
-	Task              apijson.Field
-	ExternalDirectory apijson.Field
-	Todowrite         apijson.Field
-	Question          apijson.Field
-	Websearch         apijson.Field
-	Lsp               apijson.Field
-	DoomLoop          apijson.Field
-	Skill             apijson.Field
-	raw               string
-	ExtraFields       map[string]apijson.Field
-}
-
-func (r *ConfigPermission) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r configPermissionJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r ConfigPermission) implementsConfigPermissionUnion() {}
-
-// Union satisfied by [ConfigPermissionBashString] or [ConfigPermissionBashMap].
-type ConfigPermissionBashUnion interface {
-	implementsConfigPermissionBashUnion()
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigPermissionUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigPermission](),
-		},
-	)
-}
-
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigPermissionBashUnion](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionBashString](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigPermissionBashMap](),
-		},
-	)
-}
-
-type ConfigPermissionBashString string
-
-const (
-	ConfigPermissionBashStringAsk   ConfigPermissionBashString = "ask"
-	ConfigPermissionBashStringAllow ConfigPermissionBashString = "allow"
-	ConfigPermissionBashStringDeny  ConfigPermissionBashString = "deny"
-)
-
-func (r ConfigPermissionBashString) IsKnown() bool {
-	switch r {
-	case ConfigPermissionBashStringAsk, ConfigPermissionBashStringAllow, ConfigPermissionBashStringDeny:
-		return true
-	}
-	return false
-}
-
-func (r ConfigPermissionBashString) implementsConfigPermissionBashUnion() {}
-
-type ConfigPermissionBashMap map[string]ConfigPermissionBashMapItem
-
-func (r ConfigPermissionBashMap) implementsConfigPermissionBashUnion() {}
-
-type ConfigPermissionBashMapItem string
-
-const (
-	ConfigPermissionBashMapAsk   ConfigPermissionBashMapItem = "ask"
-	ConfigPermissionBashMapAllow ConfigPermissionBashMapItem = "allow"
-	ConfigPermissionBashMapDeny  ConfigPermissionBashMapItem = "deny"
-)
-
-func (r ConfigPermissionBashMapItem) IsKnown() bool {
-	switch r {
-	case ConfigPermissionBashMapAsk, ConfigPermissionBashMapAllow, ConfigPermissionBashMapDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionEdit string
-
-const (
-	ConfigPermissionEditAsk   ConfigPermissionEdit = "ask"
-	ConfigPermissionEditAllow ConfigPermissionEdit = "allow"
-	ConfigPermissionEditDeny  ConfigPermissionEdit = "deny"
-)
-
-func (r ConfigPermissionEdit) IsKnown() bool {
-	switch r {
-	case ConfigPermissionEditAsk, ConfigPermissionEditAllow, ConfigPermissionEditDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionWebfetch string
-
-const (
-	ConfigPermissionWebfetchAsk   ConfigPermissionWebfetch = "ask"
-	ConfigPermissionWebfetchAllow ConfigPermissionWebfetch = "allow"
-	ConfigPermissionWebfetchDeny  ConfigPermissionWebfetch = "deny"
-)
-
-func (r ConfigPermissionWebfetch) IsKnown() bool {
-	switch r {
-	case ConfigPermissionWebfetchAsk, ConfigPermissionWebfetchAllow, ConfigPermissionWebfetchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionTodowrite string
-
-const (
-	ConfigPermissionTodowriteAsk   ConfigPermissionTodowrite = "ask"
-	ConfigPermissionTodowriteAllow ConfigPermissionTodowrite = "allow"
-	ConfigPermissionTodowriteDeny  ConfigPermissionTodowrite = "deny"
-)
-
-func (r ConfigPermissionTodowrite) IsKnown() bool {
-	switch r {
-	case ConfigPermissionTodowriteAsk, ConfigPermissionTodowriteAllow, ConfigPermissionTodowriteDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionQuestion string
-
-const (
-	ConfigPermissionQuestionAsk   ConfigPermissionQuestion = "ask"
-	ConfigPermissionQuestionAllow ConfigPermissionQuestion = "allow"
-	ConfigPermissionQuestionDeny  ConfigPermissionQuestion = "deny"
-)
-
-func (r ConfigPermissionQuestion) IsKnown() bool {
-	switch r {
-	case ConfigPermissionQuestionAsk, ConfigPermissionQuestionAllow, ConfigPermissionQuestionDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionWebsearch string
-
-const (
-	ConfigPermissionWebsearchAsk   ConfigPermissionWebsearch = "ask"
-	ConfigPermissionWebsearchAllow ConfigPermissionWebsearch = "allow"
-	ConfigPermissionWebsearchDeny  ConfigPermissionWebsearch = "deny"
-)
-
-func (r ConfigPermissionWebsearch) IsKnown() bool {
-	switch r {
-	case ConfigPermissionWebsearchAsk, ConfigPermissionWebsearchAllow, ConfigPermissionWebsearchDeny:
-		return true
-	}
-	return false
-}
-
-type ConfigPermissionDoomLoop string
-
-const (
-	ConfigPermissionDoomLoopAsk   ConfigPermissionDoomLoop = "ask"
-	ConfigPermissionDoomLoopAllow ConfigPermissionDoomLoop = "allow"
-	ConfigPermissionDoomLoopDeny  ConfigPermissionDoomLoop = "deny"
-)
-
-func (r ConfigPermissionDoomLoop) IsKnown() bool {
-	switch r {
-	case ConfigPermissionDoomLoopAsk, ConfigPermissionDoomLoopAllow, ConfigPermissionDoomLoopDeny:
-		return true
-	}
-	return false
 }
 
 type ConfigProvider struct {
@@ -3817,15 +1342,19 @@ type ConfigProviderOptions struct {
 	SetCacheKey   bool   `json:"setCacheKey"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
-	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	Timeout any `json:"timeout"`
+	//
+	// Resolves to [shared.UnionInt] (an int64 millisecond duration) or
+	// [shared.UnionBool] (always false).
+	Timeout ConfigProviderOptionsTimeoutUnion `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
-	// This field can have the runtime type of [shared.UnionInt], [shared.UnionBool].
-	HeaderTimeout any                       `json:"headerTimeout"`
-	ChunkTimeout  int64                     `json:"chunkTimeout"`
-	ExtraFields   map[string]any            `json:"-,extras"`
-	JSON          configProviderOptionsJSON `json:"-"`
+	//
+	// Resolves to [shared.UnionInt] (an int64 millisecond duration) or
+	// [shared.UnionBool] (always false).
+	HeaderTimeout ConfigProviderOptionsTimeoutUnion `json:"headerTimeout"`
+	ChunkTimeout  int64                             `json:"chunkTimeout"`
+	ExtraFields   map[string]any                    `json:"-,extras"`
+	JSON          configProviderOptionsJSON         `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
@@ -3979,9 +1508,11 @@ type McpRemoteConfig struct {
 	Timeout int64 `json:"timeout"`
 	// Headers to send with the request
 	Headers map[string]string `json:"headers"`
-	// OAuth authentication configuration for this MCP server.
-	// This field can have the runtime type of [McpOAuthConfig] or bool (false).
-	OAuth any                 `json:"oauth"`
+	// OAuth authentication configuration for the MCP server. Set to false to
+	// disable OAuth auto-detection.
+	//
+	// Resolves to [McpOAuthConfig] or [shared.UnionBool] (always false).
+	OAuth McpOAuthConfigUnion `json:"oauth"`
 	JSON  mcpRemoteConfigJSON `json:"-"`
 }
 
@@ -4069,9 +1600,9 @@ type ConfigUpdateParams struct {
 	Mode  param.Field[ConfigModeParam]                `json:"mode"`
 	Model param.Field[string]                         `json:"model"`
 	// Permission configuration. A short string ("ask"|"allow"|"deny") or an
-	// object with per-action permission rule overrides. Accepts [ConfigPermissionAction]
-	// (a string constant) or [ConfigPermissionParam].
-	Permission param.Field[ConfigPermissionUnionParam] `json:"permission"`
+	// object with per-action permission rule overrides. Accepts
+	// [PermissionActionConfig] (a string constant) or [PermissionConfigObjectParam].
+	Permission param.Field[PermissionConfigUnionParam] `json:"permission"`
 	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
 	// of [pluginName, configObject] (where configObject is a map[string]any).
 	Plugin   param.Field[[]any]                          `json:"plugin"`
@@ -4439,58 +1970,84 @@ func (r AttachmentConfigParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// ConfigPermissionParam is the request-side counterpart of [ConfigPermission].
-// It is also the object variant of the [ConfigPermissionUnionParam] request union.
-type ConfigPermissionParam struct {
-	// Accepts [ConfigPermissionBashString] or [map[string]ConfigPermissionBashMapItem].
-	Bash              param.Field[any] `json:"bash"`
-	Edit              param.Field[any] `json:"edit"`
-	Webfetch          param.Field[any] `json:"webfetch"`
-	Read              param.Field[any] `json:"read"`
-	Glob              param.Field[any] `json:"glob"`
-	Grep              param.Field[any] `json:"grep"`
-	List              param.Field[any] `json:"list"`
-	Task              param.Field[any] `json:"task"`
-	ExternalDirectory param.Field[any] `json:"external_directory"`
-	Todowrite         param.Field[any] `json:"todowrite"`
-	Question          param.Field[any] `json:"question"`
-	Websearch         param.Field[any] `json:"websearch"`
-	Lsp               param.Field[any] `json:"lsp"`
-	DoomLoop          param.Field[any] `json:"doom_loop"`
-	Skill             param.Field[any] `json:"skill"`
+// PermissionConfigObjectParam is the request-side counterpart of
+// [PermissionConfigObject]. It is the object variant of the
+// [PermissionConfigUnionParam] request union.
+type PermissionConfigObjectParam struct {
+	Read              param.Field[PermissionRuleConfigUnionParam] `json:"read"`
+	Edit              param.Field[PermissionRuleConfigUnionParam] `json:"edit"`
+	Glob              param.Field[PermissionRuleConfigUnionParam] `json:"glob"`
+	Grep              param.Field[PermissionRuleConfigUnionParam] `json:"grep"`
+	List              param.Field[PermissionRuleConfigUnionParam] `json:"list"`
+	Bash              param.Field[PermissionRuleConfigUnionParam] `json:"bash"`
+	Task              param.Field[PermissionRuleConfigUnionParam] `json:"task"`
+	ExternalDirectory param.Field[PermissionRuleConfigUnionParam] `json:"external_directory"`
+	Lsp               param.Field[PermissionRuleConfigUnionParam] `json:"lsp"`
+	Skill             param.Field[PermissionRuleConfigUnionParam] `json:"skill"`
+	Todowrite         param.Field[PermissionActionConfig]         `json:"todowrite"`
+	Question          param.Field[PermissionActionConfig]         `json:"question"`
+	Webfetch          param.Field[PermissionActionConfig]         `json:"webfetch"`
+	Websearch         param.Field[PermissionActionConfig]         `json:"websearch"`
+	DoomLoop          param.Field[PermissionActionConfig]         `json:"doom_loop"`
+	// Additional per-tool rules beyond the properties listed above, per the
+	// OpenAPI `PermissionConfig.additionalProperties` -> `PermissionRuleConfig`
+	// mapping.
+	ExtraFields map[string]PermissionRuleConfigUnionParam `json:"-,extras"`
 }
 
-func (r ConfigPermissionParam) MarshalJSON() (data []byte, err error) {
+func (r PermissionConfigObjectParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r ConfigPermissionParam) implementsConfigPermissionUnionParam() {}
+func (r PermissionConfigObjectParam) implementsPermissionConfigUnionParam() {}
 
-// ConfigPermissionUnionParam is the request-side union for the permission field.
+// PermissionRuleConfigUnionParam is the request-side union for the OpenAPI
+// `PermissionRuleConfig` anyOf.
 //
-// Satisfied by [ConfigPermissionAction] (a short string "ask"|"allow"|"deny")
-// or [ConfigPermissionParam] (per-action permission rule overrides).
-type ConfigPermissionUnionParam interface {
-	implementsConfigPermissionUnionParam()
+// Satisfied by [PermissionActionConfig] (a short string "ask"|"allow"|"deny") or
+// [PermissionObjectConfig] (a map of pattern to action).
+type PermissionRuleConfigUnionParam interface {
+	implementsPermissionRuleConfigUnionParam()
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[ConfigPermissionUnionParam](),
+		reflect.TypeFor[PermissionRuleConfigUnionParam](),
 		"",
 		apijson.UnionVariant{
 			TypeFilter: gjson.String,
-			Type:       reflect.TypeFor[ConfigPermissionAction](),
+			Type:       reflect.TypeFor[PermissionActionConfig](),
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConfigPermissionParam](),
+			Type:       reflect.TypeFor[PermissionObjectConfig](),
 		},
 	)
 }
 
-// ConfigPermissionAction already implements ConfigPermissionUnionParam.
-func (r ConfigPermissionAction) implementsConfigPermissionUnionParam() {}
+// PermissionConfigUnionParam is the request-side union for the OpenAPI
+// `PermissionConfig` anyOf.
+//
+// Satisfied by [PermissionActionConfig] (a short string "ask"|"allow"|"deny") or
+// [PermissionConfigObjectParam] (per-tool permission rule overrides).
+type PermissionConfigUnionParam interface {
+	implementsPermissionConfigUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[PermissionConfigUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[PermissionActionConfig](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[PermissionConfigObjectParam](),
+		},
+	)
+}
 
 // McpLocalConfigParam is the request-side counterpart of [McpLocalConfig].
 type McpLocalConfigParam struct {
@@ -4571,6 +2128,29 @@ func (r McpOAuthConfigDisabledParam) MarshalJSON() (data []byte, err error) {
 
 func (r McpOAuthConfigDisabledParam) implementsMcpOAuthConfigUnionParam() {}
 
+// McpOAuthConfigUnion is the OpenAPI `McpRemoteConfig.oauth` anyOf union.
+//
+// Satisfied by [McpOAuthConfig] (a complete OAuth config) or [shared.UnionBool]
+// (a scalar false that disables OAuth auto-detection).
+type McpOAuthConfigUnion interface {
+	ImplementsMcpOAuthConfigUnion()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[McpOAuthConfigUnion](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[McpOAuthConfig](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[shared.UnionBool](),
+		},
+	)
+}
+
 // Satisfied by [McpOAuthConfigParam], [McpOAuthConfigDisabledParam].
 type McpOAuthConfigUnionParam interface {
 	implementsMcpOAuthConfigUnionParam()
@@ -4636,11 +2216,11 @@ type ConfigProviderOptionsParam struct {
 	SetCacheKey   param.Field[bool]   `json:"setCacheKey"`
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout. Accepts [shared.UnionInt] or [shared.UnionBool].
-	Timeout param.Field[any] `json:"timeout"`
+	Timeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Set to false to disable.
 	// Accepts [shared.UnionInt] or [shared.UnionBool].
-	HeaderTimeout param.Field[any]   `json:"headerTimeout"`
-	ChunkTimeout  param.Field[int64] `json:"chunkTimeout"`
+	HeaderTimeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"headerTimeout"`
+	ChunkTimeout  param.Field[int64]                             `json:"chunkTimeout"`
 }
 
 func (r ConfigProviderOptionsParam) MarshalJSON() (data []byte, err error) {
@@ -4767,64 +2347,50 @@ func (r ConfigProviderParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// configAgentSubParam is a shared param shape for all ConfigAgent sub-types
-// (Build, General, Plan, Explore, Title, Summary, Compaction).
-// All sub-agent config structs share the same fields; use any for the
-// permission field since it accepts a complex per-tool bash/string/map union.
-type configAgentSubParam struct {
-	Description param.Field[string] `json:"description"`
-	Disable     param.Field[bool]   `json:"disable"`
-	Mode        param.Field[string] `json:"mode"`
-	Model       param.Field[string] `json:"model"`
-	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[any]             `json:"permission"`
-	Prompt      param.Field[string]          `json:"prompt"`
-	Temperature param.Field[float64]         `json:"temperature"`
-	Tools       param.Field[map[string]bool] `json:"tools"`
-	TopP        param.Field[float64]         `json:"top_p"`
+// AgentConfigParam is the request-side counterpart of [AgentConfig] (the OpenAPI
+// `AgentConfig` schema). It is shared by every agent slot of [ConfigAgentParam]
+// and [ConfigModeParam], and by their user-defined entries.
+type AgentConfigParam struct {
+	Model       param.Field[string]          `json:"model"`
 	Variant     param.Field[string]          `json:"variant"`
+	Temperature param.Field[float64]         `json:"temperature"`
+	TopP        param.Field[float64]         `json:"top_p"`
+	Prompt      param.Field[string]          `json:"prompt"`
+	Tools       param.Field[map[string]bool] `json:"tools"`
+	Disable     param.Field[bool]            `json:"disable"`
+	Description param.Field[string]          `json:"description"`
+	Mode        param.Field[AgentConfigMode] `json:"mode"`
 	Hidden      param.Field[bool]            `json:"hidden"`
 	Options     param.Field[map[string]any]  `json:"options"`
-	Color       param.Field[string]          `json:"color"`
-	Steps       param.Field[int64]           `json:"steps"`
-	MaxSteps    param.Field[int64]           `json:"maxSteps"`
+	// Hex color code (e.g., #FF5733) or theme color (e.g., primary)
+	Color    param.Field[string] `json:"color"`
+	Steps    param.Field[int64]  `json:"steps"`
+	MaxSteps param.Field[int64]  `json:"maxSteps"`
+	// Permission configuration. Accepts [PermissionActionConfig] (a short string
+	// "ask"|"allow"|"deny") or [PermissionConfigObjectParam].
+	Permission param.Field[PermissionConfigUnionParam] `json:"permission"`
+	// Additional agent properties not listed above. The OpenAPI `AgentConfig`
+	// schema allows arbitrary extra properties.
+	ExtraFields map[string]any `json:"-,extras"`
 }
 
-func (r configAgentSubParam) MarshalJSON() (data []byte, err error) {
+func (r AgentConfigParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// ConfigAgentBuildParam is the request-side counterpart of [ConfigAgentBuild].
-type ConfigAgentBuildParam = configAgentSubParam
-
-// ConfigAgentGeneralParam is the request-side counterpart of [ConfigAgentGeneral].
-type ConfigAgentGeneralParam = configAgentSubParam
-
-// ConfigAgentPlanParam is the request-side counterpart of [ConfigAgentPlan].
-type ConfigAgentPlanParam = configAgentSubParam
-
-// ConfigAgentExploreParam is the request-side counterpart of [ConfigAgentExplore].
-type ConfigAgentExploreParam = configAgentSubParam
-
-// ConfigAgentTitleParam is the request-side counterpart of [ConfigAgentTitle].
-type ConfigAgentTitleParam = configAgentSubParam
-
-// ConfigAgentSummaryParam is the request-side counterpart of [ConfigAgentSummary].
-type ConfigAgentSummaryParam = configAgentSubParam
-
-// ConfigAgentCompactionParam is the request-side counterpart of [ConfigAgentCompaction].
-type ConfigAgentCompactionParam = configAgentSubParam
-
 // ConfigAgentParam is the request-side counterpart of [ConfigAgent].
-// ExtraFields allows passing arbitrary named agent configs beyond the named sub-agents.
+// ExtraFields allows passing arbitrary named agent configs beyond the named
+// sub-agents, per the OpenAPI `Config.agent.additionalProperties` mapping.
 type ConfigAgentParam struct {
-	Build      param.Field[ConfigAgentBuildParam]      `json:"build"`
-	Compaction param.Field[ConfigAgentCompactionParam] `json:"compaction"`
-	Explore    param.Field[ConfigAgentExploreParam]    `json:"explore"`
-	General    param.Field[ConfigAgentGeneralParam]    `json:"general"`
-	Plan       param.Field[ConfigAgentPlanParam]       `json:"plan"`
-	Summary    param.Field[ConfigAgentSummaryParam]    `json:"summary"`
-	Title      param.Field[ConfigAgentTitleParam]      `json:"title"`
+	Build      param.Field[AgentConfigParam] `json:"build"`
+	Compaction param.Field[AgentConfigParam] `json:"compaction"`
+	Explore    param.Field[AgentConfigParam] `json:"explore"`
+	General    param.Field[AgentConfigParam] `json:"general"`
+	Plan       param.Field[AgentConfigParam] `json:"plan"`
+	Summary    param.Field[AgentConfigParam] `json:"summary"`
+	Title      param.Field[AgentConfigParam] `json:"title"`
+	// User-defined agents keyed by agent name.
+	ExtraFields map[string]AgentConfigParam `json:"-,extras"`
 }
 
 func (r ConfigAgentParam) MarshalJSON() (data []byte, err error) {
@@ -4835,58 +2401,12 @@ func (r ConfigAgentParam) MarshalJSON() (data []byte, err error) {
 //
 // @deprecated Use ConfigAgentParam instead.
 type ConfigModeParam struct {
-	Build param.Field[ConfigModeBuildParam] `json:"build"`
-	Plan  param.Field[ConfigModePlanParam]  `json:"plan"`
+	Build param.Field[AgentConfigParam] `json:"build"`
+	Plan  param.Field[AgentConfigParam] `json:"plan"`
+	// User-defined modes keyed by mode name.
+	ExtraFields map[string]AgentConfigParam `json:"-,extras"`
 }
 
 func (r ConfigModeParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// ConfigModeBuildParam is the request-side counterpart of [ConfigModeBuild].
-type ConfigModeBuildParam struct {
-	Description param.Field[string] `json:"description"`
-	Disable     param.Field[bool]   `json:"disable"`
-	Mode        param.Field[string] `json:"mode"`
-	Model       param.Field[string] `json:"model"`
-	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[any]             `json:"permission"`
-	Prompt      param.Field[string]          `json:"prompt"`
-	Temperature param.Field[float64]         `json:"temperature"`
-	Tools       param.Field[map[string]bool] `json:"tools"`
-	TopP        param.Field[float64]         `json:"top_p"`
-	Variant     param.Field[string]          `json:"variant"`
-	Hidden      param.Field[bool]            `json:"hidden"`
-	Options     param.Field[map[string]any]  `json:"options"`
-	Color       param.Field[string]          `json:"color"`
-	Steps       param.Field[int64]           `json:"steps"`
-	MaxSteps    param.Field[int64]           `json:"maxSteps"`
-}
-
-func (r ConfigModeBuildParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// ConfigModePlanParam is the request-side counterpart of [ConfigModePlan].
-type ConfigModePlanParam struct {
-	Description param.Field[string] `json:"description"`
-	Disable     param.Field[bool]   `json:"disable"`
-	Mode        param.Field[string] `json:"mode"`
-	Model       param.Field[string] `json:"model"`
-	// Accepts string ("ask"|"allow"|"deny") or a per-tool permission map object.
-	Permission  param.Field[any]             `json:"permission"`
-	Prompt      param.Field[string]          `json:"prompt"`
-	Temperature param.Field[float64]         `json:"temperature"`
-	Tools       param.Field[map[string]bool] `json:"tools"`
-	TopP        param.Field[float64]         `json:"top_p"`
-	Variant     param.Field[string]          `json:"variant"`
-	Hidden      param.Field[bool]            `json:"hidden"`
-	Options     param.Field[map[string]any]  `json:"options"`
-	Color       param.Field[string]          `json:"color"`
-	Steps       param.Field[int64]           `json:"steps"`
-	MaxSteps    param.Field[int64]           `json:"maxSteps"`
-}
-
-func (r ConfigModePlanParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }

@@ -5,6 +5,7 @@ package shared
 type UnionBool bool
 
 func (UnionBool) ImplementsConfigProviderOptionsTimeoutUnion() {}
+func (UnionBool) ImplementsMcpOAuthConfigUnion()               {}
 
 type UnionInt int64
 

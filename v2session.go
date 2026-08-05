@@ -1246,10 +1246,9 @@ type V2SessionMessageAssistantReasoningContent struct {
 	ID   string `json:"id,required"`
 	Text string `json:"text,required"`
 	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any `json:"providerMetadata"`
-	// This field can have the runtime type of [V2SessionMessageAssistantReasoningContentTime].
-	Time any                                           `json:"time"`
-	JSON v2SessionMessageAssistantReasoningContentJSON `json:"-"`
+	ProviderMetadata any                                            `json:"providerMetadata"`
+	Time             *V2SessionMessageAssistantReasoningContentTime `json:"time"`
+	JSON             v2SessionMessageAssistantReasoningContentJSON  `json:"-"`
 }
 
 type v2SessionMessageAssistantReasoningContentJSON struct {
@@ -1348,6 +1347,17 @@ func (r *ToolFileContent) UnmarshalJSON(data []byte) (err error) {
 
 func (r toolFileContentJSON) RawJSON() string {
 	return r.raw
+}
+
+func (r ToolTextContent) implementsLLMToolContentUnion() {}
+
+func (r ToolFileContent) implementsLLMToolContentUnion() {}
+
+// LLMToolContentUnion is satisfied by [ToolTextContent] or [ToolFileContent].
+// It corresponds to the OpenAPI schema LLMToolContent (anyOf ToolTextContent,
+// ToolFileContent) and the JS SDK type LlmToolContent.
+type LLMToolContentUnion interface {
+	implementsLLMToolContentUnion()
 }
 
 // ===== V2 Session Message Tool State Types =====
@@ -1461,8 +1471,8 @@ type V2SessionMessageToolStateRunning struct {
 	Status     V2SessionMessageToolStateRunningStatus `json:"status,required"`
 	Input      map[string]any                         `json:"input,required"`
 	Structured map[string]any                         `json:"structured,required"`
-	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content any                                  `json:"content,required"`
+	// Each element can be [ToolTextContent] or [ToolFileContent].
+	Content []LLMToolContentUnion                `json:"content,required"`
 	JSON    v2SessionMessageToolStateRunningJSON `json:"-"`
 }
 
@@ -1503,8 +1513,8 @@ type V2SessionMessageToolStateCompleted struct {
 	Status     V2SessionMessageToolStateCompletedStatus `json:"status,required"`
 	Input      map[string]any                           `json:"input,required"`
 	Structured map[string]any                           `json:"structured,required"`
-	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     any                      `json:"content,required"`
+	// Each element can be [ToolTextContent] or [ToolFileContent].
+	Content     []LLMToolContentUnion    `json:"content,required"`
 	Attachments []V2PromptFileAttachment `json:"attachments"`
 	// This field can have the runtime type of [[]string].
 	OutputPaths any `json:"outputPaths"`
@@ -1553,9 +1563,9 @@ type V2SessionMessageToolStateError struct {
 	Status     V2SessionMessageToolStateErrorStatus `json:"status,required"`
 	Input      map[string]any                       `json:"input,required"`
 	Structured map[string]any                       `json:"structured,required"`
-	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content any                 `json:"content,required"`
-	Error   SessionErrorUnknown `json:"error,required"`
+	// Each element can be [ToolTextContent] or [ToolFileContent].
+	Content []LLMToolContentUnion `json:"content,required"`
+	Error   SessionErrorUnknown   `json:"error,required"`
 	// This field can have the runtime type of [any].
 	Result any                                `json:"result"`
 	JSON   v2SessionMessageToolStateErrorJSON `json:"-"`
@@ -2579,6 +2589,20 @@ func (r v2SessionDurableEventRevertCommittedJSON) RawJSON() string {
 func (V2SessionDurableEventRevertCommitted) implementsV2SessionDurableEvent() {}
 
 func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[LLMToolContentUnion](),
+		"type",
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeFor[ToolTextContent](),
+		},
+		apijson.UnionVariant{
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "file",
+			Type:               reflect.TypeFor[ToolFileContent](),
+		},
+	)
 	apijson.RegisterUnion(
 		reflect.TypeFor[V2SessionMessageToolStateUnion](),
 		"",
