@@ -274,12 +274,11 @@ func (r v2IntegrationAttemptStatusResponseJSON) RawJSON() string {
 type IntegrationInfo struct {
 	ID   string `json:"id,required"`
 	Name string `json:"name,required"`
-	// This field can have the runtime type of []IntegrationOAuthMethod,
-	// []IntegrationKeyMethod, []IntegrationEnvMethod.
-	Methods any `json:"methods,required"`
-	// This field can have the runtime type of []ConnectionCredentialInfo,
-	// []ConnectionEnvInfo.
-	Connections any                 `json:"connections,required"`
+	// Each element can be [IntegrationOAuthMethod], [IntegrationKeyMethod] or
+	// [IntegrationEnvMethod].
+	Methods []IntegrationMethod `json:"methods,required"`
+	// Each element can be [ConnectionCredentialInfo] or [ConnectionEnvInfo].
+	Connections []ConnectionInfo    `json:"connections,required"`
 	JSON        integrationInfoJSON `json:"-"`
 }
 
@@ -303,6 +302,68 @@ func (r integrationInfoJSON) RawJSON() string {
 
 // ===== IntegrationMethod Union =====
 
+// IntegrationMethod represents an integration method, which can be OAuth-based,
+// key-based or environment-variable-based.
+type IntegrationMethod struct {
+	ID string `json:"id"`
+	// Each element can be [IntegrationTextPrompt] or [IntegrationSelectPrompt].
+	Prompts []IntegrationPrompt   `json:"prompts"`
+	Type    IntegrationMethodType `json:"type"`
+	Label   string                `json:"label"`
+	Names   []string              `json:"names"`
+	JSON    integrationMethodJSON `json:"-"`
+	union   IntegrationMethodUnion
+}
+
+// integrationMethodJSON contains the JSON metadata for the struct [IntegrationMethod]
+type integrationMethodJSON struct {
+	ID          apijson.Field
+	Prompts     apijson.Field
+	Type        apijson.Field
+	Label       apijson.Field
+	Names       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r integrationMethodJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *IntegrationMethod) UnmarshalJSON(data []byte) (err error) {
+	*r = IntegrationMethod{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [IntegrationMethodUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [IntegrationOAuthMethod],
+// [IntegrationKeyMethod], [IntegrationEnvMethod].
+func (r IntegrationMethod) AsUnion() IntegrationMethodUnion {
+	return r.union
+}
+
+type IntegrationMethodType string
+
+const (
+	IntegrationMethodTypeOAuth IntegrationMethodType = "oauth"
+	IntegrationMethodTypeKey   IntegrationMethodType = "key"
+	IntegrationMethodTypeEnv   IntegrationMethodType = "env"
+)
+
+func (r IntegrationMethodType) IsKnown() bool {
+	switch r {
+	case IntegrationMethodTypeOAuth, IntegrationMethodTypeKey, IntegrationMethodTypeEnv:
+		return true
+	}
+	return false
+}
+
 // IntegrationMethodUnion represents the union of integration method types.
 // Possible runtime types are [IntegrationOAuthMethod], [IntegrationKeyMethod],
 // [IntegrationEnvMethod].
@@ -316,7 +377,7 @@ type IntegrationOAuthMethod struct {
 	Type  IntegrationOAuthMethodType `json:"type,required"`
 	Label string                     `json:"label,required"`
 	// Each element can be [IntegrationTextPrompt] or [IntegrationSelectPrompt].
-	Prompts []IntegrationPromptUnion   `json:"prompts"`
+	Prompts []IntegrationPrompt        `json:"prompts"`
 	JSON    integrationOAuthMethodJSON `json:"-"`
 }
 
@@ -435,23 +496,84 @@ func (r IntegrationEnvMethodType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[IntegrationMethodUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationOAuthMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "oauth",
+			Type:               reflect.TypeFor[IntegrationOAuthMethod](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationKeyMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "key",
+			Type:               reflect.TypeFor[IntegrationKeyMethod](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationEnvMethod](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "env",
+			Type:               reflect.TypeFor[IntegrationEnvMethod](),
 		},
 	)
 }
 
 // ===== ConnectionInfo Union =====
+
+// ConnectionInfo represents a connection, which can be credential-based or
+// environment-variable-based.
+type ConnectionInfo struct {
+	Type  ConnectionInfoType `json:"type"`
+	ID    string             `json:"id"`
+	Label string             `json:"label"`
+	Name  string             `json:"name"`
+	JSON  connectionInfoJSON `json:"-"`
+	union ConnectionInfoUnion
+}
+
+// connectionInfoJSON contains the JSON metadata for the struct [ConnectionInfo]
+type connectionInfoJSON struct {
+	Type        apijson.Field
+	ID          apijson.Field
+	Label       apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r connectionInfoJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ConnectionInfo) UnmarshalJSON(data []byte) (err error) {
+	*r = ConnectionInfo{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ConnectionInfoUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [ConnectionCredentialInfo],
+// [ConnectionEnvInfo].
+func (r ConnectionInfo) AsUnion() ConnectionInfoUnion {
+	return r.union
+}
+
+type ConnectionInfoType string
+
+const (
+	ConnectionInfoTypeCredential ConnectionInfoType = "credential"
+	ConnectionInfoTypeEnv        ConnectionInfoType = "env"
+)
+
+func (r ConnectionInfoType) IsKnown() bool {
+	switch r {
+	case ConnectionInfoTypeCredential, ConnectionInfoTypeEnv:
+		return true
+	}
+	return false
+}
 
 // ConnectionInfoUnion represents the union of connection types.
 // Possible runtime types are [ConnectionCredentialInfo], [ConnectionEnvInfo].
@@ -542,14 +664,16 @@ func (r ConnectionEnvInfoType) IsKnown() bool {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[ConnectionInfoUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConnectionCredentialInfo](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "credential",
+			Type:               reflect.TypeFor[ConnectionCredentialInfo](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[ConnectionEnvInfo](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "env",
+			Type:               reflect.TypeFor[ConnectionEnvInfo](),
 		},
 	)
 }
@@ -557,14 +681,16 @@ func init() {
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[IntegrationPromptUnion](),
-		"",
+		"type",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationTextPrompt](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "text",
+			Type:               reflect.TypeFor[IntegrationTextPrompt](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[IntegrationSelectPrompt](),
+			TypeFilter:         gjson.JSON,
+			DiscriminatorValue: "select",
+			Type:               reflect.TypeFor[IntegrationSelectPrompt](),
 		},
 	)
 }
@@ -649,13 +775,11 @@ func (r integrationAttemptTimeJSON) RawJSON() string {
 // failed, or expired.
 type IntegrationAttemptStatus struct {
 	Status IntegrationAttemptStatusType `json:"status,required"`
-	// Message is present only when status is "failed". This field can have the
-	// runtime type of [string].
-	Message any `json:"message"`
-	// This field can have the runtime type of [IntegrationAttemptTime].
-	Time  any                          `json:"time,required"`
-	JSON  integrationAttemptStatusJSON `json:"-"`
-	union IntegrationAttemptStatusUnion
+	// Message is present only when status is "failed".
+	Message string                       `json:"message"`
+	Time    IntegrationAttemptTime       `json:"time,required"`
+	JSON    integrationAttemptStatusJSON `json:"-"`
+	union   IntegrationAttemptStatusUnion
 }
 
 // integrationAttemptStatusJSON contains the JSON metadata for the struct [IntegrationAttemptStatus]
@@ -944,6 +1068,68 @@ func (r IntegrationSelectPromptType) IsKnown() bool {
 }
 
 // ===== IntegrationPrompt Union =====
+
+// IntegrationPrompt represents a configuration prompt for an integration method,
+// which can be a text input or a select dropdown.
+type IntegrationPrompt struct {
+	Type        IntegrationPromptType     `json:"type"`
+	Key         string                    `json:"key"`
+	Message     string                    `json:"message"`
+	Placeholder string                    `json:"placeholder"`
+	Options     []IntegrationSelectOption `json:"options"`
+	When        IntegrationWhen           `json:"when"`
+	JSON        integrationPromptJSON     `json:"-"`
+	union       IntegrationPromptUnion
+}
+
+// integrationPromptJSON contains the JSON metadata for the struct [IntegrationPrompt]
+type integrationPromptJSON struct {
+	Type        apijson.Field
+	Key         apijson.Field
+	Message     apijson.Field
+	Placeholder apijson.Field
+	Options     apijson.Field
+	When        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r integrationPromptJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *IntegrationPrompt) UnmarshalJSON(data []byte) (err error) {
+	*r = IntegrationPrompt{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [IntegrationPromptUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [IntegrationTextPrompt],
+// [IntegrationSelectPrompt].
+func (r IntegrationPrompt) AsUnion() IntegrationPromptUnion {
+	return r.union
+}
+
+type IntegrationPromptType string
+
+const (
+	IntegrationPromptTypeText   IntegrationPromptType = "text"
+	IntegrationPromptTypeSelect IntegrationPromptType = "select"
+)
+
+func (r IntegrationPromptType) IsKnown() bool {
+	switch r {
+	case IntegrationPromptTypeText, IntegrationPromptTypeSelect:
+		return true
+	}
+	return false
+}
 
 // IntegrationPromptUnion represents the union of prompt types.
 // Possible runtime types are [IntegrationTextPrompt], [IntegrationSelectPrompt].

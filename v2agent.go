@@ -79,10 +79,10 @@ type V2AgentInfo struct {
 	// preset name ("primary"|"secondary"|"accent"|"success"|"warning"|"error"|
 	// "info").
 	// This field can have the runtime type of [string], [AgentColor].
-	Color       any                `json:"color"`
-	Steps       int64              `json:"steps"`
-	Permissions []PermissionV2Rule `json:"permissions,required"`
-	JSON        v2AgentInfoJSON    `json:"-"`
+	Color       any                 `json:"color"`
+	Steps       int64               `json:"steps"`
+	Permissions PermissionV2Ruleset `json:"permissions,required"`
+	JSON        v2AgentInfoJSON     `json:"-"`
 	colorUnion  AgentColorUnion
 }
 
@@ -232,10 +232,9 @@ func (r ModelRefParam) MarshalJSON() (data []byte, err error) {
 }
 
 type ProviderRequest struct {
-	Headers map[string]string `json:"headers,required"`
-	// This field can have the runtime type of [map[string]any].
-	Body any                 `json:"body,required"`
-	JSON providerRequestJSON `json:"-"`
+	Headers map[string]string   `json:"headers,required"`
+	Body    map[string]any      `json:"body,required"`
+	JSON    providerRequestJSON `json:"-"`
 }
 
 type providerRequestJSON struct {
@@ -275,6 +274,9 @@ func (r *PermissionV2Rule) UnmarshalJSON(data []byte) (err error) {
 func (r permissionV2RuleJSON) RawJSON() string {
 	return r.raw
 }
+
+// PermissionV2Ruleset is used for response deserialization.
+type PermissionV2Ruleset []PermissionV2Rule
 
 type PermissionV2Effect string
 

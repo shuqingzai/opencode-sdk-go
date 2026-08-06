@@ -107,7 +107,7 @@ func init() {
 }
 
 type OAuth struct {
-	Type          string    `json:"type,required"`
+	Type          OAuthType `json:"type,required"`
 	Refresh       string    `json:"refresh,required"`
 	Access        string    `json:"access,required"`
 	Expires       int64     `json:"expires,required"`
@@ -138,8 +138,22 @@ func (r oauthJSON) RawJSON() string {
 
 func (r OAuth) implementsAuth() {}
 
+type OAuthType string
+
+const (
+	OAuthTypeOAuth OAuthType = "oauth"
+)
+
+func (r OAuthType) IsKnown() bool {
+	switch r {
+	case OAuthTypeOAuth:
+		return true
+	}
+	return false
+}
+
 type ApiAuth struct {
-	Type     string            `json:"type,required"`
+	Type     ApiAuthType       `json:"type,required"`
 	Key      string            `json:"key,required"`
 	Metadata map[string]string `json:"metadata"`
 	JSON     apiAuthJSON       `json:"-"`
@@ -164,8 +178,22 @@ func (r apiAuthJSON) RawJSON() string {
 
 func (r ApiAuth) implementsAuth() {}
 
+type ApiAuthType string
+
+const (
+	ApiAuthTypeAPI ApiAuthType = "api"
+)
+
+func (r ApiAuthType) IsKnown() bool {
+	switch r {
+	case ApiAuthTypeAPI:
+		return true
+	}
+	return false
+}
+
 type WellKnownAuth struct {
-	Type  string            `json:"type,required"`
+	Type  WellKnownAuthType `json:"type,required"`
 	Key   string            `json:"key,required"`
 	Token string            `json:"token,required"`
 	JSON  wellKnownAuthJSON `json:"-"`
@@ -190,6 +218,20 @@ func (r wellKnownAuthJSON) RawJSON() string {
 
 func (r WellKnownAuth) implementsAuth() {}
 
+type WellKnownAuthType string
+
+const (
+	WellKnownAuthTypeWellKnown WellKnownAuthType = "wellknown"
+)
+
+func (r WellKnownAuthType) IsKnown() bool {
+	switch r {
+	case WellKnownAuthTypeWellKnown:
+		return true
+	}
+	return false
+}
+
 // Satisfied by [OAuthParam], [ApiAuthParam], or [WellKnownAuthParam].
 type AuthParam interface {
 	implementsAuthParam()
@@ -197,12 +239,12 @@ type AuthParam interface {
 
 // OAuthParam is the request-side counterpart of [OAuth] (OpenAPI OAuth schema).
 type OAuthParam struct {
-	Type          param.Field[string] `json:"type,required"`
-	Refresh       param.Field[string] `json:"refresh,required"`
-	Access        param.Field[string] `json:"access,required"`
-	Expires       param.Field[int64]  `json:"expires,required"`
-	AccountID     param.Field[string] `json:"accountId"`
-	EnterpriseURL param.Field[string] `json:"enterpriseUrl"`
+	Type          param.Field[OAuthParamType] `json:"type,required"`
+	Refresh       param.Field[string]         `json:"refresh,required"`
+	Access        param.Field[string]         `json:"access,required"`
+	Expires       param.Field[int64]          `json:"expires,required"`
+	AccountID     param.Field[string]         `json:"accountId"`
+	EnterpriseURL param.Field[string]         `json:"enterpriseUrl"`
 }
 
 func (r OAuthParam) MarshalJSON() (data []byte, err error) {
@@ -211,9 +253,23 @@ func (r OAuthParam) MarshalJSON() (data []byte, err error) {
 
 func (r OAuthParam) implementsAuthParam() {}
 
+type OAuthParamType string
+
+const (
+	OAuthParamTypeOAuth OAuthParamType = "oauth"
+)
+
+func (r OAuthParamType) IsKnown() bool {
+	switch r {
+	case OAuthParamTypeOAuth:
+		return true
+	}
+	return false
+}
+
 // ApiAuthParam is the request-side counterpart of [ApiAuth] (OpenAPI ApiAuth schema).
 type ApiAuthParam struct {
-	Type     param.Field[string]            `json:"type,required"`
+	Type     param.Field[ApiAuthParamType]  `json:"type,required"`
 	Key      param.Field[string]            `json:"key,required"`
 	Metadata param.Field[map[string]string] `json:"metadata"`
 }
@@ -224,11 +280,25 @@ func (r ApiAuthParam) MarshalJSON() (data []byte, err error) {
 
 func (r ApiAuthParam) implementsAuthParam() {}
 
+type ApiAuthParamType string
+
+const (
+	ApiAuthParamTypeAPI ApiAuthParamType = "api"
+)
+
+func (r ApiAuthParamType) IsKnown() bool {
+	switch r {
+	case ApiAuthParamTypeAPI:
+		return true
+	}
+	return false
+}
+
 // WellKnownAuthParam is the request-side counterpart of [WellKnownAuth] (OpenAPI WellKnownAuth schema).
 type WellKnownAuthParam struct {
-	Type  param.Field[string] `json:"type,required"`
-	Key   param.Field[string] `json:"key,required"`
-	Token param.Field[string] `json:"token,required"`
+	Type  param.Field[WellKnownAuthParamType] `json:"type,required"`
+	Key   param.Field[string]                 `json:"key,required"`
+	Token param.Field[string]                 `json:"token,required"`
 }
 
 func (r WellKnownAuthParam) MarshalJSON() (data []byte, err error) {
@@ -236,3 +306,17 @@ func (r WellKnownAuthParam) MarshalJSON() (data []byte, err error) {
 }
 
 func (r WellKnownAuthParam) implementsAuthParam() {}
+
+type WellKnownAuthParamType string
+
+const (
+	WellKnownAuthParamTypeWellKnown WellKnownAuthParamType = "wellknown"
+)
+
+func (r WellKnownAuthParamType) IsKnown() bool {
+	switch r {
+	case WellKnownAuthParamTypeWellKnown:
+		return true
+	}
+	return false
+}

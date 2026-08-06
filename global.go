@@ -999,7 +999,7 @@ func init() {
 type SyncEventResponse struct {
 	Type      SyncEventResponseType      `json:"type,required"`
 	SyncEvent SyncEventResponseSyncEvent `json:"syncEvent,required"`
-	ID        string                     `json:"id"`
+	ID        string                     `json:"id,required"`
 	JSON      syncEventResponseJSON      `json:"-"`
 }
 
@@ -1338,10 +1338,10 @@ type SyncEventResponseSyncEvent struct {
 	// [EventListResponseEventSessionNextAgentSwitchedProperties],
 	// [EventListResponseEventSessionNextModelSwitchedProperties],
 	// [EventListResponseEventSessionNextPromptedProperties],
-	// [EventListResponseEventSessionNextPromptAdmittedProperties],
+	// [SyncEventSessionNextPromptAdmittedProperties],
 	// [EventListResponseEventSessionNextSyntheticProperties],
 	// [EventListResponseEventSessionNextShellStartedProperties],
-	// [EventListResponseEventSessionNextContextUpdatedProperties],
+	// [SyncEventSessionNextContextUpdatedProperties],
 	// [EventListResponseEventSessionNextShellEndedProperties],
 	// [EventListResponseEventSessionNextStepStartedProperties],
 	// [EventListResponseEventSessionNextStepEndedProperties],

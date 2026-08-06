@@ -35,25 +35,25 @@ func TestEventOptionalObjectFieldsUseConcreteTypes(t *testing.T) {
 			name:  "permission asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionAskedProperties](),
 			field: "Tool",
-			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventPermissionAskedPropertiesTool]()),
+			want:  reflect.TypeFor[opencode.EventListResponseEventPermissionAskedPropertiesTool](),
 		},
 		{
 			name:  "question asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionAskedProperties](),
 			field: "Tool",
-			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventQuestionAskedPropertiesTool]()),
+			want:  reflect.TypeFor[opencode.QuestionTool](),
 		},
 		{
 			name:  "permission v2 asked source",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventPermissionV2AskedProperties](),
 			field: "Source",
-			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventPermissionV2AskedPropertiesSource]()),
+			want:  reflect.TypeFor[opencode.PermissionV2Source](),
 		},
 		{
 			name:  "question v2 asked tool",
 			typ:   reflect.TypeFor[opencode.EventListResponseEventQuestionV2AskedProperties](),
 			field: "Tool",
-			want:  reflect.PointerTo(reflect.TypeFor[opencode.EventListResponseEventQuestionV2AskedPropertiesTool]()),
+			want:  reflect.TypeFor[opencode.QuestionV2Tool](),
 		},
 	}
 

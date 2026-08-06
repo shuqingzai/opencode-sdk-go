@@ -552,23 +552,6 @@ func (r AgentPartInputSourceParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// OutputFormatUnionParam is the request-side counterpart of [OutputFormatUnion].
-//
-// Satisfied by [OutputFormatTextParam], [OutputFormatJsonSchemaParam].
-type OutputFormatUnionParam interface {
-	implementsOutputFormatUnionParam()
-}
-
-type OutputFormatTextParam struct {
-	Type param.Field[OutputFormatTextType] `json:"type,required"`
-}
-
-func (r OutputFormatTextParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r OutputFormatTextParam) implementsOutputFormatUnionParam() {}
-
 type OutputFormatTextType string
 
 const (
@@ -582,18 +565,6 @@ func (r OutputFormatTextType) IsKnown() bool {
 	}
 	return false
 }
-
-type OutputFormatJsonSchemaParam struct {
-	Type       param.Field[OutputFormatJsonSchemaType] `json:"type,required"`
-	Schema     param.Field[any]                        `json:"schema,required"`
-	RetryCount param.Field[int64]                      `json:"retryCount"`
-}
-
-func (r OutputFormatJsonSchemaParam) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r OutputFormatJsonSchemaParam) implementsOutputFormatUnionParam() {}
 
 type OutputFormatJsonSchemaType string
 
@@ -609,21 +580,6 @@ func (r OutputFormatJsonSchemaType) IsKnown() bool {
 	return false
 }
 
-func init() {
-	apijson.RegisterUnion(
-		reflect.TypeFor[OutputFormatUnionParam](),
-		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[OutputFormatTextParam](),
-		},
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeFor[OutputFormatJsonSchemaParam](),
-		},
-	)
-}
-
 // OutputFormatUnion is the OpenAPI `OutputFormat` anyOf union, used by
 // [UserMessage.Format].
 //
@@ -633,7 +589,7 @@ type OutputFormatUnion interface {
 }
 
 // OutputFormatText is the Response-side representation of the OpenAPI
-// OutputFormatTextParam schema (`type: "text"`).
+// `OutputFormatText` schema (`type: "text"`).
 type OutputFormatText struct {
 	Type OutputFormatTextType `json:"type,required"`
 	JSON outputFormatTextJSON `json:"-"`
@@ -657,8 +613,8 @@ func (r outputFormatTextJSON) RawJSON() string {
 
 func (r OutputFormatText) implementsOutputFormatUnion() {}
 
-// OutputFormatJsonSchema is the Response-side representation of the
-// OpenAPI OutputFormatJsonSchemaParam schema (`type: "json_schema"`).
+// OutputFormatJsonSchema is the Response-side representation of the OpenAPI
+// `OutputFormatJsonSchema` schema (`type: "json_schema"`).
 type OutputFormatJsonSchema struct {
 	Schema     map[string]any             `json:"schema,required"`
 	Type       OutputFormatJsonSchemaType `json:"type,required"`
@@ -875,7 +831,7 @@ type AssistantMessageError struct {
 	// This field can have the runtime type of [shared.ProviderAuthErrorData],
 	// [shared.UnknownErrorData], [any], [shared.MessageAbortedErrorData],
 	// [shared.StructuredOutputErrorData], [shared.ContextOverflowErrorData],
-	// [shared.APIErrorData].
+	// [shared.ContentFilterErrorData], [shared.APIErrorData].
 	Data  any                       `json:"data,required"`
 	Name  AssistantMessageErrorName `json:"name,required"`
 	JSON  assistantMessageErrorJSON `json:"-"`
@@ -1069,7 +1025,7 @@ type FilePartSource struct {
 	Type FilePartSourceType `json:"type,required"`
 	Kind int64              `json:"kind"`
 	Name string             `json:"name"`
-	// This field can have the runtime type of [SymbolSourceRange].
+	// This field can have the runtime type of [Range].
 	Range any                `json:"range"`
 	JSON  filePartSourceJSON `json:"-"`
 	union FilePartSourceUnion
@@ -1299,8 +1255,7 @@ type Message struct {
 	// This field can have the runtime type of [UserMessageSummary], [bool].
 	Summary any    `json:"summary"`
 	Finish  string `json:"finish"`
-	// This field can have the runtime type of [string].
-	System any `json:"system"`
+	System  string `json:"system"`
 	// This field can have the runtime type of [AssistantMessageTokens].
 	Tokens any         `json:"tokens"`
 	JSON   messageJSON `json:"-"`
@@ -1403,7 +1358,7 @@ type Part struct {
 	Hash        string             `json:"hash"`
 	Ignored     bool               `json:"ignored"`
 	// This field can have the runtime type of [map[string]any].
-	Metadata any              `json:"metadata"`
+	Metadata map[string]any   `json:"metadata"`
 	Mime     string           `json:"mime"`
 	Model    SubtaskPartModel `json:"model"`
 	Name     string           `json:"name"`
@@ -1852,8 +1807,8 @@ type Session struct {
 	WorkspaceID string            `json:"workspaceID"`
 	Permission  PermissionRuleset `json:"permission"`
 	// This field can have the runtime type of [map[string]any].
-	Metadata any         `json:"metadata"`
-	JSON     sessionJSON `json:"-"`
+	Metadata map[string]any `json:"metadata"`
+	JSON     sessionJSON    `json:"-"`
 }
 
 // sessionJSON contains the JSON metadata for the struct [Session]
@@ -2251,7 +2206,7 @@ type SymbolSource struct {
 	Kind  int64              `json:"kind,required"`
 	Name  string             `json:"name,required"`
 	Path  string             `json:"path,required"`
-	Range SymbolSourceRange  `json:"range,required"`
+	Range Range              `json:"range,required"`
 	Text  FilePartSourceText `json:"text,required"`
 	Type  SymbolSourceType   `json:"type,required"`
 	JSON  symbolSourceJSON   `json:"-"`
@@ -2279,74 +2234,14 @@ func (r symbolSourceJSON) RawJSON() string {
 
 func (r SymbolSource) implementsFilePartSource() {}
 
-type SymbolSourceRange struct {
-	End   SymbolSourceRangeEnd   `json:"end,required"`
-	Start SymbolSourceRangeStart `json:"start,required"`
-	JSON  symbolSourceRangeJSON  `json:"-"`
-}
+// Deprecated: use [Range] instead.
+type SymbolSourceRange = Range
 
-// symbolSourceRangeJSON contains the JSON metadata for the struct
-// [SymbolSourceRange]
-type symbolSourceRangeJSON struct {
-	End         apijson.Field
-	Start       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+// Deprecated: use [Position] instead.
+type SymbolSourceRangeEnd = Position
 
-func (r *SymbolSourceRange) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r symbolSourceRangeJSON) RawJSON() string {
-	return r.raw
-}
-
-type SymbolSourceRangeEnd struct {
-	Character int64                    `json:"character,required"`
-	Line      int64                    `json:"line,required"`
-	JSON      symbolSourceRangeEndJSON `json:"-"`
-}
-
-// symbolSourceRangeEndJSON contains the JSON metadata for the struct
-// [SymbolSourceRangeEnd]
-type symbolSourceRangeEndJSON struct {
-	Character   apijson.Field
-	Line        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SymbolSourceRangeEnd) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r symbolSourceRangeEndJSON) RawJSON() string {
-	return r.raw
-}
-
-type SymbolSourceRangeStart struct {
-	Character int64                      `json:"character,required"`
-	Line      int64                      `json:"line,required"`
-	JSON      symbolSourceRangeStartJSON `json:"-"`
-}
-
-// symbolSourceRangeStartJSON contains the JSON metadata for the struct
-// [SymbolSourceRangeStart]
-type symbolSourceRangeStartJSON struct {
-	Character   apijson.Field
-	Line        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SymbolSourceRangeStart) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r symbolSourceRangeStartJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [Position] instead.
+type SymbolSourceRangeStart = Position
 
 type SymbolSourceType string
 
@@ -2730,14 +2625,12 @@ func (r ToolPart) implementsPart() {}
 type ToolPartState struct {
 	Status ToolPartStateStatus `json:"status,required"`
 	// This field can have the runtime type of [[]FilePart].
-	Attachments any    `json:"attachments"`
-	Error       string `json:"error"`
-	// This field can have the runtime type of [map[string]any].
-	Input any `json:"input"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any    `json:"metadata"`
-	Output   string `json:"output"`
-	Raw      string `json:"raw"`
+	Attachments any            `json:"attachments"`
+	Error       string         `json:"error"`
+	Input       map[string]any `json:"input"`
+	Metadata    map[string]any `json:"metadata"`
+	Output      string         `json:"output"`
+	Raw         string         `json:"raw"`
 	// This field can have the runtime type of [ToolStateRunningTime],
 	// [ToolStateCompletedTime], [ToolStateErrorTime].
 	Time  any               `json:"time"`

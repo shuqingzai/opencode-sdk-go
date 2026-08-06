@@ -117,7 +117,7 @@ func TestSyncStealParamsMarshalJSON_Empty(t *testing.T) {
 func TestSyncHistoryListParamsMarshalJSON_NonEmpty(t *testing.T) {
 	t.Parallel()
 	params := SyncHistoryListParams{
-		Body: SyncHistoryListParamsBody{"agg_001": 10, "agg_002": 5},
+		Body: F(SyncHistoryListParamsBody{"agg_001": 10, "agg_002": 5}),
 	}
 
 	data, err := params.MarshalJSON()

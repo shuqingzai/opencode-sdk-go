@@ -432,3 +432,128 @@ func TestV2EventSessionErrorDataAsError(t *testing.T) {
 		t.Errorf("ContextOverflowError.Data.Message: got %q, want %q", e.Data.Message, "context too long")
 	}
 }
+
+// TestV2EventSessionStatusDataStatusUnion verifies that
+// V2EventSessionStatusData.Status decodes into the correct concrete variant for
+// each SessionStatus anyOf member (idle/retry/busy), both through the public
+// `any` field and through the AsStatus() accessor.
+func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		rawJSON  string
+		assertFn func(t *testing.T, d opencode.V2EventSessionStatusData)
+	}{
+		{
+			name:    "idle",
+			rawJSON: `{"sessionID":"ses_1","status":{"type":"idle"}}`,
+			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
+				t.Helper()
+				if _, ok := d.Status.(opencode.SessionStatusIdle); !ok {
+					t.Fatalf("Status: got %T, want opencode.SessionStatusIdle", d.Status)
+				}
+				if _, ok := d.AsStatus().(opencode.SessionStatusIdle); !ok {
+					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusIdle", d.AsStatus())
+				}
+			},
+		},
+		{
+			name:    "retry",
+			rawJSON: `{"sessionID":"ses_1","status":{"type":"retry","attempt":2,"message":"busy","next":3,"action":{"reason":"rate limited","provider":"openai","title":"retry","message":"try again","label":"Retry"}}}`,
+			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
+				t.Helper()
+				s, ok := d.Status.(opencode.SessionStatusRetry)
+				if !ok {
+					t.Fatalf("Status: got %T, want opencode.SessionStatusRetry", d.Status)
+				}
+				if s.Attempt != 2 {
+					t.Errorf("Status.Attempt: got %d, want 2", s.Attempt)
+				}
+				if s.Next != 3 {
+					t.Errorf("Status.Next: got %d, want 3", s.Next)
+				}
+				if s.Action.Provider != "openai" {
+					t.Errorf("Status.Action.Provider: got %q, want %q", s.Action.Provider, "openai")
+				}
+				if _, ok := d.AsStatus().(opencode.SessionStatusRetry); !ok {
+					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusRetry", d.AsStatus())
+				}
+			},
+		},
+		{
+			name:    "busy",
+			rawJSON: `{"sessionID":"ses_1","status":{"type":"busy"}}`,
+			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
+				t.Helper()
+				if _, ok := d.Status.(opencode.SessionStatusBusy); !ok {
+					t.Fatalf("Status: got %T, want opencode.SessionStatusBusy", d.Status)
+				}
+				if _, ok := d.AsStatus().(opencode.SessionStatusBusy); !ok {
+					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusBusy", d.AsStatus())
+				}
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var d opencode.V2EventSessionStatusData
+			if err := json.Unmarshal([]byte(tc.rawJSON), &d); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			if d.SessionID != "ses_1" {
+				t.Errorf("SessionID: got %q, want %q", d.SessionID, "ses_1")
+			}
+			tc.assertFn(t, d)
+		})
+	}
+}
+
+// TestV2EventSessionStatusDataStatusRawJSON verifies that the raw JSON metadata
+// is preserved after the shadow-routed decode.
+func TestV2EventSessionStatusDataStatusRawJSON(t *testing.T) {
+	t.Parallel()
+	raw := `{"sessionID":"ses_1","status":{"type":"busy"}}`
+	var d opencode.V2EventSessionStatusData
+	if err := json.Unmarshal([]byte(raw), &d); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got := d.JSON.RawJSON(); got != raw {
+		t.Errorf("RawJSON(): got %s, want %s", got, raw)
+	}
+}
+
+// TestV2EventTuiCommandExecuteDataCommand verifies that Command decodes into
+// the concrete string enum type (known values and arbitrary strings).
+func TestV2EventTuiCommandExecuteDataCommand(t *testing.T) {
+	t.Parallel()
+	t.Run("known_value", func(t *testing.T) {
+		t.Parallel()
+		raw := `{"command":"prompt.submit"}`
+		var d opencode.V2EventTuiCommandExecuteData
+		if err := json.Unmarshal([]byte(raw), &d); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if d.Command != opencode.V2EventTuiCommandExecuteCommandCommandPromptSubmit {
+			t.Errorf("Command: got %q, want %q", d.Command, opencode.V2EventTuiCommandExecuteCommandCommandPromptSubmit)
+		}
+		if !d.Command.IsKnown() {
+			t.Errorf("Command.IsKnown(): got false, want true")
+		}
+	})
+	t.Run("arbitrary_string", func(t *testing.T) {
+		t.Parallel()
+		raw := `{"command":"custom.command"}`
+		var d opencode.V2EventTuiCommandExecuteData
+		if err := json.Unmarshal([]byte(raw), &d); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if d.Command != "custom.command" {
+			t.Errorf("Command: got %q, want %q", d.Command, "custom.command")
+		}
+		if d.Command.IsKnown() {
+			t.Errorf("Command.IsKnown(): got true, want false")
+		}
+	})
+}

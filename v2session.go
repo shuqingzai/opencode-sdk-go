@@ -567,10 +567,10 @@ func (r v2SessionMessageAgentSwitchedJSON) RawJSON() string {
 }
 
 type V2SessionMessageModelSwitched struct {
-	ID    string                `json:"id,required"`
-	Time  V2SessionMessageTime  `json:"time,required"`
-	Type  string                `json:"type,required"`
-	Model V2SessionMessageModel `json:"model,required"`
+	ID    string               `json:"id,required"`
+	Time  V2SessionMessageTime `json:"time,required"`
+	Type  string               `json:"type,required"`
+	Model ModelRef             `json:"model,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                               `json:"metadata"`
 	JSON     v2SessionMessageModelSwitchedJSON `json:"-"`
@@ -693,7 +693,7 @@ type V2SessionMessageAssistant struct {
 	Time  V2SessionMessageAssistantTime `json:"time,required"`
 	Type  string                        `json:"type,required"`
 	Agent string                        `json:"agent,required"`
-	Model V2SessionMessageModel         `json:"model,required"`
+	Model ModelRef                      `json:"model,required"`
 	// This field can have the runtime type of
 	// [V2SessionMessageAssistantTextContent],
 	// [V2SessionMessageAssistantReasoningContent],
@@ -863,29 +863,6 @@ func (r *V2SessionMessageAssistantTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r v2SessionMessageAssistantTimeJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2SessionMessageModel struct {
-	ID         string                    `json:"id,required"`
-	ProviderID string                    `json:"providerID,required"`
-	Variant    string                    `json:"variant"`
-	JSON       v2SessionMessageModelJSON `json:"-"`
-}
-
-type v2SessionMessageModelJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionMessageModel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2SessionMessageModelJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1073,7 +1050,7 @@ type V2SessionInputAdmitted struct {
 	ID          string                     `json:"id,required"`
 	SessionID   string                     `json:"sessionID,required"`
 	Prompt      V2SessionInputPrompt       `json:"prompt,required"`
-	Delivery    SessionDelivery            `json:"delivery"`
+	Delivery    SessionDelivery            `json:"delivery,required"`
 	TimeCreated int64                      `json:"timeCreated,required"`
 	PromotedSeq int64                      `json:"promotedSeq"`
 	JSON        v2SessionInputAdmittedJSON `json:"-"`
@@ -1242,13 +1219,12 @@ func (r v2SessionMessageAssistantTextContentJSON) RawJSON() string {
 }
 
 type V2SessionMessageAssistantReasoningContent struct {
-	Type string `json:"type,required"`
-	ID   string `json:"id,required"`
-	Text string `json:"text,required"`
-	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any                                            `json:"providerMetadata"`
-	Time             *V2SessionMessageAssistantReasoningContentTime `json:"time"`
-	JSON             v2SessionMessageAssistantReasoningContentJSON  `json:"-"`
+	Type             string                                        `json:"type,required"`
+	ID               string                                        `json:"id,required"`
+	Text             string                                        `json:"text,required"`
+	ProviderMetadata map[string]any                                `json:"providerMetadata"`
+	Time             V2SessionMessageAssistantReasoningContentTime `json:"time"`
+	JSON             v2SessionMessageAssistantReasoningContentJSON `json:"-"`
 }
 
 type v2SessionMessageAssistantReasoningContentJSON struct {
@@ -1358,6 +1334,69 @@ func (r ToolFileContent) implementsLLMToolContentUnion() {}
 // ToolFileContent) and the JS SDK type LlmToolContent.
 type LLMToolContentUnion interface {
 	implementsLLMToolContentUnion()
+}
+
+// LLMToolContent is the response-side carrier for the LLMToolContent union. It
+// merges the fields of [ToolTextContent] and [ToolFileContent] and preserves
+// access to the decoded union variant via [LLMToolContent.AsUnion].
+//
+// OpenAPI: LLMToolContent (anyOf ToolTextContent, ToolFileContent); JS SDK:
+// LlmToolContent.
+type LLMToolContent struct {
+	Type  LLMToolContentType `json:"type,required"`
+	Text  string             `json:"text"`
+	URI   string             `json:"uri"`
+	Mime  string             `json:"mime"`
+	Name  string             `json:"name"`
+	JSON  lLMToolContentJSON `json:"-"`
+	union LLMToolContentUnion
+}
+
+// lLMToolContentJSON contains the JSON metadata for the struct [LLMToolContent]
+type lLMToolContentJSON struct {
+	Type        apijson.Field
+	Text        apijson.Field
+	URI         apijson.Field
+	Mime        apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r lLMToolContentJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *LLMToolContent) UnmarshalJSON(data []byte) (err error) {
+	*r = LLMToolContent{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [LLMToolContentUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [ToolTextContent], [ToolFileContent].
+func (r LLMToolContent) AsUnion() LLMToolContentUnion {
+	return r.union
+}
+
+type LLMToolContentType string
+
+const (
+	LLMToolContentTypeText LLMToolContentType = "text"
+	LLMToolContentTypeFile LLMToolContentType = "file"
+)
+
+func (r LLMToolContentType) IsKnown() bool {
+	switch r {
+	case LLMToolContentTypeText, LLMToolContentTypeFile:
+		return true
+	}
+	return false
 }
 
 // ===== V2 Session Message Tool State Types =====
@@ -1472,7 +1511,7 @@ type V2SessionMessageToolStateRunning struct {
 	Input      map[string]any                         `json:"input,required"`
 	Structured map[string]any                         `json:"structured,required"`
 	// Each element can be [ToolTextContent] or [ToolFileContent].
-	Content []LLMToolContentUnion                `json:"content,required"`
+	Content []LLMToolContent                     `json:"content,required"`
 	JSON    v2SessionMessageToolStateRunningJSON `json:"-"`
 }
 
@@ -1514,11 +1553,12 @@ type V2SessionMessageToolStateCompleted struct {
 	Input      map[string]any                           `json:"input,required"`
 	Structured map[string]any                           `json:"structured,required"`
 	// Each element can be [ToolTextContent] or [ToolFileContent].
-	Content     []LLMToolContentUnion    `json:"content,required"`
+	Content     []LLMToolContent         `json:"content,required"`
 	Attachments []V2PromptFileAttachment `json:"attachments"`
-	// This field can have the runtime type of [[]string].
-	OutputPaths any `json:"outputPaths"`
-	// This field can have the runtime type of [any].
+	OutputPaths []string                 `json:"outputPaths"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
 	Result any                                    `json:"result"`
 	JSON   v2SessionMessageToolStateCompletedJSON `json:"-"`
 }
@@ -1564,9 +1604,11 @@ type V2SessionMessageToolStateError struct {
 	Input      map[string]any                       `json:"input,required"`
 	Structured map[string]any                       `json:"structured,required"`
 	// Each element can be [ToolTextContent] or [ToolFileContent].
-	Content []LLMToolContentUnion `json:"content,required"`
-	Error   SessionErrorUnknown   `json:"error,required"`
-	// This field can have the runtime type of [any].
+	Content []LLMToolContent    `json:"content,required"`
+	Error   SessionErrorUnknown `json:"error,required"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
 	Result any                                `json:"result"`
 	JSON   v2SessionMessageToolStateErrorJSON `json:"-"`
 }

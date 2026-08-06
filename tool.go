@@ -58,10 +58,13 @@ func (r *ToolService) List(ctx context.Context, query ToolListParams, opts ...op
 }
 
 type ToolListItem struct {
-	ID          string           `json:"id,required"`
-	Description string           `json:"description,required"`
-	Parameters  any              `json:"parameters,required"`
-	JSON        toolListItemJSON `json:"-"`
+	ID          string `json:"id,required"`
+	Description string `json:"description,required"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
+	Parameters any              `json:"parameters,required"`
+	JSON       toolListItemJSON `json:"-"`
 }
 
 // toolListItemJSON contains the JSON metadata for the struct [ToolListItem]

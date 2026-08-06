@@ -5,5 +5,7 @@ Brewfile.lock.json
 .idea/
 *.test
 *.log
+.tmp/
 tmp/
 testdata/
+vendor/

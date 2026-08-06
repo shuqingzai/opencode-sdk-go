@@ -109,9 +109,8 @@ type GlobalSession struct {
 	Model       GlobalSessionModel   `json:"model"`
 	Permission  PermissionRuleset    `json:"permission"`
 	Revert      GlobalSessionRevert  `json:"revert"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any               `json:"metadata"`
-	JSON     globalSessionJSON `json:"-"`
+	Metadata    map[string]any       `json:"metadata"`
+	JSON        globalSessionJSON    `json:"-"`
 }
 
 // globalSessionJSON contains the JSON metadata for the struct [GlobalSession]

@@ -575,10 +575,9 @@ func (r providerModelLimitJSON) RawJSON() string {
 type ProviderAuthMethod struct {
 	Type  ProviderAuthMethodType `json:"type,required"`
 	Label string                 `json:"label,required"`
-	// This field can have the runtime type of []ProviderAuthMethodPromptText,
-	// []ProviderAuthMethodPromptSelect.
-	Prompts any                    `json:"prompts"`
-	JSON    providerAuthMethodJSON `json:"-"`
+	// Each element can be [ProviderAuthMethodPromptText] or [ProviderAuthMethodPromptSelect].
+	Prompts []ProviderAuthMethodPrompt `json:"prompts"`
+	JSON    providerAuthMethodJSON     `json:"-"`
 }
 
 // providerAuthMethodJSON contains the JSON metadata for the struct [ProviderAuthMethod]
@@ -619,13 +618,79 @@ func (r ProviderAuthMethodType) IsKnown() bool {
 
 // ProviderAuthMethodPrompt represents a prompt in an authentication method.
 // It can be either a text prompt or a select prompt.
-type ProviderAuthMethodPrompt interface {
-	implementsProviderAuthMethodPrompt()
+type ProviderAuthMethodPrompt struct {
+	Type        ProviderAuthMethodPromptType           `json:"type,required"`
+	Key         string                                 `json:"key"`
+	Message     string                                 `json:"message"`
+	Placeholder string                                 `json:"placeholder"`
+	Options     []ProviderAuthMethodPromptSelectOption `json:"options"`
+	When        ProviderAuthMethodPromptWhen           `json:"when"`
+	JSON        providerAuthMethodPromptJSON           `json:"-"`
+	union       ProviderAuthMethodPromptUnion
+}
+
+// providerAuthMethodPromptJSON contains the JSON metadata for the struct [ProviderAuthMethodPrompt]
+type providerAuthMethodPromptJSON struct {
+	Type        apijson.Field
+	Key         apijson.Field
+	Message     apijson.Field
+	Placeholder apijson.Field
+	Options     apijson.Field
+	When        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r providerAuthMethodPromptJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ProviderAuthMethodPrompt) UnmarshalJSON(data []byte) (err error) {
+	*r = ProviderAuthMethodPrompt{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ProviderAuthMethodPromptUnion] interface which you can cast
+// to the specific types for more type safety.
+//
+// Possible runtime types of the union are [ProviderAuthMethodPromptText],
+// [ProviderAuthMethodPromptSelect].
+func (r ProviderAuthMethodPrompt) AsUnion() ProviderAuthMethodPromptUnion {
+	return r.union
+}
+
+// ProviderAuthMethodPromptUnion represents the union of provider auth method
+// prompt types.
+//
+// Possible runtime types are [ProviderAuthMethodPromptText],
+// [ProviderAuthMethodPromptSelect].
+type ProviderAuthMethodPromptUnion interface {
+	implementsProviderAuthMethodPromptUnion()
+}
+
+// ProviderAuthMethodPromptType represents the type of a prompt.
+type ProviderAuthMethodPromptType string
+
+const (
+	ProviderAuthMethodPromptTypeText   ProviderAuthMethodPromptType = "text"
+	ProviderAuthMethodPromptTypeSelect ProviderAuthMethodPromptType = "select"
+)
+
+func (r ProviderAuthMethodPromptType) IsKnown() bool {
+	switch r {
+	case ProviderAuthMethodPromptTypeText, ProviderAuthMethodPromptTypeSelect:
+		return true
+	}
+	return false
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[ProviderAuthMethodPrompt](),
+		reflect.TypeFor[ProviderAuthMethodPromptUnion](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
@@ -670,7 +735,7 @@ func (r providerAuthMethodPromptTextJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r ProviderAuthMethodPromptText) implementsProviderAuthMethodPrompt() {}
+func (r ProviderAuthMethodPromptText) implementsProviderAuthMethodPromptUnion() {}
 
 // ProviderAuthMethodPromptTextType represents the type of a text prompt.
 type ProviderAuthMethodPromptTextType string
@@ -717,7 +782,7 @@ func (r providerAuthMethodPromptSelectJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r ProviderAuthMethodPromptSelect) implementsProviderAuthMethodPrompt() {}
+func (r ProviderAuthMethodPromptSelect) implementsProviderAuthMethodPromptUnion() {}
 
 // ProviderAuthMethodPromptSelectType represents the type of a select prompt.
 type ProviderAuthMethodPromptSelectType string

@@ -1582,12 +1582,26 @@ func (r EventListResponseEventProjectUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventProjectUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventProjectUpdatedProperties struct {
-	Project Project                                            `json:"project,required"`
-	JSON    eventListResponseEventProjectUpdatedPropertiesJSON `json:"-"`
+	Commands  ProjectCommands                                    `json:"commands"`
+	Icon      ProjectIcon                                        `json:"icon"`
+	ID        string                                             `json:"id,required"`
+	Name      string                                             `json:"name"`
+	Sandboxes []string                                           `json:"sandboxes,required"`
+	Time      ProjectTime                                        `json:"time,required"`
+	Vcs       ProjectVcs                                         `json:"vcs"`
+	Worktree  string                                             `json:"worktree,required"`
+	JSON      eventListResponseEventProjectUpdatedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventProjectUpdatedPropertiesJSON struct {
-	Project     apijson.Field
+	Commands    apijson.Field
+	Icon        apijson.Field
+	ID          apijson.Field
+	Name        apijson.Field
+	Sandboxes   apijson.Field
+	Time        apijson.Field
+	Vcs         apijson.Field
+	Worktree    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -1906,14 +1920,14 @@ func (r EventListResponseEventPermissionAsked) implementsEventListResponse() {}
 func (r EventListResponseEventPermissionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionAskedProperties struct {
-	Always     []string                                             `json:"always,required"`
-	ID         string                                               `json:"id,required"`
-	Metadata   map[string]any                                       `json:"metadata,required"`
-	Patterns   []string                                             `json:"patterns,required"`
-	Permission string                                               `json:"permission,required"`
-	SessionID  string                                               `json:"sessionID,required"`
-	Tool       *EventListResponseEventPermissionAskedPropertiesTool `json:"tool"`
-	JSON       eventListResponseEventPermissionAskedPropertiesJSON  `json:"-"`
+	Always     []string                                            `json:"always,required"`
+	ID         string                                              `json:"id,required"`
+	Metadata   map[string]any                                      `json:"metadata,required"`
+	Patterns   []string                                            `json:"patterns,required"`
+	Permission string                                              `json:"permission,required"`
+	SessionID  string                                              `json:"sessionID,required"`
+	Tool       EventListResponseEventPermissionAskedPropertiesTool `json:"tool"`
+	JSON       eventListResponseEventPermissionAskedPropertiesJSON `json:"-"`
 }
 
 func (r *EventListResponseEventPermissionAskedProperties) UnmarshalJSON(data []byte) (err error) {
@@ -2101,11 +2115,11 @@ func (r EventListResponseEventQuestionAsked) implementsEventListResponse() {}
 func (r EventListResponseEventQuestionAsked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventQuestionAskedProperties struct {
-	ID        string                                                   `json:"id,required"`
-	Questions []EventListResponseEventQuestionAskedPropertiesQuestions `json:"questions,required"`
-	SessionID string                                                   `json:"sessionID,required"`
-	Tool      *EventListResponseEventQuestionAskedPropertiesTool       `json:"tool"`
-	JSON      eventListResponseEventQuestionAskedPropertiesJSON        `json:"-"`
+	ID        string                                            `json:"id,required"`
+	Questions []QuestionInfo                                    `json:"questions,required"`
+	SessionID string                                            `json:"sessionID,required"`
+	Tool      QuestionTool                                      `json:"tool"`
+	JSON      eventListResponseEventQuestionAskedPropertiesJSON `json:"-"`
 }
 
 func (r *EventListResponseEventQuestionAskedProperties) UnmarshalJSON(data []byte) (err error) {
@@ -2125,76 +2139,14 @@ func (r eventListResponseEventQuestionAskedPropertiesJSON) RawJSON() string {
 	return r.raw
 }
 
-type EventListResponseEventQuestionAskedPropertiesQuestions struct {
-	// This field can have the runtime type of [bool].
-	Custom any    `json:"custom"`
-	Header string `json:"header,required"`
-	// This field can have the runtime type of [bool].
-	Multiple any                                                             `json:"multiple"`
-	Options  []EventListResponseEventQuestionAskedPropertiesQuestionsOptions `json:"options,required"`
-	Question string                                                          `json:"question,required"`
-	JSON     eventListResponseEventQuestionAskedPropertiesQuestionsJSON      `json:"-"`
-}
+// Deprecated: use [QuestionInfo] instead.
+type EventListResponseEventQuestionAskedPropertiesQuestions = QuestionInfo
 
-type eventListResponseEventQuestionAskedPropertiesQuestionsJSON struct {
-	Custom      apijson.Field
-	Header      apijson.Field
-	Multiple    apijson.Field
-	Options     apijson.Field
-	Question    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+// Deprecated: use [QuestionOption] instead.
+type EventListResponseEventQuestionAskedPropertiesQuestionsOptions = QuestionOption
 
-func (r *EventListResponseEventQuestionAskedPropertiesQuestions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesQuestionsJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventQuestionAskedPropertiesQuestionsOptions struct {
-	Description string                                                            `json:"description,required"`
-	Label       string                                                            `json:"label,required"`
-	JSON        eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON struct {
-	Description apijson.Field
-	Label       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionAskedPropertiesQuestionsOptions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesQuestionsOptionsJSON) RawJSON() string {
-	return r.raw
-}
-
-type EventListResponseEventQuestionAskedPropertiesTool struct {
-	CallID    string                                                `json:"callID,required"`
-	MessageID string                                                `json:"messageID,required"`
-	JSON      eventListResponseEventQuestionAskedPropertiesToolJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionAskedPropertiesToolJSON struct {
-	CallID      apijson.Field
-	MessageID   apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionAskedPropertiesTool) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionAskedPropertiesToolJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [QuestionTool] instead.
+type EventListResponseEventQuestionAskedPropertiesTool = QuestionTool
 
 type EventListResponseEventQuestionAskedType string
 

@@ -117,14 +117,16 @@ type Config struct {
 	// Reference configuration for external documentation. Keys are reference
 	// names, values can be a plain URL/path string or a structured config (git
 	// or local).
-	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
-	// [ConfigV2ReferenceLocal].
-	Reference map[string]any `json:"reference"`
+	// Each value decodes to [ConfigV2Reference]; use [ConfigV2Reference.AsUnion]
+	// to get the [ConfigV2ReferenceString], [ConfigV2ReferenceGit] or
+	// [ConfigV2ReferenceLocal] variant.
+	Reference map[string]ConfigV2Reference `json:"reference"`
 	// References from external sources. Keys are reference names, values can be a
 	// plain URL/path string or a structured config (git or local).
-	// This field can have the runtime type of [string], [ConfigV2ReferenceGit],
-	// [ConfigV2ReferenceLocal].
-	References map[string]any `json:"references"`
+	// Each value decodes to [ConfigV2Reference]; use [ConfigV2Reference.AsUnion]
+	// to get the [ConfigV2ReferenceString], [ConfigV2ReferenceGit] or
+	// [ConfigV2ReferenceLocal] variant.
+	References map[string]ConfigV2Reference `json:"references"`
 	// Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
 	// enables automatic sharing, 'disabled' disables all sharing
 	Share ConfigShare `json:"share"`
@@ -286,6 +288,48 @@ func init() {
 	)
 }
 
+// PermissionRuleConfig is the carrier for the OpenAPI `PermissionRuleConfig`
+// anyOf union, used by the per-tool rule properties of [PermissionConfigObject].
+// The rule resolves at decode time to either [PermissionActionConfig] (a short
+// string "ask"|"allow"|"deny") or [PermissionObjectConfig] (a map of pattern to
+// action).
+//
+// The decoded union is available via [PermissionRuleConfig.AsUnion].
+type PermissionRuleConfig struct {
+	JSON  permissionRuleConfigJSON `json:"-"`
+	union PermissionRuleConfigUnion
+}
+
+// permissionRuleConfigJSON contains the JSON metadata for the struct
+// [PermissionRuleConfig]
+type permissionRuleConfigJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r permissionRuleConfigJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *PermissionRuleConfig) UnmarshalJSON(data []byte) (err error) {
+	*r = PermissionRuleConfig{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	r.JSON.raw = string(data)
+	return nil
+}
+
+// AsUnion returns a [PermissionRuleConfigUnion] interface which you can cast to
+// the specific types for more type safety.
+//
+// Possible runtime types of the union are [PermissionActionConfig],
+// [PermissionObjectConfig].
+func (r PermissionRuleConfig) AsUnion() PermissionRuleConfigUnion {
+	return r.union
+}
+
 // PermissionConfigUnion is the OpenAPI `PermissionConfig` anyOf union.
 //
 // Satisfied by [PermissionActionConfig] (a short string "ask"|"allow"|"deny") or
@@ -313,30 +357,30 @@ func init() {
 // anyOf union: per-tool permission rule overrides.
 //
 // The ten tools that accept a matchable argument (paths, commands, skill names)
-// are typed as [PermissionRuleConfigUnion] and resolve at decode time to either
+// are typed as [PermissionRuleConfig] and resolve at decode time to either
 // [PermissionActionConfig] or [PermissionObjectConfig]. The remaining five tools
 // take no argument and are therefore plain [PermissionActionConfig], exactly as
 // the OpenAPI `PermissionConfig.anyOf[1]` schema declares.
 type PermissionConfigObject struct {
-	Read              PermissionRuleConfigUnion `json:"read"`
-	Edit              PermissionRuleConfigUnion `json:"edit"`
-	Glob              PermissionRuleConfigUnion `json:"glob"`
-	Grep              PermissionRuleConfigUnion `json:"grep"`
-	List              PermissionRuleConfigUnion `json:"list"`
-	Bash              PermissionRuleConfigUnion `json:"bash"`
-	Task              PermissionRuleConfigUnion `json:"task"`
-	ExternalDirectory PermissionRuleConfigUnion `json:"external_directory"`
-	Lsp               PermissionRuleConfigUnion `json:"lsp"`
-	Skill             PermissionRuleConfigUnion `json:"skill"`
-	Todowrite         PermissionActionConfig    `json:"todowrite"`
-	Question          PermissionActionConfig    `json:"question"`
-	Webfetch          PermissionActionConfig    `json:"webfetch"`
-	Websearch         PermissionActionConfig    `json:"websearch"`
-	DoomLoop          PermissionActionConfig    `json:"doom_loop"`
+	Read              PermissionRuleConfig   `json:"read"`
+	Edit              PermissionRuleConfig   `json:"edit"`
+	Glob              PermissionRuleConfig   `json:"glob"`
+	Grep              PermissionRuleConfig   `json:"grep"`
+	List              PermissionRuleConfig   `json:"list"`
+	Bash              PermissionRuleConfig   `json:"bash"`
+	Task              PermissionRuleConfig   `json:"task"`
+	ExternalDirectory PermissionRuleConfig   `json:"external_directory"`
+	Lsp               PermissionRuleConfig   `json:"lsp"`
+	Skill             PermissionRuleConfig   `json:"skill"`
+	Todowrite         PermissionActionConfig `json:"todowrite"`
+	Question          PermissionActionConfig `json:"question"`
+	Webfetch          PermissionActionConfig `json:"webfetch"`
+	Websearch         PermissionActionConfig `json:"websearch"`
+	DoomLoop          PermissionActionConfig `json:"doom_loop"`
 	// Additional per-tool rules beyond the properties listed above, per the OpenAPI
 	// `PermissionConfig.additionalProperties` -> `PermissionRuleConfig` mapping.
-	ExtraFields map[string]PermissionRuleConfigUnion `json:"-,extras"`
-	JSON        permissionConfigObjectJSON           `json:"-"`
+	ExtraFields map[string]PermissionRuleConfig `json:"-,extras"`
+	JSON        permissionConfigObjectJSON      `json:"-"`
 }
 
 // permissionConfigObjectJSON contains the JSON metadata for the struct
@@ -917,7 +961,7 @@ type ConfigMcp struct {
 	Environment any `json:"environment"`
 	// This field can have the runtime type of [map[string]string]. Headers to send with the request (for "remote" type).
 	Headers any `json:"headers"`
-	// This field can have the runtime type of [McpOAuthConfig, nil]. OAuth authentication configuration for the MCP server (for "remote" type).
+	// This field can have the runtime type of [McpRemoteConfigOAuth, nil]. OAuth authentication configuration for the MCP server (for "remote" type).
 	OAuth any `json:"oauth"`
 	// This field can have the runtime type of [int64, nil]. Timeout in milliseconds for MCP server requests.
 	Timeout any `json:"timeout"`
@@ -1212,9 +1256,9 @@ func (r configProviderModelsCostJSON) RawJSON() string {
 }
 
 type ConfigProviderModelsLimit struct {
-	Context float64                       `json:"context,required"`
-	Input   float64                       `json:"input"`
-	Output  float64                       `json:"output,required"`
+	Context int64                         `json:"context,required"`
+	Input   int64                         `json:"input"`
+	Output  int64                         `json:"output,required"`
 	JSON    configProviderModelsLimitJSON `json:"-"`
 }
 
@@ -1343,18 +1387,20 @@ type ConfigProviderOptions struct {
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout.
 	//
-	// Resolves to [shared.UnionInt] (an int64 millisecond duration) or
-	// [shared.UnionBool] (always false).
-	Timeout ConfigProviderOptionsTimeoutUnion `json:"timeout"`
+	// Decodes to [ConfigProviderOptionsTimeout]; use
+	// [ConfigProviderOptionsTimeout.AsUnion] to get [shared.UnionInt] (an int64
+	// millisecond duration) or [shared.UnionBool] (always false).
+	Timeout ConfigProviderOptionsTimeout `json:"timeout"`
 	// Timeout in milliseconds to wait for response headers. Provider integrations
 	// may set defaults. Set to false to disable timeout.
 	//
-	// Resolves to [shared.UnionInt] (an int64 millisecond duration) or
-	// [shared.UnionBool] (always false).
-	HeaderTimeout ConfigProviderOptionsTimeoutUnion `json:"headerTimeout"`
-	ChunkTimeout  int64                             `json:"chunkTimeout"`
-	ExtraFields   map[string]any                    `json:"-,extras"`
-	JSON          configProviderOptionsJSON         `json:"-"`
+	// Decodes to [ConfigProviderOptionsTimeout]; use
+	// [ConfigProviderOptionsTimeout.AsUnion] to get [shared.UnionInt] (an int64
+	// millisecond duration) or [shared.UnionBool] (always false).
+	HeaderTimeout ConfigProviderOptionsTimeout `json:"headerTimeout"`
+	ChunkTimeout  int64                        `json:"chunkTimeout"`
+	ExtraFields   map[string]any               `json:"-,extras"`
+	JSON          configProviderOptionsJSON    `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
@@ -1397,14 +1443,50 @@ func init() {
 			Type:       reflect.TypeFor[shared.UnionInt](),
 		},
 		apijson.UnionVariant{
-			TypeFilter: gjson.True,
-			Type:       reflect.TypeFor[shared.UnionBool](),
-		},
-		apijson.UnionVariant{
 			TypeFilter: gjson.False,
 			Type:       reflect.TypeFor[shared.UnionBool](),
 		},
 	)
+}
+
+// ConfigProviderOptionsTimeout is the carrier for the OpenAPI
+// `ProviderConfig.options.timeout` / `headerTimeout` anyOf union: an integer
+// millisecond duration or false (to disable).
+//
+// The decoded union is available via [ConfigProviderOptionsTimeout.AsUnion].
+type ConfigProviderOptionsTimeout struct {
+	JSON  configProviderOptionsTimeoutJSON `json:"-"`
+	union ConfigProviderOptionsTimeoutUnion
+}
+
+// configProviderOptionsTimeoutJSON contains the JSON metadata for the struct
+// [ConfigProviderOptionsTimeout]
+type configProviderOptionsTimeoutJSON struct {
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r configProviderOptionsTimeoutJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ConfigProviderOptionsTimeout) UnmarshalJSON(data []byte) (err error) {
+	*r = ConfigProviderOptionsTimeout{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	r.JSON.raw = string(data)
+	return nil
+}
+
+// AsUnion returns a [ConfigProviderOptionsTimeoutUnion] interface which you can
+// cast to the specific types for more type safety.
+//
+// Possible runtime types of the union are [shared.UnionInt] or
+// [shared.UnionBool].
+func (r ConfigProviderOptionsTimeout) AsUnion() ConfigProviderOptionsTimeoutUnion {
+	return r.union
 }
 
 // Control sharing behavior:'manual' allows manual sharing via commands, 'auto'
@@ -1511,9 +1593,10 @@ type McpRemoteConfig struct {
 	// OAuth authentication configuration for the MCP server. Set to false to
 	// disable OAuth auto-detection.
 	//
-	// Resolves to [McpOAuthConfig] or [shared.UnionBool] (always false).
-	OAuth McpOAuthConfigUnion `json:"oauth"`
-	JSON  mcpRemoteConfigJSON `json:"-"`
+	// Decodes to [McpRemoteConfigOAuth]; use [McpRemoteConfigOAuth.AsUnion] to get
+	// [McpOAuthConfig] or [shared.UnionBool] (always false).
+	OAuth McpRemoteConfigOAuth `json:"oauth"`
+	JSON  mcpRemoteConfigJSON  `json:"-"`
 }
 
 // mcpRemoteConfigJSON contains the JSON metadata for the struct [McpRemoteConfig]
@@ -1551,6 +1634,63 @@ func (r McpRemoteConfigType) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// McpRemoteConfigOAuth is the carrier for the OpenAPI `McpRemoteConfig.oauth`
+// anyOf union: a complete OAuth config ([McpOAuthConfig]) or false (to disable
+// OAuth auto-detection).
+//
+// The decoded union is available via [McpRemoteConfigOAuth.AsUnion].
+type McpRemoteConfigOAuth struct {
+	// OAuth client ID. If not provided, dynamic client registration (RFC 7591) will be attempted.
+	ClientID string `json:"clientId"`
+	// OAuth client secret (if required by the authorization server)
+	ClientSecret string `json:"clientSecret"`
+	// OAuth scopes to request during authorization
+	Scope string `json:"scope"`
+	// OAuth callback port for the local HTTP server
+	CallbackPort int64 `json:"callbackPort"`
+	// OAuth redirect URI
+	RedirectURI string                   `json:"redirectUri"`
+	JSON        mcpRemoteConfigOAuthJSON `json:"-"`
+	union       McpOAuthConfigUnion
+}
+
+// mcpRemoteConfigOAuthJSON contains the JSON metadata for the struct
+// [McpRemoteConfigOAuth]
+type mcpRemoteConfigOAuthJSON struct {
+	ClientID     apijson.Field
+	ClientSecret apijson.Field
+	Scope        apijson.Field
+	CallbackPort apijson.Field
+	RedirectURI  apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r mcpRemoteConfigOAuthJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *McpRemoteConfigOAuth) UnmarshalJSON(data []byte) (err error) {
+	*r = McpRemoteConfigOAuth{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	if _, ok := r.union.(shared.UnionBool); ok {
+		r.JSON.raw = string(data)
+		return nil
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [McpOAuthConfigUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [McpOAuthConfig], [shared.UnionBool].
+func (r McpRemoteConfigOAuth) AsUnion() McpOAuthConfigUnion {
+	return r.union
 }
 
 type ConfigGetParams struct {
@@ -1792,10 +1932,21 @@ func (r configV2ReferenceLocalJSON) RawJSON() string {
 
 func (r ConfigV2ReferenceLocal) implementsConfigV2ReferenceUnion() {}
 
+// ConfigV2ReferenceString is the bare string variant of
+// [ConfigV2ReferenceUnion], e.g. a GitHub "owner/repo" shorthand or a local
+// path.
+type ConfigV2ReferenceString string
+
+func (r ConfigV2ReferenceString) implementsConfigV2ReferenceUnion() {}
+
 func init() {
 	apijson.RegisterUnion(
 		reflect.TypeFor[ConfigV2ReferenceUnion](),
 		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[ConfigV2ReferenceString](),
+		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeFor[ConfigV2ReferenceGit](),
@@ -1805,6 +1956,65 @@ func init() {
 			Type:       reflect.TypeFor[ConfigV2ReferenceLocal](),
 		},
 	)
+}
+
+// ConfigV2Reference is the carrier for the OpenAPI `Config.reference` /
+// `Config.references` anyOf union: a bare string (URL/path shorthand), a git
+// reference ([ConfigV2ReferenceGit]) or a local reference
+// ([ConfigV2ReferenceLocal]).
+//
+// The decoded union is available via [ConfigV2Reference.AsUnion].
+type ConfigV2Reference struct {
+	// Git repository URL, host/path reference, or GitHub owner/repo shorthand
+	Repository string `json:"repository"`
+	// Branch to reference
+	Branch string `json:"branch"`
+	// Absolute path, ~/ path, or workspace-relative path to a local reference directory
+	Path string `json:"path"`
+	// Human-readable description of the reference
+	Description string `json:"description"`
+	// Whether to hide this reference from listings
+	Hidden bool                  `json:"hidden"`
+	JSON   configV2ReferenceJSON `json:"-"`
+	union  ConfigV2ReferenceUnion
+}
+
+// configV2ReferenceJSON contains the JSON metadata for the struct
+// [ConfigV2Reference]
+type configV2ReferenceJSON struct {
+	Repository  apijson.Field
+	Branch      apijson.Field
+	Path        apijson.Field
+	Description apijson.Field
+	Hidden      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r configV2ReferenceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ConfigV2Reference) UnmarshalJSON(data []byte) (err error) {
+	*r = ConfigV2Reference{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	if _, ok := r.union.(ConfigV2ReferenceString); ok {
+		r.JSON.raw = string(data)
+		return nil
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ConfigV2ReferenceUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [ConfigV2ReferenceString],
+// [ConfigV2ReferenceGit], [ConfigV2ReferenceLocal].
+func (r ConfigV2Reference) AsUnion() ConfigV2ReferenceUnion {
+	return r.union
 }
 
 // Tool output configuration

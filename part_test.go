@@ -232,6 +232,45 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 		}
 	})
 
+	t.Run("Part set — File variant with source union serializes", func(t *testing.T) {
+		t.Parallel()
+		params := PartUpdateParams{
+			Part: F(PartUpdatePartUnion(PartUpdatePartFile{
+				ID:        F("prt_4"),
+				SessionID: F("ses_1"),
+				MessageID: F("msg_1"),
+				Mime:      F("text/plain"),
+				URL:       F("file:///tmp/b.ts"),
+				Type:      F(PartUpdatePartFileTypeFile),
+				Filename:  F("b.ts"),
+				Source: F(FilePartSourceUnionParam(FileSourceParam{
+					Path: F("/tmp/b.ts"),
+					Text: F(FilePartSourceTextParam{
+						End:   F(int64(0)),
+						Start: F(int64(10)),
+						Value: F("const x = 1"),
+					}),
+					Type: F(FileSourceTypeFile),
+				})),
+			})),
+		}
+		b, err := json.Marshal(params)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{
+			`"id":"prt_4"`,
+			`"type":"file"`,
+			`"source":{"path":"/tmp/b.ts"`,
+			`"text":{"end":0,"start":10,"value":"const x = 1"}`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
 	t.Run("Part set — Compaction variant with tail_start_id", func(t *testing.T) {
 		t.Parallel()
 		params := PartUpdateParams{

@@ -242,13 +242,13 @@ func (r SyncStealParamsBody) MarshalJSON() (data []byte, err error) {
 }
 
 type SyncHistoryListParams struct {
-	Directory param.Field[string]       `query:"directory"`
-	Workspace param.Field[string]       `query:"workspace"`
-	Body      SyncHistoryListParamsBody `json:"-"`
+	Directory param.Field[string]                    `query:"directory"`
+	Workspace param.Field[string]                    `query:"workspace"`
+	Body      param.Field[SyncHistoryListParamsBody] `json:"-"`
 }
 
 func (r SyncHistoryListParams) MarshalJSON() (data []byte, err error) {
-	if len(r.Body) > 0 {
+	if r.Body.Present {
 		return apijson.MarshalRoot(r.Body)
 	}
 	return nil, nil

@@ -206,6 +206,141 @@ func TestV2ModelInfoApiNativeType(t *testing.T) {
 	}
 }
 
+// TestV2ModelInfoApiBearerAisdk verifies the bearer struct V2ModelInfoApi decodes
+// an "aisdk" api payload into its fields and exposes the V2ModelInfoApiAisdk
+// union variant.
+func TestV2ModelInfoApiBearerAisdk(t *testing.T) {
+	t.Parallel()
+
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+	raw := `{` + baseModel + `,"api":{"type":"aisdk","id":"gpt-4-aisdk","package":"@ai-sdk/openai","url":"https://ai-sdk.dev"}}`
+
+	var info opencode.V2ModelInfo
+	if err := json.Unmarshal([]byte(raw), &info); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	if info.Api.Type != opencode.V2ModelInfoApiTypeAisdk {
+		t.Errorf("Api.Type: got %q, want %q", info.Api.Type, opencode.V2ModelInfoApiTypeAisdk)
+	}
+	if info.Api.ID != "gpt-4-aisdk" {
+		t.Errorf("Api.ID: got %q, want %q", info.Api.ID, "gpt-4-aisdk")
+	}
+	if info.Api.Package != "@ai-sdk/openai" {
+		t.Errorf("Api.Package: got %q, want %q", info.Api.Package, "@ai-sdk/openai")
+	}
+
+	aisdk, ok := info.Api.AsUnion().(opencode.V2ModelInfoApiAisdk)
+	if !ok {
+		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiAisdk", info.Api.AsUnion())
+	}
+	if aisdk.ID != "gpt-4-aisdk" || aisdk.Package != "@ai-sdk/openai" {
+		t.Errorf("aisdk variant: got ID=%q Package=%q, want ID=%q Package=%q", aisdk.ID, aisdk.Package, "gpt-4-aisdk", "@ai-sdk/openai")
+	}
+}
+
+// TestV2ModelInfoApiBearerNative verifies the bearer struct V2ModelInfoApi decodes
+// a "native" api payload and resolves its Settings.
+func TestV2ModelInfoApiBearerNative(t *testing.T) {
+	t.Parallel()
+
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+	raw := `{` + baseModel + `,"api":{"type":"native","id":"gpt-4-native","url":"https://api.openai.com","settings":{"apiKey":"sk-123","baseURL":"https://api.openai.com/v1"}}}`
+
+	var info opencode.V2ModelInfo
+	if err := json.Unmarshal([]byte(raw), &info); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	if info.Api.Type != opencode.V2ModelInfoApiTypeNative {
+		t.Errorf("Api.Type: got %q, want %q", info.Api.Type, opencode.V2ModelInfoApiTypeNative)
+	}
+	if info.Api.ID != "gpt-4-native" {
+		t.Errorf("Api.ID: got %q, want %q", info.Api.ID, "gpt-4-native")
+	}
+	if got := info.Api.Settings["apiKey"]; got != "sk-123" {
+		t.Errorf("Api.Settings[apiKey]: got %v, want %q", got, "sk-123")
+	}
+
+	native, ok := info.Api.AsUnion().(opencode.V2ModelInfoApiNative)
+	if !ok {
+		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiNative", info.Api.AsUnion())
+	}
+	if got := native.Settings["baseURL"]; got != "https://api.openai.com/v1" {
+		t.Errorf("native.Settings[baseURL]: got %v, want %q", got, "https://api.openai.com/v1")
+	}
+}
+
+// TestV2ModelInfoApiRawJSON verifies that Api.JSON.RawJSON() returns the complete
+// raw api JSON payload.
+func TestV2ModelInfoApiRawJSON(t *testing.T) {
+	t.Parallel()
+
+	apiJSON := `{"type":"aisdk","id":"raw-test","package":"@ai-sdk/openai","url":"https://raw.dev"}`
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+	raw := `{` + baseModel + `,"api":` + apiJSON + `}`
+
+	var info opencode.V2ModelInfo
+	if err := json.Unmarshal([]byte(raw), &info); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	got := info.Api.JSON.RawJSON()
+	if got != apiJSON {
+		t.Errorf("Api.JSON.RawJSON() = %q, want %q", got, apiJSON)
+	}
+	if !json.Valid([]byte(got)) {
+		t.Errorf("Api.JSON.RawJSON() = %q, not valid JSON", got)
+	}
+}
+
+// TestV2ModelInfoAsAPIUnionBackwardCompat verifies that the deprecated
+// AsAPIUnion() still returns the correct union after the bearer-struct refactor.
+func TestV2ModelInfoAsAPIUnionBackwardCompat(t *testing.T) {
+	t.Parallel()
+
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+
+	cases := []struct {
+		name     string
+		apiJSON  string
+		wantType reflect.Type
+	}{
+		{
+			name:     "aisdk",
+			apiJSON:  `{"type":"aisdk","id":"gpt-4-aisdk","package":"@ai-sdk/openai"}`,
+			wantType: reflect.TypeOf(opencode.V2ModelInfoApiAisdk{}),
+		},
+		{
+			name:     "native",
+			apiJSON:  `{"type":"native","id":"gpt-4-native","settings":{}}`,
+			wantType: reflect.TypeOf(opencode.V2ModelInfoApiNative{}),
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			raw := `{` + baseModel + `,"api":` + tc.apiJSON + `}`
+			var info opencode.V2ModelInfo
+			if err := json.Unmarshal([]byte(raw), &info); err != nil {
+				t.Fatalf("json.Unmarshal: %v", err)
+			}
+			union := info.AsAPIUnion()
+			if union == nil {
+				t.Fatal("AsAPIUnion() returned nil")
+			}
+			if got := reflect.TypeOf(union); got != tc.wantType {
+				t.Errorf("AsAPIUnion() type=%v, want %v", got, tc.wantType)
+			}
+			if !reflect.DeepEqual(info.AsAPIUnion(), info.Api.AsUnion()) {
+				t.Error("AsAPIUnion() and Api.AsUnion() returned different unions")
+			}
+		})
+	}
+}
+
 // TestV2ModelInfoStatus verifies V2ModelInfoStatus.IsKnown.
 func TestV2ModelInfoStatus(t *testing.T) {
 	t.Parallel()

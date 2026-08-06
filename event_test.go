@@ -374,8 +374,8 @@ func TestSSEPropertiesTypedFields(t *testing.T) {
 		if !ok {
 			t.Fatalf("Properties = %T, want EventListResponseEventPermissionAskedProperties", e.Properties)
 		}
-		if p.Tool == nil {
-			t.Fatalf("Tool = nil, want non-nil")
+		if p.JSON.Tool.IsMissing() {
+			t.Fatalf("Tool is missing, want present")
 		}
 		if p.Tool.MessageID != "mm" {
 			t.Errorf("Tool.MessageID = %q, want mm", p.Tool.MessageID)
@@ -395,8 +395,8 @@ func TestSSEPropertiesTypedFields(t *testing.T) {
 		if !ok {
 			t.Fatalf("Properties = %T, want EventListResponseEventQuestionAskedProperties", e.Properties)
 		}
-		if p.Tool == nil {
-			t.Fatalf("Tool = nil, want non-nil")
+		if p.JSON.Tool.IsMissing() {
+			t.Fatalf("Tool is missing, want present")
 		}
 		if p.Tool.MessageID != "mm" || p.Tool.CallID != "cc" {
 			t.Errorf("Tool = %#v, want MessageID=mm CallID=cc", p.Tool)
@@ -413,8 +413,8 @@ func TestSSEPropertiesTypedFields(t *testing.T) {
 		if !ok {
 			t.Fatalf("Payload = %T, want EventListResponseEventPermissionV2Asked", g.Payload)
 		}
-		if p.Properties.Source == nil {
-			t.Fatalf("Source = nil, want non-nil")
+		if p.Properties.JSON.Source.IsMissing() {
+			t.Fatalf("Source is missing, want present")
 		}
 		if p.Properties.Source.MessageID != "m" {
 			t.Errorf("Source.MessageID = %q, want m", p.Properties.Source.MessageID)
@@ -434,8 +434,8 @@ func TestSSEPropertiesTypedFields(t *testing.T) {
 		if !ok {
 			t.Fatalf("Payload = %T, want EventListResponseEventQuestionV2Asked", g.Payload)
 		}
-		if p.Properties.Tool == nil {
-			t.Fatalf("Tool = nil, want non-nil")
+		if p.Properties.JSON.Tool.IsMissing() {
+			t.Fatalf("Tool is missing, want present")
 		}
 		if p.Properties.Tool.MessageID != "m" || p.Properties.Tool.CallID != "c" {
 			t.Errorf("Tool = %#v, want MessageID=m CallID=c", p.Properties.Tool)
@@ -452,8 +452,170 @@ func TestSSEPropertiesTypedFields(t *testing.T) {
 		if !ok {
 			t.Fatalf("Properties = %T", e.Properties)
 		}
-		if p.Tool != nil {
-			t.Errorf("Tool = %#v, want nil (absent)", p.Tool)
+		if !p.JSON.Tool.IsMissing() {
+			t.Errorf("Tool = %#v, want missing (absent)", p.Tool)
 		}
 	})
+}
+
+// =============================================================================
+// Deprecated type-alias SSE decoding regression tests
+//
+// These events previously declared their own dedicated struct types
+// (EventListResponseEventSessionNextModelSwitchedModel,
+// EventListResponseEventSessionNextPromptedPrompt,
+// EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt,
+// SyncEventPrompt, EventListResponseEventPermissionV2RepliedPropertiesReply).
+// They were converted to `// Deprecated:` type aliases of the canonical
+// cross-service types (ModelRef, V2SessionInputPrompt, PermissionV2Reply).
+// These tests prove the SSE deserialization path still decodes non-zero values.
+// =============================================================================
+
+// TestSSEAliasedModelSwitchedDecodes verifies session.next.model.switched
+// decodes the model field (aliased to ModelRef) to concrete values.
+func TestSSEAliasedModelSwitchedDecodes(t *testing.T) {
+	t.Parallel()
+	var e EventListResponse
+	data := `{"id":"evt_1","type":"session.next.model.switched","properties":{"timestamp":123,"sessionID":"ses_1","messageID":"msg_1","model":{"id":"m-1","providerID":"p-1","variant":"v1"}}}`
+	if err := json.Unmarshal([]byte(data), &e); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if e.Type != EventListResponseTypeSessionNextModelSwitched {
+		t.Fatalf("Type = %q", e.Type)
+	}
+	p, ok := e.Properties.(EventListResponseEventSessionNextModelSwitchedProperties)
+	if !ok {
+		t.Fatalf("Properties = %T, want EventListResponseEventSessionNextModelSwitchedProperties", e.Properties)
+	}
+	if p.Model.ID != "m-1" || p.Model.ProviderID != "p-1" || p.Model.Variant != "v1" {
+		t.Fatalf("Model = %+v, want non-zero decoded values", p.Model)
+	}
+}
+
+// TestSSEAliasedPromptedPromptDecodes verifies session.next.prompted decodes
+// the prompt field (aliased to V2SessionInputPrompt) with nested attachments.
+func TestSSEAliasedPromptedPromptDecodes(t *testing.T) {
+	t.Parallel()
+	var e EventListResponse
+	data := `{"id":"evt_2","type":"session.next.prompted","properties":{"timestamp":1,"sessionID":"ses_1","messageID":"msg_2","prompt":{"text":"hello","files":[{"uri":"file:///a.txt","mime":"text/plain","name":"a.txt"}],"agents":[{"name":"writer"}]},"delivery":"steer"}}`
+	if err := json.Unmarshal([]byte(data), &e); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	p, ok := e.Properties.(EventListResponseEventSessionNextPromptedProperties)
+	if !ok {
+		t.Fatalf("Properties = %T, want EventListResponseEventSessionNextPromptedProperties", e.Properties)
+	}
+	if p.Prompt.Text != "hello" {
+		t.Fatalf("Prompt.Text = %q, want hello", p.Prompt.Text)
+	}
+	if len(p.Prompt.Files) != 1 || p.Prompt.Files[0].URI != "file:///a.txt" || p.Prompt.Files[0].Mime != "text/plain" {
+		t.Fatalf("Prompt.Files = %+v", p.Prompt.Files)
+	}
+	if len(p.Prompt.Agents) != 1 || p.Prompt.Agents[0].Name != "writer" {
+		t.Fatalf("Prompt.Agents = %+v", p.Prompt.Agents)
+	}
+}
+
+// TestSSEAliasedPromptAdmittedDecodes verifies session.next.prompt.admitted
+// decodes the prompt field (aliased to V2SessionInputPrompt).
+func TestSSEAliasedPromptAdmittedDecodes(t *testing.T) {
+	t.Parallel()
+	var e EventListResponse
+	data := `{"id":"evt_3","type":"session.next.prompt.admitted","properties":{"timestamp":1,"sessionID":"ses_1","messageID":"msg_3","prompt":{"text":"admitted","agents":[{"name":"reader"}]},"delivery":"queue"}}`
+	if err := json.Unmarshal([]byte(data), &e); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	p, ok := e.Properties.(EventListResponseEventSessionNextPromptAdmittedProperties)
+	if !ok {
+		t.Fatalf("Properties = %T, want EventListResponseEventSessionNextPromptAdmittedProperties", e.Properties)
+	}
+	if p.Prompt.Text != "admitted" || len(p.Prompt.Agents) != 1 {
+		t.Fatalf("Prompt = %+v, want non-zero decoded values", p.Prompt)
+	}
+}
+
+// TestSSEAliasedPermissionV2RepliedDecodes verifies permission.v2.replied
+// decodes the reply field (aliased to PermissionV2Reply) and that both the new
+// and deprecated constant names resolve to the same value.
+func TestSSEAliasedPermissionV2RepliedDecodes(t *testing.T) {
+	t.Parallel()
+	var e EventListResponse
+	data := `{"id":"evt_4","type":"permission.v2.replied","properties":{"sessionID":"ses_1","requestID":"per_1","reply":"once"}}`
+	if err := json.Unmarshal([]byte(data), &e); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	p, ok := e.Properties.(EventListResponseEventPermissionV2RepliedProperties)
+	if !ok {
+		t.Fatalf("Properties = %T, want EventListResponseEventPermissionV2RepliedProperties", e.Properties)
+	}
+	if p.Reply != PermissionV2ReplyOnce {
+		t.Fatalf("Reply = %q, want once", p.Reply)
+	}
+	if !p.Reply.IsKnown() {
+		t.Fatalf("Reply.IsKnown() = false for %q", p.Reply)
+	}
+	// Deprecated constant aliases must still resolve to the canonical values.
+	if EventListResponseEventPermissionV2RepliedPropertiesReplyOnce != PermissionV2ReplyOnce {
+		t.Fatalf("deprecated const Once mismatch")
+	}
+	if EventListResponseEventPermissionV2RepliedPropertiesReplyAlways != PermissionV2ReplyAlways {
+		t.Fatalf("deprecated const Always mismatch")
+	}
+	if EventListResponseEventPermissionV2RepliedPropertiesReplyReject != PermissionV2ReplyReject {
+		t.Fatalf("deprecated const Reject mismatch")
+	}
+}
+
+// TestSSEAliasedSyncEventPromptDecodes verifies the V1 sync path decodes a
+// prompt.admitted sync event whose prompt field uses V2SessionInputPrompt.
+func TestSSEAliasedSyncEventPromptDecodes(t *testing.T) {
+	t.Parallel()
+	var sync1 SyncEventResponse
+	data := `{"type":"sync","id":"evt_5","syncEvent":{"type":"session.next.prompt.admitted.1","id":"evt_5","seq":1,"aggregateID":"ses_1","data":{"timestamp":1,"sessionID":"ses_1","messageID":"msg_5","prompt":{"text":"sync-prompt","files":[{"uri":"file:///b.txt","mime":"text/plain"}]},"delivery":"steer"}}}`
+	if err := json.Unmarshal([]byte(data), &sync1); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if sync1.Type != SyncEventResponseTypeSync {
+		t.Fatalf("Type = %q", sync1.Type)
+	}
+	inner, ok := sync1.SyncEvent.AsUnion().(SyncEventSessionNextPromptAdmitted)
+	if !ok {
+		t.Fatalf("SyncEvent.AsUnion() = %T, want SyncEventSessionNextPromptAdmitted", sync1.SyncEvent.AsUnion())
+	}
+	if inner.Data.Prompt.Text != "sync-prompt" {
+		t.Fatalf("Prompt.Text = %q, want sync-prompt", inner.Data.Prompt.Text)
+	}
+	if len(inner.Data.Prompt.Files) != 1 || inner.Data.Prompt.Files[0].URI != "file:///b.txt" {
+		t.Fatalf("Prompt.Files = %+v", inner.Data.Prompt.Files)
+	}
+}
+
+// TestDeprecatedAliasTypeIdentity verifies the deprecated aliases are true type
+// aliases of the canonical cross-service types (identical, not distinct types).
+func TestDeprecatedAliasTypeIdentity(t *testing.T) {
+	t.Parallel()
+	if reflect.TypeFor[EventListResponseEventSessionNextModelSwitchedModel]() != reflect.TypeFor[ModelRef]() {
+		t.Fatalf("EventListResponseEventSessionNextModelSwitchedModel is not an alias of ModelRef")
+	}
+	if reflect.TypeFor[EventListResponseEventSessionNextPromptedPrompt]() != reflect.TypeFor[V2SessionInputPrompt]() {
+		t.Fatalf("EventListResponseEventSessionNextPromptedPrompt is not an alias of V2SessionInputPrompt")
+	}
+	if reflect.TypeFor[EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt]() != reflect.TypeFor[V2SessionInputPrompt]() {
+		t.Fatalf("EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt is not an alias of V2SessionInputPrompt")
+	}
+	if reflect.TypeFor[SyncEventPrompt]() != reflect.TypeFor[V2SessionInputPrompt]() {
+		t.Fatalf("SyncEventPrompt is not an alias of V2SessionInputPrompt")
+	}
+	if reflect.TypeFor[EventListResponseEventPermissionV2RepliedPropertiesReply]() != reflect.TypeFor[PermissionV2Reply]() {
+		t.Fatalf("EventListResponseEventPermissionV2RepliedPropertiesReply is not an alias of PermissionV2Reply")
+	}
+	if reflect.TypeFor[EventListResponseEventQuestionAskedPropertiesQuestions]() != reflect.TypeFor[QuestionInfo]() {
+		t.Fatalf("EventListResponseEventQuestionAskedPropertiesQuestions is not an alias of QuestionInfo")
+	}
+	if reflect.TypeFor[EventListResponseEventQuestionAskedPropertiesTool]() != reflect.TypeFor[QuestionTool]() {
+		t.Fatalf("EventListResponseEventQuestionAskedPropertiesTool is not an alias of QuestionTool")
+	}
+	if reflect.TypeFor[EventListResponseEventPermissionV2AskedPropertiesSource]() != reflect.TypeFor[PermissionV2Source]() {
+		t.Fatalf("EventListResponseEventPermissionV2AskedPropertiesSource is not an alias of PermissionV2Source")
+	}
 }

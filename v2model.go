@@ -69,12 +69,11 @@ func (r v2ModelListResponseJSON) RawJSON() string {
 }
 
 type V2ModelInfo struct {
-	ID         string `json:"id,required"`
-	ProviderID string `json:"providerID,required"`
-	Family     string `json:"family"`
-	Name       string `json:"name,required"`
-	// This field can have the runtime type of [V2ModelInfoApiAisdk], [V2ModelInfoApiNative].
-	Api          any                     `json:"api,required"`
+	ID           string                  `json:"id,required"`
+	ProviderID   string                  `json:"providerID,required"`
+	Family       string                  `json:"family"`
+	Name         string                  `json:"name,required"`
+	Api          V2ModelInfoApi          `json:"api,required"`
 	Capabilities V2ModelInfoCapabilities `json:"capabilities,required"`
 	Request      V2ModelInfoRequest      `json:"request,required"`
 	Variants     []V2ModelInfoVariant    `json:"variants,required"`
@@ -84,7 +83,6 @@ type V2ModelInfo struct {
 	Enabled      bool                    `json:"enabled,required"`
 	Limit        V2ModelInfoLimit        `json:"limit,required"`
 	JSON         v2ModelInfoJSON         `json:"-"`
-	apiUnion     V2ModelInfoApiUnion
 }
 
 // v2ModelInfoJSON contains the JSON metadata for the struct [V2ModelInfo]
@@ -107,19 +105,7 @@ type v2ModelInfoJSON struct {
 }
 
 func (r *V2ModelInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ModelInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	apiData := gjson.GetBytes(data, "api").Raw
-	if apiData != "" {
-		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ModelInfoJSON) RawJSON() string {
@@ -127,8 +113,76 @@ func (r v2ModelInfoJSON) RawJSON() string {
 }
 
 // AsAPIUnion returns the api field as a typed union.
+//
+// Deprecated: use [V2ModelInfo.Api.AsUnion] instead.
 func (r *V2ModelInfo) AsAPIUnion() V2ModelInfoApiUnion {
-	return r.apiUnion
+	return r.Api.AsUnion()
+}
+
+// V2ModelInfoApi is the union bearer for the api field of [V2ModelInfo].
+// It holds the decoded API configuration and provides typed access via [AsUnion].
+//
+// The runtime union variant can be one of [V2ModelInfoApiAisdk] or
+// [V2ModelInfoApiNative]; use [AsUnion] to obtain the concrete type.
+type V2ModelInfoApi struct {
+	ID      string             `json:"id,required"`
+	Type    V2ModelInfoApiType `json:"type,required"`
+	Package string             `json:"package"`
+	URL     string             `json:"url"`
+	// This field can have the runtime type of [map[string]any].
+	Settings map[string]any     `json:"settings"`
+	JSON     v2ModelInfoApiJSON `json:"-"`
+	union    V2ModelInfoApiUnion
+}
+
+// v2ModelInfoApiJSON contains the JSON metadata for the struct [V2ModelInfoApi]
+type v2ModelInfoApiJSON struct {
+	ID          apijson.Field
+	Type        apijson.Field
+	Package     apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2ModelInfoApiJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *V2ModelInfoApi) UnmarshalJSON(data []byte) (err error) {
+	*r = V2ModelInfoApi{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2ModelInfoApiUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [V2ModelInfoApiAisdk],
+// [V2ModelInfoApiNative].
+func (r V2ModelInfoApi) AsUnion() V2ModelInfoApiUnion {
+	return r.union
+}
+
+// V2ModelInfoApiType is the discriminator shared by every
+// [V2ModelInfoApiUnion] variant.
+type V2ModelInfoApiType string
+
+const (
+	V2ModelInfoApiTypeAisdk  V2ModelInfoApiType = "aisdk"
+	V2ModelInfoApiTypeNative V2ModelInfoApiType = "native"
+)
+
+func (r V2ModelInfoApiType) IsKnown() bool {
+	switch r {
+	case V2ModelInfoApiTypeAisdk, V2ModelInfoApiTypeNative:
+		return true
+	}
+	return false
 }
 
 // V2ModelInfoApiUnion represents the api configuration of a model.
@@ -144,7 +198,7 @@ type V2ModelInfoApiAisdk struct {
 	Package string                  `json:"package,required"`
 	URL     string                  `json:"url"`
 	// This field can have the runtime type of [map[string]any].
-	Settings any                     `json:"settings"`
+	Settings map[string]any          `json:"settings"`
 	JSON     v2ModelInfoApiAisdkJSON `json:"-"`
 }
 
@@ -173,7 +227,7 @@ type V2ModelInfoApiNative struct {
 	Type V2ModelInfoApiNativeType `json:"type,required"`
 	URL  string                   `json:"url"`
 	// This field can have the runtime type of [map[string]any].
-	Settings any                      `json:"settings,required"`
+	Settings map[string]any           `json:"settings,required"`
 	JSON     v2ModelInfoApiNativeJSON `json:"-"`
 }
 
@@ -244,7 +298,7 @@ func init() {
 type V2ModelInfoRequest struct {
 	Headers map[string]string `json:"headers,required"`
 	// This field can have the runtime type of [map[string]any].
-	Body    any                    `json:"body,required"`
+	Body    map[string]any         `json:"body,required"`
 	Variant string                 `json:"variant"`
 	JSON    v2ModelInfoRequestJSON `json:"-"`
 }
@@ -269,7 +323,7 @@ type V2ModelInfoVariant struct {
 	ID      string            `json:"id,required"`
 	Headers map[string]string `json:"headers,required"`
 	// This field can have the runtime type of [map[string]any].
-	Body any                    `json:"body,required"`
+	Body map[string]any         `json:"body,required"`
 	JSON v2ModelInfoVariantJSON `json:"-"`
 }
 

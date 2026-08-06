@@ -107,15 +107,13 @@ func (r v2ProviderGetResponseJSON) RawJSON() string {
 }
 
 type V2ProviderInfo struct {
-	ID            string `json:"id,required"`
-	IntegrationID string `json:"integrationID"`
-	Name          string `json:"name,required"`
-	Disabled      bool   `json:"disabled"`
-	// This field can have the runtime type of [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
-	Api      any                `json:"api,required"`
-	Request  ProviderRequest    `json:"request,required"`
-	JSON     v2ProviderInfoJSON `json:"-"`
-	apiUnion V2ProviderInfoApiUnion
+	ID            string             `json:"id,required"`
+	IntegrationID string             `json:"integrationID"`
+	Name          string             `json:"name,required"`
+	Disabled      bool               `json:"disabled"`
+	Api           V2ProviderInfoApi  `json:"api,required"`
+	Request       ProviderRequest    `json:"request,required"`
+	JSON          v2ProviderInfoJSON `json:"-"`
 }
 
 // v2ProviderInfoJSON contains the JSON metadata for the struct [V2ProviderInfo]
@@ -131,19 +129,7 @@ type v2ProviderInfoJSON struct {
 }
 
 func (r *V2ProviderInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ProviderInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	apiData := gjson.GetBytes(data, "api").Raw
-	if apiData != "" {
-		err = apijson.UnmarshalRoot([]byte(apiData), &r.apiUnion)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ProviderInfoJSON) RawJSON() string {
@@ -151,8 +137,74 @@ func (r v2ProviderInfoJSON) RawJSON() string {
 }
 
 // AsAPIUnion returns the api field as a typed union.
+//
+// Deprecated: use [V2ProviderInfo.Api.AsUnion] instead.
 func (r *V2ProviderInfo) AsAPIUnion() V2ProviderInfoApiUnion {
-	return r.apiUnion
+	return r.Api.AsUnion()
+}
+
+// V2ProviderInfoApi is the union bearer for the api field of [V2ProviderInfo].
+// It holds the decoded API configuration and provides typed access via [AsUnion].
+//
+// The runtime union variant can be one of [V2ProviderInfoApiAisdk] or
+// [V2ProviderInfoApiNative]; use [AsUnion] to obtain the concrete type.
+type V2ProviderInfoApi struct {
+	Type    V2ProviderInfoApiType `json:"type,required"`
+	Package string                `json:"package"`
+	URL     string                `json:"url"`
+	// This field can have the runtime type of [map[string]any].
+	Settings map[string]any        `json:"settings"`
+	JSON     v2ProviderInfoApiJSON `json:"-"`
+	union    V2ProviderInfoApiUnion
+}
+
+// v2ProviderInfoApiJSON contains the JSON metadata for the struct [V2ProviderInfoApi]
+type v2ProviderInfoApiJSON struct {
+	Type        apijson.Field
+	Package     apijson.Field
+	URL         apijson.Field
+	Settings    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r v2ProviderInfoApiJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *V2ProviderInfoApi) UnmarshalJSON(data []byte) (err error) {
+	*r = V2ProviderInfoApi{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [V2ProviderInfoApiUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [V2ProviderInfoApiAisdk],
+// [V2ProviderInfoApiNative].
+func (r V2ProviderInfoApi) AsUnion() V2ProviderInfoApiUnion {
+	return r.union
+}
+
+// V2ProviderInfoApiType is the discriminator shared by every
+// [V2ProviderInfoApiUnion] variant.
+type V2ProviderInfoApiType string
+
+const (
+	V2ProviderInfoApiTypeAisdk  V2ProviderInfoApiType = "aisdk"
+	V2ProviderInfoApiTypeNative V2ProviderInfoApiType = "native"
+)
+
+func (r V2ProviderInfoApiType) IsKnown() bool {
+	switch r {
+	case V2ProviderInfoApiTypeAisdk, V2ProviderInfoApiTypeNative:
+		return true
+	}
+	return false
 }
 
 // V2ProviderInfoApiUnion represents the api configuration of a provider.
@@ -166,7 +218,7 @@ type V2ProviderInfoApiAisdk struct {
 	Package string                     `json:"package,required"`
 	URL     string                     `json:"url"`
 	// This field can have the runtime type of [map[string]any].
-	Settings any                        `json:"settings"`
+	Settings map[string]any             `json:"settings"`
 	JSON     v2ProviderInfoApiAisdkJSON `json:"-"`
 }
 
@@ -193,7 +245,7 @@ type V2ProviderInfoApiNative struct {
 	Type V2ProviderInfoApiNativeType `json:"type,required"`
 	URL  string                      `json:"url"`
 	// This field can have the runtime type of [map[string]any].
-	Settings any                         `json:"settings,required"`
+	Settings map[string]any              `json:"settings,required"`
 	JSON     v2ProviderInfoApiNativeJSON `json:"-"`
 }
 

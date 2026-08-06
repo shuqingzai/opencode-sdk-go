@@ -28,7 +28,7 @@ func TestAuthSet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Auth.Set(context.TODO(), "providerID", opencode.OAuthParam{
-		Type:    opencode.F("oauth"),
+		Type:    opencode.F(opencode.OAuthParamTypeOAuth),
 		Refresh: opencode.F("refresh_token"),
 		Access:  opencode.F("access_token"),
 		Expires: opencode.F[int64](3600),
@@ -76,7 +76,7 @@ func TestOAuthParamRequiredOnlyNoOptionalFields(t *testing.T) {
 	t.Parallel()
 
 	p := opencode.OAuthParam{
-		Type:    opencode.F("oauth"),
+		Type:    opencode.F(opencode.OAuthParamTypeOAuth),
 		Refresh: opencode.F("refresh_tok"),
 		Access:  opencode.F("access_tok"),
 		Expires: opencode.F[int64](9999),
@@ -130,7 +130,7 @@ func TestAuthParamVariantsSerialization(t *testing.T) {
 		{
 			name: "OAuthParam_required_only",
 			param: opencode.OAuthParam{
-				Type:    opencode.F("oauth"),
+				Type:    opencode.F(opencode.OAuthParamTypeOAuth),
 				Refresh: opencode.F("r"),
 				Access:  opencode.F("a"),
 				Expires: opencode.F[int64](1),
@@ -142,7 +142,7 @@ func TestAuthParamVariantsSerialization(t *testing.T) {
 		{
 			name: "OAuthParam_with_optional",
 			param: opencode.OAuthParam{
-				Type:          opencode.F("oauth"),
+				Type:          opencode.F(opencode.OAuthParamTypeOAuth),
 				Refresh:       opencode.F("r"),
 				Access:        opencode.F("a"),
 				Expires:       opencode.F[int64](1),
@@ -156,7 +156,7 @@ func TestAuthParamVariantsSerialization(t *testing.T) {
 		{
 			name: "ApiAuthParam_required_only",
 			param: opencode.ApiAuthParam{
-				Type: opencode.F("api"),
+				Type: opencode.F(opencode.ApiAuthParamTypeAPI),
 				Key:  opencode.F("sk-secret"),
 			},
 			wantType: "api",
@@ -166,7 +166,7 @@ func TestAuthParamVariantsSerialization(t *testing.T) {
 		{
 			name: "ApiAuthParam_with_metadata",
 			param: opencode.ApiAuthParam{
-				Type:     opencode.F("api"),
+				Type:     opencode.F(opencode.ApiAuthParamTypeAPI),
 				Key:      opencode.F("sk-secret"),
 				Metadata: opencode.F(map[string]string{"env": "prod"}),
 			},
@@ -177,7 +177,7 @@ func TestAuthParamVariantsSerialization(t *testing.T) {
 		{
 			name: "WellKnownAuthParam_all_required",
 			param: opencode.WellKnownAuthParam{
-				Type:  opencode.F("wellknown"),
+				Type:  opencode.F(opencode.WellKnownAuthParamTypeWellKnown),
 				Key:   opencode.F("github"),
 				Token: opencode.F("tok_xyz"),
 			},
@@ -235,7 +235,7 @@ func TestOAuthParamImplementsAuthParam(t *testing.T) {
 
 	// Also verify JSON output is non-empty
 	p := opencode.ApiAuthParam{
-		Type: opencode.F("api"),
+		Type: opencode.F(opencode.ApiAuthParamTypeAPI),
 		Key:  opencode.F("k"),
 	}
 	b, err := json.Marshal(p)

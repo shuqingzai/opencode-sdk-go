@@ -459,3 +459,6 @@ type UnionBool = shared.UnionBool
 
 // This is an alias to an internal type.
 type UnionInt = shared.UnionInt
+
+// This is an alias to an internal type.
+type Model = ProviderModel

@@ -41,9 +41,9 @@ func TestV2ReferenceInfoUnmarshalGitSource(t *testing.T) {
 		t.Errorf("Path: got %q, want %q", info.Path, "refs/git/my-repo")
 	}
 
-	// Verify Source (any) is populated
-	if info.Source == nil {
-		t.Fatal("Source field is nil after UnmarshalJSON")
+	// Verify Source bearer is populated
+	if info.JSON.Source.IsMissing() {
+		t.Fatal("Source field is missing after UnmarshalJSON")
 	}
 
 	// Verify AsSourceUnion returns the concrete git type
@@ -92,9 +92,9 @@ func TestV2ReferenceInfoUnmarshalLocalSource(t *testing.T) {
 		t.Errorf("Name: got %q, want %q", info.Name, "local-ref")
 	}
 
-	// Verify Source (any) is populated
-	if info.Source == nil {
-		t.Fatal("Source field is nil after UnmarshalJSON")
+	// Verify Source bearer is populated
+	if info.JSON.Source.IsMissing() {
+		t.Fatal("Source field is missing after UnmarshalJSON")
 	}
 
 	// Verify AsSourceUnion returns the concrete local type

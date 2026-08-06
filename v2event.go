@@ -35,7 +35,7 @@ func NewV2EventService(opts ...option.RequestOption) (r *V2EventService) {
 }
 
 // Subscribe to native event payloads for the server.
-func (r *V2EventService) Subscribe(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
+func (r *V2EventService) ListStreaming(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
 	var (
 		raw *http.Response
 		err error
@@ -45,6 +45,15 @@ func (r *V2EventService) Subscribe(ctx context.Context, opts ...option.RequestOp
 	path := "api/event"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &raw, opts...)
 	return ssestream.NewStream[V2Event](ssestream.NewDecoder(raw), err)
+}
+
+// Subscribe to events
+//
+// Subscribe to native event payloads for the server.
+//
+// Deprecated: use [V2EventService.ListStreaming] instead.
+func (r *V2EventService) Subscribe(ctx context.Context, opts ...option.RequestOption) (stream *ssestream.Stream[V2Event]) {
+	return r.ListStreaming(ctx, opts...)
 }
 
 // V2Event represents a native event payload from the V2 /api/event endpoint.
@@ -1549,10 +1558,9 @@ func (r V2EventPermissionAskedType) IsKnown() bool {
 }
 
 type V2EventPermissionAskedData struct {
-	Always []string `json:"always,required"`
-	ID     string   `json:"id,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata   any                            `json:"metadata,required"`
+	Always     []string                       `json:"always,required"`
+	ID         string                         `json:"id,required"`
+	Metadata   map[string]any                 `json:"metadata,required"`
 	Patterns   []string                       `json:"patterns,required"`
 	Permission string                         `json:"permission,required"`
 	SessionID  string                         `json:"sessionID,required"`
@@ -1583,10 +1591,10 @@ func (r v2EventPermissionAskedDataJSON) RawJSON() string {
 type V2EventPermissionAskedDataTool struct {
 	CallID    string                             `json:"callID,required"`
 	MessageID string                             `json:"messageID,required"`
-	JSON      V2EventPermissionAskedDataToolJSON `json:"-"`
+	JSON      v2EventPermissionAskedDataToolJSON `json:"-"`
 }
 
-type V2EventPermissionAskedDataToolJSON struct {
+type v2EventPermissionAskedDataToolJSON struct {
 	CallID      apijson.Field
 	MessageID   apijson.Field
 	raw         string
@@ -1597,7 +1605,7 @@ func (r *V2EventPermissionAskedDataTool) UnmarshalJSON(data []byte) (err error) 
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventPermissionAskedDataToolJSON) RawJSON() string {
+func (r v2EventPermissionAskedDataToolJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1715,10 +1723,9 @@ func (r V2EventPermissionV2AskedType) IsKnown() bool {
 }
 
 type V2EventPermissionV2AskedData struct {
-	Action string `json:"action,required"`
-	ID     string `json:"id,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata  any                              `json:"metadata"`
+	Action    string                           `json:"action,required"`
+	ID        string                           `json:"id,required"`
+	Metadata  map[string]any                   `json:"metadata"`
 	Resources []string                         `json:"resources,required"`
 	Save      []string                         `json:"save"`
 	SessionID string                           `json:"sessionID,required"`
@@ -4094,14 +4101,13 @@ func (r V2EventSessionNextReasoningEndedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningEndedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any                                      `json:"providerMetadata"`
-	ReasoningID      string                                   `json:"reasoningID,required"`
-	SessionID        string                                   `json:"sessionID,required"`
-	Text             string                                   `json:"text,required"`
-	Timestamp        int64                                    `json:"timestamp,required"`
-	JSON             v2EventSessionNextReasoningEndedDataJSON `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	ProviderMetadata   map[string]any                           `json:"providerMetadata"`
+	ReasoningID        string                                   `json:"reasoningID,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Text               string                                   `json:"text,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	JSON               v2EventSessionNextReasoningEndedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningEndedDataJSON struct {
@@ -4169,13 +4175,12 @@ func (r V2EventSessionNextReasoningStartedType) IsKnown() bool {
 }
 
 type V2EventSessionNextReasoningStartedData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any                                        `json:"providerMetadata"`
-	ReasoningID      string                                     `json:"reasoningID,required"`
-	SessionID        string                                     `json:"sessionID,required"`
-	Timestamp        int64                                      `json:"timestamp,required"`
-	JSON             v2EventSessionNextReasoningStartedDataJSON `json:"-"`
+	AssistantMessageID string                                     `json:"assistantMessageID,required"`
+	ProviderMetadata   map[string]any                             `json:"providerMetadata"`
+	ReasoningID        string                                     `json:"reasoningID,required"`
+	SessionID          string                                     `json:"sessionID,required"`
+	Timestamp          int64                                      `json:"timestamp,required"`
+	JSON               v2EventSessionNextReasoningStartedDataJSON `json:"-"`
 }
 
 type v2EventSessionNextReasoningStartedDataJSON struct {
@@ -4657,7 +4662,7 @@ func (r V2EventSessionNextStepEndedType) IsKnown() bool {
 
 type V2EventSessionNextStepEndedData struct {
 	AssistantMessageID string                                `json:"assistantMessageID,required"`
-	Cost               int64                                 `json:"cost,required"`
+	Cost               float64                               `json:"cost,required"`
 	Files              []string                              `json:"files"`
 	Finish             string                                `json:"finish,required"`
 	SessionID          string                                `json:"sessionID,required"`
@@ -4693,10 +4698,10 @@ type V2EventSessionNextStepEndedDataTokens struct {
 	Input     int64                                      `json:"input,required"`
 	Output    int64                                      `json:"output,required"`
 	Reasoning int64                                      `json:"reasoning,required"`
-	JSON      V2EventSessionNextStepEndedDataTokensJSON  `json:"-"`
+	JSON      v2EventSessionNextStepEndedDataTokensJSON  `json:"-"`
 }
 
-type V2EventSessionNextStepEndedDataTokensJSON struct {
+type v2EventSessionNextStepEndedDataTokensJSON struct {
 	Cache       apijson.Field
 	Input       apijson.Field
 	Output      apijson.Field
@@ -4709,17 +4714,17 @@ func (r *V2EventSessionNextStepEndedDataTokens) UnmarshalJSON(data []byte) (err 
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventSessionNextStepEndedDataTokensJSON) RawJSON() string {
+func (r v2EventSessionNextStepEndedDataTokensJSON) RawJSON() string {
 	return r.raw
 }
 
 type V2EventSessionNextStepEndedDataTokensCache struct {
 	Read  int64                                          `json:"read,required"`
 	Write int64                                          `json:"write,required"`
-	JSON  V2EventSessionNextStepEndedDataTokensCacheJSON `json:"-"`
+	JSON  v2EventSessionNextStepEndedDataTokensCacheJSON `json:"-"`
 }
 
-type V2EventSessionNextStepEndedDataTokensCacheJSON struct {
+type v2EventSessionNextStepEndedDataTokensCacheJSON struct {
 	Read        apijson.Field
 	Write       apijson.Field
 	raw         string
@@ -4730,7 +4735,7 @@ func (r *V2EventSessionNextStepEndedDataTokensCache) UnmarshalJSON(data []byte) 
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventSessionNextStepEndedDataTokensCacheJSON) RawJSON() string {
+func (r v2EventSessionNextStepEndedDataTokensCacheJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -5208,15 +5213,14 @@ func (r V2EventSessionNextToolCalledType) IsKnown() bool {
 }
 
 type V2EventSessionNextToolCalledData struct {
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	CallID             string `json:"callID,required"`
-	// This field can have the runtime type of [map[string]any].
-	Input     any                                      `json:"input,required"`
-	Provider  V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
-	SessionID string                                   `json:"sessionID,required"`
-	Timestamp int64                                    `json:"timestamp,required"`
-	Tool      string                                   `json:"tool,required"`
-	JSON      v2EventSessionNextToolCalledDataJSON     `json:"-"`
+	AssistantMessageID string                                   `json:"assistantMessageID,required"`
+	CallID             string                                   `json:"callID,required"`
+	Input              map[string]any                           `json:"input,required"`
+	Provider           V2EventSessionNextToolCalledDataProvider `json:"provider,required"`
+	SessionID          string                                   `json:"sessionID,required"`
+	Timestamp          int64                                    `json:"timestamp,required"`
+	Tool               string                                   `json:"tool,required"`
+	JSON               v2EventSessionNextToolCalledDataJSON     `json:"-"`
 }
 
 type v2EventSessionNextToolCalledDataJSON struct {
@@ -5240,13 +5244,12 @@ func (r v2EventSessionNextToolCalledDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolCalledDataProvider struct {
-	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any                                          `json:"metadata"`
-	JSON     V2EventSessionNextToolCalledDataProviderJSON `json:"-"`
+	Executed bool                                         `json:"executed,required"`
+	Metadata map[string]any                               `json:"metadata"`
+	JSON     v2EventSessionNextToolCalledDataProviderJSON `json:"-"`
 }
 
-type V2EventSessionNextToolCalledDataProviderJSON struct {
+type v2EventSessionNextToolCalledDataProviderJSON struct {
 	Executed    apijson.Field
 	Metadata    apijson.Field
 	raw         string
@@ -5257,7 +5260,7 @@ func (r *V2EventSessionNextToolCalledDataProvider) UnmarshalJSON(data []byte) (e
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventSessionNextToolCalledDataProviderJSON) RawJSON() string {
+func (r v2EventSessionNextToolCalledDataProviderJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -5311,7 +5314,8 @@ type V2EventSessionNextToolFailedData struct {
 	CallID             string                                   `json:"callID,required"`
 	Error              SessionErrorUnknown                      `json:"error,required"`
 	Provider           V2EventSessionNextToolFailedDataProvider `json:"provider,required"`
-	// This field can have the runtime type of [any].
+	// Result holds an arbitrary tool result payload with no fixed schema
+	// (OpenAPI: free-form object).
 	Result    any                                  `json:"result"`
 	SessionID string                               `json:"sessionID,required"`
 	Timestamp int64                                `json:"timestamp,required"`
@@ -5339,13 +5343,12 @@ func (r v2EventSessionNextToolFailedDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolFailedDataProvider struct {
-	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any                                          `json:"metadata"`
-	JSON     V2EventSessionNextToolFailedDataProviderJSON `json:"-"`
+	Executed bool                                         `json:"executed,required"`
+	Metadata map[string]any                               `json:"metadata"`
+	JSON     v2EventSessionNextToolFailedDataProviderJSON `json:"-"`
 }
 
-type V2EventSessionNextToolFailedDataProviderJSON struct {
+type v2EventSessionNextToolFailedDataProviderJSON struct {
 	Executed    apijson.Field
 	Metadata    apijson.Field
 	raw         string
@@ -5356,7 +5359,7 @@ func (r *V2EventSessionNextToolFailedDataProvider) UnmarshalJSON(data []byte) (e
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventSessionNextToolFailedDataProviderJSON) RawJSON() string {
+func (r v2EventSessionNextToolFailedDataProviderJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -5625,10 +5628,9 @@ type V2EventSessionNextToolProgressData struct {
 	AssistantMessageID string `json:"assistantMessageID,required"`
 	CallID             string `json:"callID,required"`
 	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content   []any  `json:"content,required"`
-	SessionID string `json:"sessionID,required"`
-	// This field can have the runtime type of [map[string]any].
-	Structured any                                    `json:"structured,required"`
+	Content    []any                                  `json:"content,required"`
+	SessionID  string                                 `json:"sessionID,required"`
+	Structured map[string]any                         `json:"structured,required"`
 	Timestamp  int64                                  `json:"timestamp,required"`
 	JSON       v2EventSessionNextToolProgressDataJSON `json:"-"`
 }
@@ -5704,11 +5706,11 @@ type V2EventSessionNextToolSuccessData struct {
 	Content     []any                                     `json:"content,required"`
 	OutputPaths []string                                  `json:"outputPaths"`
 	Provider    V2EventSessionNextToolSuccessDataProvider `json:"provider,required"`
-	// This field can have the runtime type of [any].
-	Result    any    `json:"result"`
-	SessionID string `json:"sessionID,required"`
-	// This field can have the runtime type of [map[string]any].
-	Structured any                                   `json:"structured,required"`
+	// Result holds an arbitrary tool result payload with no fixed schema
+	// (OpenAPI: free-form object).
+	Result     any                                   `json:"result"`
+	SessionID  string                                `json:"sessionID,required"`
+	Structured map[string]any                        `json:"structured,required"`
 	Timestamp  int64                                 `json:"timestamp,required"`
 	JSON       v2EventSessionNextToolSuccessDataJSON `json:"-"`
 }
@@ -5736,13 +5738,12 @@ func (r v2EventSessionNextToolSuccessDataJSON) RawJSON() string {
 }
 
 type V2EventSessionNextToolSuccessDataProvider struct {
-	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any                                           `json:"metadata"`
-	JSON     V2EventSessionNextToolSuccessDataProviderJSON `json:"-"`
+	Executed bool                                          `json:"executed,required"`
+	Metadata map[string]any                                `json:"metadata"`
+	JSON     v2EventSessionNextToolSuccessDataProviderJSON `json:"-"`
 }
 
-type V2EventSessionNextToolSuccessDataProviderJSON struct {
+type v2EventSessionNextToolSuccessDataProviderJSON struct {
 	Executed    apijson.Field
 	Metadata    apijson.Field
 	raw         string
@@ -5753,7 +5754,7 @@ func (r *V2EventSessionNextToolSuccessDataProvider) UnmarshalJSON(data []byte) (
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r V2EventSessionNextToolSuccessDataProviderJSON) RawJSON() string {
+func (r v2EventSessionNextToolSuccessDataProviderJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -5803,9 +5804,14 @@ func (r V2EventSessionStatusType) IsKnown() bool {
 }
 
 type V2EventSessionStatusData struct {
-	SessionID string                       `json:"sessionID,required"`
-	Status    SessionStatus                `json:"status,required"`
-	JSON      v2EventSessionStatusDataJSON `json:"-"`
+	SessionID string `json:"sessionID,required"`
+	// This field can have the runtime type of [SessionStatusIdle],
+	// [SessionStatusRetry] or [SessionStatusBusy].
+	Status any                          `json:"status,required"`
+	JSON   v2EventSessionStatusDataJSON `json:"-"`
+	// statusUnion holds the typed status payload after [UnmarshalJSON] routes
+	// the raw data through [SessionStatus] registered union variants.
+	statusUnion SessionStatus
 }
 
 type v2EventSessionStatusDataJSON struct {
@@ -5815,12 +5821,39 @@ type v2EventSessionStatusDataJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
+// v2EventSessionStatusDataShadow mirrors [V2EventSessionStatusData] with the
+// status field declared as the registered [SessionStatus] union so apijson
+// routes the nested status object to its matching variant instead of decoding
+// it into a generic map.
+type v2EventSessionStatusDataShadow struct {
+	SessionID string                       `json:"sessionID,required"`
+	Status    SessionStatus                `json:"status,required"`
+	JSON      v2EventSessionStatusDataJSON `json:"-"`
+}
+
 func (r *V2EventSessionStatusData) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
+	*r = V2EventSessionStatusData{}
+	var shadow v2EventSessionStatusDataShadow
+	if err = apijson.UnmarshalRoot(data, &shadow); err != nil {
+		return err
+	}
+	r.SessionID = shadow.SessionID
+	r.Status = shadow.Status
+	r.JSON = shadow.JSON
+	r.statusUnion = shadow.Status
+	return nil
 }
 
 func (r v2EventSessionStatusDataJSON) RawJSON() string {
 	return r.raw
+}
+
+// AsStatus returns the status field as a typed [SessionStatus] union.
+//
+// Possible runtime types of the union are [SessionStatusIdle], [SessionStatusRetry]
+// or [SessionStatusBusy].
+func (r *V2EventSessionStatusData) AsStatus() SessionStatus {
+	return r.statusUnion
 }
 
 type V2EventSessionUpdated struct {
@@ -6001,8 +6034,10 @@ func (r V2EventTuiCommandExecuteType) IsKnown() bool {
 }
 
 type V2EventTuiCommandExecuteData struct {
-	// This field can have the runtime type of [string].
-	Command any                              `json:"command,required"`
+	// Command holds the executed TUI command. Known enum values are available
+	// via [V2EventTuiCommandExecuteCommand]; the field may also carry arbitrary
+	// string values for unknown commands.
+	Command V2EventTuiCommandExecuteCommand  `json:"command,required"`
 	JSON    v2EventTuiCommandExecuteDataJSON `json:"-"`
 }
 

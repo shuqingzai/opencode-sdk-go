@@ -541,7 +541,7 @@ type EventListResponseEventSessionNextModelSwitchedProperties struct {
 	Timestamp int64                                                        `json:"timestamp,required"`
 	MessageID string                                                       `json:"messageID,required"`
 	SessionID string                                                       `json:"sessionID,required"`
-	Model     EventListResponseEventSessionNextModelSwitchedModel          `json:"model,required"`
+	Model     ModelRef                                                     `json:"model,required"`
 	JSON      eventListResponseEventSessionNextModelSwitchedPropertiesJSON `json:"-"`
 }
 
@@ -623,7 +623,7 @@ type EventListResponseEventSessionNextPromptedProperties struct {
 	Timestamp int64                                                   `json:"timestamp,required"`
 	MessageID string                                                  `json:"messageID,required"`
 	SessionID string                                                  `json:"sessionID,required"`
-	Prompt    EventListResponseEventSessionNextPromptedPrompt         `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt                                    `json:"prompt,required"`
 	Delivery  EventListResponseEventSessionNextPromptedDelivery       `json:"delivery,required"`
 	JSON      eventListResponseEventSessionNextPromptedPropertiesJSON `json:"-"`
 }
@@ -892,7 +892,7 @@ type EventListResponseEventSessionNextStepStartedProperties struct {
 	AssistantMessageID string                                                     `json:"assistantMessageID,required"`
 	SessionID          string                                                     `json:"sessionID,required"`
 	Agent              string                                                     `json:"agent,required"`
-	Model              EventListResponseEventSessionNextModelSwitchedModel        `json:"model,required"`
+	Model              ModelRef                                                   `json:"model,required"`
 	Snapshot           string                                                     `json:"snapshot"`
 	JSON               eventListResponseEventSessionNextStepStartedPropertiesJSON `json:"-"`
 }
@@ -1300,13 +1300,12 @@ func (r EventListResponseEventSessionNextReasoningStarted) implementsEventListRe
 func (r EventListResponseEventSessionNextReasoningStarted) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningStartedProperties struct {
-	Timestamp          int64  `json:"timestamp,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID          string `json:"sessionID,required"`
-	ReasoningID        string `json:"reasoningID,required"`
-	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any                                                             `json:"providerMetadata"`
-	JSON             eventListResponseEventSessionNextReasoningStartedPropertiesJSON `json:"-"`
+	Timestamp          int64                                                           `json:"timestamp,required"`
+	AssistantMessageID string                                                          `json:"assistantMessageID,required"`
+	SessionID          string                                                          `json:"sessionID,required"`
+	ReasoningID        string                                                          `json:"reasoningID,required"`
+	ProviderMetadata   map[string]any                                                  `json:"providerMetadata"`
+	JSON               eventListResponseEventSessionNextReasoningStartedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningStartedPropertiesJSON struct {
@@ -1437,14 +1436,13 @@ func (r EventListResponseEventSessionNextReasoningEnded) implementsEventListResp
 func (r EventListResponseEventSessionNextReasoningEnded) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextReasoningEndedProperties struct {
-	Timestamp          int64  `json:"timestamp,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID          string `json:"sessionID,required"`
-	ReasoningID        string `json:"reasoningID,required"`
-	Text               string `json:"text,required"`
-	// This field can have the runtime type of [map[string]any].
-	ProviderMetadata any                                                           `json:"providerMetadata"`
-	JSON             eventListResponseEventSessionNextReasoningEndedPropertiesJSON `json:"-"`
+	Timestamp          int64                                                         `json:"timestamp,required"`
+	AssistantMessageID string                                                        `json:"assistantMessageID,required"`
+	SessionID          string                                                        `json:"sessionID,required"`
+	ReasoningID        string                                                        `json:"reasoningID,required"`
+	Text               string                                                        `json:"text,required"`
+	ProviderMetadata   map[string]any                                                `json:"providerMetadata"`
+	JSON               eventListResponseEventSessionNextReasoningEndedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextReasoningEndedPropertiesJSON struct {
@@ -1712,15 +1710,14 @@ func (r EventListResponseEventSessionNextToolCalled) implementsEventListResponse
 func (r EventListResponseEventSessionNextToolCalled) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolCalledProperties struct {
-	Timestamp          int64  `json:"timestamp,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID          string `json:"sessionID,required"`
-	CallID             string `json:"callID,required"`
-	Tool               string `json:"tool,required"`
-	// This field can have the runtime type of [map[string]any].
-	Input    any                                                       `json:"input,required"`
-	Provider EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
-	JSON     eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
+	Timestamp          int64                                                     `json:"timestamp,required"`
+	AssistantMessageID string                                                    `json:"assistantMessageID,required"`
+	SessionID          string                                                    `json:"sessionID,required"`
+	CallID             string                                                    `json:"callID,required"`
+	Tool               string                                                    `json:"tool,required"`
+	Input              map[string]any                                            `json:"input,required"`
+	Provider           EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
+	JSON               eventListResponseEventSessionNextToolCalledPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolCalledPropertiesJSON struct {
@@ -1785,14 +1782,13 @@ func (r EventListResponseEventSessionNextToolProgress) implementsEventListRespon
 func (r EventListResponseEventSessionNextToolProgress) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolProgressProperties struct {
-	Timestamp          int64  `json:"timestamp,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID          string `json:"sessionID,required"`
-	CallID             string `json:"callID,required"`
-	// This field can have the runtime type of [map[string]any].
-	Structured any `json:"structured,required"`
-	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content []any                                                       `json:"content,required"`
+	Timestamp          int64          `json:"timestamp,required"`
+	AssistantMessageID string         `json:"assistantMessageID,required"`
+	SessionID          string         `json:"sessionID,required"`
+	CallID             string         `json:"callID,required"`
+	Structured         map[string]any `json:"structured,required"`
+	// Each element can be [ToolTextContent] or [ToolFileContent].
+	Content []LLMToolContent                                            `json:"content,required"`
 	JSON    eventListResponseEventSessionNextToolProgressPropertiesJSON `json:"-"`
 }
 
@@ -1857,18 +1853,20 @@ func (r EventListResponseEventSessionNextToolSuccess) implementsEventListRespons
 func (r EventListResponseEventSessionNextToolSuccess) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolSuccessProperties struct {
-	Timestamp          int64  `json:"timestamp,required"`
-	AssistantMessageID string `json:"assistantMessageID,required"`
-	SessionID          string `json:"sessionID,required"`
-	CallID             string `json:"callID,required"`
-	// This field can have the runtime type of [map[string]any].
-	Structured any `json:"structured,required"`
-	// This field can have the runtime type of [[]ToolTextContent], [[]ToolFileContent].
-	Content     []any                                                      `json:"content,required"`
-	OutputPaths []string                                                   `json:"outputPaths"`
-	Provider    EventListResponseEventSessionNextToolCalledProvider        `json:"provider,required"`
-	Result      any                                                        `json:"result"`
-	JSON        eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
+	Timestamp          int64          `json:"timestamp,required"`
+	AssistantMessageID string         `json:"assistantMessageID,required"`
+	SessionID          string         `json:"sessionID,required"`
+	CallID             string         `json:"callID,required"`
+	Structured         map[string]any `json:"structured,required"`
+	// Each element can be [ToolTextContent] or [ToolFileContent].
+	Content     []LLMToolContent                                    `json:"content,required"`
+	OutputPaths []string                                            `json:"outputPaths"`
+	Provider    EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
+	Result any                                                        `json:"result"`
+	JSON   eventListResponseEventSessionNextToolSuccessPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolSuccessPropertiesJSON struct {
@@ -1935,14 +1933,17 @@ func (r EventListResponseEventSessionNextToolFailed) implementsEventListResponse
 func (r EventListResponseEventSessionNextToolFailed) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextToolFailedProperties struct {
-	Timestamp          int64                                                     `json:"timestamp,required"`
-	AssistantMessageID string                                                    `json:"assistantMessageID,required"`
-	SessionID          string                                                    `json:"sessionID,required"`
-	CallID             string                                                    `json:"callID,required"`
-	Error              SessionErrorUnknown                                       `json:"error,required"`
-	Provider           EventListResponseEventSessionNextToolCalledProvider       `json:"provider,required"`
-	Result             any                                                       `json:"result"`
-	JSON               eventListResponseEventSessionNextToolFailedPropertiesJSON `json:"-"`
+	Timestamp          int64                                               `json:"timestamp,required"`
+	AssistantMessageID string                                              `json:"assistantMessageID,required"`
+	SessionID          string                                              `json:"sessionID,required"`
+	CallID             string                                              `json:"callID,required"`
+	Error              SessionErrorUnknown                                 `json:"error,required"`
+	Provider           EventListResponseEventSessionNextToolCalledProvider `json:"provider,required"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
+	Result any                                                       `json:"result"`
+	JSON   eventListResponseEventSessionNextToolFailedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextToolFailedPropertiesJSON struct {
@@ -2263,35 +2264,15 @@ func (r EventListResponseEventSessionNextCompactionEndedType) IsKnown() bool {
 	return false
 }
 
-// EventListResponseEventSessionNextModelSwitchedModel
-type EventListResponseEventSessionNextModelSwitchedModel struct {
-	ID         string                                                  `json:"id,required"`
-	ProviderID string                                                  `json:"providerID,required"`
-	Variant    string                                                  `json:"variant"`
-	JSON       eventListResponseEventSessionNextModelSwitchedModelJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextModelSwitchedModelJSON struct {
-	ID          apijson.Field
-	ProviderID  apijson.Field
-	Variant     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextModelSwitchedModel) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextModelSwitchedModelJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [ModelRef] instead.
+// EventListResponseEventSessionNextModelSwitchedModel is a type alias for
+// [ModelRef]. OpenAPI declares this as a $ref to ModelRef.
+type EventListResponseEventSessionNextModelSwitchedModel = ModelRef
 
 // EventListResponseEventSessionNextToolCalledProvider
 type EventListResponseEventSessionNextToolCalledProvider struct {
-	Executed bool `json:"executed,required"`
-	// This field can have the runtime type of [map[string]any].
-	Metadata any                                                     `json:"metadata"`
+	Executed bool                                                    `json:"executed,required"`
+	Metadata map[string]any                                          `json:"metadata"`
 	JSON     eventListResponseEventSessionNextToolCalledProviderJSON `json:"-"`
 }
 
@@ -2340,29 +2321,10 @@ func (r eventListResponseEventSessionNextRetriedErrorJSON) RawJSON() string {
 	return r.raw
 }
 
-// EventListResponseEventSessionNextPromptedPrompt
-type EventListResponseEventSessionNextPromptedPrompt struct {
-	Text   string                                              `json:"text,required"`
-	Files  []V2PromptFileAttachment                            `json:"files"`
-	Agents []V2PromptAgentAttachment                           `json:"agents"`
-	JSON   eventListResponseEventSessionNextPromptedPromptJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextPromptedPromptJSON struct {
-	Text        apijson.Field
-	Files       apijson.Field
-	Agents      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextPromptedPrompt) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextPromptedPromptJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [V2SessionInputPrompt] instead.
+// EventListResponseEventSessionNextPromptedPrompt is a type alias for
+// [V2SessionInputPrompt]. OpenAPI declares this as a $ref to Prompt.
+type EventListResponseEventSessionNextPromptedPrompt = V2SessionInputPrompt
 
 // EventListResponseEventSessionNextStepEndedTokens
 type EventListResponseEventSessionNextStepEndedTokens struct {
@@ -2542,120 +2504,24 @@ func (r eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON) RawJS
 	return r.raw
 }
 
-// PermissionV2Source represents the source tool of a permission v2 request.
-type EventListResponseEventPermissionV2AskedPropertiesSource struct {
-	Type      string                                                      `json:"type,required"`
-	MessageID string                                                      `json:"messageID,required"`
-	CallID    string                                                      `json:"callID,required"`
-	JSON      eventListResponseEventPermissionV2AskedPropertiesSourceJSON `json:"-"`
-}
+// Deprecated: use [PermissionV2Source] instead.
+// EventListResponseEventPermissionV2AskedPropertiesSource is a type alias for
+// [PermissionV2Source]. OpenAPI declares this as a $ref to PermissionV2Source.
+type EventListResponseEventPermissionV2AskedPropertiesSource = PermissionV2Source
 
-type eventListResponseEventPermissionV2AskedPropertiesSourceJSON struct {
-	Type        apijson.Field
-	MessageID   apijson.Field
-	CallID      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
+// Deprecated: use [PermissionV2Reply] instead.
+// EventListResponseEventPermissionV2RepliedPropertiesReply is a type alias for
+// [PermissionV2Reply]. OpenAPI declares this as a $ref to PermissionV2Reply.
+type EventListResponseEventPermissionV2RepliedPropertiesReply = PermissionV2Reply
 
-func (r *EventListResponseEventPermissionV2AskedPropertiesSource) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
+// Deprecated: use [PermissionV2ReplyOnce] instead.
+const EventListResponseEventPermissionV2RepliedPropertiesReplyOnce = PermissionV2ReplyOnce
 
-func (r eventListResponseEventPermissionV2AskedPropertiesSourceJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [PermissionV2ReplyAlways] instead.
+const EventListResponseEventPermissionV2RepliedPropertiesReplyAlways = PermissionV2ReplyAlways
 
-// PermissionV2ReplyType represents the reply type for permission v2 requests.
-type EventListResponseEventPermissionV2RepliedPropertiesReply string
-
-const (
-	EventListResponseEventPermissionV2RepliedPropertiesReplyOnce   EventListResponseEventPermissionV2RepliedPropertiesReply = "once"
-	EventListResponseEventPermissionV2RepliedPropertiesReplyAlways EventListResponseEventPermissionV2RepliedPropertiesReply = "always"
-	EventListResponseEventPermissionV2RepliedPropertiesReplyReject EventListResponseEventPermissionV2RepliedPropertiesReply = "reject"
-)
-
-func (r EventListResponseEventPermissionV2RepliedPropertiesReply) IsKnown() bool {
-	switch r {
-	case EventListResponseEventPermissionV2RepliedPropertiesReplyOnce,
-		EventListResponseEventPermissionV2RepliedPropertiesReplyAlways,
-		EventListResponseEventPermissionV2RepliedPropertiesReplyReject:
-		return true
-	}
-	return false
-}
-
-// QuestionV2Option represents an option in a v2 question.
-type EventListResponseEventQuestionV2AskedPropertiesQuestionsOption struct {
-	Label       string                                                             `json:"label,required"`
-	Description string                                                             `json:"description,required"`
-	JSON        eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON struct {
-	Label       apijson.Field
-	Description apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionV2AskedPropertiesQuestionsOption) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionV2AskedPropertiesQuestionsOptionJSON) RawJSON() string {
-	return r.raw
-}
-
-// QuestionV2Info represents a v2 question with options.
-type EventListResponseEventQuestionV2AskedPropertiesQuestions struct {
-	Question string                                                           `json:"question,required"`
-	Header   string                                                           `json:"header,required"`
-	Options  []EventListResponseEventQuestionV2AskedPropertiesQuestionsOption `json:"options,required"`
-	Multiple bool                                                             `json:"multiple"`
-	Custom   bool                                                             `json:"custom"`
-	JSON     eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON     `json:"-"`
-}
-
-type eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON struct {
-	Question    apijson.Field
-	Header      apijson.Field
-	Options     apijson.Field
-	Multiple    apijson.Field
-	Custom      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionV2AskedPropertiesQuestions) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionV2AskedPropertiesQuestionsJSON) RawJSON() string {
-	return r.raw
-}
-
-// QuestionV2Tool represents the tool context for a v2 question.
-type EventListResponseEventQuestionV2AskedPropertiesTool struct {
-	MessageID string                                                  `json:"messageID,required"`
-	CallID    string                                                  `json:"callID,required"`
-	JSON      eventListResponseEventQuestionV2AskedPropertiesToolJSON `json:"-"`
-}
-
-type eventListResponseEventQuestionV2AskedPropertiesToolJSON struct {
-	MessageID   apijson.Field
-	CallID      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventQuestionV2AskedPropertiesTool) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventQuestionV2AskedPropertiesToolJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [PermissionV2ReplyReject] instead.
+const EventListResponseEventPermissionV2RepliedPropertiesReplyReject = PermissionV2ReplyReject
 
 // =============================================================================
 // EventListResponseEventIntegrationUpdated
@@ -2873,14 +2739,14 @@ func (r EventListResponseEventPermissionV2Asked) implementsEventListResponse()  
 func (r EventListResponseEventPermissionV2Asked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionV2AskedProperties struct {
-	ID        string                                                   `json:"id,required"`
-	SessionID string                                                   `json:"sessionID,required"`
-	Action    string                                                   `json:"action,required"`
-	Resources []string                                                 `json:"resources,required"`
-	Save      []string                                                 `json:"save"`
-	Metadata  map[string]any                                           `json:"metadata"`
-	Source    *EventListResponseEventPermissionV2AskedPropertiesSource `json:"source"`
-	JSON      eventListResponseEventPermissionV2AskedPropertiesJSON    `json:"-"`
+	ID        string                                                `json:"id,required"`
+	SessionID string                                                `json:"sessionID,required"`
+	Action    string                                                `json:"action,required"`
+	Resources []string                                              `json:"resources,required"`
+	Save      []string                                              `json:"save"`
+	Metadata  map[string]any                                        `json:"metadata"`
+	Source    PermissionV2Source                                    `json:"source"`
+	JSON      eventListResponseEventPermissionV2AskedPropertiesJSON `json:"-"`
 }
 
 func (r *EventListResponseEventPermissionV2AskedProperties) UnmarshalJSON(data []byte) (err error) {
@@ -2948,10 +2814,10 @@ func (r EventListResponseEventPermissionV2Replied) implementsEventListResponse()
 func (r EventListResponseEventPermissionV2Replied) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPermissionV2RepliedProperties struct {
-	SessionID string                                                   `json:"sessionID,required"`
-	RequestID string                                                   `json:"requestID,required"`
-	Reply     EventListResponseEventPermissionV2RepliedPropertiesReply `json:"reply,required"`
-	JSON      eventListResponseEventPermissionV2RepliedPropertiesJSON  `json:"-"`
+	SessionID string                                                  `json:"sessionID,required"`
+	RequestID string                                                  `json:"requestID,required"`
+	Reply     PermissionV2Reply                                       `json:"reply,required"`
+	JSON      eventListResponseEventPermissionV2RepliedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventPermissionV2RepliedPropertiesJSON struct {
@@ -3076,11 +2942,11 @@ func (r EventListResponseEventQuestionV2Asked) implementsEventListResponse()  {}
 func (r EventListResponseEventQuestionV2Asked) implementsGlobalEventPayload() {}
 
 type EventListResponseEventQuestionV2AskedProperties struct {
-	ID        string                                                     `json:"id,required"`
-	SessionID string                                                     `json:"sessionID,required"`
-	Questions []EventListResponseEventQuestionV2AskedPropertiesQuestions `json:"questions,required"`
-	Tool      *EventListResponseEventQuestionV2AskedPropertiesTool       `json:"tool"`
-	JSON      eventListResponseEventQuestionV2AskedPropertiesJSON        `json:"-"`
+	ID        string                                              `json:"id,required"`
+	SessionID string                                              `json:"sessionID,required"`
+	Questions []QuestionV2Info                                    `json:"questions,required"`
+	Tool      QuestionV2Tool                                      `json:"tool"`
+	JSON      eventListResponseEventQuestionV2AskedPropertiesJSON `json:"-"`
 }
 
 func (r *EventListResponseEventQuestionV2AskedProperties) UnmarshalJSON(data []byte) (err error) {
@@ -3099,6 +2965,15 @@ type eventListResponseEventQuestionV2AskedPropertiesJSON struct {
 func (r eventListResponseEventQuestionV2AskedPropertiesJSON) RawJSON() string {
 	return r.raw
 }
+
+// Deprecated: use [QuestionV2Info] instead.
+type EventListResponseEventQuestionV2AskedPropertiesQuestions = QuestionV2Info
+
+// Deprecated: use [QuestionV2Option] instead.
+type EventListResponseEventQuestionV2AskedPropertiesQuestionsOption = QuestionV2Option
+
+// Deprecated: use [QuestionV2Tool] instead.
+type EventListResponseEventQuestionV2AskedPropertiesTool = QuestionV2Tool
 
 type EventListResponseEventQuestionV2AskedType string
 
@@ -3548,7 +3423,7 @@ type EventListResponseEventSessionNextPromptAdmittedProperties struct {
 	Timestamp int64                                                             `json:"timestamp,required"`
 	SessionID string                                                            `json:"sessionID,required"`
 	MessageID string                                                            `json:"messageID,required"`
-	Prompt    EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt   `json:"prompt,required"`
+	Prompt    V2SessionInputPrompt                                              `json:"prompt,required"`
 	Delivery  EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery `json:"delivery,required"`
 	JSON      eventListResponseEventSessionNextPromptAdmittedPropertiesJSON     `json:"-"`
 }
@@ -3571,28 +3446,10 @@ func (r eventListResponseEventSessionNextPromptAdmittedPropertiesJSON) RawJSON()
 	return r.raw
 }
 
-type EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt struct {
-	Text   string                                                              `json:"text,required"`
-	Files  []V2PromptFileAttachment                                            `json:"files"`
-	Agents []V2PromptAgentAttachment                                           `json:"agents"`
-	JSON   eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON struct {
-	Text        apijson.Field
-	Files       apijson.Field
-	Agents      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextPromptAdmittedPropertiesPromptJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [V2SessionInputPrompt] instead.
+// EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt is a type
+// alias for [V2SessionInputPrompt]. OpenAPI declares this as a $ref to Prompt.
+type EventListResponseEventSessionNextPromptAdmittedPropertiesPrompt = V2SessionInputPrompt
 
 type EventListResponseEventSessionNextPromptAdmittedType string
 

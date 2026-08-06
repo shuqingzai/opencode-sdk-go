@@ -125,6 +125,9 @@ type Workspace struct {
 	Name      string `json:"name,required"`
 	Branch    string `json:"branch"`
 	Directory string `json:"directory"`
+	// This field is an untyped arbitrary value. The OpenAPI schema declares it as
+	// an empty schema (`{}`), meaning it may hold any JSON value. Use a
+	// type-switch or json.Unmarshal to inspect the runtime value.
 	Extra     any    `json:"extra"`
 	ProjectID string `json:"projectID,required"`
 	// The amount of time in milliseconds that this workspace has been used.

@@ -259,8 +259,7 @@ type PartUpdatePartFile struct {
 	URL       param.Field[string]                 `json:"url,required"`
 	Filename  param.Field[string]                 `json:"filename"`
 	// Source of the file (e.g. symbol, resource, or inline file source).
-	// Accepts [map[string]any] or an appropriate FilePartSource variant.
-	Source param.Field[any] `json:"source"`
+	Source param.Field[FilePartSourceUnionParam] `json:"source"`
 }
 
 func (r PartUpdatePartFile) MarshalJSON() (data []byte, err error) {

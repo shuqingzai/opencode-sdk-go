@@ -392,7 +392,7 @@ func TestV2SessionMessageToolProviderWithoutResultMetadata(t *testing.T) {
 
 // TestToolStateContentUnionDecoding verifies that the Content field on
 // V2SessionMessageToolStateRunning / Completed / Error decodes as
-// []LLMToolContentUnion with concrete element types, not []interface{}.
+// []LLMToolContent with concrete element types, not []interface{}.
 func TestToolStateContentUnionDecoding(t *testing.T) {
 	t.Parallel()
 
@@ -408,13 +408,13 @@ func TestToolStateContentUnionDecoding(t *testing.T) {
 		if len(state.Content) != 2 {
 			t.Fatalf("expected 2 content items, got %d", len(state.Content))
 		}
-		textItem, ok := state.Content[0].(ToolTextContent)
+		textItem, ok := state.Content[0].AsUnion().(ToolTextContent)
 		if !ok {
 			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
 		} else if textItem.Text != "hello" {
 			t.Errorf("element[0].Text: expected hello, got %q", textItem.Text)
 		}
-		fileItem, ok := state.Content[1].(ToolFileContent)
+		fileItem, ok := state.Content[1].AsUnion().(ToolFileContent)
 		if !ok {
 			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
 		} else if fileItem.URI != "file:///a.txt" {
@@ -432,10 +432,10 @@ func TestToolStateContentUnionDecoding(t *testing.T) {
 		if len(state.Content) != 2 {
 			t.Fatalf("expected 2 content items, got %d", len(state.Content))
 		}
-		if _, ok := state.Content[0].(ToolTextContent); !ok {
+		if _, ok := state.Content[0].AsUnion().(ToolTextContent); !ok {
 			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
 		}
-		if _, ok := state.Content[1].(ToolFileContent); !ok {
+		if _, ok := state.Content[1].AsUnion().(ToolFileContent); !ok {
 			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
 		}
 	})
@@ -450,10 +450,10 @@ func TestToolStateContentUnionDecoding(t *testing.T) {
 		if len(state.Content) != 2 {
 			t.Fatalf("expected 2 content items, got %d", len(state.Content))
 		}
-		if _, ok := state.Content[0].(ToolTextContent); !ok {
+		if _, ok := state.Content[0].AsUnion().(ToolTextContent); !ok {
 			t.Errorf("element[0]: expected ToolTextContent, got %T", state.Content[0])
 		}
-		if _, ok := state.Content[1].(ToolFileContent); !ok {
+		if _, ok := state.Content[1].AsUnion().(ToolFileContent); !ok {
 			t.Errorf("element[1]: expected ToolFileContent, got %T", state.Content[1])
 		}
 	})
@@ -485,11 +485,52 @@ func TestToolStateContentUnionDecoding(t *testing.T) {
 		if len(completed.Content) != 1 {
 			t.Fatalf("expected 1 content item, got %d", len(completed.Content))
 		}
-		textItem, ok := completed.Content[0].(ToolTextContent)
+		textItem, ok := completed.Content[0].AsUnion().(ToolTextContent)
 		if !ok {
 			t.Errorf("element[0]: expected ToolTextContent, got %T", completed.Content[0])
 		} else if textItem.Text != "world" {
 			t.Errorf("element[0].Text: expected world, got %q", textItem.Text)
+		}
+	})
+}
+
+// TestLLMToolContentCarrierTypedFields verifies that the LLMToolContent union
+// carrier exposes typed string fields (Text/URI/Mime/Name) and an enum-typed
+// Type discriminator instead of any.
+func TestLLMToolContentCarrierTypedFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("TextVariant", func(t *testing.T) {
+		t.Parallel()
+		var c LLMToolContent
+		if err := c.UnmarshalJSON([]byte(`{"type":"text","text":"hello"}`)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if c.Type != LLMToolContentTypeText {
+			t.Errorf("Type: got %q, want %q", c.Type, LLMToolContentTypeText)
+		}
+		if c.Text != "hello" {
+			t.Errorf("Text: got %q, want hello", c.Text)
+		}
+		if _, ok := c.AsUnion().(ToolTextContent); !ok {
+			t.Errorf("AsUnion: expected ToolTextContent, got %T", c.AsUnion())
+		}
+	})
+
+	t.Run("FileVariant", func(t *testing.T) {
+		t.Parallel()
+		var c LLMToolContent
+		if err := c.UnmarshalJSON([]byte(`{"type":"file","uri":"file:///a.txt","mime":"text/plain","name":"a.txt"}`)); err != nil {
+			t.Fatalf("UnmarshalJSON: %v", err)
+		}
+		if c.Type != LLMToolContentTypeFile {
+			t.Errorf("Type: got %q, want %q", c.Type, LLMToolContentTypeFile)
+		}
+		if c.URI != "file:///a.txt" || c.Mime != "text/plain" || c.Name != "a.txt" {
+			t.Errorf("URI/Mime/Name: %q / %q / %q", c.URI, c.Mime, c.Name)
+		}
+		if _, ok := c.AsUnion().(ToolFileContent); !ok {
+			t.Errorf("AsUnion: expected ToolFileContent, got %T", c.AsUnion())
 		}
 	})
 }

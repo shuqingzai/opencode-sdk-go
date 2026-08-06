@@ -83,9 +83,9 @@ func (r symbolJSON) RawJSON() string {
 }
 
 type SymbolLocation struct {
-	Range SymbolLocationRange `json:"range,required"`
-	URI   string              `json:"uri,required"`
-	JSON  symbolLocationJSON  `json:"-"`
+	Range Range              `json:"range,required"`
+	URI   string             `json:"uri,required"`
+	JSON  symbolLocationJSON `json:"-"`
 }
 
 // symbolLocationJSON contains the JSON metadata for the struct [SymbolLocation]
@@ -104,51 +104,57 @@ func (r symbolLocationJSON) RawJSON() string {
 	return r.raw
 }
 
-type SymbolLocationRange struct {
-	End   SymbolPosition          `json:"end,required"`
-	Start SymbolPosition          `json:"start,required"`
-	JSON  symbolLocationRangeJSON `json:"-"`
+// Range represents a source range as defined by the OpenAPI `Range` schema.
+type Range struct {
+	End   Position  `json:"end,required"`
+	Start Position  `json:"start,required"`
+	JSON  rangeJSON `json:"-"`
 }
 
-// symbolLocationRangeJSON contains the JSON metadata for the struct
-// [SymbolLocationRange]
-type symbolLocationRangeJSON struct {
+// rangeJSON contains the JSON metadata for the struct [Range]
+type rangeJSON struct {
 	End         apijson.Field
 	Start       apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *SymbolLocationRange) UnmarshalJSON(data []byte) (err error) {
+func (r *Range) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r symbolLocationRangeJSON) RawJSON() string {
+func (r rangeJSON) RawJSON() string {
 	return r.raw
 }
 
-// SymbolPosition represents a line/character position in a source file.
-type SymbolPosition struct {
-	Character int64              `json:"character,required"`
-	Line      int64              `json:"line,required"`
-	JSON      symbolPositionJSON `json:"-"`
+// Deprecated: use [Range] instead.
+type SymbolLocationRange = Range
+
+// Position represents a line/character position in a source file.
+type Position struct {
+	Character int64        `json:"character,required"`
+	Line      int64        `json:"line,required"`
+	JSON      positionJSON `json:"-"`
 }
 
-// symbolPositionJSON contains the JSON metadata for the struct [SymbolPosition]
-type symbolPositionJSON struct {
+// positionJSON contains the JSON metadata for the struct [Position]
+type positionJSON struct {
 	Character   apijson.Field
 	Line        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *SymbolPosition) UnmarshalJSON(data []byte) (err error) {
+func (r *Position) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r symbolPositionJSON) RawJSON() string {
+func (r positionJSON) RawJSON() string {
 	return r.raw
 }
+
+// Deprecated: use [Position] instead.
+type SymbolPosition = Position
 
 type FindTextResponse struct {
 	AbsoluteOffset int64                      `json:"absolute_offset,required"`

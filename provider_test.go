@@ -16,11 +16,10 @@ import (
 )
 
 // TestProviderAuthMethodPromptsUnmarshal verifies that ProviderAuthMethod.Prompts
-// (now typed as any) correctly deserialises from JSON. After the fix, callers
-// receive the raw decoded value ([]interface{} containing map[string]any elements)
-// and must cast each element manually. The test also confirms that the
-// ProviderAuthMethodPromptText and ProviderAuthMethodPromptSelect types still
-// unmarshal correctly on their own.
+// (typed as []ProviderAuthMethodPrompt) correctly deserialises from JSON. Each
+// element of the heterogeneous array resolves to the concrete variant type
+// ([ProviderAuthMethodPromptText] or [ProviderAuthMethodPromptSelect]) via the
+// registered apijson Union discriminator "type".
 //
 // Run with: go test -run TestProviderAuthMethodPromptsUnmarshal -v ./...
 func TestProviderAuthMethodPromptsUnmarshal(t *testing.T) {
@@ -83,27 +82,110 @@ func TestProviderAuthMethodPromptsUnmarshal(t *testing.T) {
 				}
 				return
 			}
-			// After fix, Prompts is any — cast to []interface{}
-			prompts, ok := pam.Prompts.([]interface{})
-			if !ok {
-				t.Fatalf("Prompts runtime type: got %T, want []interface{}", pam.Prompts)
+			if len(pam.Prompts) != tc.wantPromptsLen {
+				t.Errorf("Prompts length: got %d, want %d", len(pam.Prompts), tc.wantPromptsLen)
 			}
-			if len(prompts) != tc.wantPromptsLen {
-				t.Errorf("Prompts length: got %d, want %d", len(prompts), tc.wantPromptsLen)
-			}
-			// Each element should be a map[string]interface{} with a "type" key
-			for i, p := range prompts {
-				m, ok := p.(map[string]interface{})
-				if !ok {
-					t.Errorf("Prompts[%d]: expected map[string]interface{}, got %T", i, p)
-					continue
-				}
-				if _, hasType := m["type"]; !hasType {
-					t.Errorf("Prompts[%d]: missing 'type' key in %v", i, m)
+			// Each element must resolve to a concrete variant, not a bare map.
+			for i, p := range pam.Prompts {
+				switch p.AsUnion().(type) {
+				case opencode.ProviderAuthMethodPromptText, opencode.ProviderAuthMethodPromptSelect:
+					// correct typed variant
+				default:
+					t.Errorf("Prompts[%d]: expected ProviderAuthMethodPromptText or ProviderAuthMethodPromptSelect, got %T", i, p.AsUnion())
 				}
 			}
 		})
 	}
+}
+
+// TestProviderAuthMethodPromptCarryingStructUnmarshal verifies that the
+// carrying struct [ProviderAuthMethodPrompt] (the element type of
+// [ProviderAuthMethod.Prompts]) correctly decodes the concrete field values
+// from both the text and select JSON payloads, including the typed Type enum.
+func TestProviderAuthMethodPromptCarryingStructUnmarshal(t *testing.T) {
+	t.Parallel()
+
+	t.Run("text", func(t *testing.T) {
+		t.Parallel()
+		const raw = `{"type":"text","key":"api_key","message":"Enter your API key","placeholder":"sk-...","when":{"key":"needs_key","op":"eq","value":"true"}}`
+		var p opencode.ProviderAuthMethodPrompt
+		if err := json.Unmarshal([]byte(raw), &p); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if p.Type != opencode.ProviderAuthMethodPromptTypeText {
+			t.Errorf("Type: got %q, want %q", p.Type, opencode.ProviderAuthMethodPromptTypeText)
+		}
+		if !p.Type.IsKnown() {
+			t.Error("IsKnown: expected true for text")
+		}
+		if p.Key != "api_key" {
+			t.Errorf("Key: got %q, want api_key", p.Key)
+		}
+		if p.Message != "Enter your API key" {
+			t.Errorf("Message: got %q", p.Message)
+		}
+		if p.Placeholder != "sk-..." {
+			t.Errorf("Placeholder: got %q, want sk-...", p.Placeholder)
+		}
+		if p.When.Key != "needs_key" || p.When.Op != opencode.ProviderAuthMethodPromptWhenOpEq || p.When.Value != "true" {
+			t.Errorf("When: got %+v", p.When)
+		}
+		if len(p.Options) != 0 {
+			t.Errorf("Options: got %d, want 0", len(p.Options))
+		}
+		// RawJSON must be preserved so callers can access the full payload.
+		if p.JSON.RawJSON() == "" {
+			t.Error("RawJSON: expected non-empty raw payload")
+		}
+	})
+
+	t.Run("select", func(t *testing.T) {
+		t.Parallel()
+		const raw = `{"type":"select","key":"region","message":"Select region","options":[{"label":"US East","value":"us-east-1","hint":"Lower latency"},{"label":"EU West","value":"eu-west-1"}]}`
+		var p opencode.ProviderAuthMethodPrompt
+		if err := json.Unmarshal([]byte(raw), &p); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if p.Type != opencode.ProviderAuthMethodPromptTypeSelect {
+			t.Errorf("Type: got %q, want %q", p.Type, opencode.ProviderAuthMethodPromptTypeSelect)
+		}
+		if !p.Type.IsKnown() {
+			t.Error("IsKnown: expected true for select")
+		}
+		if p.Key != "region" {
+			t.Errorf("Key: got %q, want region", p.Key)
+		}
+		if p.Message != "Select region" {
+			t.Errorf("Message: got %q", p.Message)
+		}
+		if len(p.Options) != 2 {
+			t.Fatalf("Options length: got %d, want 2", len(p.Options))
+		}
+		if p.Options[0].Label != "US East" || p.Options[0].Value != "us-east-1" || p.Options[0].Hint != "Lower latency" {
+			t.Errorf("Options[0]: %+v", p.Options[0])
+		}
+		if p.Options[1].Label != "EU West" || p.Options[1].Value != "eu-west-1" {
+			t.Errorf("Options[1]: %+v", p.Options[1])
+		}
+		if p.Placeholder != "" {
+			t.Errorf("Placeholder: got %q, want empty", p.Placeholder)
+		}
+	})
+
+	t.Run("unknown_type", func(t *testing.T) {
+		t.Parallel()
+		const raw = `{"type":"custom","key":"k","message":"m"}`
+		var p opencode.ProviderAuthMethodPrompt
+		if err := json.Unmarshal([]byte(raw), &p); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		if p.Type != opencode.ProviderAuthMethodPromptType("custom") {
+			t.Errorf("Type: got %q, want custom", p.Type)
+		}
+		if p.Type.IsKnown() {
+			t.Error("IsKnown: expected false for unknown type")
+		}
+	})
 }
 
 // TestProviderAuthMethodPromptTextUnmarshal verifies that ProviderAuthMethodPromptText

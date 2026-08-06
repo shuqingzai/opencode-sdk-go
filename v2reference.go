@@ -71,15 +71,12 @@ func (r v2ReferenceListResponseJSON) RawJSON() string {
 
 // V2ReferenceInfo represents a reference entry.
 type V2ReferenceInfo struct {
-	Name        string `json:"name,required"`
-	Path        string `json:"path,required"`
-	Description string `json:"description"`
-	Hidden      bool   `json:"hidden"`
-	// This field can have the runtime type of [ReferenceLocalSource],
-	// [ReferenceGitSource].
-	Source      any                 `json:"source,required"`
+	Name        string              `json:"name,required"`
+	Path        string              `json:"path,required"`
+	Description string              `json:"description"`
+	Hidden      bool                `json:"hidden"`
+	Source      ReferenceSource     `json:"source,required"`
 	JSON        v2ReferenceInfoJSON `json:"-"`
-	sourceUnion ReferenceSourceUnion
 }
 
 // v2ReferenceInfoJSON contains the JSON metadata for the struct [V2ReferenceInfo]
@@ -94,19 +91,7 @@ type v2ReferenceInfoJSON struct {
 }
 
 func (r *V2ReferenceInfo) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ReferenceInfo{}
-	err = apijson.UnmarshalRoot(data, r)
-	if err != nil {
-		return err
-	}
-	sourceData := gjson.GetBytes(data, "source").Raw
-	if sourceData != "" {
-		err = apijson.UnmarshalRoot([]byte(sourceData), &r.sourceUnion)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2ReferenceInfoJSON) RawJSON() string {
@@ -114,8 +99,77 @@ func (r v2ReferenceInfoJSON) RawJSON() string {
 }
 
 // AsSourceUnion returns the source field as a typed union.
+//
+// Deprecated: use [V2ReferenceInfo.Source.AsUnion] instead.
 func (r *V2ReferenceInfo) AsSourceUnion() ReferenceSourceUnion {
-	return r.sourceUnion
+	return r.Source.AsUnion()
+}
+
+// ReferenceSource is the union bearer for the source field of [V2ReferenceInfo].
+// It holds the decoded source configuration and provides typed access via [AsUnion].
+//
+// The runtime union variant can be one of [ReferenceLocalSource] or
+// [ReferenceGitSource]; use [AsUnion] to obtain the concrete type.
+type ReferenceSource struct {
+	Type        ReferenceSourceType `json:"type,required"`
+	Path        string              `json:"path"`
+	Repository  string              `json:"repository"`
+	Branch      string              `json:"branch"`
+	Description string              `json:"description"`
+	Hidden      bool                `json:"hidden"`
+	JSON        referenceSourceJSON `json:"-"`
+	union       ReferenceSourceUnion
+}
+
+// referenceSourceJSON contains the JSON metadata for the struct [ReferenceSource]
+type referenceSourceJSON struct {
+	Type        apijson.Field
+	Path        apijson.Field
+	Repository  apijson.Field
+	Branch      apijson.Field
+	Description apijson.Field
+	Hidden      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r referenceSourceJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *ReferenceSource) UnmarshalJSON(data []byte) (err error) {
+	*r = ReferenceSource{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [ReferenceSourceUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [ReferenceLocalSource],
+// [ReferenceGitSource].
+func (r ReferenceSource) AsUnion() ReferenceSourceUnion {
+	return r.union
+}
+
+// ReferenceSourceType is the discriminator shared by every [ReferenceSourceUnion]
+// variant.
+type ReferenceSourceType string
+
+const (
+	ReferenceSourceTypeLocal ReferenceSourceType = "local"
+	ReferenceSourceTypeGit   ReferenceSourceType = "git"
+)
+
+func (r ReferenceSourceType) IsKnown() bool {
+	switch r {
+	case ReferenceSourceTypeLocal, ReferenceSourceTypeGit:
+		return true
+	}
+	return false
 }
 
 // ReferenceSourceUnion represents the source of a reference.
@@ -126,7 +180,7 @@ type ReferenceSourceUnion interface {
 
 // ReferenceLocalSource represents a local reference source.
 type ReferenceLocalSource struct {
-	Type        string                   `json:"type,required"`
+	Type        ReferenceLocalSourceType `json:"type,required"`
 	Path        string                   `json:"path,required"`
 	Description string                   `json:"description"`
 	Hidden      bool                     `json:"hidden"`
@@ -155,7 +209,7 @@ func (r ReferenceLocalSource) implementsReferenceSourceUnion() {}
 
 // ReferenceGitSource represents a git reference source.
 type ReferenceGitSource struct {
-	Type        string                 `json:"type,required"`
+	Type        ReferenceGitSourceType `json:"type,required"`
 	Repository  string                 `json:"repository,required"`
 	Branch      string                 `json:"branch"`
 	Description string                 `json:"description"`
@@ -183,6 +237,34 @@ func (r referenceGitSourceJSON) RawJSON() string {
 }
 
 func (r ReferenceGitSource) implementsReferenceSourceUnion() {}
+
+type ReferenceLocalSourceType string
+
+const (
+	ReferenceLocalSourceTypeLocal ReferenceLocalSourceType = "local"
+)
+
+func (r ReferenceLocalSourceType) IsKnown() bool {
+	switch r {
+	case ReferenceLocalSourceTypeLocal:
+		return true
+	}
+	return false
+}
+
+type ReferenceGitSourceType string
+
+const (
+	ReferenceGitSourceTypeGit ReferenceGitSourceType = "git"
+)
+
+func (r ReferenceGitSourceType) IsKnown() bool {
+	switch r {
+	case ReferenceGitSourceTypeGit:
+		return true
+	}
+	return false
+}
 
 func init() {
 	apijson.RegisterUnion(

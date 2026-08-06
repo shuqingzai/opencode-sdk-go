@@ -52,11 +52,21 @@ func (r *V2FsService) Find(ctx context.Context, query V2FsFindParams, opts ...op
 	return
 }
 
-// Read a file at the given path.
+// Read file
 //
-// The path argument is the file path to read, which will be appended to
-// the `/api/fs/read/` URL.
-func (r *V2FsService) Read(ctx context.Context, path string, query V2FsReadParams, opts ...option.RequestOption) (res *http.Response, err error) {
+// Serve one file relative to the requested location.
+func (r *V2FsService) Read(ctx context.Context, query V2FsReadParams, opts ...option.RequestOption) (res *http.Response, err error) {
+	opts = slices.Concat(r.Options, opts)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, "api/fs/read/*", query, &res, opts...)
+	return
+}
+
+// ReadPath reads the file at the given path by appending it to the
+// `/api/fs/read/` URL.
+//
+// Deprecated: the OpenAPI specification defines no path parameter for this
+// endpoint; use [V2FsService.Read] instead.
+func (r *V2FsService) ReadPath(ctx context.Context, path string, query V2FsReadParams, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if path == "" {
 		err = errors.New("missing required path parameter")

@@ -6,12 +6,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/sst/opencode-sdk-go"
+	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/testutil"
 	"github.com/sst/opencode-sdk-go/option"
 )
@@ -193,27 +195,28 @@ func TestConfigProviderModelInterleavedUnmarshal(t *testing.T) {
 //
 // OpenAPI: components.schemas.PermissionConfig.anyOf[1].properties.
 //
-// The rule fields are statically typed as [opencode.PermissionRuleConfigUnion], so
-// apijson resolves the registered union and callers get the concrete variant type
-// directly — no `any` type-switching on Go's generic JSON types.
+// The rule fields are statically typed as the carrier [opencode.PermissionRuleConfig];
+// apijson resolves the registered union inside the carrier and callers get the
+// concrete variant type via [opencode.PermissionRuleConfig.AsUnion] — no `any`
+// type-switching on Go's generic JSON types.
 //
 // Run with: go test -run TestPermissionConfigObjectRuleUnmarshal -v ./...
 func TestPermissionConfigObjectRuleUnmarshal(t *testing.T) {
 	t.Parallel()
 	ruleFields := []struct {
 		key string
-		get func(opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion
+		get func(opencode.PermissionConfigObject) opencode.PermissionRuleConfig
 	}{
-		{"read", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Read }},
-		{"edit", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Edit }},
-		{"glob", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Glob }},
-		{"grep", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Grep }},
-		{"list", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.List }},
-		{"bash", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Bash }},
-		{"task", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Task }},
-		{"external_directory", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.ExternalDirectory }},
-		{"lsp", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Lsp }},
-		{"skill", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfigUnion { return p.Skill }},
+		{"read", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Read }},
+		{"edit", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Edit }},
+		{"glob", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Glob }},
+		{"grep", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Grep }},
+		{"list", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.List }},
+		{"bash", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Bash }},
+		{"task", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Task }},
+		{"external_directory", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.ExternalDirectory }},
+		{"lsp", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Lsp }},
+		{"skill", func(p opencode.PermissionConfigObject) opencode.PermissionRuleConfig { return p.Skill }},
 	}
 	if len(ruleFields) != 10 {
 		t.Fatalf("OpenAPI defines 10 PermissionRuleConfig properties, test covers %d", len(ruleFields))
@@ -226,9 +229,9 @@ func TestPermissionConfigObjectRuleUnmarshal(t *testing.T) {
 			if err := json.Unmarshal([]byte(`{"`+rf.key+`":"allow"}`), &p); err != nil {
 				t.Fatalf("json.Unmarshal: %v", err)
 			}
-			got, ok := rf.get(p).(opencode.PermissionActionConfig)
+			got, ok := rf.get(p).AsUnion().(opencode.PermissionActionConfig)
 			if !ok {
-				t.Fatalf("runtime type = %T, want opencode.PermissionActionConfig", rf.get(p))
+				t.Fatalf("runtime type = %T, want opencode.PermissionActionConfig", rf.get(p).AsUnion())
 			}
 			if got != opencode.PermissionActionConfigAllow {
 				t.Errorf("value = %q, want %q", got, opencode.PermissionActionConfigAllow)
@@ -244,9 +247,9 @@ func TestPermissionConfigObjectRuleUnmarshal(t *testing.T) {
 			if err := json.Unmarshal([]byte(`{"`+rf.key+`":{"src/**":"allow","**":"ask"}}`), &p); err != nil {
 				t.Fatalf("json.Unmarshal: %v", err)
 			}
-			obj, ok := rf.get(p).(opencode.PermissionObjectConfig)
+			obj, ok := rf.get(p).AsUnion().(opencode.PermissionObjectConfig)
 			if !ok {
-				t.Fatalf("runtime type = %T, want opencode.PermissionObjectConfig", rf.get(p))
+				t.Fatalf("runtime type = %T, want opencode.PermissionObjectConfig", rf.get(p).AsUnion())
 			}
 			if obj["src/**"] != opencode.PermissionActionConfigAllow {
 				t.Errorf(`["src/**"] = %q, want "allow"`, obj["src/**"])
@@ -263,8 +266,8 @@ func TestPermissionConfigObjectRuleUnmarshal(t *testing.T) {
 				if err := json.Unmarshal([]byte(body), &p); err != nil {
 					t.Fatalf("%s: json.Unmarshal: %v", body, err)
 				}
-				if rf.get(p) != nil {
-					t.Errorf("%s: got %#v, want nil", body, rf.get(p))
+				if rf.get(p).AsUnion() != nil {
+					t.Errorf("%s: got %#v, want nil", body, rf.get(p).AsUnion())
 				}
 			}
 		})
@@ -322,16 +325,16 @@ func TestPermissionConfigObjectExtraFields(t *testing.T) {
 	if len(p.ExtraFields) != 2 {
 		t.Fatalf("len(ExtraFields) = %d, want 2 (got %#v)", len(p.ExtraFields), p.ExtraFields)
 	}
-	action, ok := p.ExtraFields["custom_tool"].(opencode.PermissionActionConfig)
+	action, ok := p.ExtraFields["custom_tool"].AsUnion().(opencode.PermissionActionConfig)
 	if !ok {
-		t.Fatalf(`ExtraFields["custom_tool"] type = %T, want opencode.PermissionActionConfig`, p.ExtraFields["custom_tool"])
+		t.Fatalf(`ExtraFields["custom_tool"] type = %T, want opencode.PermissionActionConfig`, p.ExtraFields["custom_tool"].AsUnion())
 	}
 	if action != opencode.PermissionActionConfigDeny {
 		t.Errorf(`ExtraFields["custom_tool"] = %q, want "deny"`, action)
 	}
-	obj, ok := p.ExtraFields["other_tool"].(opencode.PermissionObjectConfig)
+	obj, ok := p.ExtraFields["other_tool"].AsUnion().(opencode.PermissionObjectConfig)
 	if !ok {
-		t.Fatalf(`ExtraFields["other_tool"] type = %T, want opencode.PermissionObjectConfig`, p.ExtraFields["other_tool"])
+		t.Fatalf(`ExtraFields["other_tool"] type = %T, want opencode.PermissionObjectConfig`, p.ExtraFields["other_tool"].AsUnion())
 	}
 	if obj["a/**"] != opencode.PermissionActionConfigAllow {
 		t.Errorf(`ExtraFields["other_tool"]["a/**"] = %q, want "allow"`, obj["a/**"])
@@ -565,8 +568,8 @@ func TestConfigAgentCustomAgentUnmarshal(t *testing.T) {
 	if !ok {
 		t.Fatalf("reviewer.Permission type = %T, want opencode.PermissionConfigObject", rev.Permission)
 	}
-	if edit, _ := perm.Edit.(opencode.PermissionActionConfig); edit != opencode.PermissionActionConfigDeny {
-		t.Errorf("reviewer.Permission.Edit = %#v, want PermissionActionConfigDeny", perm.Edit)
+	if edit, _ := perm.Edit.AsUnion().(opencode.PermissionActionConfig); edit != opencode.PermissionActionConfigDeny {
+		t.Errorf("reviewer.Permission.Edit = %#v, want PermissionActionConfigDeny", perm.Edit.AsUnion())
 	}
 	// `name` is not part of the OpenAPI AgentConfig schema; AgentConfig allows
 	// arbitrary additional properties, so it must land in AgentConfig.ExtraFields.
@@ -897,10 +900,11 @@ func TestConfigRoundTripRawJSON(t *testing.T) {
 //
 //	anyOf: [ {type: integer, exclusiveMinimum: 0}, {type: boolean, enum: [false]} ]
 //
-// Both fields are statically typed as [opencode.ConfigProviderOptionsTimeoutUnion]
-// so the registered union resolves to [shared.UnionInt] (int64 milliseconds) or
-// [shared.UnionBool]. Declaring them `any` would silently yield float64 / bool,
-// violating the OpenAPI `integer` contract and losing precision above 2^53.
+// Both fields are statically typed as the carrier [opencode.ConfigProviderOptionsTimeout];
+// the registered union resolves to [shared.UnionInt] (int64 milliseconds) or
+// [shared.UnionBool] via [opencode.ConfigProviderOptionsTimeout.AsUnion].
+// Declaring them `any` would silently yield float64 / bool, violating the
+// OpenAPI `integer` contract and losing precision above 2^53.
 //
 // Run with: go test -run TestConfigProviderOptionsTimeoutUnion -v ./...
 func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
@@ -912,16 +916,16 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 		if err := json.Unmarshal([]byte(`{"timeout":600000,"headerTimeout":30000}`), &o); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		ms, ok := o.Timeout.(opencode.UnionInt)
+		ms, ok := o.Timeout.AsUnion().(opencode.UnionInt)
 		if !ok {
-			t.Fatalf("Timeout runtime type = %T, want shared.UnionInt", o.Timeout)
+			t.Fatalf("Timeout runtime type = %T, want shared.UnionInt", o.Timeout.AsUnion())
 		}
 		if int64(ms) != 600000 {
 			t.Errorf("Timeout = %d, want 600000", int64(ms))
 		}
-		hms, ok := o.HeaderTimeout.(opencode.UnionInt)
+		hms, ok := o.HeaderTimeout.AsUnion().(opencode.UnionInt)
 		if !ok {
-			t.Fatalf("HeaderTimeout runtime type = %T, want shared.UnionInt", o.HeaderTimeout)
+			t.Fatalf("HeaderTimeout runtime type = %T, want shared.UnionInt", o.HeaderTimeout.AsUnion())
 		}
 		if int64(hms) != 30000 {
 			t.Errorf("HeaderTimeout = %d, want 30000", int64(hms))
@@ -934,7 +938,10 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 		if err := json.Unmarshal([]byte(`{"timeout":false,"headerTimeout":false}`), &o); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		for name, got := range map[string]any{"timeout": o.Timeout, "headerTimeout": o.HeaderTimeout} {
+		for name, got := range map[string]any{
+			"timeout":       o.Timeout.AsUnion(),
+			"headerTimeout": o.HeaderTimeout.AsUnion(),
+		} {
 			v, ok := got.(opencode.UnionBool)
 			if !ok {
 				t.Fatalf("%s runtime type = %T, want shared.UnionBool", name, got)
@@ -952,9 +959,9 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 		if err := json.Unmarshal([]byte(`{"timeout":9007199254740993}`), &o); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		got, ok := o.Timeout.(opencode.UnionInt)
+		got, ok := o.Timeout.AsUnion().(opencode.UnionInt)
 		if !ok {
-			t.Fatalf("runtime type = %T, want shared.UnionInt", o.Timeout)
+			t.Fatalf("runtime type = %T, want shared.UnionInt", o.Timeout.AsUnion())
 		}
 		if int64(got) != 9007199254740993 {
 			t.Errorf("Timeout = %d, want 9007199254740993 (int64 precision lost)", int64(got))
@@ -968,11 +975,11 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 			if err := json.Unmarshal([]byte(body), &o); err != nil {
 				t.Fatalf("%s: json.Unmarshal: %v", body, err)
 			}
-			if o.Timeout != nil {
-				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout)
+			if o.Timeout.AsUnion() != nil {
+				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout.AsUnion())
 			}
-			if o.HeaderTimeout != nil {
-				t.Errorf("%s: HeaderTimeout = %#v, want nil", body, o.HeaderTimeout)
+			if o.HeaderTimeout.AsUnion() != nil {
+				t.Errorf("%s: HeaderTimeout = %#v, want nil", body, o.HeaderTimeout.AsUnion())
 			}
 		}
 	})
@@ -984,8 +991,8 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 			if err := json.Unmarshal([]byte(body), &o); err != nil {
 				t.Fatalf("%s: must not fail the whole decode: %v", body, err)
 			}
-			if o.Timeout != nil {
-				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout)
+			if o.Timeout.AsUnion() != nil {
+				t.Errorf("%s: Timeout = %#v, want nil", body, o.Timeout.AsUnion())
 			}
 		}
 	})
@@ -1022,8 +1029,8 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
 		got, err := json.Marshal(opencode.ConfigProviderOptionsParam{
-			Timeout:       opencode.F(src.Timeout),
-			HeaderTimeout: opencode.F(src.HeaderTimeout),
+			Timeout:       opencode.F(src.Timeout.AsUnion()),
+			HeaderTimeout: opencode.F(src.HeaderTimeout.AsUnion()),
 		})
 		if err != nil {
 			t.Fatalf("json.Marshal: %v", err)
@@ -1040,10 +1047,9 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 //
 //	anyOf: [ {$ref: McpOAuthConfig}, {type: boolean, enum: [false]} ]
 //
-// McpRemoteConfig is itself a registered variant of ConfigMcpUnion, so its
-// UnmarshalJSON is bypassed by apijson (internal/apijson/decoder.go:145-148).
-// The field must therefore be statically typed as the union for the registry
-// lookup to hit.
+// The field is statically typed as the carrier [opencode.McpRemoteConfigOAuth];
+// apijson resolves the registered union inside the carrier and the concrete
+// variant is reached via [opencode.McpRemoteConfigOAuth.AsUnion].
 //
 // Run with: go test -run TestMcpRemoteConfigOAuthUnion -v ./...
 func TestMcpRemoteConfigOAuthUnion(t *testing.T) {
@@ -1055,9 +1061,9 @@ func TestMcpRemoteConfigOAuthUnion(t *testing.T) {
 		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":{"clientId":"cid","callbackPort":4096}}`), &v); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		c, ok := v.OAuth.(opencode.McpOAuthConfig)
+		c, ok := v.OAuth.AsUnion().(opencode.McpOAuthConfig)
 		if !ok {
-			t.Fatalf("OAuth runtime type = %T, want opencode.McpOAuthConfig", v.OAuth)
+			t.Fatalf("OAuth runtime type = %T, want opencode.McpOAuthConfig", v.OAuth.AsUnion())
 		}
 		if c.ClientID != "cid" {
 			t.Errorf("ClientID = %q, want cid", c.ClientID)
@@ -1073,9 +1079,9 @@ func TestMcpRemoteConfigOAuthUnion(t *testing.T) {
 		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":false}`), &v); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		b, ok := v.OAuth.(opencode.UnionBool)
+		b, ok := v.OAuth.AsUnion().(opencode.UnionBool)
 		if !ok {
-			t.Fatalf("OAuth runtime type = %T, want shared.UnionBool", v.OAuth)
+			t.Fatalf("OAuth runtime type = %T, want shared.UnionBool", v.OAuth.AsUnion())
 		}
 		if bool(b) {
 			t.Error("OAuth = true, want false")
@@ -1089,29 +1095,33 @@ func TestMcpRemoteConfigOAuthUnion(t *testing.T) {
 			if err := json.Unmarshal([]byte(body), &v); err != nil {
 				t.Fatalf("%s: json.Unmarshal: %v", body, err)
 			}
-			if v.OAuth != nil {
-				t.Errorf("%s: OAuth = %#v, want nil", body, v.OAuth)
+			if v.OAuth.AsUnion() != nil {
+				t.Errorf("%s: OAuth = %#v, want nil", body, v.OAuth.AsUnion())
 			}
 		}
 	})
 
 	// ConfigMcp is the union carrier for Config.mcp values; apijson.Port must
-	// carry the typed OAuth value through to the carrier's any field.
+	// carry the typed OAuth carrier value through to the carrier's any field.
 	t.Run("through_ConfigMcp_carrier", func(t *testing.T) {
 		t.Parallel()
 		var cm opencode.ConfigMcp
 		if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":{"clientId":"c"}}`), &cm); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
-		if _, ok := cm.OAuth.(opencode.McpOAuthConfig); !ok {
-			t.Errorf("ConfigMcp.OAuth runtime type = %T, want opencode.McpOAuthConfig", cm.OAuth)
+		o, ok := cm.OAuth.(opencode.McpRemoteConfigOAuth)
+		if !ok {
+			t.Fatalf("ConfigMcp.OAuth runtime type = %T, want opencode.McpRemoteConfigOAuth", cm.OAuth)
+		}
+		if _, ok := o.AsUnion().(opencode.McpOAuthConfig); !ok {
+			t.Errorf("ConfigMcp.OAuth union runtime type = %T, want opencode.McpOAuthConfig", o.AsUnion())
 		}
 		rc, ok := cm.AsUnion().(opencode.McpRemoteConfig)
 		if !ok {
 			t.Fatalf("AsUnion() = %T, want opencode.McpRemoteConfig", cm.AsUnion())
 		}
-		if _, ok := rc.OAuth.(opencode.McpOAuthConfig); !ok {
-			t.Errorf("McpRemoteConfig.OAuth runtime type = %T", rc.OAuth)
+		if _, ok := rc.OAuth.AsUnion().(opencode.McpOAuthConfig); !ok {
+			t.Errorf("McpRemoteConfig.OAuth union runtime type = %T", rc.OAuth.AsUnion())
 		}
 	})
 }
@@ -1198,6 +1208,196 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 			if !reflect.DeepEqual(gotMap, wantMap) {
 				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
 			}
+		})
+	}
+}
+
+// Carrier structs with no promoted data fields (疑点 1): the empty-carrier
+// PermissionRuleConfig / ConfigProviderOptionsTimeout must still populate the
+// decoded union and preserve the full raw JSON of the value.
+func TestPermissionRuleConfigEmptyCarrierUnionAndRaw(t *testing.T) {
+	t.Parallel()
+	var p opencode.PermissionConfigObject
+	if err := json.Unmarshal([]byte(`{"read":"allow","edit":{"src/**":"ask"}}`), &p); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	act, ok := p.Read.AsUnion().(opencode.PermissionActionConfig)
+	if !ok {
+		t.Fatalf("Read union runtime type = %T, want opencode.PermissionActionConfig", p.Read.AsUnion())
+	}
+	if act != opencode.PermissionActionConfigAllow {
+		t.Errorf("Read = %q, want %q", act, opencode.PermissionActionConfigAllow)
+	}
+	if got := p.Read.JSON.RawJSON(); got != `"allow"` {
+		t.Errorf("Read.JSON.RawJSON() = %q, want %q", got, `"allow"`)
+	}
+	obj, ok := p.Edit.AsUnion().(opencode.PermissionObjectConfig)
+	if !ok {
+		t.Fatalf("Edit union runtime type = %T, want opencode.PermissionObjectConfig", p.Edit.AsUnion())
+	}
+	if obj["src/**"] != opencode.PermissionActionConfigAsk {
+		t.Errorf(`Edit["src/**"] = %q, want %q`, obj["src/**"], opencode.PermissionActionConfigAsk)
+	}
+	if got := p.Edit.JSON.RawJSON(); got != `{"src/**":"ask"}` {
+		t.Errorf("Edit.JSON.RawJSON() = %q, want %q", got, `{"src/**":"ask"}`)
+	}
+}
+
+func TestConfigProviderOptionsTimeoutEmptyCarrierUnionAndRaw(t *testing.T) {
+	t.Parallel()
+	var o opencode.ConfigProviderOptions
+	if err := json.Unmarshal([]byte(`{"timeout":600000,"headerTimeout":false}`), &o); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	ms, ok := o.Timeout.AsUnion().(opencode.UnionInt)
+	if !ok {
+		t.Fatalf("Timeout union runtime type = %T, want opencode.UnionInt", o.Timeout.AsUnion())
+	}
+	if int64(ms) != 600000 {
+		t.Errorf("Timeout = %d, want 600000", int64(ms))
+	}
+	if got := o.Timeout.JSON.RawJSON(); got != `600000` {
+		t.Errorf("Timeout.JSON.RawJSON() = %q, want %q", got, `600000`)
+	}
+	b, ok := o.HeaderTimeout.AsUnion().(opencode.UnionBool)
+	if !ok {
+		t.Fatalf("HeaderTimeout union runtime type = %T, want opencode.UnionBool", o.HeaderTimeout.AsUnion())
+	}
+	if bool(b) {
+		t.Error("HeaderTimeout = true, want false")
+	}
+	if got := o.HeaderTimeout.JSON.RawJSON(); got != `false` {
+		t.Errorf("HeaderTimeout.JSON.RawJSON() = %q, want %q", got, `false`)
+	}
+	// OpenAPI declares timeout as anyOf[integer>0, enum[false]]: true must NOT
+	// silently decode to UnionBool.
+	var bad opencode.ConfigProviderOptions
+	if err := json.Unmarshal([]byte(`{"timeout":true}`), &bad); err == nil {
+		if _, ok := bad.Timeout.AsUnion().(opencode.UnionBool); ok {
+			t.Error("timeout:true silently decoded as UnionBool, want decode error")
+		}
+	}
+}
+
+// Carrier structs with promoted data fields (疑点 1, golden ToolPartState
+// pattern): McpRemoteConfigOAuth promotes the McpOAuthConfig object variant
+// fields while keeping raw JSON intact for both variants.
+func TestMcpRemoteConfigOAuthCarrierPromotedFields(t *testing.T) {
+	t.Parallel()
+	var v opencode.McpRemoteConfig
+	if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":{"clientId":"cid","clientSecret":"sec","scope":"openid","callbackPort":4096,"redirectUri":"http://x"}}`), &v); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got := v.OAuth.ClientID; got != "cid" {
+		t.Errorf("OAuth.ClientID = %q, want cid", got)
+	}
+	if got := v.OAuth.ClientSecret; got != "sec" {
+		t.Errorf("OAuth.ClientSecret = %q, want sec", got)
+	}
+	if got := v.OAuth.Scope; got != "openid" {
+		t.Errorf("OAuth.Scope = %q, want openid", got)
+	}
+	if got := v.OAuth.CallbackPort; got != 4096 {
+		t.Errorf("OAuth.CallbackPort = %d, want 4096", got)
+	}
+	if got := v.OAuth.RedirectURI; got != "http://x" {
+		t.Errorf("OAuth.RedirectURI = %q, want http://x", got)
+	}
+	if got := v.OAuth.JSON.RawJSON(); got != `{"clientId":"cid","clientSecret":"sec","scope":"openid","callbackPort":4096,"redirectUri":"http://x"}` {
+		t.Errorf("OAuth.JSON.RawJSON() = %q", got)
+	}
+
+	var v2 opencode.McpRemoteConfig
+	if err := json.Unmarshal([]byte(`{"type":"remote","url":"u","oauth":false}`), &v2); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	b, ok := v2.OAuth.AsUnion().(opencode.UnionBool)
+	if !ok {
+		t.Fatalf("OAuth union runtime type = %T, want opencode.UnionBool", v2.OAuth.AsUnion())
+	}
+	if bool(b) {
+		t.Error("OAuth = true, want false")
+	}
+	if got := v2.OAuth.JSON.RawJSON(); got != `false` {
+		t.Errorf("OAuth.JSON.RawJSON() = %q, want %q", got, `false`)
+	}
+}
+
+func TestConfigV2ReferenceCarrierVariants(t *testing.T) {
+	t.Parallel()
+	var c opencode.Config
+	if err := json.Unmarshal([]byte(`{
+		"reference": {
+			"plain": "owner/repo",
+			"git": {"repository": "https://github.com/a/b", "branch": "dev", "description": "g", "hidden": true},
+			"local": {"path": "./docs", "description": "d"}
+		}
+	}`), &c); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	plain, ok := c.Reference["plain"].AsUnion().(opencode.ConfigV2ReferenceString)
+	if !ok {
+		t.Fatalf("plain union runtime type = %T, want opencode.ConfigV2ReferenceString", c.Reference["plain"].AsUnion())
+	}
+	if string(plain) != "owner/repo" {
+		t.Errorf("plain = %q, want owner/repo", string(plain))
+	}
+	if got := c.Reference["plain"].JSON.RawJSON(); got != `"owner/repo"` {
+		t.Errorf("plain.JSON.RawJSON() = %q, want %q", got, `"owner/repo"`)
+	}
+
+	git, ok := c.Reference["git"].AsUnion().(opencode.ConfigV2ReferenceGit)
+	if !ok {
+		t.Fatalf("git union runtime type = %T, want opencode.ConfigV2ReferenceGit", c.Reference["git"].AsUnion())
+	}
+	if git.Repository != "https://github.com/a/b" || git.Branch != "dev" || !git.Hidden || git.Description != "g" {
+		t.Errorf("git variant = %#v", git)
+	}
+	if got := c.Reference["git"].Repository; got != "https://github.com/a/b" {
+		t.Errorf("promoted Repository = %q, want https://github.com/a/b", got)
+	}
+	if got := c.Reference["git"].Branch; got != "dev" {
+		t.Errorf("promoted Branch = %q, want dev", got)
+	}
+	if got := c.Reference["git"].JSON.RawJSON(); got != `{"repository": "https://github.com/a/b", "branch": "dev", "description": "g", "hidden": true}` {
+		t.Errorf("git.JSON.RawJSON() = %q", got)
+	}
+
+	local, ok := c.Reference["local"].AsUnion().(opencode.ConfigV2ReferenceLocal)
+	if !ok {
+		t.Fatalf("local union runtime type = %T, want opencode.ConfigV2ReferenceLocal", c.Reference["local"].AsUnion())
+	}
+	if local.Path != "./docs" || local.Description != "d" {
+		t.Errorf("local variant = %#v", local)
+	}
+	if got := c.Reference["local"].Path; got != "./docs" {
+		t.Errorf("promoted Path = %q, want ./docs", got)
+	}
+	if got := c.Reference["local"].JSON.RawJSON(); got != `{"path": "./docs", "description": "d"}` {
+		t.Errorf("local.JSON.RawJSON() = %q", got)
+	}
+}
+
+// 疑点 2: apijson.Port panics on non-struct union variants, which is why the
+// scalar-variant carriers skip Port and only set raw.
+func TestPortPanicsOnNonStructVariant(t *testing.T) {
+	t.Parallel()
+	for _, scalar := range []any{
+		opencode.PermissionActionConfigAllow,
+		opencode.PermissionObjectConfig{"a/**": opencode.PermissionActionConfigAllow},
+		opencode.ConfigV2ReferenceString("owner/repo"),
+		opencode.UnionBool(false),
+		opencode.UnionInt(600000),
+	} {
+		t.Run(fmt.Sprintf("%T", scalar), func(t *testing.T) {
+			t.Parallel()
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("apijson.Port(%T, ...) did not panic", scalar)
+				}
+			}()
+			_ = apijson.Port(scalar, &struct{}{})
 		})
 	}
 }

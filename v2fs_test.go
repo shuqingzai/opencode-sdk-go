@@ -10,16 +10,16 @@ import (
 	"github.com/sst/opencode-sdk-go/option"
 )
 
-// TestV2FsReadEmptyPathReturnsError verifies that V2FsService.Read returns an
-// error with message "missing required path parameter" when the path argument is
-// empty, consistent with the validation pattern used by all other SDK methods
-// that accept a required path parameter.
-func TestV2FsReadEmptyPathReturnsError(t *testing.T) {
+// TestV2FsReadPathEmptyPathReturnsError verifies that V2FsService.ReadPath
+// returns an error with message "missing required path parameter" when the path
+// argument is empty, consistent with the validation pattern used by all other SDK
+// methods that accept a required path parameter.
+func TestV2FsReadPathEmptyPathReturnsError(t *testing.T) {
 	t.Parallel()
 	client := opencode.NewClient(
 		option.WithBaseURL("http://localhost:4010"),
 	)
-	_, err := client.V2Fs.Read(context.Background(), "", opencode.V2FsReadParams{})
+	_, err := client.V2Fs.ReadPath(context.Background(), "", opencode.V2FsReadParams{})
 	if err == nil {
 		t.Fatal("expected error for empty path, got nil")
 	}
@@ -29,15 +29,16 @@ func TestV2FsReadEmptyPathReturnsError(t *testing.T) {
 	}
 }
 
-// TestV2FsReadNonEmptyPathNoValidationError verifies that V2FsService.Read does
-// not return a validation error for a non-empty path (the request will fail for
-// other reasons in a test environment, but the path validation must pass).
-func TestV2FsReadNonEmptyPathNoValidationError(t *testing.T) {
+// TestV2FsReadPathNonEmptyPathNoValidationError verifies that
+// V2FsService.ReadPath does not return a validation error for a non-empty path
+// (the request will fail for other reasons in a test environment, but the path
+// validation must pass).
+func TestV2FsReadPathNonEmptyPathNoValidationError(t *testing.T) {
 	t.Parallel()
 	client := opencode.NewClient(
 		option.WithBaseURL("http://localhost:4010"),
 	)
-	_, err := client.V2Fs.Read(context.Background(), "some/path/file.txt", opencode.V2FsReadParams{})
+	_, err := client.V2Fs.ReadPath(context.Background(), "some/path/file.txt", opencode.V2FsReadParams{})
 	// The request will fail due to no server, but not due to path validation.
 	if err != nil && err.Error() == "missing required path parameter" {
 		t.Errorf("non-empty path should not trigger validation error, but got: %v", err)
