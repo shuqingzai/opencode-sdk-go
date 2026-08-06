@@ -9,3 +9,5 @@ Brewfile.lock.json
 tmp/
 testdata/
 vendor/
+go.work
+go.mod.sum
