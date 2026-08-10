@@ -210,8 +210,7 @@ func TestTuiToastShowVariantAliasIsCompatible(t *testing.T) {
 // Duration and Title fields are concrete types (int64, string) not any.
 func TestEventListResponseEventTuiToastShowPropertiesFieldTypes(t *testing.T) {
 	t.Parallel()
-	props := EventListResponseEventTuiToastShowProperties{}
-	rt := reflect.TypeOf(props)
+	rt := reflect.TypeFor[EventListResponseEventTuiToastShowProperties]()
 
 	durationField, ok := rt.FieldByName("Duration")
 	if !ok {

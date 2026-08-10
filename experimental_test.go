@@ -167,7 +167,7 @@ func TestExperimentalWarpParamsNullIDSerialization(t *testing.T) {
 		t.Fatalf("json.Marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
@@ -200,7 +200,7 @@ func TestExperimentalWarpParamsStringIDSerialization(t *testing.T) {
 		t.Fatalf("json.Marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
@@ -222,7 +222,7 @@ func TestWorkspaceTimeUsedDeserialization(t *testing.T) {
 		name     string
 		json     string
 		wantType string
-		wantVal  interface{}
+		wantVal  any
 	}{
 		{
 			name:     "number",
@@ -251,7 +251,6 @@ func TestWorkspaceTimeUsedDeserialization(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var ws opencode.Workspace

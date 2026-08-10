@@ -81,7 +81,7 @@ func TestV2CredentialUpdateParamsBodyQuerySeparation(t *testing.T) {
 		if err != nil {
 			t.Fatalf("json.Marshal: %v", err)
 		}
-		var m map[string]interface{}
+		var m map[string]any
 		if err := json.Unmarshal(data, &m); err != nil {
 			t.Fatalf("json.Unmarshal result: %v", err)
 		}
@@ -97,7 +97,7 @@ func TestV2CredentialUpdateParamsBodyQuerySeparation(t *testing.T) {
 	t.Run("url_query_only", func(t *testing.T) {
 		t.Parallel()
 		v := params.URLQuery()
-		if _, ok := interface{}(v).(url.Values); !ok {
+		if _, ok := any(v).(url.Values); !ok {
 			t.Fatal("URLQuery() did not return url.Values")
 		}
 		// location should appear in query

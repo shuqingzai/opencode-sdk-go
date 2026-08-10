@@ -1460,38 +1460,18 @@ func (r SyncEventSessionNextContextUpdatedType) IsKnown() bool {
 	return false
 }
 
-type SyncEventSessionNextContextUpdatedProperties struct {
-	Timestamp int64                                            `json:"timestamp,required"`
-	SessionID string                                           `json:"sessionID,required"`
-	MessageID string                                           `json:"messageID,required"`
-	Text      string                                           `json:"text,required"`
-	JSON      syncEventSessionNextContextUpdatedPropertiesJSON `json:"-"`
-}
-
-type syncEventSessionNextContextUpdatedPropertiesJSON struct {
-	Timestamp   apijson.Field
-	SessionID   apijson.Field
-	MessageID   apijson.Field
-	Text        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextContextUpdatedPropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextContextUpdatedProperties) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
+// SyncEventSessionNextContextUpdatedProperties is a type alias for
+// [EventListResponseEventSessionNextContextUpdatedProperties]. OpenAPI declares
+// the sync event `data` payload with the same shape as the v1 event `properties`.
+type SyncEventSessionNextContextUpdatedProperties = EventListResponseEventSessionNextContextUpdatedProperties
 
 type SyncEventSessionNextContextUpdated struct {
-	Type        SyncEventSessionNextContextUpdatedType       `json:"type,required"`
-	ID          string                                       `json:"id,required"`
-	Seq         int64                                        `json:"seq,required"`
-	AggregateID string                                       `json:"aggregateID,required"`
-	Data        SyncEventSessionNextContextUpdatedProperties `json:"data,required"`
-	JSON        syncEventSessionNextContextUpdatedJSON       `json:"-"`
+	Type        SyncEventSessionNextContextUpdatedType                    `json:"type,required"`
+	ID          string                                                    `json:"id,required"`
+	Seq         int64                                                     `json:"seq,required"`
+	AggregateID string                                                    `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextContextUpdatedProperties `json:"data,required"`
+	JSON        syncEventSessionNextContextUpdatedJSON                    `json:"-"`
 }
 
 type syncEventSessionNextContextUpdatedJSON struct {
@@ -1528,56 +1508,29 @@ func (r SyncEventSessionNextPromptAdmittedType) IsKnown() bool {
 	return false
 }
 
-// SyncEventSessionNextPromptAdmittedDelivery is the delivery mode for an admitted prompt.
-type SyncEventSessionNextPromptAdmittedDelivery string
+// SyncEventSessionNextPromptAdmittedDelivery is an alias for
+// [EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery] for
+// backward compatibility. OpenAPI declares the same enum for both the sync
+// event `data.delivery` and the v1 event `properties.delivery`.
+type SyncEventSessionNextPromptAdmittedDelivery = EventListResponseEventSessionNextPromptAdmittedPropertiesDelivery
 
 const (
-	SyncEventSessionNextPromptAdmittedDeliverySteer SyncEventSessionNextPromptAdmittedDelivery = "steer"
-	SyncEventSessionNextPromptAdmittedDeliveryQueue SyncEventSessionNextPromptAdmittedDelivery = "queue"
+	SyncEventSessionNextPromptAdmittedDeliverySteer = EventListResponseEventSessionNextPromptAdmittedPropertiesDeliverySteer
+	SyncEventSessionNextPromptAdmittedDeliveryQueue = EventListResponseEventSessionNextPromptAdmittedPropertiesDeliveryQueue
 )
 
-func (r SyncEventSessionNextPromptAdmittedDelivery) IsKnown() bool {
-	switch r {
-	case SyncEventSessionNextPromptAdmittedDeliverySteer, SyncEventSessionNextPromptAdmittedDeliveryQueue:
-		return true
-	}
-	return false
-}
-
-type SyncEventSessionNextPromptAdmittedProperties struct {
-	Timestamp int64                                            `json:"timestamp,required"`
-	SessionID string                                           `json:"sessionID,required"`
-	MessageID string                                           `json:"messageID,required"`
-	Prompt    V2SessionInputPrompt                             `json:"prompt,required"`
-	Delivery  SyncEventSessionNextPromptAdmittedDelivery       `json:"delivery,required"`
-	JSON      syncEventSessionNextPromptAdmittedPropertiesJSON `json:"-"`
-}
-
-type syncEventSessionNextPromptAdmittedPropertiesJSON struct {
-	Timestamp   apijson.Field
-	SessionID   apijson.Field
-	MessageID   apijson.Field
-	Prompt      apijson.Field
-	Delivery    apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r syncEventSessionNextPromptAdmittedPropertiesJSON) RawJSON() string {
-	return r.raw
-}
-
-func (r *SyncEventSessionNextPromptAdmittedProperties) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
+// SyncEventSessionNextPromptAdmittedProperties is a type alias for
+// [EventListResponseEventSessionNextPromptAdmittedProperties]. OpenAPI declares
+// the sync event `data` payload with the same shape as the v1 event `properties`.
+type SyncEventSessionNextPromptAdmittedProperties = EventListResponseEventSessionNextPromptAdmittedProperties
 
 type SyncEventSessionNextPromptAdmitted struct {
-	Type        SyncEventSessionNextPromptAdmittedType       `json:"type,required"`
-	ID          string                                       `json:"id,required"`
-	Seq         int64                                        `json:"seq,required"`
-	AggregateID string                                       `json:"aggregateID,required"`
-	Data        SyncEventSessionNextPromptAdmittedProperties `json:"data,required"`
-	JSON        syncEventSessionNextPromptAdmittedJSON       `json:"-"`
+	Type        SyncEventSessionNextPromptAdmittedType                    `json:"type,required"`
+	ID          string                                                    `json:"id,required"`
+	Seq         int64                                                     `json:"seq,required"`
+	AggregateID string                                                    `json:"aggregateID,required"`
+	Data        EventListResponseEventSessionNextPromptAdmittedProperties `json:"data,required"`
+	JSON        syncEventSessionNextPromptAdmittedJSON                    `json:"-"`
 }
 
 type syncEventSessionNextPromptAdmittedJSON struct {

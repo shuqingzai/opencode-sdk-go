@@ -314,7 +314,7 @@ func TestMcpAddParamsLocalSerialization(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
 	}
@@ -325,7 +325,7 @@ func TestMcpAddParamsLocalSerialization(t *testing.T) {
 	}
 
 	// config must be an object
-	cfg, ok := got["config"].(map[string]interface{})
+	cfg, ok := got["config"].(map[string]any)
 	if !ok {
 		t.Fatalf("config field: expected object, got %T", got["config"])
 	}
@@ -365,12 +365,12 @@ func TestMcpAddParamsRemoteSerialization(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
 	}
 
-	cfg, ok := got["config"].(map[string]interface{})
+	cfg, ok := got["config"].(map[string]any)
 	if !ok {
 		t.Fatalf("config field: expected object, got %T", got["config"])
 	}
@@ -413,17 +413,17 @@ func TestMcpAddParamsRemoteWithOAuth(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
 	}
 
-	cfg, ok := got["config"].(map[string]interface{})
+	cfg, ok := got["config"].(map[string]any)
 	if !ok {
 		t.Fatalf("config field: expected object, got %T", got["config"])
 	}
 
-	oauth, ok := cfg["oauth"].(map[string]interface{})
+	oauth, ok := cfg["oauth"].(map[string]any)
 	if !ok {
 		t.Fatalf("config.oauth: expected object, got %T", cfg["oauth"])
 	}
@@ -458,12 +458,12 @@ func TestMcpAddParamsRemoteOAuthDisabled(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal result: %v", err)
 	}
 
-	cfg, ok := got["config"].(map[string]interface{})
+	cfg, ok := got["config"].(map[string]any)
 	if !ok {
 		t.Fatalf("config field: expected object, got %T", got["config"])
 	}

@@ -1717,8 +1717,8 @@ type ConfigUpdateParams struct {
 	Autoshare  param.Field[bool]                  `json:"autoshare"`
 	// Automatically update to the latest version. Pass true to auto-update,
 	// false to disable, or "notify" to show update notifications.
-	// Accepts [bool] or [string] ("notify").
-	Autoupdate        param.Field[any]                           `json:"autoupdate"`
+	// Accepts [ConfigAutoupdateEnabled] or [ConfigAutoupdateNotify].
+	Autoupdate        param.Field[ConfigAutoupdateUnionParam]    `json:"autoupdate"`
 	Command           param.Field[map[string]ConfigCommandParam] `json:"command"`
 	Compaction        param.Field[ConfigCompactionParam]         `json:"compaction"`
 	DisabledProviders param.Field[[]string]                      `json:"disabled_providers"`
@@ -1727,15 +1727,15 @@ type ConfigUpdateParams struct {
 	Experimental      param.Field[ConfigExperimentalParam]       `json:"experimental"`
 	// Enable or configure formatters. Pass false to disable, true to enable
 	// built-ins, or a map of formatter-name to config to enable with overrides.
-	// Accepts [bool] or [map[string]ConfigFormatter].
-	Formatter    param.Field[any]            `json:"formatter"`
-	Instructions param.Field[[]string]       `json:"instructions"`
-	Layout       param.Field[ConfigLayout]   `json:"layout"`
-	LogLevel     param.Field[ConfigLogLevel] `json:"logLevel"`
+	// Accepts [ConfigFormatterEnabled] or [ConfigFormatterMapParam].
+	Formatter    param.Field[ConfigFormatterUnionParam] `json:"formatter"`
+	Instructions param.Field[[]string]                  `json:"instructions"`
+	Layout       param.Field[ConfigLayout]              `json:"layout"`
+	LogLevel     param.Field[ConfigLogLevel]            `json:"logLevel"`
 	// Enable or configure LSP servers. Pass false to disable, true to enable
 	// built-ins, or a map of lsp-name to config to enable with overrides.
-	// Accepts [bool] or [map[string]ConfigLsp].
-	Lsp   param.Field[any]                            `json:"lsp"`
+	// Accepts [ConfigLspEnabled] or [ConfigLspMapParam].
+	Lsp   param.Field[ConfigLspUnionParam]            `json:"lsp"`
 	Mcp   param.Field[map[string]ConfigMcpUnionParam] `json:"mcp"`
 	Mode  param.Field[ConfigModeParam]                `json:"mode"`
 	Model param.Field[string]                         `json:"model"`
@@ -1743,28 +1743,28 @@ type ConfigUpdateParams struct {
 	// object with per-action permission rule overrides. Accepts
 	// [PermissionActionConfig] (a string constant) or [PermissionConfigObjectParam].
 	Permission param.Field[PermissionConfigUnionParam] `json:"permission"`
-	// Plugins to load. Each item is either a plugin name (string) or a 2-tuple
-	// of [pluginName, configObject] (where configObject is a map[string]any).
-	Plugin   param.Field[[]any]                          `json:"plugin"`
+	// Plugins to load. Each item is a [ConfigPluginName] (a plugin name) or a
+	// [ConfigPluginTupleParam] 2-tuple of [pluginName, configObject].
+	Plugin   param.Field[[]ConfigPluginItemUnionParam]   `json:"plugin"`
 	Provider param.Field[map[string]ConfigProviderParam] `json:"provider"`
-	// Map of reference name → value. Each value can be a plain [string] (URL/path),
-	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	Reference param.Field[map[string]any] `json:"reference"`
-	// Map of reference name → value. Each value can be a plain [string] (URL/path),
-	// a [ConfigV2ReferenceGit], or a [ConfigV2ReferenceLocal].
-	References    param.Field[map[string]any]        `json:"references"`
-	Share         param.Field[ConfigShare]           `json:"share"`
-	Shell         param.Field[string]                `json:"shell"`
-	Server        param.Field[ServerConfigParam]     `json:"server"`
-	Skills        param.Field[ConfigSkillsParam]     `json:"skills"`
-	SmallModel    param.Field[string]                `json:"small_model"`
-	Snapshot      param.Field[bool]                  `json:"snapshot"`
-	ToolOutput    param.Field[ConfigToolOutputParam] `json:"tool_output"`
-	Tools         param.Field[map[string]bool]       `json:"tools"`
-	Username      param.Field[string]                `json:"username"`
-	Watcher       param.Field[ConfigWatcherParam]    `json:"watcher"`
-	DefaultAgent  param.Field[string]                `json:"default_agent"`
-	SubagentDepth param.Field[int64]                 `json:"subagent_depth"`
+	// Map of reference name → value. Each value can be a [ConfigV2ReferenceString]
+	// (URL/path), a [ConfigV2ReferenceGitParam], or a [ConfigV2ReferenceLocalParam].
+	Reference param.Field[map[string]ConfigV2ReferenceUnionParam] `json:"reference"`
+	// Map of reference name → value. Each value can be a [ConfigV2ReferenceString]
+	// (URL/path), a [ConfigV2ReferenceGitParam], or a [ConfigV2ReferenceLocalParam].
+	References    param.Field[map[string]ConfigV2ReferenceUnionParam] `json:"references"`
+	Share         param.Field[ConfigShare]                            `json:"share"`
+	Shell         param.Field[string]                                 `json:"shell"`
+	Server        param.Field[ServerConfigParam]                      `json:"server"`
+	Skills        param.Field[ConfigSkillsParam]                      `json:"skills"`
+	SmallModel    param.Field[string]                                 `json:"small_model"`
+	Snapshot      param.Field[bool]                                   `json:"snapshot"`
+	ToolOutput    param.Field[ConfigToolOutputParam]                  `json:"tool_output"`
+	Tools         param.Field[map[string]bool]                        `json:"tools"`
+	Username      param.Field[string]                                 `json:"username"`
+	Watcher       param.Field[ConfigWatcherParam]                     `json:"watcher"`
+	DefaultAgent  param.Field[string]                                 `json:"default_agent"`
+	SubagentDepth param.Field[int64]                                  `json:"subagent_depth"`
 }
 
 func (r ConfigUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -1777,6 +1777,338 @@ func (r ConfigUpdateParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// ConfigAutoupdateEnabled is the boolean variant of the OpenAPI
+// `Config.autoupdate` anyOf union.
+type ConfigAutoupdateEnabled bool
+
+func (r ConfigAutoupdateEnabled) implementsConfigAutoupdateUnionParam() {}
+
+// ConfigAutoupdateNotify is the string "notify" variant of the OpenAPI
+// `Config.autoupdate` anyOf union.
+type ConfigAutoupdateNotify string
+
+func (r ConfigAutoupdateNotify) implementsConfigAutoupdateUnionParam() {}
+
+// ConfigAutoupdateUnionParam is the request-side union for the OpenAPI
+// `Config.autoupdate` anyOf (boolean | "notify").
+//
+// Satisfied by [ConfigAutoupdateEnabled], [ConfigAutoupdateNotify].
+type ConfigAutoupdateUnionParam interface {
+	implementsConfigAutoupdateUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigAutoupdateUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[ConfigAutoupdateEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[ConfigAutoupdateEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[ConfigAutoupdateNotify](),
+		},
+	)
+}
+
+// ConfigFormatterEnabled is the boolean variant of the OpenAPI
+// `Config.formatter` anyOf union.
+type ConfigFormatterEnabled bool
+
+func (r ConfigFormatterEnabled) implementsConfigFormatterUnionParam() {}
+
+// ConfigFormatterParam is the request-side counterpart of [ConfigFormatter].
+type ConfigFormatterParam struct {
+	Disabled    param.Field[bool]              `json:"disabled"`
+	Command     param.Field[[]string]          `json:"command"`
+	Environment param.Field[map[string]string] `json:"environment"`
+	Extensions  param.Field[[]string]          `json:"extensions"`
+}
+
+func (r ConfigFormatterParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// ConfigFormatterMapParam is the object variant of the OpenAPI
+// `Config.formatter` anyOf union: a map of formatter-name to per-formatter
+// config.
+type ConfigFormatterMapParam map[string]ConfigFormatterParam
+
+func (r ConfigFormatterMapParam) implementsConfigFormatterUnionParam() {}
+
+// ConfigFormatterUnionParam is the request-side union for the OpenAPI
+// `Config.formatter` anyOf (boolean | map[string]ConfigFormatter).
+//
+// Satisfied by [ConfigFormatterEnabled], [ConfigFormatterMapParam].
+type ConfigFormatterUnionParam interface {
+	implementsConfigFormatterUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigFormatterUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[ConfigFormatterEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[ConfigFormatterEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigFormatterMapParam](),
+		},
+	)
+}
+
+// ConfigLspEnabled is the boolean variant of the OpenAPI `Config.lsp` anyOf
+// union.
+type ConfigLspEnabled bool
+
+func (r ConfigLspEnabled) implementsConfigLspUnionParam() {}
+
+// ConfigLspDisabledParam is the request-side counterpart of [ConfigLspDisabled].
+type ConfigLspDisabledParam struct {
+	Disabled param.Field[ConfigLspDisabledDisabled] `json:"disabled,required"`
+}
+
+func (r ConfigLspDisabledParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigLspDisabledParam) implementsConfigLspServerUnionParam() {}
+
+// ConfigLspObjectParam is the request-side counterpart of [ConfigLspObject].
+type ConfigLspObjectParam struct {
+	Command        param.Field[[]string]          `json:"command,required"`
+	Disabled       param.Field[bool]              `json:"disabled"`
+	Env            param.Field[map[string]string] `json:"env"`
+	Extensions     param.Field[[]string]          `json:"extensions"`
+	Initialization param.Field[map[string]any]    `json:"initialization"`
+}
+
+func (r ConfigLspObjectParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigLspObjectParam) implementsConfigLspServerUnionParam() {}
+
+// ConfigLspServerUnionParam is the per-server union of the OpenAPI
+// `Config.lsp` object variant (disabled | command-based config).
+//
+// Satisfied by [ConfigLspDisabledParam], [ConfigLspObjectParam].
+type ConfigLspServerUnionParam interface {
+	implementsConfigLspServerUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigLspServerUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspDisabledParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspObjectParam](),
+		},
+	)
+}
+
+// ConfigLspMapParam is the object variant of the OpenAPI `Config.lsp` anyOf
+// union: a map of lsp-name to per-server config.
+type ConfigLspMapParam map[string]ConfigLspServerUnionParam
+
+func (r ConfigLspMapParam) implementsConfigLspUnionParam() {}
+
+// ConfigLspUnionParam is the request-side union for the OpenAPI `Config.lsp`
+// anyOf (boolean | map[string]ConfigLsp).
+//
+// Satisfied by [ConfigLspEnabled], [ConfigLspMapParam].
+type ConfigLspUnionParam interface {
+	implementsConfigLspUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigLspUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[ConfigLspEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[ConfigLspEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigLspMapParam](),
+		},
+	)
+}
+
+// ConfigPluginName is the string variant of the OpenAPI `Config.plugin` item
+// anyOf union: a bare plugin name.
+type ConfigPluginName string
+
+func (r ConfigPluginName) implementsConfigPluginItemUnionParam() {}
+
+// ConfigPluginTupleParam is the 2-tuple variant of the OpenAPI `Config.plugin`
+// item anyOf union: [pluginName, configObject].
+//
+// It serializes as the OpenAPI `prefixItems` tuple `[pluginName, configObject]`
+// (a JSON array, not an object), so [MarshalJSON] emits `[Name.Value,
+// Config.Value]` and the struct json tags are not used. Both [Name] and
+// [Config] must be set; leaving either unset emits its zero value.
+type ConfigPluginTupleParam struct {
+	Name   param.Field[string]
+	Config param.Field[map[string]any]
+}
+
+func (r ConfigPluginTupleParam) MarshalJSON() (data []byte, err error) {
+	return apijson.Marshal([]any{r.Name.Value, r.Config.Value})
+}
+
+func (r ConfigPluginTupleParam) implementsConfigPluginItemUnionParam() {}
+
+// ConfigPluginItemUnionParam is the request-side union for each item of the
+// OpenAPI `Config.plugin` array (string | [string, object]).
+//
+// Satisfied by [ConfigPluginName], [ConfigPluginTupleParam].
+type ConfigPluginItemUnionParam interface {
+	implementsConfigPluginItemUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigPluginItemUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[ConfigPluginName](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigPluginTupleParam](),
+		},
+	)
+}
+
+// ConfigV2ReferenceGitParam is the request-side counterpart of
+// [ConfigV2ReferenceGit].
+type ConfigV2ReferenceGitParam struct {
+	Repository  param.Field[string] `json:"repository,required"`
+	Branch      param.Field[string] `json:"branch"`
+	Description param.Field[string] `json:"description"`
+	Hidden      param.Field[bool]   `json:"hidden"`
+}
+
+func (r ConfigV2ReferenceGitParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigV2ReferenceGitParam) implementsConfigV2ReferenceUnionParam() {}
+
+// ConfigV2ReferenceLocalParam is the request-side counterpart of
+// [ConfigV2ReferenceLocal].
+type ConfigV2ReferenceLocalParam struct {
+	Path        param.Field[string] `json:"path,required"`
+	Description param.Field[string] `json:"description"`
+	Hidden      param.Field[bool]   `json:"hidden"`
+}
+
+func (r ConfigV2ReferenceLocalParam) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigV2ReferenceLocalParam) implementsConfigV2ReferenceUnionParam() {}
+
+// ConfigV2ReferenceUnionParam is the request-side union for each value of the
+// OpenAPI `Config.reference` / `Config.references` object
+// (string | ConfigV2ReferenceGit | ConfigV2ReferenceLocal).
+//
+// Satisfied by [ConfigV2ReferenceString], [ConfigV2ReferenceGitParam],
+// [ConfigV2ReferenceLocalParam].
+type ConfigV2ReferenceUnionParam interface {
+	implementsConfigV2ReferenceUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigV2ReferenceUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[ConfigV2ReferenceString](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigV2ReferenceGitParam](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigV2ReferenceLocalParam](),
+		},
+	)
+}
+
+// ConfigProviderModelsInterleavedEnabled is the boolean variant of the OpenAPI
+// `ProviderConfig.models.*.interleaved` anyOf union.
+type ConfigProviderModelsInterleavedEnabled bool
+
+func (r ConfigProviderModelsInterleavedEnabled) implementsConfigProviderModelsInterleavedUnionParam() {
+}
+
+// ConfigProviderModelsInterleavedString is the string variant of the OpenAPI
+// `ProviderConfig.models.*.interleaved` anyOf union (covers both the known enum
+// values and arbitrary vendor strings).
+type ConfigProviderModelsInterleavedString string
+
+func (r ConfigProviderModelsInterleavedString) implementsConfigProviderModelsInterleavedUnionParam() {
+}
+
+// ConfigProviderModelsInterleavedUnionParam is the request-side union for the
+// OpenAPI `ProviderConfig.models.*.interleaved` anyOf
+// (boolean | string | { "field": string }).
+//
+// Satisfied by [ConfigProviderModelsInterleavedEnabled],
+// [ConfigProviderModelsInterleavedString], [ConfigProviderModelsInterleavedFieldParam].
+type ConfigProviderModelsInterleavedUnionParam interface {
+	implementsConfigProviderModelsInterleavedUnionParam()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeFor[ConfigProviderModelsInterleavedUnionParam](),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.True,
+			Type:       reflect.TypeFor[ConfigProviderModelsInterleavedEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.False,
+			Type:       reflect.TypeFor[ConfigProviderModelsInterleavedEnabled](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.String,
+			Type:       reflect.TypeFor[ConfigProviderModelsInterleavedString](),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeFor[ConfigProviderModelsInterleavedFieldParam](),
+		},
+	)
 }
 
 type ConfigProvidersParams struct {
@@ -1937,7 +2269,8 @@ func (r ConfigV2ReferenceLocal) implementsConfigV2ReferenceUnion() {}
 // path.
 type ConfigV2ReferenceString string
 
-func (r ConfigV2ReferenceString) implementsConfigV2ReferenceUnion() {}
+func (r ConfigV2ReferenceString) implementsConfigV2ReferenceUnion()      {}
+func (r ConfigV2ReferenceString) implementsConfigV2ReferenceUnionParam() {}
 
 func init() {
 	apijson.RegisterUnion(
@@ -2448,19 +2781,21 @@ type ConfigProviderModelParam struct {
 	// variants: boolean, the enum "reasoning"|"reasoning_content"|"reasoning_text",
 	// any arbitrary string, or the object `{ "field": string }` (use
 	// [ConfigProviderModelsInterleavedFieldParam] for the object variant).
-	// Accepts [bool], [string] or [ConfigProviderModelsInterleavedFieldParam].
-	Interleaved param.Field[any]                                 `json:"interleaved"`
-	Name        param.Field[string]                              `json:"name"`
-	Options     param.Field[map[string]any]                      `json:"options"`
-	Reasoning   param.Field[bool]                                `json:"reasoning"`
-	ReleaseDate param.Field[string]                              `json:"release_date"`
-	Temperature param.Field[bool]                                `json:"temperature"`
-	ToolCall    param.Field[bool]                                `json:"tool_call"`
-	Cost        param.Field[ConfigProviderModelsCostParam]       `json:"cost"`
-	Limit       param.Field[ConfigProviderModelsLimitParam]      `json:"limit"`
-	Modalities  param.Field[ConfigProviderModelsModalitiesParam] `json:"modalities"`
-	Provider    param.Field[ConfigProviderModelsProviderParam]   `json:"provider"`
-	Status      param.Field[ConfigProviderModelsStatus]          `json:"status"`
+	// Accepts [ConfigProviderModelsInterleavedEnabled],
+	// [ConfigProviderModelsInterleavedString] or
+	// [ConfigProviderModelsInterleavedFieldParam].
+	Interleaved param.Field[ConfigProviderModelsInterleavedUnionParam] `json:"interleaved"`
+	Name        param.Field[string]                                    `json:"name"`
+	Options     param.Field[map[string]any]                            `json:"options"`
+	Reasoning   param.Field[bool]                                      `json:"reasoning"`
+	ReleaseDate param.Field[string]                                    `json:"release_date"`
+	Temperature param.Field[bool]                                      `json:"temperature"`
+	ToolCall    param.Field[bool]                                      `json:"tool_call"`
+	Cost        param.Field[ConfigProviderModelsCostParam]             `json:"cost"`
+	Limit       param.Field[ConfigProviderModelsLimitParam]            `json:"limit"`
+	Modalities  param.Field[ConfigProviderModelsModalitiesParam]       `json:"modalities"`
+	Provider    param.Field[ConfigProviderModelsProviderParam]         `json:"provider"`
+	Status      param.Field[ConfigProviderModelsStatus]                `json:"status"`
 	// Accepts object.
 	Variants param.Field[any] `json:"variants"`
 }
@@ -2538,6 +2873,9 @@ type ConfigProviderModelsInterleavedFieldParam struct {
 
 func (r ConfigProviderModelsInterleavedFieldParam) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+func (r ConfigProviderModelsInterleavedFieldParam) implementsConfigProviderModelsInterleavedUnionParam() {
 }
 
 // ConfigProviderParam is the request-side counterpart of [ConfigProvider].

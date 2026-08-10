@@ -3206,7 +3206,7 @@ func (r EventListResponseEventPtyExited) implementsEventListResponse() {}
 func (r EventListResponseEventPtyExited) implementsGlobalEventPayload() {}
 
 type EventListResponseEventPtyExitedProperties struct {
-	ExitCode int                                           `json:"exitCode,required"`
+	ExitCode int64                                         `json:"exitCode,required"`
 	ID       string                                        `json:"id,required"`
 	JSON     eventListResponseEventPtyExitedPropertiesJSON `json:"-"`
 }

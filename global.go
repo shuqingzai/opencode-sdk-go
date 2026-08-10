@@ -9,12 +9,13 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/sst/opencode-sdk-go/internal/apijson"
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
 	"github.com/sst/opencode-sdk-go/packages/ssestream"
-	"github.com/tidwall/gjson"
 )
 
 // GlobalService contains methods and other services that help with interacting with
@@ -410,14 +411,22 @@ func (r globalEventJSON) RawJSON() string {
 func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
 	*r = GlobalEvent{}
 
-	// Phase 1: parse only the wrapper fields (directory, project, workspace)
-	// into an alias struct that intentionally omits Payload, avoiding an
-	// unnecessary pass through the any decoder. The full JSON metadata
-	// is still captured correctly via globalEventJSON.
+	// Phase 1: parse the wrapper fields (directory, project, workspace) plus the
+	// payload into an alias struct, so globalEventJSON captures the full JSON
+	// metadata — including JSON.Payload's presence status (IsMissing/IsNull/
+	// IsInvalid/Raw).
+	//
+	// Payload is declared as json.RawMessage rather than any on purpose: the
+	// decoder only needs to mark the field as present and record its raw bytes,
+	// because Phase 2 re-parses the payload and routes it to a typed union
+	// variant. Decoding it into any as well would build a map[string]any that is
+	// immediately discarded (~2x the allocations of RawMessage). The alias value
+	// itself is unused; only the metadata it produces is kept.
 	type globalEventAlias struct {
 		Directory string          `json:"directory,required"`
 		Project   string          `json:"project"`
 		Workspace string          `json:"workspace"`
+		Payload   json.RawMessage `json:"payload"`
 		JSON      globalEventJSON `json:"-"`
 	}
 	var alias globalEventAlias
@@ -433,6 +442,17 @@ func (r *GlobalEvent) UnmarshalJSON(data []byte) (err error) {
 	result := gjson.ParseBytes(data)
 	payloadResult := result.Get("payload")
 	if !payloadResult.Exists() {
+		return nil
+	}
+
+	// The OpenAPI payload union is an anyOf of object schemas only, so any
+	// non-object payload (null, bool, number, string, array) cannot match a
+	// variant. Skip union routing instead of failing, which would terminate
+	// the whole SSE stream. The JSON metadata (JSON.Payload) still records
+	// the raw value so callers can distinguish a missing payload
+	// (IsMissing()), an explicit null (IsNull()) or a non-object scalar
+	// (Raw()) from a routed event body.
+	if !payloadResult.IsObject() {
 		return nil
 	}
 

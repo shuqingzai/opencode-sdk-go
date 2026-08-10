@@ -61,11 +61,10 @@ func TestV2CommandListParamsURLQuery(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			v := tc.params.URLQuery()
-			if _, ok := interface{}(v).(url.Values); !ok {
+			if _, ok := any(v).(url.Values); !ok {
 				t.Fatal("URLQuery() did not return url.Values")
 			}
 			for _, key := range tc.wantKeys {

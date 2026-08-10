@@ -1147,15 +1147,23 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "bool_true",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[any](true),
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedEnabled(true)),
 			},
 			wantJSON: `{"interleaved":true}`,
+		},
+		// Variant 1b: bool false
+		{
+			name: "bool_false",
+			param: opencode.ConfigProviderModelParam{
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedEnabled(false)),
+			},
+			wantJSON: `{"interleaved":false}`,
 		},
 		// Variant 2: enum string
 		{
 			name: "string_reasoning_text",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[any]("reasoning_text"),
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedString("reasoning_text")),
 			},
 			wantJSON: `{"interleaved":"reasoning_text"}`,
 		},
@@ -1163,16 +1171,16 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "string_vendor",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[any]("vendor_custom"),
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedString("vendor_custom")),
 			},
 			wantJSON: `{"interleaved":"vendor_custom"}`,
 		},
 		// Variant 4: object { "field": "reasoning_text" }
-		// Uses the new ConfigProviderModelsInterleavedFieldParam request-side type.
+		// Uses the ConfigProviderModelsInterleavedFieldParam request-side type.
 		{
 			name: "object_field_reasoning_text",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[any](opencode.ConfigProviderModelsInterleavedFieldParam{
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedFieldParam{
 					Field: opencode.F(opencode.ProviderModelCapabilitiesInterleavedFieldField("reasoning_text")),
 				}),
 			},
@@ -1182,7 +1190,7 @@ func TestConfigProviderModelParamInterleavedMarshal(t *testing.T) {
 		{
 			name: "object_field_vendor_custom",
 			param: opencode.ConfigProviderModelParam{
-				Interleaved: opencode.F[any](opencode.ConfigProviderModelsInterleavedFieldParam{
+				Interleaved: opencode.F[opencode.ConfigProviderModelsInterleavedUnionParam](opencode.ConfigProviderModelsInterleavedFieldParam{
 					Field: opencode.F(opencode.ProviderModelCapabilitiesInterleavedFieldField("vendor_custom")),
 				}),
 			},
@@ -1399,5 +1407,412 @@ func TestPortPanicsOnNonStructVariant(t *testing.T) {
 			}()
 			_ = apijson.Port(scalar, &struct{}{})
 		})
+	}
+}
+
+// TestConfigAutoupdateUnionParamMarshal verifies serialization of every variant of
+// the OpenAPI `Config.autoupdate` anyOf (boolean | "notify").
+func TestConfigAutoupdateUnionParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.ConfigUpdateParams
+		wantJSON string
+	}{
+		// Variant 1a: boolean true
+		{
+			name: "bool_true",
+			param: opencode.ConfigUpdateParams{
+				Autoupdate: opencode.F[opencode.ConfigAutoupdateUnionParam](opencode.ConfigAutoupdateEnabled(true)),
+			},
+			wantJSON: `{"autoupdate":true}`,
+		},
+		// Variant 1b: boolean false
+		{
+			name: "bool_false",
+			param: opencode.ConfigUpdateParams{
+				Autoupdate: opencode.F[opencode.ConfigAutoupdateUnionParam](opencode.ConfigAutoupdateEnabled(false)),
+			},
+			wantJSON: `{"autoupdate":false}`,
+		},
+		// Variant 2: string enum "notify"
+		{
+			name: "string_notify",
+			param: opencode.ConfigUpdateParams{
+				Autoupdate: opencode.F[opencode.ConfigAutoupdateUnionParam](opencode.ConfigAutoupdateNotify("notify")),
+			},
+			wantJSON: `{"autoupdate":"notify"}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			var gotMap, wantMap map[string]any
+			if err := json.Unmarshal(got, &gotMap); err != nil {
+				t.Fatalf("re-parse got: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tc.wantJSON), &wantMap); err != nil {
+				t.Fatalf("re-parse want: %v", err)
+			}
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigFormatterUnionParamMarshal verifies serialization of every variant of
+// the OpenAPI `Config.formatter` anyOf (boolean | map[string]ConfigFormatter).
+func TestConfigFormatterUnionParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.ConfigUpdateParams
+		wantJSON string
+	}{
+		// Variant 1: boolean false (disable)
+		{
+			name: "bool_false",
+			param: opencode.ConfigUpdateParams{
+				Formatter: opencode.F[opencode.ConfigFormatterUnionParam](opencode.ConfigFormatterEnabled(false)),
+			},
+			wantJSON: `{"formatter":false}`,
+		},
+		// Variant 2: object map
+		{
+			name: "map_with_command_and_extensions",
+			param: opencode.ConfigUpdateParams{
+				Formatter: opencode.F[opencode.ConfigFormatterUnionParam](opencode.ConfigFormatterMapParam{
+					"prettier": opencode.ConfigFormatterParam{
+						Command:    opencode.F([]string{"prettier", "--write"}),
+						Extensions: opencode.F([]string{".ts"}),
+					},
+				}),
+			},
+			wantJSON: `{"formatter":{"prettier":{"command":["prettier","--write"],"extensions":[".ts"]}}}`,
+		},
+		// Variant 2b: map with environment and disabled
+		{
+			name: "map_environment_disabled",
+			param: opencode.ConfigUpdateParams{
+				Formatter: opencode.F[opencode.ConfigFormatterUnionParam](opencode.ConfigFormatterMapParam{
+					"biome": opencode.ConfigFormatterParam{
+						Disabled:    opencode.F(true),
+						Environment: opencode.F(map[string]string{"NODE_ENV": "production"}),
+					},
+				}),
+			},
+			wantJSON: `{"formatter":{"biome":{"disabled":true,"environment":{"NODE_ENV":"production"}}}}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			var gotMap, wantMap map[string]any
+			if err := json.Unmarshal(got, &gotMap); err != nil {
+				t.Fatalf("re-parse got: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tc.wantJSON), &wantMap); err != nil {
+				t.Fatalf("re-parse want: %v", err)
+			}
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigLspUnionParamMarshal verifies serialization of every variant of the
+// OpenAPI `Config.lsp` anyOf (boolean | map[string] per-server union).
+func TestConfigLspUnionParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.ConfigUpdateParams
+		wantJSON string
+	}{
+		// Variant 1: boolean false (disable)
+		{
+			name: "bool_false",
+			param: opencode.ConfigUpdateParams{
+				Lsp: opencode.F[opencode.ConfigLspUnionParam](opencode.ConfigLspEnabled(false)),
+			},
+			wantJSON: `{"lsp":false}`,
+		},
+		// Variant 2a: per-server disabled config
+		{
+			name: "map_server_disabled",
+			param: opencode.ConfigUpdateParams{
+				Lsp: opencode.F[opencode.ConfigLspUnionParam](opencode.ConfigLspMapParam{
+					"gopls": opencode.ConfigLspDisabledParam{
+						Disabled: opencode.F(opencode.ConfigLspDisabledDisabled(true)),
+					},
+				}),
+			},
+			wantJSON: `{"lsp":{"gopls":{"disabled":true}}}`,
+		},
+		// Variant 2b: per-server command-based config
+		{
+			name: "map_server_command",
+			param: opencode.ConfigUpdateParams{
+				Lsp: opencode.F[opencode.ConfigLspUnionParam](opencode.ConfigLspMapParam{
+					"gopls": opencode.ConfigLspObjectParam{
+						Command:    opencode.F([]string{"gopls"}),
+						Extensions: opencode.F([]string{".go"}),
+					},
+				}),
+			},
+			wantJSON: `{"lsp":{"gopls":{"command":["gopls"],"extensions":[".go"]}}}`,
+		},
+		// Variant 2c: per-server with env and initialization
+		{
+			name: "map_server_env_initialization",
+			param: opencode.ConfigUpdateParams{
+				Lsp: opencode.F[opencode.ConfigLspUnionParam](opencode.ConfigLspMapParam{
+					"gopls": opencode.ConfigLspObjectParam{
+						Command:        opencode.F([]string{"gopls"}),
+						Env:            opencode.F(map[string]string{"GOPLS_GENERATE": "1"}),
+						Initialization: opencode.F(map[string]any{"formatting": true}),
+					},
+				}),
+			},
+			wantJSON: `{"lsp":{"gopls":{"command":["gopls"],"env":{"GOPLS_GENERATE":"1"},"initialization":{"formatting":true}}}}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			var gotMap, wantMap map[string]any
+			if err := json.Unmarshal(got, &gotMap); err != nil {
+				t.Fatalf("re-parse got: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tc.wantJSON), &wantMap); err != nil {
+				t.Fatalf("re-parse want: %v", err)
+			}
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigPluginItemUnionParamMarshal verifies serialization of every variant of
+// the OpenAPI `Config.plugin` array items (string | [string, object]).
+func TestConfigPluginItemUnionParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.ConfigUpdateParams
+		wantJSON string
+	}{
+		// Variant 1: single bare string
+		{
+			name: "single_name",
+			param: opencode.ConfigUpdateParams{
+				Plugin: opencode.F[[]opencode.ConfigPluginItemUnionParam]([]opencode.ConfigPluginItemUnionParam{
+					opencode.ConfigPluginName("a"),
+				}),
+			},
+			wantJSON: `{"plugin":["a"]}`,
+		},
+		// Variant 2: single 2-tuple [name, config]
+		{
+			name: "single_tuple",
+			param: opencode.ConfigUpdateParams{
+				Plugin: opencode.F[[]opencode.ConfigPluginItemUnionParam]([]opencode.ConfigPluginItemUnionParam{
+					opencode.ConfigPluginTupleParam{
+						Name:   opencode.F("a"),
+						Config: opencode.F(map[string]any{"k": "v"}),
+					},
+				}),
+			},
+			wantJSON: `{"plugin":[["a",{"k":"v"}]]}`,
+		},
+		// Variant 3: mixed string and tuple
+		{
+			name: "mixed",
+			param: opencode.ConfigUpdateParams{
+				Plugin: opencode.F[[]opencode.ConfigPluginItemUnionParam]([]opencode.ConfigPluginItemUnionParam{
+					opencode.ConfigPluginName("b"),
+					opencode.ConfigPluginTupleParam{
+						Name:   opencode.F("a"),
+						Config: opencode.F(map[string]any{"k": "v"}),
+					},
+				}),
+			},
+			wantJSON: `{"plugin":["b",["a",{"k":"v"}]]}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			var gotMap, wantMap map[string]any
+			if err := json.Unmarshal(got, &gotMap); err != nil {
+				t.Fatalf("re-parse got: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tc.wantJSON), &wantMap); err != nil {
+				t.Fatalf("re-parse want: %v", err)
+			}
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigV2ReferenceUnionParamMarshal verifies serialization of every
+// variant of the OpenAPI `Config.reference` / `Config.references` map values
+// (string | ConfigV2ReferenceGit | ConfigV2ReferenceLocal).
+func TestConfigV2ReferenceUnionParamMarshal(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		param    opencode.ConfigUpdateParams
+		wantJSON string
+	}{
+		// Variant 1: bare string
+		{
+			name: "reference_string",
+			param: opencode.ConfigUpdateParams{
+				Reference: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+					"x": opencode.ConfigV2ReferenceString("https://example.com/docs"),
+				}),
+			},
+			wantJSON: `{"reference":{"x":"https://example.com/docs"}}`,
+		},
+		// Variant 2: git reference
+		{
+			name: "reference_git",
+			param: opencode.ConfigUpdateParams{
+				Reference: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+					"docs": opencode.ConfigV2ReferenceGitParam{
+						Repository: opencode.F("owner/repo"),
+						Branch:     opencode.F("main"),
+					},
+				}),
+			},
+			wantJSON: `{"reference":{"docs":{"repository":"owner/repo","branch":"main"}}}`,
+		},
+		// Variant 3: local reference
+		{
+			name: "references_local",
+			param: opencode.ConfigUpdateParams{
+				References: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+					"local": opencode.ConfigV2ReferenceLocalParam{
+						Path: opencode.F("./docs"),
+					},
+				}),
+			},
+			wantJSON: `{"references":{"local":{"path":"./docs"}}}`,
+		},
+		// Variant 4: mixed string and git in the same map
+		{
+			name: "mixed",
+			param: opencode.ConfigUpdateParams{
+				Reference: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+					"plain": opencode.ConfigV2ReferenceString("owner/repo"),
+					"git": opencode.ConfigV2ReferenceGitParam{
+						Repository: opencode.F("owner/repo"),
+					},
+				}),
+			},
+			wantJSON: `{"reference":{"git":{"repository":"owner/repo"},"plain":"owner/repo"}}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := json.Marshal(tc.param)
+			if err != nil {
+				t.Fatalf("json.Marshal: %v", err)
+			}
+			var gotMap, wantMap map[string]any
+			if err := json.Unmarshal(got, &gotMap); err != nil {
+				t.Fatalf("re-parse got: %v", err)
+			}
+			if err := json.Unmarshal([]byte(tc.wantJSON), &wantMap); err != nil {
+				t.Fatalf("re-parse want: %v", err)
+			}
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("wire JSON mismatch:\n  got:  %s\n  want: %s", got, tc.wantJSON)
+			}
+		})
+	}
+}
+
+// TestConfigUpdateParamsUnionFieldsOmitted verifies that union-typed fields
+// that are not set do not appear in the marshaled JSON (param.Field zero-value
+// semantics), and that a fully-populated ConfigUpdateParams marshals all the
+// union fields together.
+func TestConfigUpdateParamsUnionFieldsOmitted(t *testing.T) {
+	t.Parallel()
+	// No union fields set → nothing emitted.
+	empty := opencode.ConfigUpdateParams{}
+	gotEmpty, err := json.Marshal(empty)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	if string(gotEmpty) != "{}" {
+		t.Errorf("empty ConfigUpdateParams = %s, want {}", gotEmpty)
+	}
+
+	// All union fields set together.
+	full := opencode.ConfigUpdateParams{
+		Autoupdate: opencode.F[opencode.ConfigAutoupdateUnionParam](opencode.ConfigAutoupdateNotify("notify")),
+		Formatter:  opencode.F[opencode.ConfigFormatterUnionParam](opencode.ConfigFormatterEnabled(true)),
+		Lsp: opencode.F[opencode.ConfigLspUnionParam](opencode.ConfigLspMapParam{
+			"gopls": opencode.ConfigLspDisabledParam{
+				Disabled: opencode.F(opencode.ConfigLspDisabledDisabled(true)),
+			},
+		}),
+		Plugin: opencode.F[[]opencode.ConfigPluginItemUnionParam]([]opencode.ConfigPluginItemUnionParam{
+			opencode.ConfigPluginName("a"),
+			opencode.ConfigPluginTupleParam{
+				Name:   opencode.F("b"),
+				Config: opencode.F(map[string]any{"n": 1}),
+			},
+		}),
+		Reference: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+			"x": opencode.ConfigV2ReferenceString("str"),
+		}),
+		References: opencode.F(map[string]opencode.ConfigV2ReferenceUnionParam{
+			"git": opencode.ConfigV2ReferenceGitParam{
+				Repository: opencode.F("owner/repo"),
+			},
+		}),
+	}
+	gotFull, err := json.Marshal(full)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	var gotFullMap map[string]any
+	if err := json.Unmarshal(gotFull, &gotFullMap); err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	for _, key := range []string{"autoupdate", "formatter", "lsp", "plugin", "reference", "references"} {
+		if _, ok := gotFullMap[key]; !ok {
+			t.Errorf("marshaled JSON missing %q: %s", key, gotFull)
+		}
 	}
 }

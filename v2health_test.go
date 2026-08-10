@@ -48,7 +48,6 @@ func TestHealthV2InfoUnmarshal(t *testing.T) {
 		{name: "healthy_false", json: `{"healthy":false}`, healthy: false},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var h opencode.HealthV2Info

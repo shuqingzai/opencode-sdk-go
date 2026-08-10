@@ -291,7 +291,6 @@ func TestV2EventSessionErrorDataErrorUnion(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var d opencode.V2EventSessionErrorData
@@ -495,7 +494,6 @@ func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var d opencode.V2EventSessionStatusData

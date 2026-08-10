@@ -251,14 +251,14 @@ func TestTuiPublishBodyPromptAppendSerialization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshal: %v", err)
 	}
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 	if got["type"] != "tui.prompt.append" {
 		t.Errorf("type: got %v, want %q", got["type"], "tui.prompt.append")
 	}
-	props, ok := got["properties"].(map[string]interface{})
+	props, ok := got["properties"].(map[string]any)
 	if !ok {
 		t.Fatalf("properties: expected object, got %T", got["properties"])
 	}
@@ -282,14 +282,14 @@ func TestTuiPublishBodyCommandExecuteSerialization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshal: %v", err)
 	}
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 	if got["type"] != "tui.command.execute" {
 		t.Errorf("type: got %v, want %q", got["type"], "tui.command.execute")
 	}
-	props, ok := got["properties"].(map[string]interface{})
+	props, ok := got["properties"].(map[string]any)
 	if !ok {
 		t.Fatalf("properties: expected object, got %T", got["properties"])
 	}
@@ -315,14 +315,14 @@ func TestTuiPublishBodyToastShowSerialization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshal: %v", err)
 	}
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 	if got["type"] != "tui.toast.show" {
 		t.Errorf("type: got %v, want %q", got["type"], "tui.toast.show")
 	}
-	props, ok := got["properties"].(map[string]interface{})
+	props, ok := got["properties"].(map[string]any)
 	if !ok {
 		t.Fatalf("properties: expected object, got %T", got["properties"])
 	}
@@ -352,14 +352,14 @@ func TestTuiPublishBodySessionSelectSerialization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshal: %v", err)
 	}
-	var got map[string]interface{}
+	var got map[string]any
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 	if got["type"] != "tui.session.select" {
 		t.Errorf("type: got %v, want %q", got["type"], "tui.session.select")
 	}
-	props, ok := got["properties"].(map[string]interface{})
+	props, ok := got["properties"].(map[string]any)
 	if !ok {
 		t.Fatalf("properties: expected object, got %T", got["properties"])
 	}

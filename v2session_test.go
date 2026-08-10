@@ -356,14 +356,14 @@ func TestV2SessionMessageToolProviderResultMetadata(t *testing.T) {
 	if !provider.Executed {
 		t.Error("expected Executed to be true")
 	}
-	metadata, ok := provider.Metadata.(map[string]interface{})
+	metadata, ok := provider.Metadata.(map[string]any)
 	if !ok {
 		t.Fatalf("expected Metadata to be map[string]interface{}, got %T", provider.Metadata)
 	}
 	if metadata["key"] != "value" {
 		t.Errorf("expected metadata key=value, got %v", metadata["key"])
 	}
-	resultMetadata, ok := provider.ResultMetadata.(map[string]interface{})
+	resultMetadata, ok := provider.ResultMetadata.(map[string]any)
 	if !ok {
 		t.Fatalf("expected ResultMetadata to be map[string]interface{}, got %T", provider.ResultMetadata)
 	}

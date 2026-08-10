@@ -62,7 +62,7 @@ func TestV2ModelInfoApiUnionDiscriminator(t *testing.T) {
 		{
 			name:       "aisdk_variant",
 			apiJSON:    `{"type":"aisdk","id":"gpt-4-aisdk","package":"@ai-sdk/openai"}`,
-			wantType:   reflect.TypeOf(opencode.V2ModelInfoApiAisdk{}),
+			wantType:   reflect.TypeFor[opencode.V2ModelInfoApiAisdk](),
 			wantAisdk:  true,
 			wantNative: false,
 			wantPkg:    "@ai-sdk/openai",
@@ -70,14 +70,14 @@ func TestV2ModelInfoApiUnionDiscriminator(t *testing.T) {
 		{
 			name:       "native_variant",
 			apiJSON:    `{"type":"native","id":"gpt-4-native","settings":{}}`,
-			wantType:   reflect.TypeOf(opencode.V2ModelInfoApiNative{}),
+			wantType:   reflect.TypeFor[opencode.V2ModelInfoApiNative](),
 			wantAisdk:  false,
 			wantNative: true,
 		},
 		{
 			name:       "aisdk_with_url",
 			apiJSON:    `{"type":"aisdk","id":"custom","package":"@ai-sdk/custom","url":"https://api.custom.com"}`,
-			wantType:   reflect.TypeOf(opencode.V2ModelInfoApiAisdk{}),
+			wantType:   reflect.TypeFor[opencode.V2ModelInfoApiAisdk](),
 			wantAisdk:  true,
 			wantNative: false,
 			wantPkg:    "@ai-sdk/custom",
@@ -85,7 +85,6 @@ func TestV2ModelInfoApiUnionDiscriminator(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			raw := `{` + baseModel + `,"api":` + tc.apiJSON + `}`
@@ -171,7 +170,6 @@ func TestV2ModelInfoApiAisdkType(t *testing.T) {
 		{name: "empty", value: "", want: false},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := tc.value.IsKnown()
@@ -195,7 +193,6 @@ func TestV2ModelInfoApiNativeType(t *testing.T) {
 		{name: "empty", value: "", want: false},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := tc.value.IsKnown()
@@ -309,17 +306,16 @@ func TestV2ModelInfoAsAPIUnionBackwardCompat(t *testing.T) {
 		{
 			name:     "aisdk",
 			apiJSON:  `{"type":"aisdk","id":"gpt-4-aisdk","package":"@ai-sdk/openai"}`,
-			wantType: reflect.TypeOf(opencode.V2ModelInfoApiAisdk{}),
+			wantType: reflect.TypeFor[opencode.V2ModelInfoApiAisdk](),
 		},
 		{
 			name:     "native",
 			apiJSON:  `{"type":"native","id":"gpt-4-native","settings":{}}`,
-			wantType: reflect.TypeOf(opencode.V2ModelInfoApiNative{}),
+			wantType: reflect.TypeFor[opencode.V2ModelInfoApiNative](),
 		},
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			raw := `{` + baseModel + `,"api":` + tc.apiJSON + `}`
@@ -357,7 +353,6 @@ func TestV2ModelInfoStatus(t *testing.T) {
 		{name: "empty", value: "", want: false},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := tc.value.IsKnown()

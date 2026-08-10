@@ -299,3 +299,123 @@ func TestPartUpdateParamsBodySerialization(t *testing.T) {
 		}
 	})
 }
+
+func TestPartUpdatePartRetryErrorNameIsKnown(t *testing.T) {
+	t.Parallel()
+	// All legal values from the OpenAPI enum ["APIError"] must be known.
+	t.Run("IsKnown returns true for all legal values", func(t *testing.T) {
+		t.Parallel()
+		for _, v := range []PartUpdatePartRetryErrorName{
+			PartUpdatePartRetryErrorNameAPIError,
+		} {
+			if !v.IsKnown() {
+				t.Errorf("IsKnown() = false for %q", v)
+			}
+		}
+	})
+
+	// Illegal values must not be known.
+	t.Run("IsKnown returns false for illegal values", func(t *testing.T) {
+		t.Parallel()
+		for _, v := range []PartUpdatePartRetryErrorName{
+			"",
+			"Unknown",
+			"APIErrorX",
+			"apierror",
+		} {
+			if v.IsKnown() {
+				t.Errorf("IsKnown() = true for illegal value %q", v)
+			}
+		}
+	})
+
+	t.Run("constant value matches OpenAPI enum", func(t *testing.T) {
+		t.Parallel()
+		if got := string(PartUpdatePartRetryErrorNameAPIError); got != "APIError" {
+			t.Errorf("PartUpdatePartRetryErrorNameAPIError = %q, want \"APIError\"", got)
+		}
+	})
+}
+
+func TestPartUpdatePartRetryErrorSerialization(t *testing.T) {
+	t.Parallel()
+	t.Run("name field serializes the enum value", func(t *testing.T) {
+		t.Parallel()
+		errVal := PartUpdatePartRetryError{
+			Name: F(PartUpdatePartRetryErrorNameAPIError),
+			Data: F(PartUpdatePartRetryErrorData{
+				IsRetryable: F(true),
+				Message:     F("retryable error"),
+			}),
+		}
+		b, err := json.Marshal(errVal)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{
+			`"name":"APIError"`,
+			`"isRetryable":true`,
+			`"message":"retryable error"`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+
+	t.Run("name omitted when not set", func(t *testing.T) {
+		t.Parallel()
+		errVal := PartUpdatePartRetryError{}
+		b, err := json.Marshal(errVal)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		if strings.Contains(got, `"name"`) {
+			t.Errorf("unexpected \"name\" key in %s", got)
+		}
+	})
+}
+
+func TestPartUpdatePartRetrySerialization(t *testing.T) {
+	t.Parallel()
+	// The Retry variant embeds the APIError envelope; `name` must equal the
+	// OpenAPI enum value "APIError" when serialized through PartUpdateParams.
+	t.Run("Retry variant serializes error.name from OpenAPI enum", func(t *testing.T) {
+		t.Parallel()
+		params := PartUpdateParams{
+			Part: F(PartUpdatePartUnion(PartUpdatePartRetry{
+				ID:        F("prt_retry"),
+				SessionID: F("ses_1"),
+				MessageID: F("msg_1"),
+				Attempt:   F(int64(1)),
+				Type:      F(PartUpdatePartRetryTypeRetry),
+				Time:      F(PartUpdatePartRetryTime{Created: F(int64(1000))}),
+				Error: F(PartUpdatePartRetryError{
+					Name: F(PartUpdatePartRetryErrorNameAPIError),
+					Data: F(PartUpdatePartRetryErrorData{
+						IsRetryable: F(true),
+						Message:     F("retryable error"),
+						StatusCode:  F(int64(429)),
+					}),
+				}),
+			})),
+		}
+		b, err := json.Marshal(params)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := string(b)
+		for _, want := range []string{
+			`"type":"retry"`,
+			`"name":"APIError"`,
+			`"isRetryable":true`,
+			`"statusCode":429`,
+		} {
+			if !strings.Contains(got, want) {
+				t.Errorf("missing %q in %s", want, got)
+			}
+		}
+	})
+}

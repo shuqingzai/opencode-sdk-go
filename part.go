@@ -665,7 +665,7 @@ func (r PartUpdatePartRetry) implementsPartUpdatePartUnion() {}
 // PartUpdatePartRetryError mirrors the OpenAPI APIError payload schema for the
 // [PartUpdatePartRetry.Error] field — a `{"name":"APIError","data":{...}}` envelope.
 type PartUpdatePartRetryError struct {
-	Name param.Field[string]                       `json:"name,required"`
+	Name param.Field[PartUpdatePartRetryErrorName] `json:"name,required"`
 	Data param.Field[PartUpdatePartRetryErrorData] `json:"data,required"`
 }
 
@@ -685,6 +685,20 @@ type PartUpdatePartRetryErrorData struct {
 
 func (r PartUpdatePartRetryErrorData) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type PartUpdatePartRetryErrorName string
+
+const (
+	PartUpdatePartRetryErrorNameAPIError PartUpdatePartRetryErrorName = "APIError"
+)
+
+func (r PartUpdatePartRetryErrorName) IsKnown() bool {
+	switch r {
+	case PartUpdatePartRetryErrorNameAPIError:
+		return true
+	}
+	return false
 }
 
 type PartUpdatePartRetryType string
