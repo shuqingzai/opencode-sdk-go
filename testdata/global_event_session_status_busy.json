@@ -1,0 +1,14 @@
+{
+  "directory": "/Users/maiyuan/Code/go-project/maiyuan/meowgic-ai",
+  "project": "7e1921c820015f02f79e5bfe811386e8edcfd6fa",
+  "payload": {
+    "id": "evt_ff578e105001VFQHCtTTTpB5Dv",
+    "type": "session.status",
+    "properties": {
+      "sessionID": "ses_00a88490dffedbM7Kj6Wz4WeOi",
+      "status": {
+        "type": "busy"
+      }
+    }
+  }
+}

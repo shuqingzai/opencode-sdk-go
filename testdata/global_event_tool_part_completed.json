@@ -1,0 +1,33 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbb8-07d6-77ab-9015-3106c9364285",
+  "project": "b8d349ffbdefd0afab2f1f1ca03829cd7662268f",
+  "payload": {
+    "id": "evt_fcbbeae7d001rxnEG4oLFSsXuq",
+    "type": "message.part.updated",
+    "properties": {
+      "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+      "part": {
+        "type": "tool",
+        "tool": "write",
+        "callID": "call-fd43e9bd-11b6-4f6c-9458-213c74886821-30",
+        "state": {
+          "status": "completed",
+          "input": {
+            "filePath": "custom-photo-upload-preview.tsx",
+            "content": ""
+          },
+          "output": "Wrote file successfully.",
+          "title": "custom-photo-upload-preview.tsx",
+          "time": {
+            "start": 1785829699178,
+            "end": 1785829699196
+          }
+        },
+        "id": "prt_fcbbeae51001R17TlXhvmkBBzX",
+        "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+        "messageID": "msg_fcbbe7ec40012yp6E0P3CPk0hs"
+      },
+      "time": 1785829699197
+    }
+  }
+}

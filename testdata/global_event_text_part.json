@@ -1,0 +1,23 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbb8-07d6-77ab-9015-3106c9364285",
+  "project": "b8d349ffbdefd0afab2f1f1ca03829cd7662268f",
+  "payload": {
+    "id": "evt_fcbbe7e6d001vJ53BF2apLxGA0",
+    "type": "message.part.updated",
+    "properties": {
+      "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+      "part": {
+        "id": "prt_fcbbda8c50014VSF6PT7PFpqi3",
+        "messageID": "msg_fcbbd8c04001Ng0bz0ST0DLHFs",
+        "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+        "type": "text",
+        "text": "正在编写设置与完整上传界面组件。",
+        "time": {
+          "start": 1785829632197,
+          "end": 1785829686892
+        }
+      },
+      "time": 1785829686893
+    }
+  }
+}

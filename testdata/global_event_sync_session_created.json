@@ -1,0 +1,62 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67",
+  "project": "68e92b396e0e4333aeed4a3df91e524b54d6a173",
+  "payload": {
+    "type": "sync",
+    "syncEvent": {
+      "id": "evt_fcbd8c076001YwctXZSulR3dYO",
+      "type": "session.created.1",
+      "seq": 0,
+      "aggregateID": "ses_034273f8affeAH2tdzMh9WZMh2",
+      "data": {
+        "sessionID": "ses_034273f8affeAH2tdzMh9WZMh2",
+        "info": {
+          "id": "ses_034273f8affeAH2tdzMh9WZMh2",
+          "slug": "proud-tiger",
+          "version": "1.18.9",
+          "projectID": "68e92b396e0e4333aeed4a3df91e524b54d6a173",
+          "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67",
+          "path": "",
+          "title": "Coding Upload App(dev-upload-app-16)",
+          "permission": [
+            {
+              "permission": "read",
+              "pattern": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67/**",
+              "action": "allow"
+            },
+            {
+              "permission": "write",
+              "pattern": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67/**",
+              "action": "allow"
+            },
+            {
+              "permission": "execute",
+              "pattern": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67/**",
+              "action": "allow"
+            },
+            {
+              "permission": "all",
+              "pattern": "**",
+              "action": "deny"
+            }
+          ],
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1785831407733,
+            "updated": 1785831407733
+          }
+        }
+      }
+    },
+    "id": "evt_fcbd8c076001YwctXZSulR3dYO"
+  }
+}

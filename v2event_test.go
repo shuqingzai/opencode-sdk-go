@@ -433,9 +433,10 @@ func TestV2EventSessionErrorDataAsError(t *testing.T) {
 }
 
 // TestV2EventSessionStatusDataStatusUnion verifies that
-// V2EventSessionStatusData.Status decodes into the correct concrete variant for
-// each SessionStatus anyOf member (idle/retry/busy), both through the public
-// `any` field and through the AsStatus() accessor.
+// V2EventSessionStatusData.Status decodes into the SessionStatus carrier struct
+// and routes to the correct concrete variant for each SessionStatus anyOf
+// member (idle/retry/busy), both through the flattened carrier fields and
+// through the AsUnion() accessor.
 func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -448,11 +449,18 @@ func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 			rawJSON: `{"sessionID":"ses_1","status":{"type":"idle"}}`,
 			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
 				t.Helper()
-				if _, ok := d.Status.(opencode.SessionStatusIdle); !ok {
-					t.Fatalf("Status: got %T, want opencode.SessionStatusIdle", d.Status)
+				if d.Status.Type != opencode.SessionStatusTypeIdle {
+					t.Errorf("Status.Type: got %q, want %q", d.Status.Type, opencode.SessionStatusTypeIdle)
 				}
-				if _, ok := d.AsStatus().(opencode.SessionStatusIdle); !ok {
-					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusIdle", d.AsStatus())
+				if !d.Status.Type.IsKnown() {
+					t.Errorf("Status.Type %q is not known", d.Status.Type)
+				}
+				v, ok := d.Status.AsUnion().(opencode.SessionStatusIdle)
+				if !ok {
+					t.Fatalf("Status.AsUnion(): got %T, want opencode.SessionStatusIdle", d.Status.AsUnion())
+				}
+				if v.Type != opencode.SessionStatusIdleTypeIdle {
+					t.Errorf("variant Type: got %q, want %q", v.Type, opencode.SessionStatusIdleTypeIdle)
 				}
 			},
 		},
@@ -461,21 +469,35 @@ func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 			rawJSON: `{"sessionID":"ses_1","status":{"type":"retry","attempt":2,"message":"busy","next":3,"action":{"reason":"rate limited","provider":"openai","title":"retry","message":"try again","label":"Retry"}}}`,
 			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
 				t.Helper()
-				s, ok := d.Status.(opencode.SessionStatusRetry)
+				if d.Status.Type != opencode.SessionStatusTypeRetry {
+					t.Errorf("Status.Type: got %q, want %q", d.Status.Type, opencode.SessionStatusTypeRetry)
+				}
+				// retry 专属字段必须 port 到载体结构体上
+				if d.Status.Attempt != 2 {
+					t.Errorf("Status.Attempt: got %d, want 2", d.Status.Attempt)
+				}
+				if d.Status.Next != 3 {
+					t.Errorf("Status.Next: got %d, want 3", d.Status.Next)
+				}
+				if d.Status.Action.Provider != "openai" {
+					t.Errorf("Status.Action.Provider: got %q, want %q", d.Status.Action.Provider, "openai")
+				}
+
+				s, ok := d.Status.AsUnion().(opencode.SessionStatusRetry)
 				if !ok {
-					t.Fatalf("Status: got %T, want opencode.SessionStatusRetry", d.Status)
+					t.Fatalf("Status.AsUnion(): got %T, want opencode.SessionStatusRetry", d.Status.AsUnion())
+				}
+				if s.Type != opencode.SessionStatusRetryTypeRetry {
+					t.Errorf("variant Type: got %q, want %q", s.Type, opencode.SessionStatusRetryTypeRetry)
 				}
 				if s.Attempt != 2 {
-					t.Errorf("Status.Attempt: got %d, want 2", s.Attempt)
+					t.Errorf("variant Attempt: got %d, want 2", s.Attempt)
 				}
 				if s.Next != 3 {
-					t.Errorf("Status.Next: got %d, want 3", s.Next)
+					t.Errorf("variant Next: got %d, want 3", s.Next)
 				}
 				if s.Action.Provider != "openai" {
-					t.Errorf("Status.Action.Provider: got %q, want %q", s.Action.Provider, "openai")
-				}
-				if _, ok := d.AsStatus().(opencode.SessionStatusRetry); !ok {
-					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusRetry", d.AsStatus())
+					t.Errorf("variant Action.Provider: got %q, want %q", s.Action.Provider, "openai")
 				}
 			},
 		},
@@ -484,11 +506,18 @@ func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 			rawJSON: `{"sessionID":"ses_1","status":{"type":"busy"}}`,
 			assertFn: func(t *testing.T, d opencode.V2EventSessionStatusData) {
 				t.Helper()
-				if _, ok := d.Status.(opencode.SessionStatusBusy); !ok {
-					t.Fatalf("Status: got %T, want opencode.SessionStatusBusy", d.Status)
+				if d.Status.Type != opencode.SessionStatusTypeBusy {
+					t.Errorf("Status.Type: got %q, want %q", d.Status.Type, opencode.SessionStatusTypeBusy)
 				}
-				if _, ok := d.AsStatus().(opencode.SessionStatusBusy); !ok {
-					t.Fatalf("AsStatus(): got %T, want opencode.SessionStatusBusy", d.AsStatus())
+				if !d.Status.Type.IsKnown() {
+					t.Errorf("Status.Type %q is not known", d.Status.Type)
+				}
+				v, ok := d.Status.AsUnion().(opencode.SessionStatusBusy)
+				if !ok {
+					t.Fatalf("Status.AsUnion(): got %T, want opencode.SessionStatusBusy", d.Status.AsUnion())
+				}
+				if v.Type != opencode.SessionStatusBusyTypeBusy {
+					t.Errorf("variant Type: got %q, want %q", v.Type, opencode.SessionStatusBusyTypeBusy)
 				}
 			},
 		},
@@ -509,7 +538,7 @@ func TestV2EventSessionStatusDataStatusUnion(t *testing.T) {
 }
 
 // TestV2EventSessionStatusDataStatusRawJSON verifies that the raw JSON metadata
-// is preserved after the shadow-routed decode.
+// is preserved on both the data struct and the nested SessionStatus carrier.
 func TestV2EventSessionStatusDataStatusRawJSON(t *testing.T) {
 	t.Parallel()
 	raw := `{"sessionID":"ses_1","status":{"type":"busy"}}`
@@ -519,6 +548,9 @@ func TestV2EventSessionStatusDataStatusRawJSON(t *testing.T) {
 	}
 	if got := d.JSON.RawJSON(); got != raw {
 		t.Errorf("RawJSON(): got %s, want %s", got, raw)
+	}
+	if got, want := d.Status.JSON.RawJSON(), `{"type":"busy"}`; got != want {
+		t.Errorf("Status.JSON.RawJSON(): got %s, want %s", got, want)
 	}
 }
 

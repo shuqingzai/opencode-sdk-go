@@ -1,0 +1,30 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbb8-07d6-77ab-9015-3106c9364285",
+  "project": "b8d349ffbdefd0afab2f1f1ca03829cd7662268f",
+  "payload": {
+    "id": "evt_fcbbb4ceb001GVwrDJLwWljum8",
+    "type": "message.part.updated",
+    "properties": {
+      "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+      "part": {
+        "id": "prt_fcbbb4ceb001mD3gM1rbqb5MV7",
+        "reason": "tool-calls",
+        "messageID": "msg_fcbbb3f480017UYG1SH55nPzS8",
+        "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+        "type": "step-finish",
+        "tokens": {
+          "total": 50229,
+          "input": 356,
+          "output": 45,
+          "reasoning": 36,
+          "cache": {
+            "write": 0,
+            "read": 49792
+          }
+        },
+        "cost": 0
+      },
+      "time": 1785829477611
+    }
+  }
+}

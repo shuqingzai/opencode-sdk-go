@@ -3758,7 +3758,7 @@ func (r SessionUnshareParams) URLQuery() (v url.Values) {
 
 // SessionStatusIdle represents an idle session status
 type SessionStatusIdle struct {
-	Type string                `json:"type,required"`
+	Type SessionStatusIdleType `json:"type,required"`
 	JSON sessionStatusIdleJSON `json:"-"`
 }
 
@@ -3776,11 +3776,25 @@ func (r *SessionStatusIdle) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r SessionStatusIdle) ImplementsSessionStatus() {}
+func (r SessionStatusIdle) implementsSessionStatus() {}
+
+type SessionStatusIdleType string
+
+const (
+	SessionStatusIdleTypeIdle SessionStatusIdleType = "idle"
+)
+
+func (r SessionStatusIdleType) IsKnown() bool {
+	switch r {
+	case SessionStatusIdleTypeIdle:
+		return true
+	}
+	return false
+}
 
 // SessionStatusRetry represents a retry session status
 type SessionStatusRetry struct {
-	Type    string                   `json:"type,required"`
+	Type    SessionStatusRetryType   `json:"type,required"`
 	Attempt int64                    `json:"attempt,required"`
 	Message string                   `json:"message,required"`
 	Action  SessionStatusRetryAction `json:"action,omitzero"`
@@ -3836,11 +3850,25 @@ func (r *SessionStatusRetry) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r SessionStatusRetry) ImplementsSessionStatus() {}
+func (r SessionStatusRetry) implementsSessionStatus() {}
+
+type SessionStatusRetryType string
+
+const (
+	SessionStatusRetryTypeRetry SessionStatusRetryType = "retry"
+)
+
+func (r SessionStatusRetryType) IsKnown() bool {
+	switch r {
+	case SessionStatusRetryTypeRetry:
+		return true
+	}
+	return false
+}
 
 // SessionStatusBusy represents a busy session status
 type SessionStatusBusy struct {
-	Type string                `json:"type,required"`
+	Type SessionStatusBusyType `json:"type,required"`
 	JSON sessionStatusBusyJSON `json:"-"`
 }
 
@@ -3858,39 +3886,79 @@ func (r *SessionStatusBusy) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r SessionStatusBusy) ImplementsSessionStatus() {}
+func (r SessionStatusBusy) implementsSessionStatus() {}
 
-// Union satisfied by [SessionStatusIdle], [SessionStatusRetry], [SessionStatusBusy].
-type SessionStatus interface {
-	ImplementsSessionStatus()
+type SessionStatusBusyType string
+
+const (
+	SessionStatusBusyTypeBusy SessionStatusBusyType = "busy"
+)
+
+func (r SessionStatusBusyType) IsKnown() bool {
+	switch r {
+	case SessionStatusBusyTypeBusy:
+		return true
+	}
+	return false
 }
 
-// SessionStatusMap is a map of session IDs to their status, returned by [SessionService.Status].
-// It implements [json.Unmarshaler] to correctly deserialize the discriminated union values.
-type SessionStatusMap map[string]SessionStatus
+// SessionStatus is the OpenAPI `SessionStatus` anyOf union, carrying the
+// flattened superset of every variant's fields. `Type` discriminates which
+// variant the payload actually is; use [SessionStatus.AsUnion] to recover the
+// concrete variant.
+type SessionStatus struct {
+	Type    SessionStatusType `json:"type,required"`
+	Attempt int64             `json:"attempt"`
+	Message string            `json:"message"`
+	// This field is only present on the [SessionStatusRetry] variant.
+	Action SessionStatusRetryAction `json:"action"`
+	Next   int64                    `json:"next"`
+	JSON   sessionStatusJSON        `json:"-"`
+	union  SessionStatusUnion
+}
 
-func (m *SessionStatusMap) UnmarshalJSON(data []byte) error {
-	raw := gjson.ParseBytes(data)
-	if !raw.IsObject() {
-		return fmt.Errorf("SessionStatusMap: expected JSON object, got %s", raw.Type)
+// sessionStatusJSON contains the JSON metadata for the struct [SessionStatus]
+type sessionStatusJSON struct {
+	Type        apijson.Field
+	Attempt     apijson.Field
+	Message     apijson.Field
+	Action      apijson.Field
+	Next        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r sessionStatusJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SessionStatus) UnmarshalJSON(data []byte) (err error) {
+	*r = SessionStatus{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
 	}
-	*m = make(SessionStatusMap, len(raw.Map()))
-	var decodeErr error
-	raw.ForEach(func(key, value gjson.Result) bool {
-		var status SessionStatus
-		if err := apijson.UnmarshalRoot([]byte(value.Raw), &status); err != nil {
-			decodeErr = err
-			return false
-		}
-		(*m)[key.String()] = status
-		return true
-	})
-	return decodeErr
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [SessionStatusUnion] interface which you can cast to the
+// specific types for more type safety.
+//
+// Possible runtime types of the union are [SessionStatusIdle],
+// [SessionStatusRetry], [SessionStatusBusy].
+func (r SessionStatus) AsUnion() SessionStatusUnion {
+	return r.union
+}
+
+// Union satisfied by [SessionStatusIdle], [SessionStatusRetry] or
+// [SessionStatusBusy].
+type SessionStatusUnion interface {
+	implementsSessionStatus()
 }
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[SessionStatus](),
+		reflect.TypeFor[SessionStatusUnion](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
@@ -3909,6 +3977,26 @@ func init() {
 		},
 	)
 }
+
+type SessionStatusType string
+
+const (
+	SessionStatusTypeIdle  SessionStatusType = "idle"
+	SessionStatusTypeRetry SessionStatusType = "retry"
+	SessionStatusTypeBusy  SessionStatusType = "busy"
+)
+
+func (r SessionStatusType) IsKnown() bool {
+	switch r {
+	case SessionStatusTypeIdle, SessionStatusTypeRetry, SessionStatusTypeBusy:
+		return true
+	}
+	return false
+}
+
+// SessionStatusMap is a map of session IDs to their status, returned by
+// [SessionService.Status].
+type SessionStatusMap map[string]SessionStatus
 
 // SnapshotFileDiff represents a diff for a file in a snapshot
 type SnapshotFileDiff struct {

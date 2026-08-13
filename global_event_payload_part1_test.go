@@ -1,6 +1,7 @@
 package opencode_test
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -67,6 +68,23 @@ func eq[T comparable](t *testing.T, field string, got, want T) {
 	}
 }
 
+// rawJSONEq 比对 RawJSON() 保留的原始报文。testdata 为缩进格式，而 RawJSON() 会
+// 逐字节保留源文档切片，因此比对前统一压缩以消除排版差异。
+func rawJSONEq(t *testing.T, field, got, want string) {
+	t.Helper()
+
+	var gotBuf, wantBuf bytes.Buffer
+	if err := json.Compact(&gotBuf, []byte(got)); err != nil {
+		t.Fatalf("%s: compact got %q: %v", field, got, err)
+	}
+	if err := json.Compact(&wantBuf, []byte(want)); err != nil {
+		t.Fatalf("%s: compact want %q: %v", field, want, err)
+	}
+	if gotBuf.String() != wantBuf.String() {
+		t.Errorf("%s = %s, want %s", field, gotBuf.String(), wantBuf.String())
+	}
+}
+
 // fieldMeta 抽象 apijson 生成的 JSON 元数据字段，用于区分「显式零值」与「字段缺失」。
 type fieldMeta interface {
 	IsMissing() bool
@@ -99,6 +117,11 @@ const (
 	directorySync   = "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbd8-b6f9-73f2-8211-96a2184ccc67"
 	projectSync     = "68e92b396e0e4333aeed4a3df91e524b54d6a173"
 	messageAssistID = "msg_fcbc06b27001uNOhch8dPpRW0E"
+
+	// 本地（非容器）部署环境下采集的 session.status busy/idle 状态转换真实报文。
+	sessionLocal   = "ses_00a88490dffedbM7Kj6Wz4WeOi"
+	directoryLocal = "/Users/maiyuan/Code/go-project/maiyuan/meowgic-ai"
+	projectLocal   = "7e1921c820015f02f79e5bfe811386e8edcfd6fa"
 )
 
 // TestGlobalEventRealPayloadReasoningPart 覆盖 testdata/global_event_reasoning_part.json，
@@ -346,13 +369,92 @@ func TestGlobalEventRealPayloadSessionStatusIdle(t *testing.T) {
 	present(t, "properties.sessionID", ss.Properties.JSON.SessionID)
 	present(t, "properties.status", ss.Properties.JSON.Status)
 
-	idle := asVariant[opencode.SessionStatusIdle](t, "properties.status", ss.Properties.AsStatus())
-	eq(t, "properties.status.type", idle.Type, "idle")
-	present(t, "properties.status.type", idle.JSON.Type)
+	// SessionStatus 载体结构体：合并枚举 + 原始报文
+	eq(t, "properties.status.type", ss.Properties.Status.Type, opencode.SessionStatusTypeIdle)
+	if !ss.Properties.Status.Type.IsKnown() {
+		t.Errorf("properties.status.type %q is not known", ss.Properties.Status.Type)
+	}
+	present(t, "properties.status.type", ss.Properties.Status.JSON.Type)
+	rawJSONEq(t, "properties.status.raw", ss.Properties.Status.JSON.RawJSON(), `{"type":"idle"}`)
 
-	// 承载字段 Status 必须持有同一个 variant 实例
-	carried := asVariant[opencode.SessionStatusIdle](t, "properties.status(any)", ss.Properties.Status)
-	eq(t, "properties.status(any).type", carried.Type, "idle")
+	// idle variant 不携带 retry 专属字段
+	missing(t, "properties.status.attempt", ss.Properties.Status.JSON.Attempt)
+	missing(t, "properties.status.message", ss.Properties.Status.JSON.Message)
+	missing(t, "properties.status.action", ss.Properties.Status.JSON.Action)
+	missing(t, "properties.status.next", ss.Properties.Status.JSON.Next)
+
+	idle := asVariant[opencode.SessionStatusIdle](t, "properties.status", ss.Properties.Status.AsUnion())
+	eq(t, "properties.status.type", idle.Type, opencode.SessionStatusIdleTypeIdle)
+	present(t, "properties.status.type", idle.JSON.Type)
+}
+
+// TestGlobalEventRealPayloadSessionStatusBusy 覆盖
+// testdata/global_event_session_status_busy.json，逐字段校验 session.status
+// 的 busy variant（本地部署环境采集的真实报文）。
+func TestGlobalEventRealPayloadSessionStatusBusy(t *testing.T) {
+	ev := decodeGlobalEvent(t, "global_event_session_status_busy.json")
+
+	eq(t, "directory", ev.Directory, directoryLocal)
+	eq(t, "project", ev.Project, projectLocal)
+
+	ss := asUnion[opencode.EventListResponseEventSessionStatus](t, ev)
+	eq(t, "payload.id", ss.ID, "evt_ff578e105001VFQHCtTTTpB5Dv")
+	eq(t, "payload.type", ss.Type, opencode.EventListResponseEventSessionStatusTypeSessionStatus)
+	if !ss.Type.IsKnown() {
+		t.Errorf("payload.type %q is not known", ss.Type)
+	}
+	eq(t, "properties.sessionID", ss.Properties.SessionID, sessionLocal)
+	present(t, "properties.sessionID", ss.Properties.JSON.SessionID)
+	present(t, "properties.status", ss.Properties.JSON.Status)
+
+	// SessionStatus 载体结构体：合并枚举 + 原始报文
+	eq(t, "properties.status.type", ss.Properties.Status.Type, opencode.SessionStatusTypeBusy)
+	if !ss.Properties.Status.Type.IsKnown() {
+		t.Errorf("properties.status.type %q is not known", ss.Properties.Status.Type)
+	}
+	present(t, "properties.status.type", ss.Properties.Status.JSON.Type)
+	rawJSONEq(t, "properties.status.raw", ss.Properties.Status.JSON.RawJSON(), `{"type":"busy"}`)
+
+	// busy variant 不携带 retry 专属字段
+	missing(t, "properties.status.attempt", ss.Properties.Status.JSON.Attempt)
+	missing(t, "properties.status.message", ss.Properties.Status.JSON.Message)
+	missing(t, "properties.status.action", ss.Properties.Status.JSON.Action)
+	missing(t, "properties.status.next", ss.Properties.Status.JSON.Next)
+
+	busy := asVariant[opencode.SessionStatusBusy](t, "properties.status", ss.Properties.Status.AsUnion())
+	eq(t, "properties.status.type", busy.Type, opencode.SessionStatusBusyTypeBusy)
+	present(t, "properties.status.type", busy.JSON.Type)
+}
+
+// TestGlobalEventRealPayloadSessionStatusIdleLocal 覆盖
+// testdata/global_event_session_status_idle_local.json，校验同一会话在 busy 之后
+// 回到 idle 的真实报文（与 busy 用例构成一次完整状态转换）。
+func TestGlobalEventRealPayloadSessionStatusIdleLocal(t *testing.T) {
+	ev := decodeGlobalEvent(t, "global_event_session_status_idle_local.json")
+
+	eq(t, "directory", ev.Directory, directoryLocal)
+	eq(t, "project", ev.Project, projectLocal)
+
+	ss := asUnion[opencode.EventListResponseEventSessionStatus](t, ev)
+	eq(t, "payload.id", ss.ID, "evt_ff578e6930017xOOazETWIrHMc")
+	eq(t, "payload.type", ss.Type, opencode.EventListResponseEventSessionStatusTypeSessionStatus)
+	if !ss.Type.IsKnown() {
+		t.Errorf("payload.type %q is not known", ss.Type)
+	}
+	eq(t, "properties.sessionID", ss.Properties.SessionID, sessionLocal)
+	present(t, "properties.sessionID", ss.Properties.JSON.SessionID)
+	present(t, "properties.status", ss.Properties.JSON.Status)
+
+	eq(t, "properties.status.type", ss.Properties.Status.Type, opencode.SessionStatusTypeIdle)
+	if !ss.Properties.Status.Type.IsKnown() {
+		t.Errorf("properties.status.type %q is not known", ss.Properties.Status.Type)
+	}
+	present(t, "properties.status.type", ss.Properties.Status.JSON.Type)
+	rawJSONEq(t, "properties.status.raw", ss.Properties.Status.JSON.RawJSON(), `{"type":"idle"}`)
+
+	idle := asVariant[opencode.SessionStatusIdle](t, "properties.status", ss.Properties.Status.AsUnion())
+	eq(t, "properties.status.type", idle.Type, opencode.SessionStatusIdleTypeIdle)
+	present(t, "properties.status.type", idle.JSON.Type)
 }
 
 // TestGlobalEventRealPayloadMessageUpdatedAssistant 覆盖

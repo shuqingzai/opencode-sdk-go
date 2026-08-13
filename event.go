@@ -2017,14 +2017,9 @@ func (r EventListResponseEventSessionStatus) implementsEventListResponse() {}
 func (r EventListResponseEventSessionStatus) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionStatusProperties struct {
-	SessionID string `json:"sessionID,required"`
-	// This field can have the runtime type of [SessionStatusIdle],
-	// [SessionStatusRetry] or [SessionStatusBusy].
-	Status any                                               `json:"status,required"`
-	JSON   eventListResponseEventSessionStatusPropertiesJSON `json:"-"`
-	// statusUnion holds the typed status payload after [UnmarshalJSON] routes
-	// the raw data through [SessionStatus] registered union variants.
-	statusUnion SessionStatus
+	SessionID string                                            `json:"sessionID,required"`
+	Status    SessionStatus                                     `json:"status,required"`
+	JSON      eventListResponseEventSessionStatusPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionStatusPropertiesJSON struct {
@@ -2034,39 +2029,12 @@ type eventListResponseEventSessionStatusPropertiesJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-// eventListResponseEventSessionStatusPropertiesShadow mirrors
-// [EventListResponseEventSessionStatusProperties] with the status field declared
-// as the registered [SessionStatus] union so apijson routes the nested status
-// object to its matching variant instead of decoding it into a generic map.
-type eventListResponseEventSessionStatusPropertiesShadow struct {
-	SessionID string                                            `json:"sessionID,required"`
-	Status    SessionStatus                                     `json:"status,required"`
-	JSON      eventListResponseEventSessionStatusPropertiesJSON `json:"-"`
-}
-
 func (r *EventListResponseEventSessionStatusProperties) UnmarshalJSON(data []byte) (err error) {
-	*r = EventListResponseEventSessionStatusProperties{}
-	var shadow eventListResponseEventSessionStatusPropertiesShadow
-	if err = apijson.UnmarshalRoot(data, &shadow); err != nil {
-		return err
-	}
-	r.SessionID = shadow.SessionID
-	r.Status = shadow.Status
-	r.JSON = shadow.JSON
-	r.statusUnion = shadow.Status
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r eventListResponseEventSessionStatusPropertiesJSON) RawJSON() string {
 	return r.raw
-}
-
-// AsStatus returns the status field as a typed [SessionStatus] union.
-//
-// Possible runtime types of the union are [SessionStatusIdle], [SessionStatusRetry]
-// or [SessionStatusBusy].
-func (r *EventListResponseEventSessionStatusProperties) AsStatus() SessionStatus {
-	return r.statusUnion
 }
 
 type EventListResponseEventSessionStatusType string

@@ -5804,14 +5804,9 @@ func (r V2EventSessionStatusType) IsKnown() bool {
 }
 
 type V2EventSessionStatusData struct {
-	SessionID string `json:"sessionID,required"`
-	// This field can have the runtime type of [SessionStatusIdle],
-	// [SessionStatusRetry] or [SessionStatusBusy].
-	Status any                          `json:"status,required"`
-	JSON   v2EventSessionStatusDataJSON `json:"-"`
-	// statusUnion holds the typed status payload after [UnmarshalJSON] routes
-	// the raw data through [SessionStatus] registered union variants.
-	statusUnion SessionStatus
+	SessionID string                       `json:"sessionID,required"`
+	Status    SessionStatus                `json:"status,required"`
+	JSON      v2EventSessionStatusDataJSON `json:"-"`
 }
 
 type v2EventSessionStatusDataJSON struct {
@@ -5821,39 +5816,12 @@ type v2EventSessionStatusDataJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-// v2EventSessionStatusDataShadow mirrors [V2EventSessionStatusData] with the
-// status field declared as the registered [SessionStatus] union so apijson
-// routes the nested status object to its matching variant instead of decoding
-// it into a generic map.
-type v2EventSessionStatusDataShadow struct {
-	SessionID string                       `json:"sessionID,required"`
-	Status    SessionStatus                `json:"status,required"`
-	JSON      v2EventSessionStatusDataJSON `json:"-"`
-}
-
 func (r *V2EventSessionStatusData) UnmarshalJSON(data []byte) (err error) {
-	*r = V2EventSessionStatusData{}
-	var shadow v2EventSessionStatusDataShadow
-	if err = apijson.UnmarshalRoot(data, &shadow); err != nil {
-		return err
-	}
-	r.SessionID = shadow.SessionID
-	r.Status = shadow.Status
-	r.JSON = shadow.JSON
-	r.statusUnion = shadow.Status
-	return nil
+	return apijson.UnmarshalRoot(data, r)
 }
 
 func (r v2EventSessionStatusDataJSON) RawJSON() string {
 	return r.raw
-}
-
-// AsStatus returns the status field as a typed [SessionStatus] union.
-//
-// Possible runtime types of the union are [SessionStatusIdle], [SessionStatusRetry]
-// or [SessionStatusBusy].
-func (r *V2EventSessionStatusData) AsStatus() SessionStatus {
-	return r.statusUnion
 }
 
 type V2EventSessionUpdated struct {

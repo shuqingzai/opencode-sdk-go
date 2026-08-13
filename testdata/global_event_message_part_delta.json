@@ -1,0 +1,15 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbb8-07d6-77ab-9015-3106c9364285",
+  "project": "b8d349ffbdefd0afab2f1f1ca03829cd7662268f",
+  "payload": {
+    "id": "evt_fcbbb4bc4003DF4SfJVuoUQqJ1",
+    "type": "message.part.delta",
+    "properties": {
+      "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+      "messageID": "msg_fcbbb3f480017UYG1SH55nPzS8",
+      "partID": "prt_fcbbb48de001AJse4fWcQNSdb4",
+      "field": "text",
+      "delta": "供"
+    }
+  }
+}

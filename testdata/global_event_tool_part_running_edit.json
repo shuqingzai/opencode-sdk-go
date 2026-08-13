@@ -1,0 +1,31 @@
+{
+  "directory": "/workspace/019dd6d3-9e26-7cb9-99d1-1b9fe82a57b3/019fcbb8-07d6-77ab-9015-3106c9364285",
+  "project": "b8d349ffbdefd0afab2f1f1ca03829cd7662268f",
+  "payload": {
+    "id": "evt_fcbbfd879001uMa2hBgrOMvZqB",
+    "type": "message.part.updated",
+    "properties": {
+      "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+      "part": {
+        "type": "tool",
+        "tool": "edit",
+        "callID": "call-16bd3101-9ce2-44ea-936b-160841721a0e-33",
+        "state": {
+          "status": "running",
+          "input": {
+            "filePath": "custom-photo-upload.tsx",
+            "oldString": "import { useCallback, useId, useRef, useState } from 'react';",
+            "newString": "import { useCallback, useId, useRef, useState, type DragEvent } from 'react';"
+          },
+          "time": {
+            "start": 1785829775481
+          }
+        },
+        "id": "prt_fcbbfd853001k0fG4geBV7a8Va",
+        "sessionID": "ses_03447e959ffec5bK9xrcGkt38N",
+        "messageID": "msg_fcbbfbbf2001sWFh4dT6ZnT5t1"
+      },
+      "time": 1785829775481
+    }
+  }
+}

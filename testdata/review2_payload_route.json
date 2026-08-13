@@ -1,0 +1,1452 @@
+[
+ {
+  "name": "(inline: type=models-dev.refreshed)",
+  "goType": "EventListResponseEventModelsDevRefreshed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "models-dev.refreshed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=integration.updated)",
+  "goType": "EventListResponseEventIntegrationUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "integration.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=integration.connection.updated)",
+  "goType": "EventListResponseEventIntegrationConnectionUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "integration.connection.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=catalog.updated)",
+  "goType": "EventListResponseEventCatalogUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "catalog.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.created)",
+  "goType": "EventListResponseEventSessionCreated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.created",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.updated)",
+  "goType": "EventListResponseEventSessionUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.deleted)",
+  "goType": "EventListResponseEventSessionDeleted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.deleted",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=message.updated)",
+  "goType": "EventListResponseEventMessageUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "message.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=message.removed)",
+  "goType": "EventListResponseEventMessageRemoved",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "message.removed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=message.part.updated)",
+  "goType": "EventListResponseEventMessagePartUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "message.part.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=message.part.removed)",
+  "goType": "EventListResponseEventMessagePartRemoved",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "message.part.removed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.agent.switched)",
+  "goType": "EventListResponseEventSessionNextAgentSwitched",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.agent.switched",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.model.switched)",
+  "goType": "EventListResponseEventSessionNextModelSwitched",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.model.switched",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.moved)",
+  "goType": "EventListResponseEventSessionNextMoved",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.moved",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.prompted)",
+  "goType": "EventListResponseEventSessionNextPrompted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.prompted",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.prompt.admitted)",
+  "goType": "EventListResponseEventSessionNextPromptAdmitted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.prompt.admitted",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.context.updated)",
+  "goType": "EventListResponseEventSessionNextContextUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.context.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.synthetic)",
+  "goType": "EventListResponseEventSessionNextSynthetic",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.synthetic",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.shell.started)",
+  "goType": "EventListResponseEventSessionNextShellStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.shell.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.shell.ended)",
+  "goType": "EventListResponseEventSessionNextShellEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.shell.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.step.started)",
+  "goType": "EventListResponseEventSessionNextStepStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.step.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.step.ended)",
+  "goType": "EventListResponseEventSessionNextStepEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.step.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.step.failed)",
+  "goType": "EventListResponseEventSessionNextStepFailed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.step.failed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.text.started)",
+  "goType": "EventListResponseEventSessionNextTextStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.text.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.text.delta)",
+  "goType": "EventListResponseEventSessionNextTextDelta",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.text.delta",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.text.ended)",
+  "goType": "EventListResponseEventSessionNextTextEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.text.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.reasoning.started)",
+  "goType": "EventListResponseEventSessionNextReasoningStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.reasoning.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.reasoning.delta)",
+  "goType": "EventListResponseEventSessionNextReasoningDelta",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.reasoning.delta",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.reasoning.ended)",
+  "goType": "EventListResponseEventSessionNextReasoningEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.reasoning.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.input.started)",
+  "goType": "EventListResponseEventSessionNextToolInputStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.input.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.input.delta)",
+  "goType": "EventListResponseEventSessionNextToolInputDelta",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.input.delta",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.input.ended)",
+  "goType": "EventListResponseEventSessionNextToolInputEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.input.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.called)",
+  "goType": "EventListResponseEventSessionNextToolCalled",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.called",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.progress)",
+  "goType": "EventListResponseEventSessionNextToolProgress",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.progress",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.success)",
+  "goType": "EventListResponseEventSessionNextToolSuccess",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.success",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.tool.failed)",
+  "goType": "EventListResponseEventSessionNextToolFailed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.tool.failed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.retried)",
+  "goType": "EventListResponseEventSessionNextRetried",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.retried",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.compaction.started)",
+  "goType": "EventListResponseEventSessionNextCompactionStarted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.compaction.started",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.compaction.delta)",
+  "goType": "EventListResponseEventSessionNextCompactionDelta",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.compaction.delta",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.compaction.ended)",
+  "goType": "EventListResponseEventSessionNextCompactionEnded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.compaction.ended",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.revert.staged)",
+  "goType": "EventListResponseEventSessionNextRevertStaged",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.revert.staged",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.revert.cleared)",
+  "goType": "EventListResponseEventSessionNextRevertCleared",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.revert.cleared",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.next.revert.committed)",
+  "goType": "EventListResponseEventSessionNextRevertCommitted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.next.revert.committed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=message.part.delta)",
+  "goType": "EventListResponseEventMessagePartDelta",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "message.part.delta",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.diff)",
+  "goType": "EventListResponseEventSessionDiff",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.diff",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.error)",
+  "goType": "EventListResponseEventSessionError",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.error",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=installation.updated)",
+  "goType": "EventListResponseEventInstallationUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "installation.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=installation.update-available)",
+  "goType": "EventListResponseEventInstallationUpdateAvailable",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "installation.update-available",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=file.edited)",
+  "goType": "EventListResponseEventFileEdited",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "file.edited",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=reference.updated)",
+  "goType": "EventListResponseEventReferenceUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "reference.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=permission.v2.asked)",
+  "goType": "EventListResponseEventPermissionV2Asked",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "permission.v2.asked",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=permission.v2.replied)",
+  "goType": "EventListResponseEventPermissionV2Replied",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "permission.v2.replied",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=plugin.added)",
+  "goType": "EventListResponseEventPluginAdded",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "plugin.added",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=project.directories.updated)",
+  "goType": "EventListResponseEventProjectDirectoriesUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "project.directories.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=file.watcher.updated)",
+  "goType": "EventListResponseEventFileWatcherUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "file.watcher.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=pty.created)",
+  "goType": "EventListResponseEventPtyCreated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "pty.created",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=pty.updated)",
+  "goType": "EventListResponseEventPtyUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "pty.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=pty.exited)",
+  "goType": "EventListResponseEventPtyExited",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "pty.exited",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=pty.deleted)",
+  "goType": "EventListResponseEventPtyDeleted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "pty.deleted",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.v2.asked)",
+  "goType": "EventListResponseEventQuestionV2Asked",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.v2.asked",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.v2.replied)",
+  "goType": "EventListResponseEventQuestionV2Replied",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.v2.replied",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.v2.rejected)",
+  "goType": "EventListResponseEventQuestionV2Rejected",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.v2.rejected",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=todo.updated)",
+  "goType": "EventListResponseEventTodoUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "todo.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=lsp.updated)",
+  "goType": "EventListResponseEventLspUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "lsp.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=permission.asked)",
+  "goType": "EventListResponseEventPermissionAsked",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "permission.asked",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=permission.replied)",
+  "goType": "EventListResponseEventPermissionReplied",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "permission.replied",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=tui.prompt.append)",
+  "goType": "EventListResponseEventTuiPromptAppend",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "tui.prompt.append",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=tui.command.execute)",
+  "goType": "EventListResponseEventTuiCommandExecute",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "tui.command.execute",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=tui.toast.show)",
+  "goType": "EventListResponseEventTuiToastShow",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "tui.toast.show",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=tui.session.select)",
+  "goType": "EventListResponseEventTuiSessionSelect",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "tui.session.select",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=mcp.tools.changed)",
+  "goType": "EventListResponseEventMcpToolsChanged",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "mcp.tools.changed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=mcp.browser.open.failed)",
+  "goType": "EventListResponseEventMcpBrowserOpenFailed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "mcp.browser.open.failed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=command.executed)",
+  "goType": "EventListResponseEventCommandExecuted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "command.executed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=project.updated)",
+  "goType": "EventListResponseEventProjectUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "project.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.status)",
+  "goType": "EventListResponseEventSessionStatus",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.status",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.idle)",
+  "goType": "EventListResponseEventSessionIdle",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.idle",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.asked)",
+  "goType": "EventListResponseEventQuestionAsked",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.asked",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.replied)",
+  "goType": "EventListResponseEventQuestionReplied",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.replied",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=question.rejected)",
+  "goType": "EventListResponseEventQuestionRejected",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "question.rejected",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=session.compacted)",
+  "goType": "EventListResponseEventSessionCompacted",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "session.compacted",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=vcs.branch.updated)",
+  "goType": "EventListResponseEventVcsBranchUpdated",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "vcs.branch.updated",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=workspace.ready)",
+  "goType": "EventListResponseEventWorkspaceReady",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "workspace.ready",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=workspace.failed)",
+  "goType": "EventListResponseEventWorkspaceFailed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "workspace.failed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=workspace.status)",
+  "goType": "EventListResponseEventWorkspaceStatus",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "workspace.status",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=worktree.ready)",
+  "goType": "EventListResponseEventWorktreeReady",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "worktree.ready",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=worktree.failed)",
+  "goType": "EventListResponseEventWorktreeFailed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "worktree.failed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=server.connected)",
+  "goType": "EventListResponseEventServerConnected",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "server.connected",
+   "properties": {}
+  }
+ },
+ {
+  "name": "(inline: type=global.disposed)",
+  "goType": "EventListResponseEventGlobalDisposed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "global.disposed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "EventServerInstanceDisposed",
+  "goType": "EventListResponseEventServerInstanceDisposed",
+  "innerGoType": "",
+  "payload": {
+   "id": "evt_x",
+   "type": "server.instance.disposed",
+   "properties": {}
+  }
+ },
+ {
+  "name": "SyncEventSessionCreated",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionCreated",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.created.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionUpdated",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionUpdated",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.updated.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionDeleted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionDeleted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.deleted.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventMessageUpdated",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventMessageUpdated",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "message.updated.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventMessageRemoved",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventMessageRemoved",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "message.removed.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventMessagePartUpdated",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventMessagePartUpdated",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "message.part.updated.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventMessagePartRemoved",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventMessagePartRemoved",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "message.part.removed.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextAgentSwitched",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextAgentSwitched",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.agent.switched.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextModelSwitched",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextModelSwitched",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.model.switched.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextMoved",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextMoved",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.moved.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextPrompted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextPrompted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.prompted.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextPromptAdmitted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextPromptAdmitted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.prompt.admitted.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextContextUpdated",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextContextUpdated",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.context.updated.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextSynthetic",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextSynthetic",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.synthetic.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextShellStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextShellStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.shell.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextShellEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextShellEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.shell.ended.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextStepStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextStepStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.step.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextStepEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextStepEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.step.ended.2",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextStepFailed",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextStepFailed",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.step.failed.2",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextTextStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextTextStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.text.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextTextEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextTextEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.text.ended.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextReasoningStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextReasoningStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.reasoning.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextReasoningEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextReasoningEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.reasoning.ended.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolInputStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolInputStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.input.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolInputEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolInputEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.input.ended.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolCalled",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolCalled",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.called.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolProgress",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolProgress",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.progress.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolSuccess",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolSuccess",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.success.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextToolFailed",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextToolFailed",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.tool.failed.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextRetried",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextRetried",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.retried.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextCompactionStarted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextCompactionStarted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.compaction.started.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextCompactionEnded",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextCompactionEnded",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.compaction.ended.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextRevertStaged",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextRevertStaged",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.revert.staged.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextRevertCleared",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextRevertCleared",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.revert.cleared.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ },
+ {
+  "name": "SyncEventSessionNextRevertCommitted",
+  "goType": "SyncEventResponse",
+  "innerGoType": "SyncEventSessionNextRevertCommitted",
+  "payload": {
+   "type": "sync",
+   "id": "evt_w",
+   "syncEvent": {
+    "type": "session.next.revert.committed.1",
+    "id": "evt_y",
+    "seq": 1,
+    "aggregateID": "agg",
+    "data": {}
+   }
+  }
+ }
+]
