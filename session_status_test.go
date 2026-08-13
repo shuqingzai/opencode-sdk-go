@@ -291,3 +291,214 @@ func TestSessionStatusMapUnmarshalEmpty(t *testing.T) {
 		t.Errorf("expected empty map, got %d entries", len(m))
 	}
 }
+
+// =============================================================================
+// omitzero 契约
+//
+// OpenAPI 中 `SessionStatus.retry.action` 与 `action.link` 均为可选字段。本 SDK
+// 的 Response 一律用值类型（全仓库 Response 指针数为 0），可选性由两部分共同承担：
+//   - 解码侧：xxxJSON 元数据的 IsMissing()/IsNull()/Raw() 分辨「缺失」与「显式零值」；
+//   - 编码侧：json tag 的 `omitzero`（Go 1.24+ stdlib 支持；Response 结构体未定义
+//     MarshalJSON，json.Marshal 走 stdlib）保证字段缺失时不产出 `"action":{}`。
+//
+// 两者合起来等价于指针语义，且不会破坏 apijson.Port（指针会因
+// `reflect.Set: value of type X is not assignable to type *X` 而 panic）。
+// 以下测试锁死该契约，防止 `omitzero` 被误当作无效 tag 删除。
+// =============================================================================
+
+// marshalKeys 序列化后返回顶层键集合，避免依赖字段顺序。
+func marshalKeys(t *testing.T, v any) map[string]json.RawMessage {
+	t.Helper()
+
+	data, err := json.Marshal(v)
+	if err != nil {
+		t.Fatalf("json.Marshal failed: %v", err)
+	}
+	var keys map[string]json.RawMessage
+	if err := json.Unmarshal(data, &keys); err != nil {
+		t.Fatalf("re-decode marshaled output %s failed: %v", data, err)
+	}
+	return keys
+}
+
+func hasKey(keys map[string]json.RawMessage, name string) bool {
+	_, ok := keys[name]
+	return ok
+}
+
+// TestSessionStatusOmitzeroAction 锁定：可选 action 缺失时不得出现在序列化结果中，
+// 存在时必须原样保留 —— 载体结构体与 retry variant 行为一致。
+func TestSessionStatusOmitzeroAction(t *testing.T) {
+	t.Parallel()
+
+	const (
+		withoutAction = `{"type":"retry","attempt":1,"message":"m","next":2}`
+		withAction    = `{"type":"retry","attempt":1,"message":"m","next":2,` +
+			`"action":{"reason":"r","provider":"p","title":"t","message":"m2","label":"l"}}`
+	)
+
+	t.Run("carrier/absent", func(t *testing.T) {
+		var s SessionStatus
+		if err := json.Unmarshal([]byte(withoutAction), &s); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		keys := marshalKeys(t, s)
+		if hasKey(keys, "action") {
+			t.Errorf(`action 缺失时序列化结果不应含 "action" 键，实际含 %s`, keys["action"])
+		}
+		// 其余必填字段必须仍在
+		for _, k := range []string{"type", "attempt", "message", "next"} {
+			if !hasKey(keys, k) {
+				t.Errorf("required key %q missing from marshaled output", k)
+			}
+		}
+	})
+
+	t.Run("carrier/present", func(t *testing.T) {
+		var s SessionStatus
+		if err := json.Unmarshal([]byte(withAction), &s); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		keys := marshalKeys(t, s)
+		if !hasKey(keys, "action") {
+			t.Fatal(`action 有值时序列化结果必须含 "action" 键`)
+		}
+		var got SessionStatusRetryAction
+		if err := json.Unmarshal(keys["action"], &got); err != nil {
+			t.Fatalf("decode marshaled action failed: %v", err)
+		}
+		if got.Provider != "p" || got.Label != "l" {
+			t.Errorf("round-tripped action = %+v, want Provider=p Label=l", got)
+		}
+	})
+
+	t.Run("variant/absent", func(t *testing.T) {
+		var v SessionStatusRetry
+		if err := json.Unmarshal([]byte(withoutAction), &v); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		if keys := marshalKeys(t, v); hasKey(keys, "action") {
+			t.Errorf(`variant: action 缺失时不应含 "action" 键，实际含 %s`, keys["action"])
+		}
+	})
+
+	t.Run("variant/present", func(t *testing.T) {
+		var v SessionStatusRetry
+		if err := json.Unmarshal([]byte(withAction), &v); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		if keys := marshalKeys(t, v); !hasKey(keys, "action") {
+			t.Error(`variant: action 有值时必须含 "action" 键`)
+		}
+	})
+}
+
+// TestSessionStatusOmitzeroActionExplicitEmpty 锁定往返保真度：服务端显式下发了
+// 一个字段全为空串的 action 时，它是「存在」而非「缺失」，序列化必须保留该键。
+// 这是值类型 + omitzero 相对裸值类型的关键差异，也是指针方案的唯一卖点。
+func TestSessionStatusOmitzeroActionExplicitEmpty(t *testing.T) {
+	t.Parallel()
+
+	const explicitEmpty = `{"type":"retry","attempt":1,"message":"m","next":2,` +
+		`"action":{"reason":"","provider":"","title":"","message":"","label":""}}`
+
+	var s SessionStatus
+	if err := json.Unmarshal([]byte(explicitEmpty), &s); err != nil {
+		t.Fatalf("decode failed: %v", err)
+	}
+
+	// 解码侧：元数据必须把「显式下发的全零 action」判为存在
+	if s.JSON.Action.IsMissing() {
+		t.Error("显式下发的 action 不应被判为 missing")
+	}
+	// 编码侧：必须保留该键，否则往返丢失「服务端确实发了 action」这一事实
+	if keys := marshalKeys(t, s); !hasKey(keys, "action") {
+		t.Error(`显式下发的全零 action 必须保留 "action" 键，否则往返丢失信息`)
+	}
+}
+
+// TestSessionStatusOmitzeroLink 锁定嵌套可选字段 action.link 的同一契约。
+func TestSessionStatusOmitzeroLink(t *testing.T) {
+	t.Parallel()
+
+	const base = `{"reason":"r","provider":"p","title":"t","message":"m","label":"l"`
+
+	t.Run("absent", func(t *testing.T) {
+		var a SessionStatusRetryAction
+		if err := json.Unmarshal([]byte(base+`}`), &a); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		if !a.JSON.Link.IsMissing() {
+			t.Error("link 未下发时 JSON.Link 应为 missing")
+		}
+		if keys := marshalKeys(t, a); hasKey(keys, "link") {
+			t.Errorf(`link 缺失时不应含 "link" 键，实际含 %s`, keys["link"])
+		}
+	})
+
+	t.Run("present", func(t *testing.T) {
+		var a SessionStatusRetryAction
+		if err := json.Unmarshal([]byte(base+`,"link":"https://example.com/billing"}`), &a); err != nil {
+			t.Fatalf("decode failed: %v", err)
+		}
+		keys := marshalKeys(t, a)
+		if !hasKey(keys, "link") {
+			t.Fatal(`link 有值时必须含 "link" 键`)
+		}
+		if string(keys["link"]) != `"https://example.com/billing"` {
+			t.Errorf("link = %s, want %q", keys["link"], "https://example.com/billing")
+		}
+	})
+}
+
+// TestSessionStatusOptionalPresenceContract 锁定「不用指针也能分辨可选字段状态」这一
+// 架构前提：缺失 / 显式 null / 显式零值三态必须互相可分辨。
+func TestSessionStatusOptionalPresenceContract(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name          string
+		raw           string
+		wantMissing   bool
+		wantNull      bool
+		wantMarshaled bool
+	}{
+		{
+			name:          "absent",
+			raw:           `{"type":"retry","attempt":1,"message":"m","next":2}`,
+			wantMissing:   true,
+			wantMarshaled: false,
+		},
+		{
+			name:          "explicit-null",
+			raw:           `{"type":"retry","attempt":1,"message":"m","next":2,"action":null}`,
+			wantNull:      true,
+			wantMarshaled: false,
+		},
+		{
+			name: "explicit-value",
+			raw: `{"type":"retry","attempt":1,"message":"m","next":2,` +
+				`"action":{"reason":"r","provider":"p","title":"t","message":"m2","label":"l"}}`,
+			wantMarshaled: true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var s SessionStatus
+			if err := json.Unmarshal([]byte(tc.raw), &s); err != nil {
+				t.Fatalf("decode failed: %v", err)
+			}
+			if got := s.JSON.Action.IsMissing(); got != tc.wantMissing {
+				t.Errorf("JSON.Action.IsMissing() = %v, want %v (raw=%q)",
+					got, tc.wantMissing, s.JSON.Action.Raw())
+			}
+			if tc.wantNull && !s.JSON.Action.IsNull() {
+				t.Errorf("JSON.Action.IsNull() = false, want true (raw=%q)", s.JSON.Action.Raw())
+			}
+			if got := hasKey(marshalKeys(t, s), "action"); got != tc.wantMarshaled {
+				t.Errorf(`marshal 是否含 "action" = %v, want %v`, got, tc.wantMarshaled)
+			}
+		})
+	}
+}

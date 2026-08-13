@@ -680,21 +680,20 @@ func TestUserMessageFormatUnionDecoding(t *testing.T) {
 		if err := json.Unmarshal([]byte(baseMsg(`{"type":"text"}`)), &msg); err != nil {
 			t.Fatalf("Unmarshal: %v", err)
 		}
-		// runtime type must be OutputFormatText
-		ft, ok := msg.Format.(opencode.OutputFormatText)
+		// 载体合并枚举
+		if msg.Format.Type != opencode.OutputFormatTypeText {
+			t.Errorf("Format.Type: got %q, want %q", msg.Format.Type, opencode.OutputFormatTypeText)
+		}
+		if !msg.Format.Type.IsKnown() {
+			t.Errorf("Format.Type %q is not known", msg.Format.Type)
+		}
+		// AsUnion() must return the concrete variant
+		af, ok := msg.Format.AsUnion().(opencode.OutputFormatText)
 		if !ok {
-			t.Fatalf("Format: got %T, want opencode.OutputFormatText", msg.Format)
+			t.Fatalf("Format.AsUnion(): got %T, want opencode.OutputFormatText", msg.Format.AsUnion())
 		}
-		if ft.Type != "text" {
-			t.Errorf("Type: got %q, want %q", ft.Type, "text")
-		}
-		// AsFormat() must return the same typed value
-		af, ok2 := msg.AsFormat().(opencode.OutputFormatText)
-		if !ok2 {
-			t.Fatalf("AsFormat(): got %T, want opencode.OutputFormatText", msg.AsFormat())
-		}
-		if af.Type != "text" {
-			t.Errorf("AsFormat().Type: got %q, want %q", af.Type, "text")
+		if af.Type != opencode.OutputFormatTextTypeText {
+			t.Errorf("AsUnion().Type: got %q, want %q", af.Type, opencode.OutputFormatTextTypeText)
 		}
 	})
 
@@ -705,26 +704,29 @@ func TestUserMessageFormatUnionDecoding(t *testing.T) {
 		if err := json.Unmarshal([]byte(baseMsg(payload)), &msg); err != nil {
 			t.Fatalf("Unmarshal: %v", err)
 		}
-		fj, ok := msg.Format.(opencode.OutputFormatJsonSchema)
-		if !ok {
-			t.Fatalf("Format: got %T, want opencode.OutputFormatJsonSchema", msg.Format)
+		// 载体扁平字段必须由 apijson.Port 填充
+		if msg.Format.Type != opencode.OutputFormatTypeJsonSchema {
+			t.Errorf("Format.Type: got %q, want %q", msg.Format.Type, opencode.OutputFormatTypeJsonSchema)
 		}
-		if fj.Type != "json_schema" {
-			t.Errorf("Type: got %q, want %q", fj.Type, "json_schema")
+		if msg.Format.RetryCount != 3 {
+			t.Errorf("Format.RetryCount: got %d, want 3", msg.Format.RetryCount)
+		}
+		if _, ok := msg.Format.Schema["type"]; !ok {
+			t.Error("Format.Schema should contain 'type' key")
+		}
+		fj, ok := msg.Format.AsUnion().(opencode.OutputFormatJsonSchema)
+		if !ok {
+			t.Fatalf("Format.AsUnion(): got %T, want opencode.OutputFormatJsonSchema", msg.Format.AsUnion())
 		}
 		if fj.RetryCount != 3 {
-			t.Errorf("RetryCount: got %d, want 3", fj.RetryCount)
+			t.Errorf("AsUnion().RetryCount: got %d, want 3", fj.RetryCount)
 		}
 		if _, ok := fj.Schema["type"]; !ok {
-			t.Error("Schema should contain 'type' key")
-		}
-		// AsFormat() must return the same typed value
-		if _, ok2 := msg.AsFormat().(opencode.OutputFormatJsonSchema); !ok2 {
-			t.Fatalf("AsFormat(): got %T, want opencode.OutputFormatJsonSchema", msg.AsFormat())
+			t.Error("AsUnion().Schema should contain 'type' key")
 		}
 	})
 
-	t.Run("null format field leaves Format nil", func(t *testing.T) {
+	t.Run("null format field degrades to zero carrier", func(t *testing.T) {
 		t.Parallel()
 		raw := `{
 			"id": "msg_002",
@@ -739,15 +741,18 @@ func TestUserMessageFormatUnionDecoding(t *testing.T) {
 		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
 			t.Fatalf("Unmarshal: %v", err)
 		}
-		if msg.Format != nil {
-			t.Errorf("Format: got %T, want nil", msg.Format)
+		if msg.Format.AsUnion() != nil {
+			t.Errorf("Format.AsUnion(): got %T, want nil", msg.Format.AsUnion())
 		}
-		if msg.AsFormat() != nil {
-			t.Errorf("AsFormat(): got %T, want nil", msg.AsFormat())
+		if msg.Format.Type != "" {
+			t.Errorf("Format.Type: got %q, want empty", msg.Format.Type)
+		}
+		if !msg.JSON.Format.IsNull() {
+			t.Errorf("JSON.Format.IsNull() = false, want true (raw=%q)", msg.JSON.Format.Raw())
 		}
 	})
 
-	t.Run("missing format field leaves Format nil", func(t *testing.T) {
+	t.Run("missing format field degrades to zero carrier", func(t *testing.T) {
 		t.Parallel()
 		raw := `{
 			"id": "msg_003",
@@ -761,12 +766,15 @@ func TestUserMessageFormatUnionDecoding(t *testing.T) {
 		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
 			t.Fatalf("Unmarshal: %v", err)
 		}
-		if msg.Format != nil {
-			t.Errorf("Format: got %T, want nil", msg.Format)
+		if msg.Format.AsUnion() != nil {
+			t.Errorf("Format.AsUnion(): got %T, want nil", msg.Format.AsUnion())
+		}
+		if !msg.JSON.Format.IsMissing() {
+			t.Errorf("JSON.Format.IsMissing() = false, want true")
 		}
 	})
 
-	t.Run("other required fields unaffected by custom UnmarshalJSON", func(t *testing.T) {
+	t.Run("other required fields unaffected by carrier decode", func(t *testing.T) {
 		t.Parallel()
 		var msg opencode.UserMessage
 		if err := json.Unmarshal([]byte(baseMsg(`{"type":"text"}`)), &msg); err != nil {
