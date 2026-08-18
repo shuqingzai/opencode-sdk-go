@@ -576,70 +576,184 @@ func TestReview2SSEBareScalarWholeEventVaries(t *testing.T) {
 }
 
 // =============================================================================
-// 🔴 Q2 独立复核发现项 2：ssestream.go 对"完全没有 data: 字段"的事件
-// （例如纯 `event: ping\n\n` 心跳/keep-alive，或 `data:` 存在但内容为空）
-// 会产出 Data=""（长度 0），随后 json.Unmarshal([]byte(""), &T) 必定报
-// "unexpected end of JSON input"——这会经 ssestream.Stream.Next() 杀死
-// 整条 SSE 流，且三条链路（GlobalEvent / EventListResponse / V2Event）
-// 无一例外。
+// SSE keep-alive 容错（已修复项的回归护栏）
 //
-// 根因在 packages/ssestream/ssestream.go 的 eventStreamDecoder.Next()：
-// 空 data 场景下仍然无条件 dispatch 一个 Event{Data: []byte{}}（或仅一个
-// "\n"），没有像 comment 行（"": 前缀）那样被跳过。这不是 event.go /
-// v2event.go / event_global_types.go 的问题（三条链路的 union 路由代码对
-// 空字节没有特殊分支可加，因为 json.Unmarshal 在到达它们的 UnmarshalJSON
-// 之前就已经失败），修复点在 ssestream.go 本身，不在本轮 Q2 任务清单内的
-// 文件，因此本测试只锁定当前行为（记录 + 三链路一致性），不提交对
-// ssestream.go 的修改；detail 见最终复核报告「需主控介入」章节。
+// 背景：eventStreamDecoder.Next() 此前对"data 缓冲为空"的块仍无条件 dispatch
+// 一个 Event{Data: []byte{}}（或仅含一个 "\n"），随后 json.Unmarshal 必报
+// "unexpected end of JSON input"，经 ssestream.Stream.Next() 杀死整条 SSE 流，
+// 三条链路无一例外。
+//
+// 这不是理论隐患：opencode v2 服务端（packages/server/src/handlers/event.ts）
+// 每 15 秒向 /api/event 推送裸注释帧 ": heartbeat\n\n"，因此
+// V2EventService.ListStreaming 在任何空闲 15 秒后必然断流。
+//
+// 修复已落在 packages/ssestream/ssestream.go 的 eventStreamDecoder.Next()：
+// data 缓冲经 bytes.TrimSpace 后为空时跳过该块并重置累加器，与
+//   - W3C SSE 规范 dispatch 算法（data 缓冲为空则 return，不派发）
+//   - JS SDK(v2) 生成器（`if (data !== "") { yield JSON.parse(data) }`）
+// 完全一致。以下测试锁定修复后的行为。
 // =============================================================================
 
-// TestReview2SSEEmptyDataLineKillsAllThreeChains 锁定当前行为：完全缺失
-// data: 字段的事件会让三条链路的 stream.Err() 都非 nil，且它之后的合法事件
-// 全部丢失。若未来修复了 ssestream.go，这个测试需要同步更新为
-// "err == nil && 后续事件不丢"。
-func TestReview2SSEEmptyDataLineKillsAllThreeChains(t *testing.T) {
+// TestReview2SSEKeepAliveDoesNotKillStream 验证携带空 data 缓冲的 SSE 帧
+// （keep-alive / 心跳）被静默跳过，既不报错也不丢失其后的合法事件。
+//
+// 这是真实场景而非理论加固：opencode v2 服务端
+// （packages/server/src/handlers/event.ts）每 15 秒向 /api/event 推送一个
+// 裸注释帧 ": heartbeat\n\n"。注释行本身会被解码器当作 comment 跳过，但其后
+// 的空行此前会派发一个 Data 为空的事件，交给 Stream.Next 的 json.Unmarshal
+// 后必然失败并永久终止整条流——即 V2EventService.ListStreaming 在任何空闲
+// 15 秒后必然断流。
+//
+// W3C SSE 规范的 dispatch 算法要求 data 缓冲为空时直接 return（不派发）；
+// JS SDK(v2) 生成器同样以 `if (data !== "")` 跳过。三条链路行为必须一致。
+func TestReview2SSEKeepAliveDoesNotKillStream(t *testing.T) {
 	t.Parallel()
-	const heartbeat = "event: ping\n\n"
 
-	t.Run("EventListResponse.properties", func(t *testing.T) {
-		n, err := sseCountEventListResponse(
-			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","properties":{"file":"/a.go"}}`)),
-			heartbeat,
-			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","properties":{"file":"/b.go"}}`)),
-		)
-		if err == nil {
-			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+	keepAlives := []struct {
+		name  string
+		frame string
+	}{
+		// opencode v2 服务端的真实心跳形态（handlers/event.ts:37）
+		{"bare comment heartbeat", ": heartbeat\n\n"},
+		// 只有 event: 字段、完全没有 data: 行
+		{"event without data line", "event: ping\n\n"},
+		// data: 行存在但内容为空（解码器会留下一个裸 "\n"）
+		{"empty data line", "data:\n\n"},
+		// data: 行内容仅为空白
+		{"whitespace-only data line", "data:   \n\n"},
+	}
+
+	for _, ka := range keepAlives {
+		t.Run(ka.name, func(t *testing.T) {
+			t.Run("EventListResponse.properties", func(t *testing.T) {
+				n, err := sseCountEventListResponse(
+					sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","properties":{"file":"/a.go"}}`)),
+					ka.frame,
+					sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","properties":{"file":"/b.go"}}`)),
+				)
+				if err != nil {
+					t.Errorf("stream.Err() = %v, want nil (keep-alive frame must not kill the stream)", err)
+				}
+				if n != 2 {
+					t.Errorf("got %d events, want 2 (no event may be dropped around a keep-alive frame)", n)
+				}
+			})
+
+			t.Run("GlobalEvent.payload", func(t *testing.T) {
+				n, err := sseCountGlobalEvent(
+					sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}}`)),
+					ka.frame,
+					sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}}`)),
+				)
+				if err != nil {
+					t.Errorf("stream.Err() = %v, want nil (keep-alive frame must not kill the stream)", err)
+				}
+				if n != 2 {
+					t.Errorf("got %d events, want 2 (no event may be dropped around a keep-alive frame)", n)
+				}
+			})
+
+			t.Run("V2Event.data", func(t *testing.T) {
+				n, err := sseCountV2Event(
+					sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`)),
+					ka.frame,
+					sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}`)),
+				)
+				if err != nil {
+					t.Errorf("stream.Err() = %v, want nil (keep-alive frame must not kill the stream)", err)
+				}
+				if n != 2 {
+					t.Errorf("got %d events, want 2 (no event may be dropped around a keep-alive frame)", n)
+				}
+			})
+		})
+	}
+}
+
+// TestReview2SSEKeepAliveLeadingAndConsecutive 验证心跳出现在流最前、以及连续
+// 多个心跳时，后续事件依然完整送达（覆盖 data/event 累加器在跳过时被正确重置）。
+func TestReview2SSEKeepAliveLeadingAndConsecutive(t *testing.T) {
+	t.Parallel()
+	const hb = ": heartbeat\n\n"
+	evt := sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`))
+
+	t.Run("leading keep-alive", func(t *testing.T) {
+		n, err := sseCountV2Event(hb, evt)
+		if err != nil {
+			t.Errorf("stream.Err() = %v, want nil", err)
 		}
 		if n != 1 {
-			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+			t.Errorf("got %d events, want 1", n)
 		}
 	})
 
-	t.Run("GlobalEvent.payload", func(t *testing.T) {
+	t.Run("consecutive keep-alives", func(t *testing.T) {
+		n, err := sseCountV2Event(hb, hb, hb, evt)
+		if err != nil {
+			t.Errorf("stream.Err() = %v, want nil", err)
+		}
+		if n != 1 {
+			t.Errorf("got %d events, want 1", n)
+		}
+	})
+
+	// 一条只有心跳、从未推送真实事件的流必须干净结束：0 个事件且 Err() 为 nil，
+	// 调用方不应看到任何错误。
+	t.Run("keep-alive only stream ends cleanly", func(t *testing.T) {
+		n, err := sseCountV2Event(hb, hb)
+		if err != nil {
+			t.Errorf("stream.Err() = %v, want nil (a heartbeat-only stream must end cleanly)", err)
+		}
+		if n != 0 {
+			t.Errorf("got %d events, want 0", n)
+		}
+	})
+}
+
+// TestReview2SSENonEmptyPayloadsStillDispatched 是跳过逻辑的反向护栏：确认
+// 修复只跳过"空 data 缓冲"，不会误伤任何携带真实内容的帧。
+func TestReview2SSENonEmptyPayloadsStillDispatched(t *testing.T) {
+	t.Parallel()
+
+	// "null" 是合法 JSON 文档（非空 data 缓冲），绝不能被跳过逻辑吞掉。
+	// GlobalEvent 的 gjson 路径取值对非 object 根节点静默降级（见
+	// TestReview2SSEBareScalarWholeEventVaries），因此它能正向证明该帧确实
+	// 被派发并计数。
+	t.Run("data: null is dispatched on GlobalEvent chain", func(t *testing.T) {
 		n, err := sseCountGlobalEvent(
+			"data: null\n\n",
 			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}}`)),
-			heartbeat,
-			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}}`)),
 		)
-		if err == nil {
-			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+		if err != nil {
+			t.Errorf("stream.Err() = %v, want nil", err)
 		}
-		if n != 1 {
-			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+		if n != 2 {
+			t.Errorf("got %d events, want 2 (`null` is a valid JSON document and must not be skipped)", n)
 		}
 	})
 
-	t.Run("V2Event.data", func(t *testing.T) {
+	// V2Event 顶层是 Union carrier，对裸标量返回 "was not able to coerce type
+	// as union"（既有行为，见 TestReview2SSEBareScalarWholeEventVaries）。这里
+	// 断言它确实抵达了 json.Unmarshal —— 若被空缓冲跳过逻辑误吞，err 会是 nil。
+	t.Run("data: null reaches Unmarshal on V2Event chain", func(t *testing.T) {
+		_, err := sseCountV2Event("data: null\n\n")
+		if err == nil {
+			t.Error("stream.Err() = nil — `null` appears to have been swallowed by the empty-buffer skip; only empty or whitespace-only buffers may be skipped")
+		}
+	})
+
+	// 真正的畸形 JSON 仍然必须报错——跳过逻辑不得把真实错误一并吞掉。
+	t.Run("malformed JSON still surfaces an error", func(t *testing.T) {
 		n, err := sseCountV2Event(
 			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`)),
-			heartbeat,
+			"data: {bad\n\n",
 			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}`)),
 		)
 		if err == nil {
-			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+			t.Error("stream.Err() = nil, want a JSON error (genuinely malformed payloads must not be silently skipped)")
 		}
 		if n != 1 {
-			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+			t.Errorf("got %d events before the error, want 1", n)
 		}
 	})
 }

@@ -67,6 +67,17 @@ func (s *eventStreamDecoder) Next() bool {
 
 		// Dispatch event on an empty line
 		if len(txt) == 0 {
+			// Per the SSE specification, a block whose data buffer is empty must
+			// not be dispatched — comment-only keep-alive frames such as
+			// ": heartbeat\n\n" carry no event. Dispatching them would hand an
+			// empty (or whitespace-only) buffer to json.Unmarshal in
+			// Stream.Next, which fails with "unexpected end of JSON input" and
+			// permanently terminates the whole stream.
+			if len(bytes.TrimSpace(data.Bytes())) == 0 {
+				event = ""
+				data.Reset()
+				continue
+			}
 			s.evt = Event{
 				Type: event,
 				Data: data.Bytes(),
