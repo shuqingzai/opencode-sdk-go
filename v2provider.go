@@ -111,7 +111,7 @@ type V2ProviderInfo struct {
 	IntegrationID string             `json:"integrationID"`
 	Name          string             `json:"name,required"`
 	Disabled      bool               `json:"disabled"`
-	Api           V2ProviderInfoApi  `json:"api,required"`
+	API           V2ProviderInfoAPI  `json:"api,required"`
 	Request       ProviderRequest    `json:"request,required"`
 	JSON          v2ProviderInfoJSON `json:"-"`
 }
@@ -122,7 +122,7 @@ type v2ProviderInfoJSON struct {
 	IntegrationID apijson.Field
 	Name          apijson.Field
 	Disabled      apijson.Field
-	Api           apijson.Field
+	API           apijson.Field
 	Request       apijson.Field
 	raw           string
 	ExtraFields   map[string]apijson.Field
@@ -138,28 +138,28 @@ func (r v2ProviderInfoJSON) RawJSON() string {
 
 // AsAPIUnion returns the api field as a typed union.
 //
-// Deprecated: use [V2ProviderInfo.Api.AsUnion] instead.
-func (r *V2ProviderInfo) AsAPIUnion() V2ProviderInfoApiUnion {
-	return r.Api.AsUnion()
+// Deprecated: use [V2ProviderInfo.API.AsUnion] instead.
+func (r *V2ProviderInfo) AsAPIUnion() V2ProviderInfoAPIUnion {
+	return r.API.AsUnion()
 }
 
-// V2ProviderInfoApi is the union bearer for the api field of [V2ProviderInfo].
+// V2ProviderInfoAPI is the union bearer for the api field of [V2ProviderInfo].
 // It holds the decoded API configuration and provides typed access via [AsUnion].
 //
-// The runtime union variant can be one of [V2ProviderInfoApiAisdk] or
-// [V2ProviderInfoApiNative]; use [AsUnion] to obtain the concrete type.
-type V2ProviderInfoApi struct {
-	Type    V2ProviderInfoApiType `json:"type,required"`
+// The runtime union variant can be one of [V2ProviderInfoAPIAisdk] or
+// [V2ProviderInfoAPINative]; use [AsUnion] to obtain the concrete type.
+type V2ProviderInfoAPI struct {
+	Type    V2ProviderInfoAPIType `json:"type,required"`
 	Package string                `json:"package"`
 	URL     string                `json:"url"`
 	// This field can have the runtime type of [map[string]any].
 	Settings map[string]any        `json:"settings"`
-	JSON     v2ProviderInfoApiJSON `json:"-"`
-	union    V2ProviderInfoApiUnion
+	JSON     v2ProviderInfoAPIJSON `json:"-"`
+	union    V2ProviderInfoAPIUnion
 }
 
-// v2ProviderInfoApiJSON contains the JSON metadata for the struct [V2ProviderInfoApi]
-type v2ProviderInfoApiJSON struct {
+// v2ProviderInfoAPIJSON contains the JSON metadata for the struct [V2ProviderInfoAPI]
+type v2ProviderInfoAPIJSON struct {
 	Type        apijson.Field
 	Package     apijson.Field
 	URL         apijson.Field
@@ -168,12 +168,12 @@ type v2ProviderInfoApiJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r v2ProviderInfoApiJSON) RawJSON() string {
+func (r v2ProviderInfoAPIJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r *V2ProviderInfoApi) UnmarshalJSON(data []byte) (err error) {
-	*r = V2ProviderInfoApi{}
+func (r *V2ProviderInfoAPI) UnmarshalJSON(data []byte) (err error) {
+	*r = V2ProviderInfoAPI{}
 	err = apijson.UnmarshalRoot(data, &r.union)
 	if err != nil {
 		return err
@@ -181,48 +181,63 @@ func (r *V2ProviderInfoApi) UnmarshalJSON(data []byte) (err error) {
 	return apijson.Port(r.union, &r)
 }
 
-// AsUnion returns a [V2ProviderInfoApiUnion] interface which you can cast to the
+// AsUnion returns a [V2ProviderInfoAPIUnion] interface which you can cast to the
 // specific types for more type safety.
 //
-// Possible runtime types of the union are [V2ProviderInfoApiAisdk],
-// [V2ProviderInfoApiNative].
-func (r V2ProviderInfoApi) AsUnion() V2ProviderInfoApiUnion {
+// Possible runtime types of the union are [V2ProviderInfoAPIAisdk],
+// [V2ProviderInfoAPINative].
+func (r V2ProviderInfoAPI) AsUnion() V2ProviderInfoAPIUnion {
 	return r.union
 }
 
-// V2ProviderInfoApiType is the discriminator shared by every
-// [V2ProviderInfoApiUnion] variant.
-type V2ProviderInfoApiType string
+// Deprecated: use [V2ProviderInfoAPI] instead.
+type V2ProviderInfoApi = V2ProviderInfoAPI
+
+// V2ProviderInfoAPIType is the discriminator shared by every
+// [V2ProviderInfoAPIUnion] variant.
+type V2ProviderInfoAPIType string
 
 const (
-	V2ProviderInfoApiTypeAisdk  V2ProviderInfoApiType = "aisdk"
-	V2ProviderInfoApiTypeNative V2ProviderInfoApiType = "native"
+	V2ProviderInfoAPITypeAisdk  V2ProviderInfoAPIType = "aisdk"
+	V2ProviderInfoAPITypeNative V2ProviderInfoAPIType = "native"
 )
 
-func (r V2ProviderInfoApiType) IsKnown() bool {
+// Deprecated: use [V2ProviderInfoAPIType] instead.
+type V2ProviderInfoApiType = V2ProviderInfoAPIType
+
+// Deprecated: use [V2ProviderInfoAPITypeAisdk] instead.
+const V2ProviderInfoApiTypeAisdk = V2ProviderInfoAPITypeAisdk
+
+// Deprecated: use [V2ProviderInfoAPITypeNative] instead.
+const V2ProviderInfoApiTypeNative = V2ProviderInfoAPITypeNative
+
+func (r V2ProviderInfoAPIType) IsKnown() bool {
 	switch r {
-	case V2ProviderInfoApiTypeAisdk, V2ProviderInfoApiTypeNative:
+	case V2ProviderInfoAPITypeAisdk, V2ProviderInfoAPITypeNative:
 		return true
 	}
 	return false
 }
 
-// V2ProviderInfoApiUnion represents the api configuration of a provider.
-// Possible runtime types are [V2ProviderInfoApiAisdk], [V2ProviderInfoApiNative].
-type V2ProviderInfoApiUnion interface {
-	implementsV2ProviderInfoApiUnion()
+// V2ProviderInfoAPIUnion represents the api configuration of a provider.
+// Possible runtime types are [V2ProviderInfoAPIAisdk], [V2ProviderInfoAPINative].
+type V2ProviderInfoAPIUnion interface {
+	implementsV2ProviderInfoAPIUnion()
 }
 
-type V2ProviderInfoApiAisdk struct {
-	Type    V2ProviderInfoApiAisdkType `json:"type,required"`
+// Deprecated: use [V2ProviderInfoAPIUnion] instead.
+type V2ProviderInfoApiUnion = V2ProviderInfoAPIUnion
+
+type V2ProviderInfoAPIAisdk struct {
+	Type    V2ProviderInfoAPIAisdkType `json:"type,required"`
 	Package string                     `json:"package,required"`
 	URL     string                     `json:"url"`
 	// This field can have the runtime type of [map[string]any].
 	Settings map[string]any             `json:"settings"`
-	JSON     v2ProviderInfoApiAisdkJSON `json:"-"`
+	JSON     v2ProviderInfoAPIAisdkJSON `json:"-"`
 }
 
-type v2ProviderInfoApiAisdkJSON struct {
+type v2ProviderInfoAPIAisdkJSON struct {
 	Type        apijson.Field
 	Package     apijson.Field
 	URL         apijson.Field
@@ -231,25 +246,28 @@ type v2ProviderInfoApiAisdkJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *V2ProviderInfoApiAisdk) UnmarshalJSON(data []byte) (err error) {
+func (r *V2ProviderInfoAPIAisdk) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r v2ProviderInfoApiAisdkJSON) RawJSON() string {
+func (r v2ProviderInfoAPIAisdkJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r V2ProviderInfoApiAisdk) implementsV2ProviderInfoApiUnion() {}
+func (r V2ProviderInfoAPIAisdk) implementsV2ProviderInfoAPIUnion() {}
 
-type V2ProviderInfoApiNative struct {
-	Type V2ProviderInfoApiNativeType `json:"type,required"`
+// Deprecated: use [V2ProviderInfoAPIAisdk] instead.
+type V2ProviderInfoApiAisdk = V2ProviderInfoAPIAisdk
+
+type V2ProviderInfoAPINative struct {
+	Type V2ProviderInfoAPINativeType `json:"type,required"`
 	URL  string                      `json:"url"`
 	// This field can have the runtime type of [map[string]any].
 	Settings map[string]any              `json:"settings,required"`
-	JSON     v2ProviderInfoApiNativeJSON `json:"-"`
+	JSON     v2ProviderInfoAPINativeJSON `json:"-"`
 }
 
-type v2ProviderInfoApiNativeJSON struct {
+type v2ProviderInfoAPINativeJSON struct {
 	Type        apijson.Field
 	URL         apijson.Field
 	Settings    apijson.Field
@@ -257,39 +275,54 @@ type v2ProviderInfoApiNativeJSON struct {
 	ExtraFields map[string]apijson.Field
 }
 
-func (r *V2ProviderInfoApiNative) UnmarshalJSON(data []byte) (err error) {
+func (r *V2ProviderInfoAPINative) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r v2ProviderInfoApiNativeJSON) RawJSON() string {
+func (r v2ProviderInfoAPINativeJSON) RawJSON() string {
 	return r.raw
 }
 
-func (r V2ProviderInfoApiNative) implementsV2ProviderInfoApiUnion() {}
+func (r V2ProviderInfoAPINative) implementsV2ProviderInfoAPIUnion() {}
 
-type V2ProviderInfoApiAisdkType string
+// Deprecated: use [V2ProviderInfoAPINative] instead.
+type V2ProviderInfoApiNative = V2ProviderInfoAPINative
+
+type V2ProviderInfoAPIAisdkType string
 
 const (
-	V2ProviderInfoApiAisdkTypeAisdk V2ProviderInfoApiAisdkType = "aisdk"
+	V2ProviderInfoAPIAisdkTypeAisdk V2ProviderInfoAPIAisdkType = "aisdk"
 )
 
-func (r V2ProviderInfoApiAisdkType) IsKnown() bool {
+// Deprecated: use [V2ProviderInfoAPIAisdkType] instead.
+type V2ProviderInfoApiAisdkType = V2ProviderInfoAPIAisdkType
+
+// Deprecated: use [V2ProviderInfoAPIAisdkTypeAisdk] instead.
+const V2ProviderInfoApiAisdkTypeAisdk = V2ProviderInfoAPIAisdkTypeAisdk
+
+func (r V2ProviderInfoAPIAisdkType) IsKnown() bool {
 	switch r {
-	case V2ProviderInfoApiAisdkTypeAisdk:
+	case V2ProviderInfoAPIAisdkTypeAisdk:
 		return true
 	}
 	return false
 }
 
-type V2ProviderInfoApiNativeType string
+type V2ProviderInfoAPINativeType string
 
 const (
-	V2ProviderInfoApiNativeTypeNative V2ProviderInfoApiNativeType = "native"
+	V2ProviderInfoAPINativeTypeNative V2ProviderInfoAPINativeType = "native"
 )
 
-func (r V2ProviderInfoApiNativeType) IsKnown() bool {
+// Deprecated: use [V2ProviderInfoAPINativeType] instead.
+type V2ProviderInfoApiNativeType = V2ProviderInfoAPINativeType
+
+// Deprecated: use [V2ProviderInfoAPINativeTypeNative] instead.
+const V2ProviderInfoApiNativeTypeNative = V2ProviderInfoAPINativeTypeNative
+
+func (r V2ProviderInfoAPINativeType) IsKnown() bool {
 	switch r {
-	case V2ProviderInfoApiNativeTypeNative:
+	case V2ProviderInfoAPINativeTypeNative:
 		return true
 	}
 	return false
@@ -297,17 +330,17 @@ func (r V2ProviderInfoApiNativeType) IsKnown() bool {
 
 func init() {
 	apijson.RegisterUnion(
-		reflect.TypeFor[V2ProviderInfoApiUnion](),
+		reflect.TypeFor[V2ProviderInfoAPIUnion](),
 		"type",
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "aisdk",
-			Type:               reflect.TypeFor[V2ProviderInfoApiAisdk](),
+			Type:               reflect.TypeFor[V2ProviderInfoAPIAisdk](),
 		},
 		apijson.UnionVariant{
 			TypeFilter:         gjson.JSON,
 			DiscriminatorValue: "native",
-			Type:               reflect.TypeFor[V2ProviderInfoApiNative](),
+			Type:               reflect.TypeFor[V2ProviderInfoAPINative](),
 		},
 	)
 }

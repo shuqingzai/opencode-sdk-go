@@ -69,7 +69,7 @@ func (r *ExperimentalWorkspaceService) Remove(ctx context.Context, id string, qu
 }
 
 // Get workspace status
-func (r *ExperimentalWorkspaceService) Status(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceStatusItem, err error) {
+func (r *ExperimentalWorkspaceService) Status(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceEventConnectionStatus, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "experimental/workspace/status"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
@@ -174,13 +174,18 @@ func (r ExperimentalWorkspaceListParams) URLQuery() (v url.Values) {
 
 // ExperimentalWorkspaceNewParams contains the request parameters for creating a workspace.
 type ExperimentalWorkspaceNewParams struct {
-	Directory param.Field[string]              `query:"directory"`
-	Workspace param.Field[string]              `query:"workspace"`
-	Body      ExperimentalWorkspaceCreateInput `json:"-"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	// Body is optional per the OpenAPI requestBody (no `required` key); when set,
+	// type is required within the body.
+	Body param.Field[ExperimentalWorkspaceCreateInput] `json:"-"`
 }
 
 func (r ExperimentalWorkspaceNewParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [ExperimentalWorkspaceNewParams]'s query parameters as `url.Values`.

@@ -116,12 +116,17 @@ type WorktreeRemoveParams struct {
 	// query: routing context — which opencode instance to target (optional)
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
-	// Body contains the worktree path to remove (required, distinct from the query directory above)
-	Body WorktreeRemoveParamsBody `json:"-"`
+	// Body contains the worktree path to remove (optional per OpenAPI requestBody,
+	// distinct from the query directory above; when set, directory is required
+	// within the body).
+	Body param.Field[WorktreeRemoveParamsBody] `json:"-"`
 }
 
 func (r WorktreeRemoveParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [WorktreeRemoveParams]'s query parameters as `url.Values`.
@@ -147,12 +152,17 @@ type WorktreeResetParams struct {
 	// query: routing context — which opencode instance to target (optional)
 	Directory param.Field[string] `query:"directory"`
 	Workspace param.Field[string] `query:"workspace"`
-	// Body contains the worktree path to reset (required, distinct from the query directory above)
-	Body WorktreeResetParamsBody `json:"-"`
+	// Body contains the worktree path to reset (optional per OpenAPI requestBody,
+	// distinct from the query directory above; when set, directory is required
+	// within the body).
+	Body param.Field[WorktreeResetParamsBody] `json:"-"`
 }
 
 func (r WorktreeResetParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [WorktreeResetParams]'s query parameters as `url.Values`.

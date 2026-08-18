@@ -539,10 +539,10 @@ func (V2SessionMessageAssistant) implementsV2SessionMessageUnion()     {}
 func (V2SessionMessageCompaction) implementsV2SessionMessageUnion()    {}
 
 type V2SessionMessageAgentSwitched struct {
-	ID    string               `json:"id,required"`
-	Time  V2SessionMessageTime `json:"time,required"`
-	Type  string               `json:"type,required"`
-	Agent string               `json:"agent,required"`
+	ID    string                            `json:"id,required"`
+	Time  V2SessionMessageTime              `json:"time,required"`
+	Type  V2SessionMessageAgentSwitchedType `json:"type,required"`
+	Agent string                            `json:"agent,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                               `json:"metadata"`
 	JSON     v2SessionMessageAgentSwitchedJSON `json:"-"`
@@ -566,11 +566,25 @@ func (r v2SessionMessageAgentSwitchedJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageAgentSwitchedType string
+
+const (
+	V2SessionMessageAgentSwitchedTypeAgentSwitched V2SessionMessageAgentSwitchedType = "agent-switched"
+)
+
+func (r V2SessionMessageAgentSwitchedType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageAgentSwitchedTypeAgentSwitched:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageModelSwitched struct {
-	ID    string               `json:"id,required"`
-	Time  V2SessionMessageTime `json:"time,required"`
-	Type  string               `json:"type,required"`
-	Model ModelRef             `json:"model,required"`
+	ID    string                            `json:"id,required"`
+	Time  V2SessionMessageTime              `json:"time,required"`
+	Type  V2SessionMessageModelSwitchedType `json:"type,required"`
+	Model ModelRef                          `json:"model,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                               `json:"metadata"`
 	JSON     v2SessionMessageModelSwitchedJSON `json:"-"`
@@ -594,11 +608,25 @@ func (r v2SessionMessageModelSwitchedJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageModelSwitchedType string
+
+const (
+	V2SessionMessageModelSwitchedTypeModelSwitched V2SessionMessageModelSwitchedType = "model-switched"
+)
+
+func (r V2SessionMessageModelSwitchedType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageModelSwitchedTypeModelSwitched:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageUser struct {
 	ID     string                    `json:"id,required"`
 	Time   V2SessionMessageTime      `json:"time,required"`
 	Text   string                    `json:"text,required"`
-	Type   string                    `json:"type,required"`
+	Type   V2SessionMessageUserType  `json:"type,required"`
 	Files  []V2PromptFileAttachment  `json:"files"`
 	Agents []V2PromptAgentAttachment `json:"agents"`
 	// This field can have the runtime type of [map[string]any].
@@ -626,12 +654,26 @@ func (r v2SessionMessageUserJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageUserType string
+
+const (
+	V2SessionMessageUserTypeUser V2SessionMessageUserType = "user"
+)
+
+func (r V2SessionMessageUserType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageUserTypeUser:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageSynthetic struct {
-	ID        string               `json:"id,required"`
-	Time      V2SessionMessageTime `json:"time,required"`
-	SessionID string               `json:"sessionID,required"`
-	Text      string               `json:"text,required"`
-	Type      string               `json:"type,required"`
+	ID        string                        `json:"id,required"`
+	Time      V2SessionMessageTime          `json:"time,required"`
+	SessionID string                        `json:"sessionID,required"`
+	Text      string                        `json:"text,required"`
+	Type      V2SessionMessageSyntheticType `json:"type,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                           `json:"metadata"`
 	JSON     v2SessionMessageSyntheticJSON `json:"-"`
@@ -656,10 +698,24 @@ func (r v2SessionMessageSyntheticJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageSyntheticType string
+
+const (
+	V2SessionMessageSyntheticTypeSynthetic V2SessionMessageSyntheticType = "synthetic"
+)
+
+func (r V2SessionMessageSyntheticType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageSyntheticTypeSynthetic:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageShell struct {
 	ID      string                    `json:"id,required"`
 	Time    V2SessionMessageShellTime `json:"time,required"`
-	Type    string                    `json:"type,required"`
+	Type    V2SessionMessageShellType `json:"type,required"`
 	CallID  string                    `json:"callID,required"`
 	Command string                    `json:"command,required"`
 	Output  string                    `json:"output,required"`
@@ -688,10 +744,24 @@ func (r v2SessionMessageShellJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageShellType string
+
+const (
+	V2SessionMessageShellTypeShell V2SessionMessageShellType = "shell"
+)
+
+func (r V2SessionMessageShellType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageShellTypeShell:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageAssistant struct {
 	ID    string                        `json:"id,required"`
 	Time  V2SessionMessageAssistantTime `json:"time,required"`
-	Type  string                        `json:"type,required"`
+	Type  V2SessionMessageAssistantType `json:"type,required"`
 	Agent string                        `json:"agent,required"`
 	Model ModelRef                      `json:"model,required"`
 	// This field can have the runtime type of
@@ -734,10 +804,24 @@ func (r v2SessionMessageAssistantJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageAssistantType string
+
+const (
+	V2SessionMessageAssistantTypeAssistant V2SessionMessageAssistantType = "assistant"
+)
+
+func (r V2SessionMessageAssistantType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageAssistantTypeAssistant:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageCompaction struct {
 	ID      string                           `json:"id,required"`
 	Time    V2SessionMessageTime             `json:"time,required"`
-	Type    string                           `json:"type,required"`
+	Type    V2SessionMessageCompactionType   `json:"type,required"`
 	Reason  V2SessionMessageCompactionReason `json:"reason,required"`
 	Summary string                           `json:"summary,required"`
 	Recent  string                           `json:"recent,required"`
@@ -766,6 +850,20 @@ func (r v2SessionMessageCompactionJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageCompactionType string
+
+const (
+	V2SessionMessageCompactionTypeCompaction V2SessionMessageCompactionType = "compaction"
+)
+
+func (r V2SessionMessageCompactionType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageCompactionTypeCompaction:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageCompactionReason string
 
 const (
@@ -782,7 +880,7 @@ func (r V2SessionMessageCompactionReason) IsKnown() bool {
 }
 
 type SessionErrorUnknown struct {
-	Type    string                  `json:"type,required"`
+	Type    SessionErrorUnknownType `json:"type,required"`
 	Message string                  `json:"message,required"`
 	JSON    sessionErrorUnknownJSON `json:"-"`
 }
@@ -801,6 +899,20 @@ func (r *SessionErrorUnknown) UnmarshalJSON(data []byte) (err error) {
 
 func (r sessionErrorUnknownJSON) RawJSON() string {
 	return r.raw
+}
+
+type SessionErrorUnknownType string
+
+const (
+	SessionErrorUnknownTypeUnknown SessionErrorUnknownType = "unknown"
+)
+
+func (r SessionErrorUnknownType) IsKnown() bool {
+	switch r {
+	case SessionErrorUnknownTypeUnknown:
+		return true
+	}
+	return false
 }
 
 // Shared sub-types
@@ -1196,7 +1308,7 @@ func (r v2PromptSourceJSON) RawJSON() string {
 // ===== V2 Content Sub-Types =====
 
 type V2SessionMessageAssistantTextContent struct {
-	Type string                                   `json:"type,required"`
+	Type V2SessionMessageAssistantTextContentType `json:"type,required"`
 	ID   string                                   `json:"id,required"`
 	Text string                                   `json:"text,required"`
 	JSON v2SessionMessageAssistantTextContentJSON `json:"-"`
@@ -1218,8 +1330,22 @@ func (r v2SessionMessageAssistantTextContentJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageAssistantTextContentType string
+
+const (
+	V2SessionMessageAssistantTextContentTypeText V2SessionMessageAssistantTextContentType = "text"
+)
+
+func (r V2SessionMessageAssistantTextContentType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageAssistantTextContentTypeText:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageAssistantReasoningContent struct {
-	Type             string                                        `json:"type,required"`
+	Type             V2SessionMessageAssistantReasoningContentType `json:"type,required"`
 	ID               string                                        `json:"id,required"`
 	Text             string                                        `json:"text,required"`
 	ProviderMetadata map[string]any                                `json:"providerMetadata"`
@@ -1245,11 +1371,25 @@ func (r v2SessionMessageAssistantReasoningContentJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageAssistantReasoningContentType string
+
+const (
+	V2SessionMessageAssistantReasoningContentTypeReasoning V2SessionMessageAssistantReasoningContentType = "reasoning"
+)
+
+func (r V2SessionMessageAssistantReasoningContentType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageAssistantReasoningContentTypeReasoning:
+		return true
+	}
+	return false
+}
+
 type V2SessionMessageAssistantToolContent struct {
-	Type     string                       `json:"type,required"`
-	ID       string                       `json:"id,required"`
-	Name     string                       `json:"name,required"`
-	Provider V2SessionMessageToolProvider `json:"provider"`
+	Type     V2SessionMessageAssistantToolContentType `json:"type,required"`
+	ID       string                                   `json:"id,required"`
+	Name     string                                   `json:"name,required"`
+	Provider V2SessionMessageToolProvider             `json:"provider"`
 	// This field can have the runtime type of
 	// [V2SessionMessageToolStatePending], [V2SessionMessageToolStateRunning],
 	// [V2SessionMessageToolStateCompleted], [V2SessionMessageToolStateError].
@@ -1277,10 +1417,24 @@ func (r v2SessionMessageAssistantToolContentJSON) RawJSON() string {
 	return r.raw
 }
 
+type V2SessionMessageAssistantToolContentType string
+
+const (
+	V2SessionMessageAssistantToolContentTypeTool V2SessionMessageAssistantToolContentType = "tool"
+)
+
+func (r V2SessionMessageAssistantToolContentType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageAssistantToolContentTypeTool:
+		return true
+	}
+	return false
+}
+
 // ===== Tool Content Types (shared) =====
 
 type ToolTextContent struct {
-	Type string              `json:"type,required"`
+	Type ToolTextContentType `json:"type,required"`
 	Text string              `json:"text,required"`
 	JSON toolTextContentJSON `json:"-"`
 }
@@ -1300,8 +1454,31 @@ func (r toolTextContentJSON) RawJSON() string {
 	return r.raw
 }
 
+// ToolTextContentType is the single-value discriminator for [ToolTextContent].
+//
+// OpenAPI: ToolTextContent.type (enum ["text"]); JS SDK: ToolTextContent.type
+// (literal "text"). This is intentionally its own single-value enum rather
+// than a reuse of [LLMToolContentType] (which additionally allows "file" for
+// the merged [LLMToolContent] carrier) — matching the established pattern of
+// [AgentPartType]/[TextPartType]/[FilePartType] in session.go, where each
+// individual union variant gets its own single-value enum distinct from the
+// merged carrier's wider enum (e.g. [PartType]).
+type ToolTextContentType string
+
+const (
+	ToolTextContentTypeText ToolTextContentType = "text"
+)
+
+func (r ToolTextContentType) IsKnown() bool {
+	switch r {
+	case ToolTextContentTypeText:
+		return true
+	}
+	return false
+}
+
 type ToolFileContent struct {
-	Type string              `json:"type,required"`
+	Type ToolFileContentType `json:"type,required"`
 	URI  string              `json:"uri,required"`
 	Mime string              `json:"mime,required"`
 	Name string              `json:"name"`
@@ -1323,6 +1500,25 @@ func (r *ToolFileContent) UnmarshalJSON(data []byte) (err error) {
 
 func (r toolFileContentJSON) RawJSON() string {
 	return r.raw
+}
+
+// ToolFileContentType is the single-value discriminator for [ToolFileContent].
+//
+// OpenAPI: ToolFileContent.type (enum ["file"]); JS SDK: ToolFileContent.type
+// (literal "file"). See [ToolTextContentType] for why this is a dedicated
+// single-value enum rather than a reuse of [LLMToolContentType].
+type ToolFileContentType string
+
+const (
+	ToolFileContentTypeFile ToolFileContentType = "file"
+)
+
+func (r ToolFileContentType) IsKnown() bool {
+	switch r {
+	case ToolFileContentTypeFile:
+		return true
+	}
+	return false
 }
 
 func (r ToolTextContent) implementsLLMToolContentUnion() {}
@@ -1738,7 +1934,7 @@ type V2SessionDurableEventAgentSwitched struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                    `json:"metadata"`
-	Type     string                                 `json:"type,required"`
+	Type     V2EventSessionNextAgentSwitchedType    `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
 	Data     V2EventSessionNextAgentSwitchedData    `json:"data,required"`
@@ -1770,7 +1966,7 @@ type V2SessionDurableEventModelSwitched struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                    `json:"metadata"`
-	Type     string                                 `json:"type,required"`
+	Type     V2EventSessionNextModelSwitchedType    `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
 	Data     V2EventSessionNextModelSwitchedData    `json:"data,required"`
@@ -1802,7 +1998,7 @@ type V2SessionDurableEventMoved struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                            `json:"metadata"`
-	Type     string                         `json:"type,required"`
+	Type     V2EventSessionNextMovedType    `json:"type,required"`
 	Durable  V2EventDurable                 `json:"durable"`
 	Location LocationRef                    `json:"location"`
 	Data     V2EventSessionNextMovedData    `json:"data,required"`
@@ -1834,7 +2030,7 @@ type V2SessionDurableEventPrompted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                               `json:"metadata"`
-	Type     string                            `json:"type,required"`
+	Type     V2EventSessionNextPromptedType    `json:"type,required"`
 	Durable  V2EventDurable                    `json:"durable"`
 	Location LocationRef                       `json:"location"`
 	Data     V2EventSessionNextPromptedData    `json:"data,required"`
@@ -1866,7 +2062,7 @@ type V2SessionDurableEventPromptAdmitted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                     `json:"metadata"`
-	Type     string                                  `json:"type,required"`
+	Type     V2EventSessionNextPromptAdmittedType    `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
 	Data     V2EventSessionNextPromptAdmittedData    `json:"data,required"`
@@ -1898,7 +2094,7 @@ type V2SessionDurableEventContextUpdated struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                     `json:"metadata"`
-	Type     string                                  `json:"type,required"`
+	Type     V2EventSessionNextContextUpdatedType    `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
 	Data     V2EventSessionNextContextUpdatedData    `json:"data,required"`
@@ -1930,7 +2126,7 @@ type V2SessionDurableEventSynthetic struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                `json:"metadata"`
-	Type     string                             `json:"type,required"`
+	Type     V2EventSessionNextSyntheticType    `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
 	Data     V2EventSessionNextSyntheticData    `json:"data,required"`
@@ -1962,7 +2158,7 @@ type V2SessionDurableEventShellStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                   `json:"metadata"`
-	Type     string                                `json:"type,required"`
+	Type     V2EventSessionNextShellStartedType    `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
 	Data     V2EventSessionNextShellStartedData    `json:"data,required"`
@@ -1994,7 +2190,7 @@ type V2SessionDurableEventShellEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                 `json:"metadata"`
-	Type     string                              `json:"type,required"`
+	Type     V2EventSessionNextShellEndedType    `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
 	Data     V2EventSessionNextShellEndedData    `json:"data,required"`
@@ -2026,7 +2222,7 @@ type V2SessionDurableEventStepStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                  `json:"metadata"`
-	Type     string                               `json:"type,required"`
+	Type     V2EventSessionNextStepStartedType    `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
 	Data     V2EventSessionNextStepStartedData    `json:"data,required"`
@@ -2058,7 +2254,7 @@ type V2SessionDurableEventStepEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                `json:"metadata"`
-	Type     string                             `json:"type,required"`
+	Type     V2EventSessionNextStepEndedType    `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
 	Data     V2EventSessionNextStepEndedData    `json:"data,required"`
@@ -2090,7 +2286,7 @@ type V2SessionDurableEventStepFailed struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                 `json:"metadata"`
-	Type     string                              `json:"type,required"`
+	Type     V2EventSessionNextStepFailedType    `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
 	Data     V2EventSessionNextStepFailedData    `json:"data,required"`
@@ -2122,7 +2318,7 @@ type V2SessionDurableEventTextStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                  `json:"metadata"`
-	Type     string                               `json:"type,required"`
+	Type     V2EventSessionNextTextStartedType    `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
 	Data     V2EventSessionNextTextStartedData    `json:"data,required"`
@@ -2154,7 +2350,7 @@ type V2SessionDurableEventTextEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                `json:"metadata"`
-	Type     string                             `json:"type,required"`
+	Type     V2EventSessionNextTextEndedType    `json:"type,required"`
 	Durable  V2EventDurable                     `json:"durable"`
 	Location LocationRef                        `json:"location"`
 	Data     V2EventSessionNextTextEndedData    `json:"data,required"`
@@ -2186,7 +2382,7 @@ type V2SessionDurableEventToolInputStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                       `json:"metadata"`
-	Type     string                                    `json:"type,required"`
+	Type     V2EventSessionNextToolInputStartedType    `json:"type,required"`
 	Durable  V2EventDurable                            `json:"durable"`
 	Location LocationRef                               `json:"location"`
 	Data     V2EventSessionNextToolInputStartedData    `json:"data,required"`
@@ -2218,7 +2414,7 @@ type V2SessionDurableEventToolInputEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                     `json:"metadata"`
-	Type     string                                  `json:"type,required"`
+	Type     V2EventSessionNextToolInputEndedType    `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
 	Data     V2EventSessionNextToolInputEndedData    `json:"data,required"`
@@ -2250,7 +2446,7 @@ type V2SessionDurableEventToolCalled struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                 `json:"metadata"`
-	Type     string                              `json:"type,required"`
+	Type     V2EventSessionNextToolCalledType    `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
 	Data     V2EventSessionNextToolCalledData    `json:"data,required"`
@@ -2282,7 +2478,7 @@ type V2SessionDurableEventToolProgress struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                   `json:"metadata"`
-	Type     string                                `json:"type,required"`
+	Type     V2EventSessionNextToolProgressType    `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
 	Data     V2EventSessionNextToolProgressData    `json:"data,required"`
@@ -2314,7 +2510,7 @@ type V2SessionDurableEventToolSuccess struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                  `json:"metadata"`
-	Type     string                               `json:"type,required"`
+	Type     V2EventSessionNextToolSuccessType    `json:"type,required"`
 	Durable  V2EventDurable                       `json:"durable"`
 	Location LocationRef                          `json:"location"`
 	Data     V2EventSessionNextToolSuccessData    `json:"data,required"`
@@ -2346,7 +2542,7 @@ type V2SessionDurableEventToolFailed struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                 `json:"metadata"`
-	Type     string                              `json:"type,required"`
+	Type     V2EventSessionNextToolFailedType    `json:"type,required"`
 	Durable  V2EventDurable                      `json:"durable"`
 	Location LocationRef                         `json:"location"`
 	Data     V2EventSessionNextToolFailedData    `json:"data,required"`
@@ -2378,7 +2574,7 @@ type V2SessionDurableEventReasoningStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                       `json:"metadata"`
-	Type     string                                    `json:"type,required"`
+	Type     V2EventSessionNextReasoningStartedType    `json:"type,required"`
 	Durable  V2EventDurable                            `json:"durable"`
 	Location LocationRef                               `json:"location"`
 	Data     V2EventSessionNextReasoningStartedData    `json:"data,required"`
@@ -2410,7 +2606,7 @@ type V2SessionDurableEventReasoningEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                     `json:"metadata"`
-	Type     string                                  `json:"type,required"`
+	Type     V2EventSessionNextReasoningEndedType    `json:"type,required"`
 	Durable  V2EventDurable                          `json:"durable"`
 	Location LocationRef                             `json:"location"`
 	Data     V2EventSessionNextReasoningEndedData    `json:"data,required"`
@@ -2442,7 +2638,7 @@ type V2SessionDurableEventRetried struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                              `json:"metadata"`
-	Type     string                           `json:"type,required"`
+	Type     V2EventSessionNextRetriedType    `json:"type,required"`
 	Durable  V2EventDurable                   `json:"durable"`
 	Location LocationRef                      `json:"location"`
 	Data     V2EventSessionNextRetriedData    `json:"data,required"`
@@ -2474,7 +2670,7 @@ type V2SessionDurableEventCompactionStarted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                        `json:"metadata"`
-	Type     string                                     `json:"type,required"`
+	Type     V2EventSessionNextCompactionStartedType    `json:"type,required"`
 	Durable  V2EventDurable                             `json:"durable"`
 	Location LocationRef                                `json:"location"`
 	Data     V2EventSessionNextCompactionStartedData    `json:"data,required"`
@@ -2506,7 +2702,7 @@ type V2SessionDurableEventCompactionEnded struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                      `json:"metadata"`
-	Type     string                                   `json:"type,required"`
+	Type     V2EventSessionNextCompactionEndedType    `json:"type,required"`
 	Durable  V2EventDurable                           `json:"durable"`
 	Location LocationRef                              `json:"location"`
 	Data     V2EventSessionNextCompactionEndedData    `json:"data,required"`
@@ -2538,7 +2734,7 @@ type V2SessionDurableEventRevertStaged struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                   `json:"metadata"`
-	Type     string                                `json:"type,required"`
+	Type     V2EventSessionNextRevertStagedType    `json:"type,required"`
 	Durable  V2EventDurable                        `json:"durable"`
 	Location LocationRef                           `json:"location"`
 	Data     V2EventSessionNextRevertStagedData    `json:"data,required"`
@@ -2570,7 +2766,7 @@ type V2SessionDurableEventRevertCleared struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                    `json:"metadata"`
-	Type     string                                 `json:"type,required"`
+	Type     V2EventSessionNextRevertClearedType    `json:"type,required"`
 	Durable  V2EventDurable                         `json:"durable"`
 	Location LocationRef                            `json:"location"`
 	Data     V2EventSessionNextRevertClearedData    `json:"data,required"`
@@ -2602,7 +2798,7 @@ type V2SessionDurableEventRevertCommitted struct {
 	ID string `json:"id,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                                      `json:"metadata"`
-	Type     string                                   `json:"type,required"`
+	Type     V2EventSessionNextRevertCommittedType    `json:"type,required"`
 	Durable  V2EventDurable                           `json:"durable"`
 	Location LocationRef                              `json:"location"`
 	Data     V2EventSessionNextRevertCommittedData    `json:"data,required"`
@@ -3311,10 +3507,10 @@ func (r v2SessionHistoryResponseJSON) RawJSON() string {
 
 // V2SessionMessageSystem represents a system message in the V2 session.
 type V2SessionMessageSystem struct {
-	ID   string               `json:"id,required"`
-	Time V2SessionMessageTime `json:"time,required"`
-	Type string               `json:"type,required"`
-	Text string               `json:"text,required"`
+	ID   string                     `json:"id,required"`
+	Time V2SessionMessageTime       `json:"time,required"`
+	Type V2SessionMessageSystemType `json:"type,required"`
+	Text string                     `json:"text,required"`
 	// This field can have the runtime type of [map[string]any].
 	Metadata any                        `json:"metadata"`
 	JSON     v2SessionMessageSystemJSON `json:"-"`
@@ -3336,6 +3532,20 @@ func (r *V2SessionMessageSystem) UnmarshalJSON(data []byte) (err error) {
 
 func (r v2SessionMessageSystemJSON) RawJSON() string {
 	return r.raw
+}
+
+type V2SessionMessageSystemType string
+
+const (
+	V2SessionMessageSystemTypeSystem V2SessionMessageSystemType = "system"
+)
+
+func (r V2SessionMessageSystemType) IsKnown() bool {
+	switch r {
+	case V2SessionMessageSystemTypeSystem:
+		return true
+	}
+	return false
 }
 
 // ===== V2SessionActiveResponse =====

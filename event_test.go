@@ -617,4 +617,169 @@ func TestDeprecatedAliasTypeIdentity(t *testing.T) {
 	if reflect.TypeFor[EventListResponseEventPermissionV2AskedPropertiesSource]() != reflect.TypeFor[PermissionV2Source]() {
 		t.Fatalf("EventListResponseEventPermissionV2AskedPropertiesSource is not an alias of PermissionV2Source")
 	}
+	if reflect.TypeFor[EventListResponseEventSessionNextMovedPropertiesLocation]() != reflect.TypeFor[LocationRef]() {
+		t.Fatalf("EventListResponseEventSessionNextMovedPropertiesLocation is not an alias of LocationRef")
+	}
+	if reflect.TypeFor[EventListResponseEventSessionNextRevertStagedPropertiesRevert]() != reflect.TypeFor[RevertState]() {
+		t.Fatalf("EventListResponseEventSessionNextRevertStagedPropertiesRevert is not an alias of RevertState")
+	}
+}
+
+// =============================================================================
+// Task 4 (A1 阻塞项 1/高 2 修复回归): session.next.revert.staged 的 revert 字段与
+// session.next.moved 的 location 字段必须直接引用共享 RevertState/LocationRef，
+// 且 FileDiff.path 字段不得再被静默丢弃（此前 []VcsFileDiff 用 "file" key 承接
+// "path" 数据导致丢失，实测 Files[0].File==""）。
+// =============================================================================
+
+// TestEventListResponseSessionNextRevertStagedFilesPathRegression 是 A1 🔴 阻塞项
+// 1 的回归护栏：修复前 revert.files[0].path 会被静默丢弃
+// (EventListResponseEventSessionNextRevertStagedPropertiesRevert.Files 曾是
+// []VcsFileDiff，其 json key 是 "file" 而非 OpenAPI FileDiff 的 "path")。
+// 使用 OpenAPI 真实 wire 格式反序列化 EventListResponseEventSessionNextRevertStagedProperties
+// (对应 /event 链路)，断言 Files[0].Path 保留原始路径。
+func TestEventListResponseSessionNextRevertStagedFilesPathRegression(t *testing.T) {
+	t.Parallel()
+	raw := `{"timestamp":1700000000,"sessionID":"ses_1","revert":{"messageID":"msg_1","partID":"prt_1","snapshot":"snap_1","diff":"diff text","files":[{"path":"/a/b.txt","status":"added","additions":2,"deletions":0,"patch":"@@"}]}}`
+	var props EventListResponseEventSessionNextRevertStagedProperties
+	if err := json.Unmarshal([]byte(raw), &props); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if props.Revert.MessageID != "msg_1" {
+		t.Errorf("Revert.MessageID = %q, want msg_1", props.Revert.MessageID)
+	}
+	if len(props.Revert.Files) != 1 {
+		t.Fatalf("Revert.Files len = %d, want 1", len(props.Revert.Files))
+	}
+	// 🔴 回归护栏：修复前该字段为 ""（path 被静默丢弃）。
+	if got := props.Revert.Files[0].Path; got != "/a/b.txt" {
+		t.Errorf("Revert.Files[0].Path = %q, want \"/a/b.txt\" (pre-fix regression: silently dropped to \"\")", got)
+	}
+	if props.Revert.Files[0].Status != FileDiffStatusAdded {
+		t.Errorf("Revert.Files[0].Status = %q, want added", props.Revert.Files[0].Status)
+	}
+	if props.Revert.Files[0].Additions != 2 {
+		t.Errorf("Revert.Files[0].Additions = %d, want 2", props.Revert.Files[0].Additions)
+	}
+	if props.Revert.Files[0].JSON.Path.IsMissing() {
+		t.Error("Revert.Files[0].JSON.Path reported missing, want present")
+	}
+	// Revert 字段本身是共享 RevertState 的直接引用（非重复克隆类型）。
+	var _ RevertState = props.Revert
+}
+
+// TestEventListResponseSessionNextMovedLocationFields 是 A1 🟠 高 2 的回归护栏：
+// location 字段必须直接引用共享 LocationRef，Directory/WorkspaceID 正确解析。
+func TestEventListResponseSessionNextMovedLocationFields(t *testing.T) {
+	t.Parallel()
+	raw := `{"timestamp":1700000001,"sessionID":"ses_2","location":{"directory":"/repo/workspace","workspaceID":"wrk_1"},"subdirectory":"sub/dir"}`
+	var props EventListResponseEventSessionNextMovedProperties
+	if err := json.Unmarshal([]byte(raw), &props); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if props.Location.Directory != "/repo/workspace" {
+		t.Errorf("Location.Directory = %q, want /repo/workspace", props.Location.Directory)
+	}
+	if props.Location.WorkspaceID != "wrk_1" {
+		t.Errorf("Location.WorkspaceID = %q, want wrk_1", props.Location.WorkspaceID)
+	}
+	if props.Subdirectory != "sub/dir" {
+		t.Errorf("Subdirectory = %q, want sub/dir", props.Subdirectory)
+	}
+	// Location 字段本身是共享 LocationRef 的直接引用（非重复克隆类型）。
+	var _ LocationRef = props.Location
+}
+
+// TestEventListResponseSessionNextRevertStagedNoDuplicateFileDiffType 确认
+// event_global_types.go 不再重复定义 Files 字段类型（[]VcsFileDiff 的错配已被
+// 移除），Files 元素类型必须与共享 FileDiff 完全一致（reflect 恒等）。
+func TestEventListResponseSessionNextRevertStagedNoDuplicateFileDiffType(t *testing.T) {
+	t.Parallel()
+	var props EventListResponseEventSessionNextRevertStagedProperties
+	filesField := reflect.TypeOf(props.Revert.Files)
+	wantElem := reflect.TypeFor[FileDiff]()
+	if filesField.Elem() != wantElem {
+		t.Fatalf("Revert.Files element type = %s, want %s", filesField.Elem(), wantElem)
+	}
+}
+
+// =============================================================================
+// Q2 独立复核发现项 1（🔴）：todo.updated 的 todos[] 字段重复定义 Todo 且
+// 私造了 OpenAPI/JS SDK(v2) 均不存在的 "id" 字段。
+//
+// OpenAPI `EventTodoUpdated.properties.properties.todos.items` 是
+// `$ref: #/components/schemas/Todo`，且 `Todo` schema 只有
+// {content, status, priority} 三个字段（无 id，additionalProperties:false）；
+// JS SDK(v2) `types.gen.ts` 的 `Todo` 类型同样只有这三个字段。修复前 Go 侧
+// 造了一个本地类型 EventListResponseEventTodoUpdatedPropertiesTodo，凭空加了
+// 一个 `ID string json:"id,required"` 字段——服务端 wire 上从不会有这个 key，
+// 该字段永远是空字符串，属于无中生有的伪造字段（比 RevertState/LocationRef
+// 的“重复定义但字段一致”更严重：这里字段集合本身就与三源不符）。
+// 修复：改为直接引用 session.go 已有的共享 Todo 类型（type alias 保留旧名，
+// 遵循本轮 RevertState/LocationRef 同款 Deprecated 迁移模式）。
+// =============================================================================
+
+// TestEventListResponseTodoUpdatedReusesSharedTodoType 验证
+// EventListResponseEventTodoUpdatedPropertiesTodo 是共享 [Todo] 类型的真别名
+// （reflect.TypeFor 恒等），而不是重新造的本地类型。
+func TestEventListResponseTodoUpdatedReusesSharedTodoType(t *testing.T) {
+	t.Parallel()
+	if reflect.TypeFor[EventListResponseEventTodoUpdatedPropertiesTodo]() != reflect.TypeFor[Todo]() {
+		t.Fatalf("EventListResponseEventTodoUpdatedPropertiesTodo is not an alias of Todo")
+	}
+	var props EventListResponseEventTodoUpdatedProperties
+	todosField := reflect.TypeOf(props.Todos)
+	wantElem := reflect.TypeFor[Todo]()
+	if todosField.Elem() != wantElem {
+		t.Fatalf("Todos element type = %s, want %s", todosField.Elem(), wantElem)
+	}
+}
+
+// TestEventListResponseTodoUpdatedDeserialization 用真实 wire 格式
+// （content/status/priority，无 id）反序列化，断言三个字段都被正确解析且
+// JSON 元数据完整；同时确认没有任何 "id" 字段被 apijson 期待（多余的
+// "id" key 若出现在 wire 上会被静默放进 ExtraFields，而不是覆盖一个不存在
+// 于 OpenAPI/JS 的 struct 字段）。
+func TestEventListResponseTodoUpdatedDeserialization(t *testing.T) {
+	t.Parallel()
+	raw := `{"sessionID":"ses_1","todos":[{"content":"write tests","status":"in_progress","priority":"high"}]}`
+	var props EventListResponseEventTodoUpdatedProperties
+	if err := json.Unmarshal([]byte(raw), &props); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if props.SessionID != "ses_1" {
+		t.Errorf("SessionID = %q, want ses_1", props.SessionID)
+	}
+	if len(props.Todos) != 1 {
+		t.Fatalf("Todos len = %d, want 1", len(props.Todos))
+	}
+	got := props.Todos[0]
+	if got.Content != "write tests" || got.Status != "in_progress" || got.Priority != "high" {
+		t.Errorf("Todos[0] = %+v, want {write tests, in_progress, high}", got)
+	}
+	if got.JSON.Content.IsMissing() || got.JSON.Status.IsMissing() || got.JSON.Priority.IsMissing() {
+		t.Error("Todos[0].JSON metadata reports fields missing, want present")
+	}
+	if got.JSON.RawJSON() == "" {
+		t.Error("Todos[0].JSON.RawJSON() is empty, want original wire JSON preserved")
+	}
+}
+
+// TestEventListResponseTodoUpdatedExtraIDGoesToExtraFields 若服务端 wire 上
+// 出现一个多余的 "id" key（例如未来 API 扩展），修复后的共享 Todo 类型必须
+// 把它放进 ExtraFields（因为 Todo 没有导出的 ID 字段），而不是像修复前那样
+// 悄悄把 wire 上从来不存在的 "id" 映射成一个永远为空的字段。
+func TestEventListResponseTodoUpdatedExtraIDGoesToExtraFields(t *testing.T) {
+	t.Parallel()
+	raw := `{"sessionID":"ses_2","todos":[{"id":"todo_999","content":"c","status":"pending","priority":"low"}]}`
+	var props EventListResponseEventTodoUpdatedProperties
+	if err := json.Unmarshal([]byte(raw), &props); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if len(props.Todos) != 1 {
+		t.Fatalf("Todos len = %d, want 1", len(props.Todos))
+	}
+	if _, ok := props.Todos[0].JSON.ExtraFields["id"]; !ok {
+		t.Error(`Todos[0].JSON.ExtraFields["id"] missing, want the unknown "id" key captured there`)
+	}
 }

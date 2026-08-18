@@ -217,19 +217,19 @@ func TestV2ModelInfoApiBearerAisdk(t *testing.T) {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 
-	if info.Api.Type != opencode.V2ModelInfoApiTypeAisdk {
-		t.Errorf("Api.Type: got %q, want %q", info.Api.Type, opencode.V2ModelInfoApiTypeAisdk)
+	if info.API.Type != opencode.V2ModelInfoApiTypeAisdk {
+		t.Errorf("Api.Type: got %q, want %q", info.API.Type, opencode.V2ModelInfoApiTypeAisdk)
 	}
-	if info.Api.ID != "gpt-4-aisdk" {
-		t.Errorf("Api.ID: got %q, want %q", info.Api.ID, "gpt-4-aisdk")
+	if info.API.ID != "gpt-4-aisdk" {
+		t.Errorf("Api.ID: got %q, want %q", info.API.ID, "gpt-4-aisdk")
 	}
-	if info.Api.Package != "@ai-sdk/openai" {
-		t.Errorf("Api.Package: got %q, want %q", info.Api.Package, "@ai-sdk/openai")
+	if info.API.Package != "@ai-sdk/openai" {
+		t.Errorf("Api.Package: got %q, want %q", info.API.Package, "@ai-sdk/openai")
 	}
 
-	aisdk, ok := info.Api.AsUnion().(opencode.V2ModelInfoApiAisdk)
+	aisdk, ok := info.API.AsUnion().(opencode.V2ModelInfoApiAisdk)
 	if !ok {
-		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiAisdk", info.Api.AsUnion())
+		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiAisdk", info.API.AsUnion())
 	}
 	if aisdk.ID != "gpt-4-aisdk" || aisdk.Package != "@ai-sdk/openai" {
 		t.Errorf("aisdk variant: got ID=%q Package=%q, want ID=%q Package=%q", aisdk.ID, aisdk.Package, "gpt-4-aisdk", "@ai-sdk/openai")
@@ -249,19 +249,19 @@ func TestV2ModelInfoApiBearerNative(t *testing.T) {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 
-	if info.Api.Type != opencode.V2ModelInfoApiTypeNative {
-		t.Errorf("Api.Type: got %q, want %q", info.Api.Type, opencode.V2ModelInfoApiTypeNative)
+	if info.API.Type != opencode.V2ModelInfoApiTypeNative {
+		t.Errorf("Api.Type: got %q, want %q", info.API.Type, opencode.V2ModelInfoApiTypeNative)
 	}
-	if info.Api.ID != "gpt-4-native" {
-		t.Errorf("Api.ID: got %q, want %q", info.Api.ID, "gpt-4-native")
+	if info.API.ID != "gpt-4-native" {
+		t.Errorf("Api.ID: got %q, want %q", info.API.ID, "gpt-4-native")
 	}
-	if got := info.Api.Settings["apiKey"]; got != "sk-123" {
+	if got := info.API.Settings["apiKey"]; got != "sk-123" {
 		t.Errorf("Api.Settings[apiKey]: got %v, want %q", got, "sk-123")
 	}
 
-	native, ok := info.Api.AsUnion().(opencode.V2ModelInfoApiNative)
+	native, ok := info.API.AsUnion().(opencode.V2ModelInfoApiNative)
 	if !ok {
-		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiNative", info.Api.AsUnion())
+		t.Fatalf("Api.AsUnion() type=%T, want V2ModelInfoApiNative", info.API.AsUnion())
 	}
 	if got := native.Settings["baseURL"]; got != "https://api.openai.com/v1" {
 		t.Errorf("native.Settings[baseURL]: got %v, want %q", got, "https://api.openai.com/v1")
@@ -282,7 +282,7 @@ func TestV2ModelInfoApiRawJSON(t *testing.T) {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
 
-	got := info.Api.JSON.RawJSON()
+	got := info.API.JSON.RawJSON()
 	if got != apiJSON {
 		t.Errorf("Api.JSON.RawJSON() = %q, want %q", got, apiJSON)
 	}
@@ -330,8 +330,209 @@ func TestV2ModelInfoAsAPIUnionBackwardCompat(t *testing.T) {
 			if got := reflect.TypeOf(union); got != tc.wantType {
 				t.Errorf("AsAPIUnion() type=%v, want %v", got, tc.wantType)
 			}
-			if !reflect.DeepEqual(info.AsAPIUnion(), info.Api.AsUnion()) {
+			if !reflect.DeepEqual(info.AsAPIUnion(), info.API.AsUnion()) {
 				t.Error("AsAPIUnion() and Api.AsUnion() returned different unions")
+			}
+		})
+	}
+}
+
+// TestV2ModelInfoAPIUnionRouting verifies (using the post-rename [V2ModelInfoAPI]
+// symbols, see Phase 2 "Api"->"API" initialism rename) that [V2ModelInfoAPIUnion]
+// correctly routes an "aisdk" payload to [V2ModelInfoAPIAisdk] and a "native"
+// payload to [V2ModelInfoAPINative], with all scalar fields (ID/Type/Package/URL)
+// decoded correctly. ModelApi variants both carry "id" per OpenAPI (unlike
+// ProviderApi, see TestV2ProviderInfoAPIUnionRouting).
+func TestV2ModelInfoAPIUnionRouting(t *testing.T) {
+	t.Parallel()
+
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+
+	t.Run("aisdk", func(t *testing.T) {
+		t.Parallel()
+		raw := `{` + baseModel + `,"api":{"type":"aisdk","id":"gpt-4-aisdk","package":"@ai-sdk/openai","url":"https://ai-sdk.dev"}}`
+		var info opencode.V2ModelInfo
+		if err := json.Unmarshal([]byte(raw), &info); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		aisdk, ok := info.API.AsUnion().(opencode.V2ModelInfoAPIAisdk)
+		if !ok {
+			t.Fatalf("AsUnion() type=%T, want V2ModelInfoAPIAisdk", info.API.AsUnion())
+		}
+		if aisdk.ID != "gpt-4-aisdk" {
+			t.Errorf("ID: got %q, want %q", aisdk.ID, "gpt-4-aisdk")
+		}
+		if aisdk.Type != opencode.V2ModelInfoAPIAisdkTypeAisdk {
+			t.Errorf("Type: got %q, want %q", aisdk.Type, opencode.V2ModelInfoAPIAisdkTypeAisdk)
+		}
+		if aisdk.Package != "@ai-sdk/openai" {
+			t.Errorf("Package: got %q, want %q", aisdk.Package, "@ai-sdk/openai")
+		}
+		if aisdk.URL != "https://ai-sdk.dev" {
+			t.Errorf("URL: got %q, want %q", aisdk.URL, "https://ai-sdk.dev")
+		}
+	})
+
+	t.Run("native", func(t *testing.T) {
+		t.Parallel()
+		raw := `{` + baseModel + `,"api":{"type":"native","id":"gpt-4-native","url":"https://api.openai.com","settings":{"apiKey":"sk-123"}}}`
+		var info opencode.V2ModelInfo
+		if err := json.Unmarshal([]byte(raw), &info); err != nil {
+			t.Fatalf("json.Unmarshal: %v", err)
+		}
+		native, ok := info.API.AsUnion().(opencode.V2ModelInfoAPINative)
+		if !ok {
+			t.Fatalf("AsUnion() type=%T, want V2ModelInfoAPINative", info.API.AsUnion())
+		}
+		if native.ID != "gpt-4-native" {
+			t.Errorf("ID: got %q, want %q", native.ID, "gpt-4-native")
+		}
+		if native.Type != opencode.V2ModelInfoAPINativeTypeNative {
+			t.Errorf("Type: got %q, want %q", native.Type, opencode.V2ModelInfoAPINativeTypeNative)
+		}
+		if native.URL != "https://api.openai.com" {
+			t.Errorf("URL: got %q, want %q", native.URL, "https://api.openai.com")
+		}
+		if got := native.Settings["apiKey"]; got != "sk-123" {
+			t.Errorf("Settings[apiKey]: got %v, want %q", got, "sk-123")
+		}
+	})
+}
+
+// TestV2ModelInfoAPIWireCompatRegression is the wire-format regression required by
+// Phase 2: after the "Api"->"API" Go identifier rename, the `json:"api"` wire key
+// must still populate the (renamed) [V2ModelInfo.API] field, and RawJSON() must
+// still return the exact original bytes for the "api" sub-object.
+func TestV2ModelInfoAPIWireCompatRegression(t *testing.T) {
+	t.Parallel()
+
+	apiJSON := `{"type":"aisdk","id":"raw-test","package":"@ai-sdk/openai","url":"https://raw.dev"}`
+	baseModel := `"id":"gpt-4","providerID":"openai","name":"GPT-4","capabilities":{"tools":true,"input":["text"],"output":["text"]},"request":{"headers":{},"body":{}},"variants":[],"time":{"released":1680000000},"cost":[{"input":0.01,"output":0.03,"cache":{"read":0.001,"write":0.002}}],"status":"active","enabled":true,"limit":{"context":128000,"output":4096}`
+	raw := `{` + baseModel + `,"api":` + apiJSON + `}`
+
+	var info opencode.V2ModelInfo
+	if err := json.Unmarshal([]byte(raw), &info); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+
+	// json:"api" wire key must still populate the renamed API field.
+	if info.API.ID != "raw-test" {
+		t.Errorf("API.ID: got %q, want %q (wire key \"api\" not routed to renamed API field)", info.API.ID, "raw-test")
+	}
+
+	got := info.API.JSON.RawJSON()
+	if got != apiJSON {
+		t.Errorf("API.JSON.RawJSON() = %q, want %q", got, apiJSON)
+	}
+	if !json.Valid([]byte(got)) {
+		t.Errorf("API.JSON.RawJSON() = %q, not valid JSON", got)
+	}
+
+	// The outer V2ModelInfo.JSON.RawJSON() must also still hold the complete
+	// original payload untouched by the identifier rename.
+	if outerRaw := info.JSON.RawJSON(); outerRaw != raw {
+		t.Errorf("V2ModelInfo.JSON.RawJSON() = %q, want %q", outerRaw, raw)
+	}
+}
+
+// TestV2ModelInfoAPIDeprecatedAliasCompileTime is a compile-time-checked assertion
+// that every "Api"-named symbol removed from v2model.go in Phase 2 is still usable
+// as a [Deprecated] alias of its "API"-named replacement. If any alias were
+// dropped, this file would fail to compile.
+func TestV2ModelInfoAPIDeprecatedAliasCompileTime(t *testing.T) {
+	t.Parallel()
+
+	// Deprecated type aliases must be identical (assignable both ways) to the new types.
+	var _ opencode.V2ModelInfoApi = opencode.V2ModelInfoAPI{}
+	var _ opencode.V2ModelInfoAPI = opencode.V2ModelInfoApi{}
+	var _ opencode.V2ModelInfoApiType = opencode.V2ModelInfoAPIType("aisdk")
+	var _ opencode.V2ModelInfoApiUnion = opencode.V2ModelInfoAPIAisdk{}
+	var _ opencode.V2ModelInfoApiAisdk = opencode.V2ModelInfoAPIAisdk{}
+	var _ opencode.V2ModelInfoApiNative = opencode.V2ModelInfoAPINative{}
+	var _ opencode.V2ModelInfoApiAisdkType = opencode.V2ModelInfoAPIAisdkType("aisdk")
+	var _ opencode.V2ModelInfoApiNativeType = opencode.V2ModelInfoAPINativeType("native")
+
+	// Deprecated enum constants must equal their new-named counterparts.
+	if opencode.V2ModelInfoApiTypeAisdk != opencode.V2ModelInfoAPITypeAisdk {
+		t.Errorf("V2ModelInfoApiTypeAisdk != V2ModelInfoAPITypeAisdk")
+	}
+	if opencode.V2ModelInfoApiTypeNative != opencode.V2ModelInfoAPITypeNative {
+		t.Errorf("V2ModelInfoApiTypeNative != V2ModelInfoAPITypeNative")
+	}
+	if opencode.V2ModelInfoApiAisdkTypeAisdk != opencode.V2ModelInfoAPIAisdkTypeAisdk {
+		t.Errorf("V2ModelInfoApiAisdkTypeAisdk != V2ModelInfoAPIAisdkTypeAisdk")
+	}
+	if opencode.V2ModelInfoApiNativeTypeNative != opencode.V2ModelInfoAPINativeTypeNative {
+		t.Errorf("V2ModelInfoApiNativeTypeNative != V2ModelInfoAPINativeTypeNative")
+	}
+
+	// Deprecated constants must still satisfy IsKnown() via the shared underlying type.
+	if !opencode.V2ModelInfoApiTypeAisdk.IsKnown() {
+		t.Error("V2ModelInfoApiTypeAisdk.IsKnown() = false, want true")
+	}
+	if !opencode.V2ModelInfoApiAisdkTypeAisdk.IsKnown() {
+		t.Error("V2ModelInfoApiAisdkTypeAisdk.IsKnown() = false, want true")
+	}
+	if !opencode.V2ModelInfoApiNativeTypeNative.IsKnown() {
+		t.Error("V2ModelInfoApiNativeTypeNative.IsKnown() = false, want true")
+	}
+}
+
+// TestV2ModelInfoAPITypeIsKnown verifies the post-rename [V2ModelInfoAPIType],
+// [V2ModelInfoAPIAisdkType] and [V2ModelInfoAPINativeType] IsKnown() implementations
+// report true for known enum values and false for unknown ones.
+func TestV2ModelInfoAPITypeIsKnown(t *testing.T) {
+	t.Parallel()
+
+	typeCases := []struct {
+		name  string
+		value opencode.V2ModelInfoAPIType
+		want  bool
+	}{
+		{name: "aisdk", value: opencode.V2ModelInfoAPITypeAisdk, want: true},
+		{name: "native", value: opencode.V2ModelInfoAPITypeNative, want: true},
+		{name: "unknown", value: "unknown", want: false},
+		{name: "empty", value: "", want: false},
+	}
+	for _, tc := range typeCases {
+		t.Run("V2ModelInfoAPIType/"+tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.value.IsKnown(); got != tc.want {
+				t.Errorf("IsKnown(%q): got %v, want %v", tc.value, got, tc.want)
+			}
+		})
+	}
+
+	aisdkCases := []struct {
+		name  string
+		value opencode.V2ModelInfoAPIAisdkType
+		want  bool
+	}{
+		{name: "aisdk", value: opencode.V2ModelInfoAPIAisdkTypeAisdk, want: true},
+		{name: "unknown", value: "unknown", want: false},
+	}
+	for _, tc := range aisdkCases {
+		t.Run("V2ModelInfoAPIAisdkType/"+tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.value.IsKnown(); got != tc.want {
+				t.Errorf("IsKnown(%q): got %v, want %v", tc.value, got, tc.want)
+			}
+		})
+	}
+
+	nativeCases := []struct {
+		name  string
+		value opencode.V2ModelInfoAPINativeType
+		want  bool
+	}{
+		{name: "native", value: opencode.V2ModelInfoAPINativeTypeNative, want: true},
+		{name: "unknown", value: "unknown", want: false},
+	}
+	for _, tc := range nativeCases {
+		t.Run("V2ModelInfoAPINativeType/"+tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.value.IsKnown(); got != tc.want {
+				t.Errorf("IsKnown(%q): got %v, want %v", tc.value, got, tc.want)
 			}
 		})
 	}

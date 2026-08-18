@@ -1237,12 +1237,15 @@ func (r V2IntegrationGetParams) URLQuery() (v url.Values) {
 // V2IntegrationConnectKeyParams contains the body and query parameters for connecting
 // with a key.
 type V2IntegrationConnectKeyParams struct {
-	Location param.Field[V2LocationParam]      `query:"location"`
-	Body     V2IntegrationConnectKeyParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                   `query:"location"`
+	Body     param.Field[V2IntegrationConnectKeyParamsBody] `json:"-"`
 }
 
 func (r V2IntegrationConnectKeyParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 func (r V2IntegrationConnectKeyParams) URLQuery() (v url.Values) {
@@ -1265,12 +1268,15 @@ func (r V2IntegrationConnectKeyParamsBody) MarshalJSON() (data []byte, err error
 // V2IntegrationConnectOauthParams contains the body and query parameters for
 // beginning an OAuth connection.
 type V2IntegrationConnectOauthParams struct {
-	Location param.Field[V2LocationParam]        `query:"location"`
-	Body     V2IntegrationConnectOauthParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                     `query:"location"`
+	Body     param.Field[V2IntegrationConnectOauthParamsBody] `json:"-"`
 }
 
 func (r V2IntegrationConnectOauthParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 func (r V2IntegrationConnectOauthParams) URLQuery() (v url.Values) {
@@ -1306,12 +1312,41 @@ func (r V2IntegrationAttemptStatusParams) URLQuery() (v url.Values) {
 // V2IntegrationAttemptCompleteParams contains the body and query parameters for
 // completing an OAuth attempt.
 type V2IntegrationAttemptCompleteParams struct {
-	Location param.Field[V2LocationParam]           `query:"location"`
-	Body     V2IntegrationAttemptCompleteParamsBody `json:"-"`
+	Location param.Field[V2LocationParam]                        `query:"location"`
+	Body     param.Field[V2IntegrationAttemptCompleteParamsBody] `json:"-"`
 }
 
+// MarshalJSON serializes [V2IntegrationAttemptCompleteParams]'s body.
+//
+// Unlike the sibling "style 1" Params in this file (V2IntegrationConnectKeyParams,
+// V2IntegrationConnectOauthParams), this endpoint's OpenAPI requestBody is
+// required==true but its inner schema declares NO required properties (only an
+// optional "code"; see openapi.json paths["/api/integration/attempt/{attemptID}/complete"].post.requestBody:
+// {"required": true, "content": {"application/json": {"schema": {"type":"object",
+// "properties": {"code": {"type":"string"}}, "additionalProperties": false}}}}).
+// That means "{}" is itself a fully valid request body for this operation, and
+// because requestBody.required is true, the server expects a JSON body to be
+// present on every call -- omitting it entirely violates the OpenAPI contract.
+//
+// The naive "style 1" pattern (`if r.Body.Present {...}; return nil, nil`) is
+// correct for Key/Oauth because their inner schemas have required properties
+// ("key" / "methodID"+"inputs"): an unset Body there is already an invalid call
+// with or without this fix, so returning nil is harmless. Here it is NOT
+// harmless: apijson.MarshalRoot(r.Body) is confirmed by test to return nil when
+// r.Body.Present is false (verified via internal/apijson.MarshalRoot on a zero
+// param.Field[T] wrapper), which upstream (requestconfig.go) still emits a
+// `Content-Type: application/json` header with a 0-byte body -- not valid JSON,
+// and a real behavioral regression vs. the pre-fix code (which produced "{}" for
+// zero-value struct bodies).
+//
+// Do not "simplify" this back to the shared style-1 branch used elsewhere in this
+// file -- always emit a body for this operation, defaulting to "{}" when the
+// caller left Body unset.
 func (r V2IntegrationAttemptCompleteParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return []byte("{}"), nil
 }
 
 func (r V2IntegrationAttemptCompleteParams) URLQuery() (v url.Values) {

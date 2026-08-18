@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/sst/opencode-sdk-go"
@@ -1230,4 +1231,57 @@ func TestGlobalEventRealPayloadToolPartCompletedQuestion(t *testing.T) {
 	missing(t, "part.state.raw", tp.State.JSON.Raw)
 	missing(t, "part.state.error", tp.State.JSON.Error)
 	missing(t, "part.state.attachments", tp.State.JSON.Attachments)
+}
+
+// =============================================================================
+// A1 阻塞项 1/高 2 回归护栏（/global/event 链路）：session.next.revert.staged 的
+// revert 字段与 session.next.moved 的 location 字段必须直接引用共享
+// RevertState/LocationRef。修复前 revert.files[0].path 会被静默丢弃
+// （EventListResponseEventSessionNextRevertStagedPropertiesRevert.Files 曾是
+// []VcsFileDiff，其 json key 是 "file" 而非 OpenAPI FileDiff 的 "path"）。
+// =============================================================================
+
+// TestGlobalEventSessionNextRevertStagedFilesPathRegression 是 A1 🔴 阻塞项 1 的
+// 回归护栏（/global/event 链路）：使用 OpenAPI 真实 wire 格式反序列化
+// GlobalEvent，断言 revert.files[0].path 未被静默丢弃。
+func TestGlobalEventSessionNextRevertStagedFilesPathRegression(t *testing.T) {
+	t.Parallel()
+	raw := []byte(`{"directory":"/repo","payload":{"id":"evt_1","type":"session.next.revert.staged","properties":{"timestamp":1700000000,"sessionID":"ses_1","revert":{"messageID":"msg_1","partID":"prt_1","snapshot":"snap_1","diff":"diff text","files":[{"path":"/a/b.txt","status":"added","additions":2,"deletions":0,"patch":"@@"}]}}}}`)
+	var ev opencode.GlobalEvent
+	if err := json.Unmarshal(raw, &ev); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	rs := asUnion[opencode.EventListResponseEventSessionNextRevertStaged](t, ev)
+	eq(t, "payload.id", rs.ID, "evt_1")
+	if len(rs.Properties.Revert.Files) != 1 {
+		t.Fatalf("Properties.Revert.Files len = %d, want 1", len(rs.Properties.Revert.Files))
+	}
+	// 🔴 回归护栏：修复前该字段为 ""（path 被静默丢弃到错误的 VcsFileDiff.File 承载类型）。
+	if got := rs.Properties.Revert.Files[0].Path; got != "/a/b.txt" {
+		t.Errorf("Properties.Revert.Files[0].Path = %q, want \"/a/b.txt\" (pre-fix regression: silently dropped)", got)
+	}
+	eq(t, "revert.files[0].status", rs.Properties.Revert.Files[0].Status, opencode.FileDiffStatusAdded)
+	eq(t, "revert.files[0].additions", rs.Properties.Revert.Files[0].Additions, int64(2))
+	present(t, "revert.files[0].path", rs.Properties.Revert.Files[0].JSON.Path)
+	if !strings.Contains(ev.JSON.RawJSON(), "/a/b.txt") {
+		t.Errorf("GlobalEvent.RawJSON() = %q, want it to preserve the file path", ev.JSON.RawJSON())
+	}
+}
+
+// TestGlobalEventSessionNextMovedLocationFields 是 A1 🟠 高 2 的回归护栏
+// （/global/event 链路）：location 字段必须直接引用共享 LocationRef，
+// Directory/WorkspaceID 正确解析。
+func TestGlobalEventSessionNextMovedLocationFields(t *testing.T) {
+	t.Parallel()
+	raw := []byte(`{"directory":"/repo","payload":{"id":"evt_2","type":"session.next.moved","properties":{"timestamp":1700000001,"sessionID":"ses_2","location":{"directory":"/repo/workspace","workspaceID":"wrk_1"},"subdirectory":"sub/dir"}}}`)
+	var ev opencode.GlobalEvent
+	if err := json.Unmarshal(raw, &ev); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	mv := asUnion[opencode.EventListResponseEventSessionNextMoved](t, ev)
+	eq(t, "payload.id", mv.ID, "evt_2")
+	eq(t, "properties.location.directory", mv.Properties.Location.Directory, "/repo/workspace")
+	eq(t, "properties.location.workspaceID", mv.Properties.Location.WorkspaceID, "wrk_1")
+	eq(t, "properties.subdirectory", mv.Properties.Subdirectory, "sub/dir")
+	present(t, "properties.location.directory", mv.Properties.Location.JSON.Directory)
 }

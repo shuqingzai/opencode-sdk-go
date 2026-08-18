@@ -186,6 +186,7 @@ func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 // [EventListResponseEventLspUpdated],
 // [EventListResponseEventMcpBrowserOpenFailed],
 // [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventModelsDevRefreshed],
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventMessagePartUpdated],
@@ -278,6 +279,7 @@ func (r EventListResponse) AsUnion() EventListResponseUnion {
 // [EventListResponseEventLspUpdated],
 // [EventListResponseEventMcpBrowserOpenFailed],
 // [EventListResponseEventMcpToolsChanged],
+// [EventListResponseEventModelsDevRefreshed],
 // [EventListResponseEventMessagePartDelta],
 // [EventListResponseEventMessagePartRemoved],
 // [EventListResponseEventMessagePartUpdated],
@@ -1116,9 +1118,9 @@ func (r EventListResponseEventTodoUpdated) implementsEventListResponse() {}
 func (r EventListResponseEventTodoUpdated) implementsGlobalEventPayload() {}
 
 type EventListResponseEventTodoUpdatedProperties struct {
-	SessionID string                                            `json:"sessionID,required"`
-	Todos     []EventListResponseEventTodoUpdatedPropertiesTodo `json:"todos,required"`
-	JSON      eventListResponseEventTodoUpdatedPropertiesJSON   `json:"-"`
+	SessionID string                                          `json:"sessionID,required"`
+	Todos     []Todo                                          `json:"todos,required"`
+	JSON      eventListResponseEventTodoUpdatedPropertiesJSON `json:"-"`
 }
 
 // eventListResponseEventTodoUpdatedPropertiesJSON contains the JSON metadata for
@@ -1138,36 +1140,13 @@ func (r eventListResponseEventTodoUpdatedPropertiesJSON) RawJSON() string {
 	return r.raw
 }
 
-type EventListResponseEventTodoUpdatedPropertiesTodo struct {
-	// Unique identifier for the todo item
-	ID string `json:"id,required"`
-	// Brief description of the task
-	Content string `json:"content,required"`
-	// Priority level of the task: high, medium, low
-	Priority string `json:"priority,required"`
-	// Current status of the task: pending, in_progress, completed, cancelled
-	Status string                                              `json:"status,required"`
-	JSON   eventListResponseEventTodoUpdatedPropertiesTodoJSON `json:"-"`
-}
-
-// eventListResponseEventTodoUpdatedPropertiesTodoJSON contains the JSON metadata
-// for the struct [EventListResponseEventTodoUpdatedPropertiesTodo]
-type eventListResponseEventTodoUpdatedPropertiesTodoJSON struct {
-	ID          apijson.Field
-	Content     apijson.Field
-	Priority    apijson.Field
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventTodoUpdatedPropertiesTodo) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventTodoUpdatedPropertiesTodoJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [Todo] instead.
+// EventListResponseEventTodoUpdatedPropertiesTodo is a type alias for [Todo].
+// OpenAPI declares `todo.updated.properties.todos[]` as a $ref to the shared
+// Todo schema ({content, status, priority} — no `id` field; the field
+// previously fabricated here had no basis in OpenAPI or the JS SDK(v2) types
+// and was always empty on the wire).
+type EventListResponseEventTodoUpdatedPropertiesTodo = Todo
 
 type EventListResponseEventTodoUpdatedType string
 

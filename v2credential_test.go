@@ -124,3 +124,72 @@ func TestV2CredentialRemoveParamsURLQuery(t *testing.T) {
 		t.Error("URLQuery should contain 'location[workspace]'")
 	}
 }
+
+// TestV2CredentialUpdateParamsMarshalJSON documents and locks in the final
+// ruling on V2CredentialUpdateParams from the Phase 2 brief: unlike the three
+// v2integration.go Params fixed in this batch (bare `Body XxxParamsBody
+// json:"-"` + unconditional apijson.MarshalRoot(r.Body)), V2CredentialUpdateParams
+// already inlines its one body field (Label) directly on the Params struct as
+// param.Field[string] `json:"label,required"`, with MarshalJSON delegating to
+// apijson.MarshalRoot(r) — the exact "inline golden standard" pattern of
+// session.go's SessionPromptParams (and, per the D4 report, app.go's
+// AppLogParams). That pattern has no bare/unwrapped Body field, so there is no
+// "style 2" defect to fix here, and no code change was made to
+// V2CredentialUpdateParams in this batch.
+//
+// The nil-vs-"{}" distinction that motivated the sync.go "style 1" fix for the
+// three v2integration.go Params does NOT apply to the inline pattern: an
+// inline Params struct always serializes to at least "{}" (never nil) via
+// apijson.MarshalRoot(r), exactly like SessionPromptParams and AppLogParams
+// when none of their optional fields are set. This is asserted directly below.
+func TestV2CredentialUpdateParamsMarshalJSON(t *testing.T) {
+	t.Parallel()
+
+	t.Run("LabelSet_SerializesLabel", func(t *testing.T) {
+		t.Parallel()
+		params := opencode.V2CredentialUpdateParams{
+			Label: opencode.F("mylabel"),
+		}
+		data, err := params.MarshalJSON()
+		if err != nil {
+			t.Fatalf("MarshalJSON error: %v", err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("json.Unmarshal result: %v", err)
+		}
+		if m["label"] != "mylabel" {
+			t.Errorf("label: got %v, want mylabel", m["label"])
+		}
+		if len(m) != 1 {
+			t.Errorf("expected exactly 1 field (label), got %v", m)
+		}
+	})
+
+	// LabelUnset_ReturnsEmptyObject documents actual behavior: because Label is
+	// inlined (not wrapped in a separate Body struct), MarshalJSON always calls
+	// apijson.MarshalRoot(r) unconditionally and returns "{}" — never nil — when
+	// Label is unset. Per OpenAPI, v2.credential.update's requestBody is
+	// `required: true` with `label` itself `required` inside the schema, so a
+	// valid caller must always set Label; "{}" here is the same "all-optional-
+	// fields-unset" degenerate case documented for SessionPromptParams/
+	// AppLogParams, not a behavioral regression to fix.
+	t.Run("LabelUnset_ReturnsEmptyObject", func(t *testing.T) {
+		t.Parallel()
+		params := opencode.V2CredentialUpdateParams{}
+		data, err := params.MarshalJSON()
+		if err != nil {
+			t.Fatalf("MarshalJSON error: %v", err)
+		}
+		if data == nil {
+			t.Fatal("expected non-nil output (inline pattern always calls apijson.MarshalRoot(r))")
+		}
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("json.Unmarshal result: %v", err)
+		}
+		if len(m) != 0 {
+			t.Errorf("expected empty object {} when Label is unset, got %v", m)
+		}
+	})
+}

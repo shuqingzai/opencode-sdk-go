@@ -51,10 +51,10 @@ func TestExperimentalWorkspaceCreate(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Experimental.Workspace.New(context.TODO(), opencode.ExperimentalWorkspaceNewParams{
-		Body: opencode.ExperimentalWorkspaceCreateInput{
+		Body: opencode.F(opencode.ExperimentalWorkspaceCreateInput{
 			Type:   opencode.F("type"),
 			Branch: opencode.F("main"),
-		},
+		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -104,9 +104,9 @@ func TestExperimentalWorkspaceNewFlatMethod(t *testing.T) {
 		option.WithBaseURL(baseURL),
 	)
 	_, err := client.Experimental.WorkspaceNew(context.TODO(), opencode.ExperimentalWorkspaceNewParams{
-		Body: opencode.ExperimentalWorkspaceCreateInput{
+		Body: opencode.F(opencode.ExperimentalWorkspaceCreateInput{
 			Type: opencode.F("type"),
-		},
+		}),
 	})
 	if err != nil {
 		var apierr *opencode.Error
@@ -294,4 +294,125 @@ func TestWorkspaceEventConnectionStatusAlias(t *testing.T) {
 	_ = s
 	var s2 opencode.WorkspaceEventConnectionStatusStatus = opencode.WorkspaceEventConnectionStatusStatusConnected
 	_ = s2
+}
+
+// TestExperimentalConsoleSwitchOrgParamsBodyPresence verifies that
+// ExperimentalConsoleSwitchOrgParams.Body follows the param.Field[T] Present
+// contract: unset -> MarshalJSON returns nil (no body sent), matching JS
+// SDK(v2) `switchOrg({directory?, workspace?, accountID?, orgID?})` where the
+// body-mapped fields are all optional (sdk.gen.ts:770-802). OpenAPI requestBody
+// for POST /experimental/console/switch has no `required` key (optional body).
+func TestExperimentalConsoleSwitchOrgParamsBodyPresence(t *testing.T) {
+	t.Parallel()
+
+	// Unset Body -> no body bytes.
+	unset := opencode.ExperimentalConsoleSwitchOrgParams{
+		Directory: opencode.F("dir"),
+	}
+	data, err := unset.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON (unset): %v", err)
+	}
+	if data != nil {
+		t.Errorf("MarshalJSON with unset Body: expected nil, got %q", data)
+	}
+
+	// Present Body -> emits accountID/orgID.
+	present := opencode.ExperimentalConsoleSwitchOrgParams{
+		Body: opencode.F(opencode.ExperimentalConsoleSwitchOrgInput{
+			AccountID: opencode.F("acc_1"),
+			OrgID:     opencode.F("org_1"),
+		}),
+	}
+	data, err = present.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON (present): %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	if got["accountID"] != "acc_1" {
+		t.Errorf("accountID: got %v, want acc_1", got["accountID"])
+	}
+	if got["orgID"] != "org_1" {
+		t.Errorf("orgID: got %v, want org_1", got["orgID"])
+	}
+}
+
+// TestExperimentalWorkspaceNewParamsBodyPresence verifies that
+// ExperimentalWorkspaceNewParams.Body follows the param.Field[T] Present
+// contract: unset -> MarshalJSON returns nil (no body sent), matching JS
+// SDK(v2) `workspace.create({directory?, workspace?, id?, type?, branch?, extra?})`
+// where all body-mapped fields are optional (sdk.gen.ts:1046-1071). OpenAPI
+// requestBody for POST /experimental/workspace has no `required` key.
+func TestExperimentalWorkspaceNewParamsBodyPresence(t *testing.T) {
+	t.Parallel()
+
+	unset := opencode.ExperimentalWorkspaceNewParams{
+		Directory: opencode.F("dir"),
+	}
+	data, err := unset.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON (unset): %v", err)
+	}
+	if data != nil {
+		t.Errorf("MarshalJSON with unset Body: expected nil, got %q", data)
+	}
+
+	present := opencode.ExperimentalWorkspaceNewParams{
+		Body: opencode.F(opencode.ExperimentalWorkspaceCreateInput{
+			Type:   opencode.F("local"),
+			Branch: opencode.F("main"),
+		}),
+	}
+	data, err = present.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON (present): %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	if got["type"] != "local" {
+		t.Errorf("type: got %v, want local", got["type"])
+	}
+	if got["branch"] != "main" {
+		t.Errorf("branch: got %v, want main", got["branch"])
+	}
+}
+
+// TestWorkspaceStatusResponseTypeUnmarshal verifies that the Workspace.Status
+// (and flat ExperimentalService.WorkspaceStatus) canonical response element
+// type WorkspaceEventConnectionStatus deserializes correctly, and that the
+// deprecated WorkspaceStatusItem alias remains usable (compile-time + runtime
+// equivalence). OpenAPI: `experimental.workspace.status` 200 =
+// array[WorkspaceEventConnectionStatus].
+func TestWorkspaceStatusResponseTypeUnmarshal(t *testing.T) {
+	t.Parallel()
+
+	var items []opencode.WorkspaceEventConnectionStatus
+	raw := `[{"workspaceID":"w1","status":"connected"}]`
+	if err := json.Unmarshal([]byte(raw), &items); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if len(items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(items))
+	}
+	if items[0].WorkspaceID != "w1" {
+		t.Errorf("WorkspaceID: got %q, want %q", items[0].WorkspaceID, "w1")
+	}
+	if items[0].Status != opencode.WorkspaceEventConnectionStatusStatusConnected {
+		t.Errorf("Status: got %q, want %q", items[0].Status, opencode.WorkspaceEventConnectionStatusStatusConnected)
+	}
+
+	// The deprecated alias must still deserialize identically (compile-time
+	// assertion that WorkspaceStatusItem == WorkspaceEventConnectionStatus).
+	var aliasItems []opencode.WorkspaceStatusItem
+	if err := json.Unmarshal([]byte(raw), &aliasItems); err != nil {
+		t.Fatalf("Unmarshal (alias): %v", err)
+	}
+	if aliasItems[0].WorkspaceID != "w1" || aliasItems[0].Status != opencode.WorkspaceStatusItemStatusConnected {
+		t.Errorf("alias unmarshal mismatch: %+v", aliasItems[0])
+	}
 }

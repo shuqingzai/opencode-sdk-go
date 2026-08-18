@@ -155,13 +155,18 @@ func (r ExperimentalConsoleListOrgsParams) URLQuery() (v url.Values) {
 
 // ExperimentalConsoleSwitchOrgParams contains the request parameters for switching the active Console org.
 type ExperimentalConsoleSwitchOrgParams struct {
-	Directory param.Field[string]               `query:"directory"`
-	Workspace param.Field[string]               `query:"workspace"`
-	Body      ExperimentalConsoleSwitchOrgInput `json:"-"`
+	Directory param.Field[string] `query:"directory"`
+	Workspace param.Field[string] `query:"workspace"`
+	// Body is optional per the OpenAPI requestBody (no `required` key); when set,
+	// accountID/orgID are required within the body.
+	Body param.Field[ExperimentalConsoleSwitchOrgInput] `json:"-"`
 }
 
 func (r ExperimentalConsoleSwitchOrgParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	if r.Body.Present {
+		return apijson.MarshalRoot(r.Body)
+	}
+	return nil, nil
 }
 
 // URLQuery serializes [ExperimentalConsoleSwitchOrgParams]'s query parameters as `url.Values`.

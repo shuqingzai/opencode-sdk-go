@@ -2454,55 +2454,15 @@ func (r EventListResponseEventPluginAddedType) IsKnown() bool {
 // Shared sub-types for new Event variants
 // =============================================================================
 
-// LocationRef represents a reference to a location in a workspace.
-type EventListResponseEventSessionNextMovedPropertiesLocation struct {
-	Directory   string                                                       `json:"directory,required"`
-	WorkspaceID string                                                       `json:"workspaceID"`
-	JSON        eventListResponseEventSessionNextMovedPropertiesLocationJSON `json:"-"`
-}
+// Deprecated: use [LocationRef] instead.
+// EventListResponseEventSessionNextMovedPropertiesLocation is a type alias for
+// [LocationRef]. OpenAPI declares this as a $ref to LocationRef.
+type EventListResponseEventSessionNextMovedPropertiesLocation = LocationRef
 
-type eventListResponseEventSessionNextMovedPropertiesLocationJSON struct {
-	Directory   apijson.Field
-	WorkspaceID apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextMovedPropertiesLocation) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextMovedPropertiesLocationJSON) RawJSON() string {
-	return r.raw
-}
-
-// RevertState represents a revert state for session.next.revert.staged.
-type EventListResponseEventSessionNextRevertStagedPropertiesRevert struct {
-	MessageID string                                                            `json:"messageID,required"`
-	PartID    string                                                            `json:"partID"`
-	Snapshot  string                                                            `json:"snapshot"`
-	Diff      string                                                            `json:"diff"`
-	Files     []VcsFileDiff                                                     `json:"files"`
-	JSON      eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON `json:"-"`
-}
-
-type eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON struct {
-	MessageID   apijson.Field
-	PartID      apijson.Field
-	Snapshot    apijson.Field
-	Diff        apijson.Field
-	Files       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *EventListResponseEventSessionNextRevertStagedPropertiesRevert) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r eventListResponseEventSessionNextRevertStagedPropertiesRevertJSON) RawJSON() string {
-	return r.raw
-}
+// Deprecated: use [RevertState] instead.
+// EventListResponseEventSessionNextRevertStagedPropertiesRevert is a type alias
+// for [RevertState]. OpenAPI declares this as a $ref to RevertState.
+type EventListResponseEventSessionNextRevertStagedPropertiesRevert = RevertState
 
 // Deprecated: use [PermissionV2Source] instead.
 // EventListResponseEventPermissionV2AskedPropertiesSource is a type alias for
@@ -3152,11 +3112,11 @@ func (r EventListResponseEventSessionNextMoved) implementsEventListResponse()  {
 func (r EventListResponseEventSessionNextMoved) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextMovedProperties struct {
-	Timestamp    int64                                                    `json:"timestamp,required"`
-	SessionID    string                                                   `json:"sessionID,required"`
-	Location     EventListResponseEventSessionNextMovedPropertiesLocation `json:"location,required"`
-	Subdirectory string                                                   `json:"subdirectory"`
-	JSON         eventListResponseEventSessionNextMovedPropertiesJSON     `json:"-"`
+	Timestamp    int64                                                `json:"timestamp,required"`
+	SessionID    string                                               `json:"sessionID,required"`
+	Location     LocationRef                                          `json:"location,required"`
+	Subdirectory string                                               `json:"subdirectory"`
+	JSON         eventListResponseEventSessionNextMovedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextMovedPropertiesJSON struct {
@@ -3221,10 +3181,10 @@ func (r EventListResponseEventSessionNextRevertStaged) implementsEventListRespon
 func (r EventListResponseEventSessionNextRevertStaged) implementsGlobalEventPayload() {}
 
 type EventListResponseEventSessionNextRevertStagedProperties struct {
-	Timestamp int64                                                         `json:"timestamp,required"`
-	SessionID string                                                        `json:"sessionID,required"`
-	Revert    EventListResponseEventSessionNextRevertStagedPropertiesRevert `json:"revert,required"`
-	JSON      eventListResponseEventSessionNextRevertStagedPropertiesJSON   `json:"-"`
+	Timestamp int64                                                       `json:"timestamp,required"`
+	SessionID string                                                      `json:"sessionID,required"`
+	Revert    RevertState                                                 `json:"revert,required"`
+	JSON      eventListResponseEventSessionNextRevertStagedPropertiesJSON `json:"-"`
 }
 
 type eventListResponseEventSessionNextRevertStagedPropertiesJSON struct {

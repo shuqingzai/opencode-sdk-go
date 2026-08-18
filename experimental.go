@@ -64,7 +64,7 @@ func (r *ExperimentalService) WorkspaceRemove(ctx context.Context, id string, qu
 
 // AdapterList lists workspace adapters in the experimental API.
 //
-// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead. See also [ExperimentalService.WorkspaceAdapterList].
+// Deprecated: Use [ExperimentalService.Workspace.Adapter.List] instead.
 func (r *ExperimentalService) AdapterList(ctx context.Context, query ExperimentalAdapterListParams, opts ...option.RequestOption) (res *[]WorkspaceAdapter, err error) {
 	return r.Workspace.Adapter.List(ctx, query, opts...)
 }
@@ -79,13 +79,13 @@ func (r *ExperimentalService) WorkspaceAdapterList(ctx context.Context, query Ex
 // WorkspaceStatus gets the workspace status in the experimental API.
 //
 // Deprecated: Use [ExperimentalService.Workspace.Status] instead.
-func (r *ExperimentalService) WorkspaceStatus(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceStatusItem, err error) {
+func (r *ExperimentalService) WorkspaceStatus(ctx context.Context, query ExperimentalWorkspaceStatusParams, opts ...option.RequestOption) (res *[]WorkspaceEventConnectionStatus, err error) {
 	return r.Workspace.Status(ctx, query, opts...)
 }
 
 // Warp warps a workspace in the experimental API.
 //
-// Deprecated: Use [ExperimentalService.Workspace.Warp] instead. See also [ExperimentalService.WorkspaceWarp].
+// Deprecated: Use [ExperimentalService.Workspace.Warp] instead.
 func (r *ExperimentalService) Warp(ctx context.Context, params ExperimentalWarpParams, opts ...option.RequestOption) (err error) {
 	return r.Workspace.Warp(ctx, params, opts...)
 }

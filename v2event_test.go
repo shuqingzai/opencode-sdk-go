@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	opencode "github.com/sst/opencode-sdk-go"
+	"github.com/sst/opencode-sdk-go/packages/ssestream"
 )
 
 func TestV2EventSessionNextCompactionEndedReasonIsKnown(t *testing.T) {
@@ -586,4 +587,211 @@ func TestV2EventTuiCommandExecuteDataCommand(t *testing.T) {
 			t.Errorf("Command.IsKnown(): got true, want false")
 		}
 	})
+}
+
+// =============================================================================
+// A1/A2 SSE 容错回归护栏：V2Event.Data 字段级畸形载体（string/number/bool/array/
+// null）必须静默降级不报错（ssestream.Stream.Next() 中 json.Unmarshal 出错即
+// return false，整个流永久终止），且 JSON.Data 元数据/RawJSON() 完整保留原始值。
+// =============================================================================
+
+// TestV2EventDataMalformedCarrierRawJSONPreserved 对 V2Event.Data 喂入
+// string/number/bool/array/null 五类畸形载体（顶层 type 仍合法，故 union 仍按
+// type 路由到 V2EventFileEdited；嵌套的 Data 子结构自身无法从标量解出字段，
+// 静默降级为零值，绝不报错）。断言：
+//   - json.Unmarshal 不报错（err == nil，否则会终结整条 SSE 流）
+//   - 顶层 JSON.RawJSON() 完整保留原始报文（不丢失任何字节）
+//   - 路由后的 variant 的 Data 子结构自身 JSON 元数据（RawJSON()）也保留了
+//     原始畸形标量，供调用方分辨降级原因
+func TestV2EventDataMalformedCarrierRawJSONPreserved(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		data string
+	}{
+		{"string", `"not-an-object"`},
+		{"number", `42`},
+		{"bool", `true`},
+		{"array", `[1,2,3]`},
+		{"null", `null`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			raw := `{"id":"evt_1","type":"file.edited","data":` + tc.data + `}`
+			var ev opencode.V2Event
+			if err := json.Unmarshal([]byte(raw), &ev); err != nil {
+				t.Fatalf("json.Unmarshal: %v (would terminate the SSE stream via ssestream.Stream.Next())", err)
+			}
+			if got := ev.JSON.RawJSON(); got != raw {
+				t.Errorf("JSON.RawJSON() = %q, want %q (raw payload must be fully preserved)", got, raw)
+			}
+			fe, ok := ev.AsUnion().(opencode.V2EventFileEdited)
+			if !ok {
+				t.Fatalf("AsUnion() = %T, want V2EventFileEdited (type-based routing must still succeed)", ev.AsUnion())
+			}
+			if fe.Data.File != "" {
+				t.Errorf("Data.File = %q, want zero-value for malformed scalar data carrier", fe.Data.File)
+			}
+			// "null" is treated like an absent Data sub-object (nothing to
+			// port), so its nested JSON metadata stays empty/missing; every
+			// other scalar carrier's raw bytes are preserved verbatim.
+			wantNestedRaw := tc.data
+			if tc.name == "null" {
+				wantNestedRaw = ""
+			}
+			if got := fe.Data.JSON.RawJSON(); got != wantNestedRaw {
+				t.Errorf("Data.JSON.RawJSON() = %q, want %q (nested raw scalar must be preserved)", got, wantNestedRaw)
+			}
+		})
+	}
+}
+
+// TestEventListResponseMalformedCarrierRawJSONPreserved 是 V2Event 侧的对照
+// 实验：EventListResponse.Properties 对同样的畸形载体必须表现一致（三条 SSE 链路
+// 容错策略必须一致，参见 A1 报告「SSE 容错铁律实测」）：不报错、顶层与嵌套的
+// RawJSON() 均完整保留原始值。
+func TestEventListResponseMalformedCarrierRawJSONPreserved(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		data string
+	}{
+		{"string", `"not-an-object"`},
+		{"number", `42`},
+		{"bool", `true`},
+		{"array", `[1,2,3]`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			raw := `{"id":"evt_1","type":"file.edited","properties":` + tc.data + `}`
+			var ev opencode.EventListResponse
+			if err := json.Unmarshal([]byte(raw), &ev); err != nil {
+				t.Fatalf("json.Unmarshal: %v (would terminate the SSE stream via ssestream.Stream.Next())", err)
+			}
+			if got := ev.JSON.RawJSON(); got != raw {
+				t.Errorf("JSON.RawJSON() = %q, want %q (raw payload must be fully preserved)", got, raw)
+			}
+			fe, ok := ev.AsUnion().(opencode.EventListResponseEventFileEdited)
+			if !ok {
+				t.Fatalf("AsUnion() = %T, want EventListResponseEventFileEdited (type-based routing must still succeed)", ev.AsUnion())
+			}
+			if fe.Properties.File != "" {
+				t.Errorf("Properties.File = %q, want zero-value for malformed scalar properties carrier", fe.Properties.File)
+			}
+			if got := fe.Properties.JSON.RawJSON(); got != tc.data {
+				t.Errorf("Properties.JSON.RawJSON() = %q, want %q (nested raw scalar must be preserved)", got, tc.data)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// 端到端 SSE 流：伪造 text/event-stream，中间夹一条字段级畸形事件，断言
+// stream.Err() == nil 且全部事件均送达（畸形事件不得杀死整条流）。
+// newSSEResponse / sseEventFrame 复用 session_status_sse_test.go 中已有的
+// package-level 测试 helper（同 opencode_test 包）。
+// =============================================================================
+
+// TestV2EventE2EStreamSurvivesMalformedDataCarrier 验证 V2EventService.ListStreaming
+// 返回的 *ssestream.Stream[V2Event] 在中间夹了一条 data 字段为畸形标量的事件时，
+// 流不会提前终止，前后的合法事件都能正确送达并路由。
+func TestV2EventE2EStreamSurvivesMalformedDataCarrier(t *testing.T) {
+	t.Parallel()
+	resp := newSSEResponse(
+		sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`)),
+		sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","data":42}`)),
+		sseEventFrame([]byte(`{"id":"evt_3","type":"file.edited","data":{"file":"/b.go"}}`)),
+	)
+	stream := ssestream.NewStream[opencode.V2Event](ssestream.NewDecoder(resp), nil)
+
+	var events []opencode.V2Event
+	for stream.Next() {
+		events = append(events, stream.Current())
+	}
+	if err := stream.Err(); err != nil {
+		t.Fatalf("stream terminated with error: %v", err)
+	}
+	if len(events) != 3 {
+		t.Fatalf("got %d events, want 3 (malformed data carrier must not kill the stream)", len(events))
+	}
+	first, ok := events[0].AsUnion().(opencode.V2EventFileEdited)
+	if !ok {
+		t.Fatalf("events[0].AsUnion() = %T, want V2EventFileEdited", events[0].AsUnion())
+	}
+	if first.Data.File != "/a.go" {
+		t.Errorf("events[0].Data.File = %q, want /a.go", first.Data.File)
+	}
+	// 畸形事件本身仍按顶层 type 路由到 V2EventFileEdited（字段级降级，非整体
+	// 失败）：Data.File 静默降级为零值，但 Data.JSON.RawJSON() 保留原始标量 42。
+	mid, ok := events[1].AsUnion().(opencode.V2EventFileEdited)
+	if !ok {
+		t.Fatalf("events[1].AsUnion() = %T, want V2EventFileEdited", events[1].AsUnion())
+	}
+	if mid.Data.File != "" {
+		t.Errorf("events[1].Data.File = %q, want zero-value (malformed data carrier)", mid.Data.File)
+	}
+	if got := mid.Data.JSON.RawJSON(); got != "42" {
+		t.Errorf("events[1].Data.JSON.RawJSON() = %q, want %q", got, "42")
+	}
+	// 🔴 关键断言：畸形事件之后的真实事件必须仍能送达并正确解码
+	last, ok := events[2].AsUnion().(opencode.V2EventFileEdited)
+	if !ok {
+		t.Fatalf("events[2].AsUnion() = %T, want V2EventFileEdited", events[2].AsUnion())
+	}
+	if last.Data.File != "/b.go" {
+		t.Errorf("events[2].Data.File = %q, want /b.go", last.Data.File)
+	}
+}
+
+// TestEventListResponseE2EStreamSurvivesMalformedPropertiesCarrier 同上，验证
+// EventListResponse（/event 链路）在畸形 properties 载体前后的事件均能送达，
+// 与 V2Event 链路的容错策略保持一致。
+func TestEventListResponseE2EStreamSurvivesMalformedPropertiesCarrier(t *testing.T) {
+	t.Parallel()
+	resp := newSSEResponse(
+		sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","properties":{"file":"/a.go"}}`)),
+		sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","properties":"not-an-object"}`)),
+		sseEventFrame([]byte(`{"id":"evt_3","type":"file.edited","properties":{"file":"/b.go"}}`)),
+	)
+	stream := ssestream.NewStream[opencode.EventListResponse](ssestream.NewDecoder(resp), nil)
+
+	var events []opencode.EventListResponse
+	for stream.Next() {
+		events = append(events, stream.Current())
+	}
+	if err := stream.Err(); err != nil {
+		t.Fatalf("stream terminated with error: %v", err)
+	}
+	if len(events) != 3 {
+		t.Fatalf("got %d events, want 3 (malformed properties carrier must not kill the stream)", len(events))
+	}
+	first, ok := events[0].AsUnion().(opencode.EventListResponseEventFileEdited)
+	if !ok {
+		t.Fatalf("events[0].AsUnion() = %T, want EventListResponseEventFileEdited", events[0].AsUnion())
+	}
+	if first.Properties.File != "/a.go" {
+		t.Errorf("events[0].Properties.File = %q, want /a.go", first.Properties.File)
+	}
+	// 畸形事件本身仍按顶层 type 路由（字段级降级，非整体失败）：Properties.File
+	// 静默降级为零值，但 Properties.JSON.RawJSON() 保留原始标量。
+	mid, ok := events[1].AsUnion().(opencode.EventListResponseEventFileEdited)
+	if !ok {
+		t.Fatalf("events[1].AsUnion() = %T, want EventListResponseEventFileEdited", events[1].AsUnion())
+	}
+	if mid.Properties.File != "" {
+		t.Errorf("events[1].Properties.File = %q, want zero-value (malformed properties carrier)", mid.Properties.File)
+	}
+	if got := mid.Properties.JSON.RawJSON(); got != `"not-an-object"` {
+		t.Errorf("events[1].Properties.JSON.RawJSON() = %q, want %q", got, `"not-an-object"`)
+	}
+	// 🔴 关键断言：畸形事件之后的真实事件必须仍能送达并正确解码
+	last, ok := events[2].AsUnion().(opencode.EventListResponseEventFileEdited)
+	if !ok {
+		t.Fatalf("events[2].AsUnion() = %T, want EventListResponseEventFileEdited", events[2].AsUnion())
+	}
+	if last.Properties.File != "/b.go" {
+		t.Errorf("events[2].Properties.File = %q, want /b.go", last.Properties.File)
+	}
 }

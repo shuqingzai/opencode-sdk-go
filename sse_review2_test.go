@@ -3,11 +3,13 @@ package opencode_test
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/sst/opencode-sdk-go"
+	"github.com/sst/opencode-sdk-go/packages/ssestream"
 )
 
 // review2PayloadRouteTestdata 是第二轮 SSE Reviewer 独立生成的 124 个 payload 路由用例
@@ -358,4 +360,286 @@ func TestReview2SSERobustnessMatrix(t *testing.T) {
 			t.Logf("[%s] %-18s -> %-6s asUnion=%s err=%s", ch.label, in.name, status, asUnion, errText)
 		}
 	}
+}
+
+// =============================================================================
+// Q2 独立复核角度 3：真实字节流层面的 SSE 容错（不止单个 JSON 反序列化）。
+// newSSEResponse / sseEventFrame 复用 session_status_sse_test.go 中已有的
+// package-level helper（同 opencode_test 包，未修改该文件）。
+// =============================================================================
+
+// sseCountEvents 把 frames 拼成一个 text/event-stream 响应体，通过真实
+// ssestream.Stream[T] 消费，返回收到的事件数与 stream.Err()。
+func sseCountEventListResponse(frames ...string) (int, error) {
+	resp := newSSEResponse(frames...)
+	stream := ssestream.NewStream[opencode.EventListResponse](ssestream.NewDecoder(resp), nil)
+	var n int
+	for stream.Next() {
+		n++
+	}
+	return n, stream.Err()
+}
+
+func sseCountGlobalEvent(frames ...string) (int, error) {
+	resp := newSSEResponse(frames...)
+	stream := ssestream.NewStream[opencode.GlobalEvent](ssestream.NewDecoder(resp), nil)
+	var n int
+	for stream.Next() {
+		n++
+	}
+	return n, stream.Err()
+}
+
+func sseCountV2Event(frames ...string) (int, error) {
+	resp := newSSEResponse(frames...)
+	stream := ssestream.NewStream[opencode.V2Event](ssestream.NewDecoder(resp), nil)
+	var n int
+	for stream.Next() {
+		n++
+	}
+	return n, stream.Err()
+}
+
+// TestReview2SSEMultiLineDataFold 验证 SSE 规范的多行 data: 折叠
+// （连续多条 "data:" 行按 \n 拼接成一个 JSON 文档）在三条链路上都能正确
+// 解码——拼接产生的裸换行落在 JSON token 之间（合法空白），不破坏 JSON。
+func TestReview2SSEMultiLineDataFold(t *testing.T) {
+	t.Parallel()
+
+	elrFrame := "event: message\n" +
+		`data: {"id":"evt_1","type":"file.edited",` + "\n" +
+		`data: "properties":{"file":"/multi.go"}}` + "\n\n"
+	n, err := sseCountEventListResponse(elrFrame)
+	if err != nil {
+		t.Fatalf("EventListResponse multi-line data fold: unexpected error %v", err)
+	}
+	if n != 1 {
+		t.Fatalf("EventListResponse multi-line data fold: got %d events, want 1", n)
+	}
+
+	geFrame := "event: message\n" +
+		`data: {"directory":"d","payload":{"id":"evt_1","type":"file.edited",` + "\n" +
+		`data: "data":{"file":"/multi.go"}}}` + "\n\n"
+	n, err = sseCountGlobalEvent(geFrame)
+	if err != nil {
+		t.Fatalf("GlobalEvent multi-line data fold: unexpected error %v", err)
+	}
+	if n != 1 {
+		t.Fatalf("GlobalEvent multi-line data fold: got %d events, want 1", n)
+	}
+
+	v2Frame := "event: message\n" +
+		`data: {"id":"evt_1","type":"file.edited",` + "\n" +
+		`data: "data":{"file":"/multi.go"}}` + "\n\n"
+	n, err = sseCountV2Event(v2Frame)
+	if err != nil {
+		t.Fatalf("V2Event multi-line data fold: unexpected error %v", err)
+	}
+	if n != 1 {
+		t.Fatalf("V2Event multi-line data fold: got %d events, want 1", n)
+	}
+}
+
+// TestReview2SSEOversizedDataDoesNotOverflowScanner 验证 >64KB 的单个 data
+// 帧（bufio.Scanner 默认 token 上限是 64KB）不会导致
+// bufio.Scanner: token too long——ssestream.NewDecoder 已把 buffer 上限设为
+// bufio.MaxScanTokenSize<<9（32MB），三条链路均需覆盖。
+func TestReview2SSEOversizedDataDoesNotOverflowScanner(t *testing.T) {
+	t.Parallel()
+	bigValue := strings.Repeat("a", 200*1024) // 200KB，远超 64KB 默认上限
+
+	elrPayload := fmt.Sprintf(`{"id":"evt_1","type":"file.edited","properties":{"file":"/%s.go"}}`, bigValue)
+	if n, err := sseCountEventListResponse(sseEventFrame([]byte(elrPayload))); err != nil || n != 1 {
+		t.Fatalf("EventListResponse oversized data: n=%d err=%v, want n=1 err=nil", n, err)
+	}
+
+	gePayload := fmt.Sprintf(`{"directory":"d","payload":{"id":"evt_1","type":"file.edited","data":{"file":"/%s.go"}}}`, bigValue)
+	if n, err := sseCountGlobalEvent(sseEventFrame([]byte(gePayload))); err != nil || n != 1 {
+		t.Fatalf("GlobalEvent oversized data: n=%d err=%v, want n=1 err=nil", n, err)
+	}
+
+	v2Payload := fmt.Sprintf(`{"id":"evt_1","type":"file.edited","data":{"file":"/%s.go"}}`, bigValue)
+	if n, err := sseCountV2Event(sseEventFrame([]byte(v2Payload))); err != nil || n != 1 {
+		t.Fatalf("V2Event oversized data: n=%d err=%v, want n=1 err=nil", n, err)
+	}
+}
+
+// TestReview2SSEConsecutiveMalformedEvents 验证*连续多条*（不止中间夹一个）
+// 畸形事件不会累积杀死流：5 个事件里第 2/3/4 连续三个都是字段级畸形载体，
+// 第 1 和第 5 个合法事件都必须完整送达。
+func TestReview2SSEConsecutiveMalformedEvents(t *testing.T) {
+	t.Parallel()
+
+	t.Run("EventListResponse.properties", func(t *testing.T) {
+		n, err := sseCountEventListResponse(
+			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","properties":{"file":"/a.go"}}`)),
+			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","properties":42}`)),
+			sseEventFrame([]byte(`{"id":"evt_3","type":"file.edited","properties":"str"}`)),
+			sseEventFrame([]byte(`{"id":"evt_4","type":"file.edited","properties":true}`)),
+			sseEventFrame([]byte(`{"id":"evt_5","type":"file.edited","properties":{"file":"/b.go"}}`)),
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if n != 5 {
+			t.Fatalf("got %d events, want 5 (3 consecutive malformed events must not kill the stream)", n)
+		}
+	})
+
+	t.Run("GlobalEvent.payload", func(t *testing.T) {
+		n, err := sseCountGlobalEvent(
+			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}}`)),
+			sseEventFrame([]byte(`{"directory":"d","payload":42}`)),
+			sseEventFrame([]byte(`{"directory":"d","payload":"str"}`)),
+			sseEventFrame([]byte(`{"directory":"d","payload":true}`)),
+			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_5","type":"file.edited","data":{"file":"/b.go"}}}`)),
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if n != 5 {
+			t.Fatalf("got %d events, want 5 (3 consecutive malformed payloads must not kill the stream)", n)
+		}
+	})
+
+	t.Run("V2Event.data", func(t *testing.T) {
+		n, err := sseCountV2Event(
+			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`)),
+			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","data":42}`)),
+			sseEventFrame([]byte(`{"id":"evt_3","type":"file.edited","data":"str"}`)),
+			sseEventFrame([]byte(`{"id":"evt_4","type":"file.edited","data":true}`)),
+			sseEventFrame([]byte(`{"id":"evt_5","type":"file.edited","data":{"file":"/b.go"}}`)),
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if n != 5 {
+			t.Fatalf("got %d events, want 5 (3 consecutive malformed data fields must not kill the stream)", n)
+		}
+	})
+}
+
+// TestReview2SSEBareArrayWholeEventTolerated 记录一个非对称的实测事实：整条
+// SSE 事件的 data: 若是裸数组 `[1,2,3]`（而不是 object），三条链路都不会报错
+// ——gjson 把 JSON array 和 object 统一归为 gjson.JSON 类型，union 路由的
+// TypeFilter（全部注册为 gjson.JSON）恰好也能匹配数组，因此不会触发
+// "was not able to coerce type as union"。这与裸 null/number/string/bool
+// （非 gjson.JSON，无 TypeFilter 匹配，会报错并杀流，见
+// TestReview2SSEBareScalarWholeEventVaries）形成对照，供后续回归对比。
+func TestReview2SSEBareArrayWholeEventTolerated(t *testing.T) {
+	t.Parallel()
+	if n, err := sseCountEventListResponse(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
+		t.Errorf("EventListResponse bare array whole event: n=%d err=%v, want err=nil", n, err)
+	}
+	if n, err := sseCountV2Event(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
+		t.Errorf("V2Event bare array whole event: n=%d err=%v, want err=nil", n, err)
+	}
+	if n, err := sseCountGlobalEvent(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
+		t.Errorf("GlobalEvent bare array whole event: n=%d err=%v, want err=nil", n, err)
+	}
+}
+
+// TestReview2SSEBareScalarWholeEventVaries 三条链路对"整条事件本身就是裸
+// 标量"（不是 object）的实测行为：
+//   - GlobalEvent：自定义 UnmarshalJSON 走 apijson.UnmarshalRoot（gjson 按路径
+//     取字段），根节点不是 object 时具名字段全部取不到值，静默产出零值，
+//     不报错、不杀流（与 A1/A2 报告一致）。
+//   - EventListResponse / V2Event：顶层就是 Union carrier，
+//     apijson.UnmarshalRoot(data, &r.union) 对 null/number/string/bool
+//     （非 gjson.JSON）找不到任何 TypeFilter 匹配的 variant，返回
+//     "was not able to coerce type as union"，会经 ssestream.Stream.Next()
+//     杀死整条流。
+//
+// 这与 A2 报告「附加观察项」结论一致（非新发现，仅补齐 GlobalEvent 侧的
+// 逐类型实测并统一到一个可执行的回归用例）。
+func TestReview2SSEBareScalarWholeEventVaries(t *testing.T) {
+	t.Parallel()
+	scalars := []string{"42", `"hello"`, "null", "true"}
+
+	for _, raw := range scalars {
+		if n, err := sseCountGlobalEvent(sseEventFrame([]byte(raw))); err != nil {
+			t.Errorf("GlobalEvent whole=%s: n=%d err=%v, want err=nil (gjson path lookups degrade silently)", raw, n, err)
+		}
+	}
+
+	for _, raw := range scalars {
+		if _, err := sseCountEventListResponse(sseEventFrame([]byte(raw))); err == nil {
+			t.Errorf("EventListResponse whole=%s: err=nil, want a union-coerce error (documents known asymmetry vs GlobalEvent)", raw)
+		}
+	}
+
+	for _, raw := range scalars {
+		if _, err := sseCountV2Event(sseEventFrame([]byte(raw))); err == nil {
+			t.Errorf("V2Event whole=%s: err=nil, want a union-coerce error (documents known asymmetry vs GlobalEvent)", raw)
+		}
+	}
+}
+
+// =============================================================================
+// 🔴 Q2 独立复核发现项 2：ssestream.go 对"完全没有 data: 字段"的事件
+// （例如纯 `event: ping\n\n` 心跳/keep-alive，或 `data:` 存在但内容为空）
+// 会产出 Data=""（长度 0），随后 json.Unmarshal([]byte(""), &T) 必定报
+// "unexpected end of JSON input"——这会经 ssestream.Stream.Next() 杀死
+// 整条 SSE 流，且三条链路（GlobalEvent / EventListResponse / V2Event）
+// 无一例外。
+//
+// 根因在 packages/ssestream/ssestream.go 的 eventStreamDecoder.Next()：
+// 空 data 场景下仍然无条件 dispatch 一个 Event{Data: []byte{}}（或仅一个
+// "\n"），没有像 comment 行（"": 前缀）那样被跳过。这不是 event.go /
+// v2event.go / event_global_types.go 的问题（三条链路的 union 路由代码对
+// 空字节没有特殊分支可加，因为 json.Unmarshal 在到达它们的 UnmarshalJSON
+// 之前就已经失败），修复点在 ssestream.go 本身，不在本轮 Q2 任务清单内的
+// 文件，因此本测试只锁定当前行为（记录 + 三链路一致性），不提交对
+// ssestream.go 的修改；detail 见最终复核报告「需主控介入」章节。
+// =============================================================================
+
+// TestReview2SSEEmptyDataLineKillsAllThreeChains 锁定当前行为：完全缺失
+// data: 字段的事件会让三条链路的 stream.Err() 都非 nil，且它之后的合法事件
+// 全部丢失。若未来修复了 ssestream.go，这个测试需要同步更新为
+// "err == nil && 后续事件不丢"。
+func TestReview2SSEEmptyDataLineKillsAllThreeChains(t *testing.T) {
+	t.Parallel()
+	const heartbeat = "event: ping\n\n"
+
+	t.Run("EventListResponse.properties", func(t *testing.T) {
+		n, err := sseCountEventListResponse(
+			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","properties":{"file":"/a.go"}}`)),
+			heartbeat,
+			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","properties":{"file":"/b.go"}}`)),
+		)
+		if err == nil {
+			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+		}
+		if n != 1 {
+			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+		}
+	})
+
+	t.Run("GlobalEvent.payload", func(t *testing.T) {
+		n, err := sseCountGlobalEvent(
+			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}}`)),
+			heartbeat,
+			sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}}`)),
+		)
+		if err == nil {
+			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+		}
+		if n != 1 {
+			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+		}
+	})
+
+	t.Run("V2Event.data", func(t *testing.T) {
+		n, err := sseCountV2Event(
+			sseEventFrame([]byte(`{"id":"evt_1","type":"file.edited","data":{"file":"/a.go"}}`)),
+			heartbeat,
+			sseEventFrame([]byte(`{"id":"evt_2","type":"file.edited","data":{"file":"/b.go"}}`)),
+		)
+		if err == nil {
+			t.Error("stream.Err() == nil — ssestream.go's empty-data-line handling has apparently been fixed; update this test's expectations")
+		}
+		if n != 1 {
+			t.Errorf("got %d events before the error, want exactly 1 (the event after the heartbeat is lost)", n)
+		}
+	})
 }
