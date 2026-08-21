@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/pagination"
 )
 
 // ExperimentalService contains methods and other services that help with interacting with
@@ -128,7 +129,7 @@ func (r *ExperimentalService) ConsoleSwitchOrg(ctx context.Context, body Experim
 // SessionList lists sessions across projects in the experimental API.
 //
 // Deprecated: Use [ExperimentalService.Session.List] instead.
-func (r *ExperimentalService) SessionList(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *[]GlobalSession, err error) {
+func (r *ExperimentalService) SessionList(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *pagination.HeaderCursorPage[GlobalSession], err error) {
 	return r.Session.List(ctx, query, opts...)
 }
 

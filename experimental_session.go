@@ -15,6 +15,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/pagination"
 )
 
 // ExperimentalSessionService contains methods and other services that help with
@@ -37,11 +38,34 @@ func NewExperimentalSessionService(opts ...option.RequestOption) (r *Experimenta
 }
 
 // List sessions across projects
-func (r *ExperimentalSessionService) List(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *[]GlobalSession, err error) {
-	opts = slices.Concat(r.Options, opts)
+//
+// The response body is a bare array of sessions, and the server advertises the
+// next page through the X-Next-Cursor response header, which it sends only while
+// further sessions remain. Read the items from Data, and call GetNextPage to
+// replay the header value as the `cursor` query parameter.
+func (r *ExperimentalSessionService) List(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) (res *pagination.HeaderCursorPage[GlobalSession], err error) {
+	var raw *http.Response
+	opts = slices.Concat([]option.RequestOption{option.WithResponseInto(&raw)}, r.Options, opts)
 	path := "experimental/session"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List sessions across projects
+//
+// ListAutoPaging walks every page for you, replaying the X-Next-Cursor response
+// header as the `cursor` query parameter until the server stops sending it.
+// Sessions are ordered newest first by their updated timestamp.
+func (r *ExperimentalSessionService) ListAutoPaging(ctx context.Context, query ExperimentalSessionListParams, opts ...option.RequestOption) *pagination.HeaderCursorPageAutoPager[GlobalSession] {
+	return pagination.NewHeaderCursorPageAutoPager(r.List(ctx, query, opts...))
 }
 
 // Background subagents

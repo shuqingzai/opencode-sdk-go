@@ -18,6 +18,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/pagination"
 	"github.com/sst/opencode-sdk-go/shared"
 )
 
@@ -62,6 +63,22 @@ func (r *SessionService) Update(ctx context.Context, id string, params SessionUp
 }
 
 // List all sessions
+//
+// This endpoint is not paginated and so has no auto-paging variant. The server
+// returns the newest Limit sessions (100 when Limit is unset) ordered by their
+// updated timestamp, and sends neither a body cursor nor an X-Next-Cursor
+// header. Start is a lower bound on the updated timestamp rather than a cursor,
+// so it cannot be used to walk backwards into older sessions.
+//
+// To reach beyond the first window, raise Limit and re-request, which is what
+// the opencode web client does; a response holding exactly Limit sessions means
+// more may exist.
+//
+// When real pagination is required, use [ExperimentalSessionService.List]
+// instead. Given the same Directory it returns the same sessions in the same
+// order, but backed by a cursor, and its GlobalSession carries every field of
+// Session plus more. [ExperimentalSessionService.ListAutoPaging] then walks the
+// whole list for you.
 func (r *SessionService) List(ctx context.Context, query SessionListParams, opts ...option.RequestOption) (res *[]Session, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "session"
@@ -170,15 +187,43 @@ func (r *SessionService) Message(ctx context.Context, id string, messageID strin
 }
 
 // List messages for a session
-func (r *SessionService) Messages(ctx context.Context, id string, query SessionMessagesParams, opts ...option.RequestOption) (res *[]SessionMessagesResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
+//
+// The response body is a bare array of messages, and the server advertises the
+// next page through the X-Next-Cursor response header, which it sends only while
+// further messages remain. Read the items from Data, and call GetNextPage to
+// replay the header value as the `before` query parameter.
+//
+// Paging only happens when Limit is set: with no Limit the server returns the
+// whole conversation in a single response and never advertises a cursor. Each
+// page is ordered oldest first, and every following page holds strictly older
+// messages than the one before it.
+func (r *SessionService) Messages(ctx context.Context, id string, query SessionMessagesParams, opts ...option.RequestOption) (res *pagination.HeaderBeforePage[SessionMessagesResponse], err error) {
+	var raw *http.Response
+	opts = slices.Concat([]option.RequestOption{option.WithResponseInto(&raw)}, r.Options, opts)
 	if id == "" {
-		err = errors.New("missing required id parameter")
-		return
+		return nil, errors.New("missing required id parameter")
 	}
 	path := fmt.Sprintf("session/%s/message", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List messages for a session
+//
+// MessagesAutoPaging walks every page for you, replaying the X-Next-Cursor
+// response header as the `before` query parameter until the server stops sending
+// it. Set Limit on the params to control the page size; without it the first
+// response already carries the whole conversation.
+func (r *SessionService) MessagesAutoPaging(ctx context.Context, id string, query SessionMessagesParams, opts ...option.RequestOption) *pagination.HeaderBeforePageAutoPager[SessionMessagesResponse] {
+	return pagination.NewHeaderBeforePageAutoPager(r.Messages(ctx, id, query, opts...))
 }
 
 // Create and send a new message to a session

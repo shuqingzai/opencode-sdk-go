@@ -17,6 +17,7 @@ import (
 	"github.com/sst/opencode-sdk-go/internal/param"
 	"github.com/sst/opencode-sdk-go/internal/requestconfig"
 	"github.com/sst/opencode-sdk-go/option"
+	"github.com/sst/opencode-sdk-go/packages/pagination"
 	"github.com/sst/opencode-sdk-go/packages/ssestream"
 	"github.com/tidwall/gjson"
 )
@@ -51,10 +52,30 @@ func NewV2SessionService(opts ...option.RequestOption) (r *V2SessionService) {
 // Retrieve sessions in the requested order. Items keep that order across pages;
 // use cursor.next or cursor.previous to move through the ordered list.
 func (r *V2SessionService) List(ctx context.Context, query V2SessionListParams, opts ...option.RequestOption) (res *V2SessionsResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var raw *http.Response
+	opts = slices.Concat([]option.RequestOption{option.WithResponseInto(&raw)}, r.Options, opts)
 	path := "api/session"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List v2 sessions
+//
+// Retrieve sessions in the requested order. Items keep that order across pages;
+// use cursor.next or cursor.previous to move through the ordered list.
+//
+// ListAutoPaging walks every page for you, transparently replaying cursor.next
+// until the server runs out of sessions.
+func (r *V2SessionService) ListAutoPaging(ctx context.Context, query V2SessionListParams, opts ...option.RequestOption) *pagination.CursorPageAutoPager[V2SessionInfo] {
+	return pagination.NewCursorPageAutoPager(r.List(ctx, query, opts...))
 }
 
 // Send v2 message
@@ -120,14 +141,35 @@ func (r *V2SessionService) Context(ctx context.Context, sessionID string, opts .
 // across pages; use cursor.next or cursor.previous to move through the ordered
 // timeline.
 func (r *V2SessionService) Messages(ctx context.Context, sessionID string, query V2SessionMessagesParams, opts ...option.RequestOption) (res *V2SessionMessagesResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var raw *http.Response
+	opts = slices.Concat([]option.RequestOption{option.WithResponseInto(&raw)}, r.Options, opts)
 	if sessionID == "" {
-		err = errors.New("missing required sessionID parameter")
-		return
+		return nil, errors.New("missing required sessionID parameter")
 	}
 	path := fmt.Sprintf("api/session/%s/message", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Get v2 session messages
+//
+// Retrieve projected v2 messages for a session. Items keep the requested order
+// across pages; use cursor.next or cursor.previous to move through the ordered
+// timeline.
+//
+// MessagesAutoPaging walks every page for you, transparently replaying
+// cursor.next until the session timeline is exhausted. The order requested on
+// the first call is preserved across pages because it is baked into the cursor.
+func (r *V2SessionService) MessagesAutoPaging(ctx context.Context, sessionID string, query V2SessionMessagesParams, opts ...option.RequestOption) *pagination.CursorPageAutoPager[V2SessionMessage] {
+	return pagination.NewCursorPageAutoPager(r.Messages(ctx, sessionID, query, opts...))
 }
 
 // New v2 session
@@ -217,14 +259,34 @@ func (r *V2SessionService) Events(ctx context.Context, sessionID string, query V
 // Read one finite page of public durable Session events after an exclusive
 // aggregate sequence. Newly committed events may appear on later pages.
 func (r *V2SessionService) History(ctx context.Context, sessionID string, query V2SessionHistoryParams, opts ...option.RequestOption) (res *V2SessionHistoryResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var raw *http.Response
+	opts = slices.Concat([]option.RequestOption{option.WithResponseInto(&raw)}, r.Options, opts)
 	if sessionID == "" {
-		err = errors.New("missing required sessionID parameter")
-		return
+		return nil, errors.New("missing required sessionID parameter")
 	}
 	path := fmt.Sprintf("api/session/%s/history", sessionID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Get session history
+//
+// Read one finite page of public durable Session events after an exclusive
+// aggregate sequence. Newly committed events may appear on later pages.
+//
+// HistoryAutoPaging walks every page for you, advancing the `after` parameter to
+// the durable sequence number of the last event it saw until hasMore turns
+// false.
+func (r *V2SessionService) HistoryAutoPaging(ctx context.Context, sessionID string, query V2SessionHistoryParams, opts ...option.RequestOption) *pagination.SeqPageAutoPager[V2SessionDurableEvent] {
+	return pagination.NewSeqPageAutoPager(r.History(ctx, sessionID, query, opts...))
 }
 
 // Interrupt session execution
@@ -262,26 +324,10 @@ func (r *V2SessionService) Message(ctx context.Context, sessionID string, messag
 
 // ===== Response Types =====
 
-type V2SessionsResponse struct {
-	Data   []V2SessionInfo        `json:"data,required"`
-	Cursor V2Cursor               `json:"cursor,required"`
-	JSON   v2SessionsResponseJSON `json:"-"`
-}
-
-type v2SessionsResponseJSON struct {
-	Data        apijson.Field
-	Cursor      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionsResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2SessionsResponseJSON) RawJSON() string {
-	return r.raw
-}
+// V2SessionsResponse is returned by the List method. It is a page of sessions:
+// use its GetNextPage / GetPreviousPage methods, or [V2SessionService.ListAutoPaging],
+// to walk the ordered list through Cursor.Next and Cursor.Previous.
+type V2SessionsResponse = pagination.CursorPage[V2SessionInfo]
 
 type V2SessionInfo struct {
 	ID        string              `json:"id,required"`
@@ -393,47 +439,17 @@ func (r v2SessionInfoTokensCacheJSON) RawJSON() string {
 	return r.raw
 }
 
-type V2Cursor struct {
-	Previous string       `json:"previous"`
-	Next     string       `json:"next"`
-	JSON     v2CursorJSON `json:"-"`
-}
+// V2Cursor carries the opaque pagination cursors returned by the v2 session
+// endpoints. Both values already encode the ordering of the sequence they walk,
+// so they must be replayed as-is and must not be combined with the `order` query
+// parameter.
+type V2Cursor = pagination.PageCursor
 
-type v2CursorJSON struct {
-	Previous    apijson.Field
-	Next        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2Cursor) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2CursorJSON) RawJSON() string {
-	return r.raw
-}
-
-type V2SessionMessagesResponse struct {
-	Data   []V2SessionMessage            `json:"data,required"`
-	Cursor V2Cursor                      `json:"cursor,required"`
-	JSON   v2SessionMessagesResponseJSON `json:"-"`
-}
-
-type v2SessionMessagesResponseJSON struct {
-	Data        apijson.Field
-	Cursor      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionMessagesResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2SessionMessagesResponseJSON) RawJSON() string {
-	return r.raw
-}
+// V2SessionMessagesResponse is returned by the Messages method. It is a page of
+// messages: use its GetNextPage / GetPreviousPage methods, or
+// [V2SessionService.MessagesAutoPaging], to walk the ordered timeline through
+// Cursor.Next and Cursor.Previous.
+type V2SessionMessagesResponse = pagination.CursorPage[V2SessionMessage]
 
 // V2SessionContextResponse is returned by the Context method. It wraps messages
 // in a data field.
@@ -3481,27 +3497,10 @@ func (r V2SessionEventResponse) ParseData() (V2SessionDurableEvent, error) {
 
 // ===== V2SessionHistoryResponse =====
 
-// V2SessionHistoryResponse is returned by the History method.
-type V2SessionHistoryResponse struct {
-	Data    []V2SessionDurableEvent      `json:"data,required"`
-	HasMore bool                         `json:"hasMore,required"`
-	JSON    v2SessionHistoryResponseJSON `json:"-"`
-}
-
-type v2SessionHistoryResponseJSON struct {
-	Data        apijson.Field
-	HasMore     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *V2SessionHistoryResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r v2SessionHistoryResponseJSON) RawJSON() string {
-	return r.raw
-}
+// V2SessionHistoryResponse is returned by the History method. It is a finite page
+// of durable session events: use its GetNextPage method, or
+// [V2SessionService.HistoryAutoPaging], to keep reading while HasMore is true.
+type V2SessionHistoryResponse = pagination.SeqPage[V2SessionDurableEvent]
 
 // ===== V2SessionMessageSystem =====
 
