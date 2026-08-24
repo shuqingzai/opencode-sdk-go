@@ -243,12 +243,6 @@ func TestReview2AliasTypeIdentity(t *testing.T) {
 			t.Errorf("%s: TypeFor[alias] != TypeFor[target]", c.name)
 		}
 	}
-	if reflect.TypeFor[opencode.SyncEventSessionNextContextUpdatedProperties]() != reflect.TypeFor[opencode.EventListResponseEventSessionNextContextUpdatedProperties]() {
-		t.Error("TypeOf(alias{}) != TypeFor[target]")
-	}
-	if reflect.TypeFor[opencode.SyncEventSessionNextPromptAdmittedProperties]() != reflect.TypeFor[opencode.EventListResponseEventSessionNextPromptAdmittedProperties]() {
-		t.Error("TypeOf(alias{}) != TypeFor[target]")
-	}
 }
 
 // =============================================================================
@@ -257,8 +251,13 @@ func TestReview2AliasTypeIdentity(t *testing.T) {
 
 // TestReview2SSERobustnessMatrix 对三条 SSE 链路（GlobalEvent / EventListResponse /
 // V2Event）分别喂入 ①载体为 null ②未知 type ③缺失必填字段 ④类型错误 ⑤畸形原始值，
-// 记录各自行为并断言：字段级载体任何畸形输入（含 string/number/bool/array）
-// 在三条链路上都不得报错（否则 ssestream.Next 会终结整个 SSE 流）。
+// 以及整帧级非对象输入（null/array/string），并断言两个口径：
+//   - 字段级载体任何畸形输入（含 string/number/bool/array）都不得报错；
+//   - 整帧级非对象载体同样不得报错（IsObject 守卫静默降级，与
+//     TestReview2SSEBareScalarWholeEventTolerated /
+//     TestReview2SSEBareArrayWholeEventTolerated 锁定的行为一致）。
+//
+// 任何解码错误都会经 ssestream.Next 终结整个 SSE 流，故一律视为缺陷。
 func TestReview2SSERobustnessMatrix(t *testing.T) {
 	chains := []struct {
 		label  string
@@ -358,6 +357,11 @@ func TestReview2SSERobustnessMatrix(t *testing.T) {
 				status = "ERROR"
 			}
 			t.Logf("[%s] %-18s -> %-6s asUnion=%s err=%s", ch.label, in.name, status, asUnion, errText)
+			if errText != "" {
+				// 整帧级非对象输入在三条链路上都必须容错（IsObject 守卫 /
+				// gjson 路径取值静默降级），任何解码错误都会终结整条流。
+				t.Errorf("[%s] %s: decode error %q would terminate the SSE stream", ch.label, in.name, errText)
+			}
 		}
 	}
 }
@@ -519,58 +523,154 @@ func TestReview2SSEConsecutiveMalformedEvents(t *testing.T) {
 	})
 }
 
-// TestReview2SSEBareArrayWholeEventTolerated 记录一个非对称的实测事实：整条
-// SSE 事件的 data: 若是裸数组 `[1,2,3]`（而不是 object），三条链路都不会报错
-// ——gjson 把 JSON array 和 object 统一归为 gjson.JSON 类型，union 路由的
-// TypeFilter（全部注册为 gjson.JSON）恰好也能匹配数组，因此不会触发
-// "was not able to coerce type as union"。这与裸 null/number/string/bool
-// （非 gjson.JSON，无 TypeFilter 匹配，会报错并杀流，见
-// TestReview2SSEBareScalarWholeEventVaries）形成对照，供后续回归对比。
+// TestReview2SSEBareArrayWholeEventTolerated 记录一个实测事实：整条
+// SSE 事件的 data: 若是裸数组 `[1,2,3]`（而不是 object），三条链路都不会报错。
+// 历史上这归因于 gjson 把 JSON array 和 object 统一归为 gjson.JSON 类型、union
+// 路由的 TypeFilter（全部注册为 gjson.JSON）恰好也能匹配数组；现整条事件级的
+// 非对象载体（含数组）统一在各自 UnmarshalJSON 入口被 IsObject 守卫拦截并静默
+// 降级（跳过 union 路由），可观察行为不变：不报错，帧仍作为零值事件派发（n=1）。
+// 裸 null/number/string/bool 同样静默降级（见
+// TestReview2SSEBareScalarWholeEventTolerated），非对象载体行为已全面统一，
+// 供后续回归对比。
 func TestReview2SSEBareArrayWholeEventTolerated(t *testing.T) {
 	t.Parallel()
-	if n, err := sseCountEventListResponse(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
-		t.Errorf("EventListResponse bare array whole event: n=%d err=%v, want err=nil", n, err)
+	if n, err := sseCountEventListResponse(sseEventFrame([]byte(`[1,2,3]`))); err != nil || n != 1 {
+		t.Errorf("EventListResponse bare array whole event: n=%d err=%v, want n=1 err=nil", n, err)
 	}
-	if n, err := sseCountV2Event(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
-		t.Errorf("V2Event bare array whole event: n=%d err=%v, want err=nil", n, err)
+	if n, err := sseCountV2Event(sseEventFrame([]byte(`[1,2,3]`))); err != nil || n != 1 {
+		t.Errorf("V2Event bare array whole event: n=%d err=%v, want n=1 err=nil", n, err)
 	}
-	if n, err := sseCountGlobalEvent(sseEventFrame([]byte(`[1,2,3]`))); err != nil {
-		t.Errorf("GlobalEvent bare array whole event: n=%d err=%v, want err=nil", n, err)
+	if n, err := sseCountGlobalEvent(sseEventFrame([]byte(`[1,2,3]`))); err != nil || n != 1 {
+		t.Errorf("GlobalEvent bare array whole event: n=%d err=%v, want n=1 err=nil", n, err)
 	}
 }
 
-// TestReview2SSEBareScalarWholeEventVaries 三条链路对"整条事件本身就是裸
+// TestReview2SSEBareScalarWholeEventTolerated 三条链路对"整条事件本身就是裸
 // 标量"（不是 object）的实测行为：
 //   - GlobalEvent：自定义 UnmarshalJSON 走 apijson.UnmarshalRoot（gjson 按路径
 //     取字段），根节点不是 object 时具名字段全部取不到值，静默产出零值，
-//     不报错、不杀流（与 A1/A2 报告一致）。
-//   - EventListResponse / V2Event：顶层就是 Union carrier，
-//     apijson.UnmarshalRoot(data, &r.union) 对 null/number/string/bool
-//     （非 gjson.JSON）找不到任何 TypeFilter 匹配的 variant，返回
-//     "was not able to coerce type as union"，会经 ssestream.Stream.Next()
-//     杀死整条流。
+//     不报错、不杀流。
+//   - EventListResponse / V2Event：顶层就是 Union carrier。历史上对
+//     null/number/string/bool 会返回 "was not able to coerce type as union"
+//     并经 ssestream.Stream.Next() 杀死整条流；现已在各自 UnmarshalJSON 入口
+//     增加 IsObject 守卫，非对象载体跳过 union 路由、静默降级 return nil，
+//     RawJSON() 仍保留原始报文——与 GlobalEvent 链路容错策略完全一致。
 //
-// 这与 A2 报告「附加观察项」结论一致（非新发现，仅补齐 GlobalEvent 侧的
-// 逐类型实测并统一到一个可执行的回归用例）。
-func TestReview2SSEBareScalarWholeEventVaries(t *testing.T) {
+// 本用例锁定修复后的统一行为：裸标量帧被静默降级——仍作为零值事件派发（n=1）、
+// 流继续存活，其后的合法事件照常送达（n=2）；三条链路的降级帧都必须经 RawJSON()
+// 保留原始报文。
+func TestReview2SSEBareScalarWholeEventTolerated(t *testing.T) {
 	t.Parallel()
-	scalars := []string{"42", `"hello"`, "null", "true"}
+	// gjson 将 true/false 视为不同类型（gjson.True / gjson.False），bool 必须
+	// 双向覆盖，与 sse_tolerance_consistency_test.go 的载体全集口径一致。
+	scalars := []string{"42", `"hello"`, "null", "true", "false"}
 
 	for _, raw := range scalars {
-		if n, err := sseCountGlobalEvent(sseEventFrame([]byte(raw))); err != nil {
-			t.Errorf("GlobalEvent whole=%s: n=%d err=%v, want err=nil (gjson path lookups degrade silently)", raw, n, err)
+		if n, err := sseCountGlobalEvent(sseEventFrame([]byte(raw))); err != nil || n != 1 {
+			t.Errorf("GlobalEvent whole=%s: n=%d err=%v, want n=1 err=nil (gjson path lookups degrade silently)", raw, n, err)
 		}
 	}
 
 	for _, raw := range scalars {
-		if _, err := sseCountEventListResponse(sseEventFrame([]byte(raw))); err == nil {
-			t.Errorf("EventListResponse whole=%s: err=nil, want a union-coerce error (documents known asymmetry vs GlobalEvent)", raw)
+		if n, err := sseCountEventListResponse(sseEventFrame([]byte(raw))); err != nil || n != 1 {
+			t.Errorf("EventListResponse whole=%s: n=%d err=%v, want n=1 err=nil (IsObject guard degrades silently)", raw, n, err)
 		}
 	}
 
 	for _, raw := range scalars {
-		if _, err := sseCountV2Event(sseEventFrame([]byte(raw))); err == nil {
-			t.Errorf("V2Event whole=%s: err=nil, want a union-coerce error (documents known asymmetry vs GlobalEvent)", raw)
+		if n, err := sseCountV2Event(sseEventFrame([]byte(raw))); err != nil || n != 1 {
+			t.Errorf("V2Event whole=%s: n=%d err=%v, want n=1 err=nil (IsObject guard degrades silently)", raw, n, err)
+		}
+	}
+
+	// 流存活证明：裸标量帧之后紧跟一条合法事件，合法事件必须照常送达
+	// （共 2 个事件且 Err() 为 nil）——降级帧绝不能像修复前那样杀死整条流。
+	for _, chain := range []struct {
+		name  string
+		count func(frames ...string) (int, error)
+		valid string
+	}{
+		{
+			name:  "EventListResponse",
+			count: sseCountEventListResponse,
+			valid: sseEventFrame([]byte(`{"id":"evt_ok","type":"file.edited","properties":{"file":"/ok.go"}}`)),
+		},
+		{
+			name:  "GlobalEvent",
+			count: sseCountGlobalEvent,
+			valid: sseEventFrame([]byte(`{"directory":"d","payload":{"id":"evt_ok","type":"file.edited","data":{"file":"/ok.go"}}}`)),
+		},
+		{
+			name:  "V2Event",
+			count: sseCountV2Event,
+			valid: sseEventFrame([]byte(`{"id":"evt_ok","type":"file.edited","data":{"file":"/ok.go"}}`)),
+		},
+	} {
+		for _, raw := range scalars {
+			n, err := chain.count(sseEventFrame([]byte(raw)), chain.valid)
+			if err != nil {
+				t.Errorf("%s whole=%s then valid event: stream.Err() = %v, want nil (stream must survive degraded frames)", chain.name, raw, err)
+			}
+			if n != 2 {
+				t.Errorf("%s whole=%s then valid event: got %d events, want 2 (degraded frame + subsequent valid event)", chain.name, raw, n)
+			}
+		}
+	}
+
+	// RawJSON 保留证明：三条链路的降级帧都必须把原始报文暴露在 RawJSON()
+	// 上，供调用方区分畸形帧与正常路由的事件体。链路 1/3 由 IsObject 守卫
+	// 显式写入 raw；链路 2 的 raw 由 Phase 1 的 apijson alias 元数据填充，
+	// 对任意根类型生效（与 sse_tolerance_consistency_test.go 的断言口径一致）。
+	for _, tc := range []struct {
+		name    string
+		consume func(raw []byte) (string, bool)
+	}{
+		{
+			name: "EventListResponse",
+			consume: func(raw []byte) (string, bool) {
+				resp := newSSEResponse(sseEventFrame(raw))
+				stream := ssestream.NewStream[opencode.EventListResponse](ssestream.NewDecoder(resp), nil)
+				defer stream.Close()
+				if !stream.Next() {
+					return "", false
+				}
+				return stream.Current().JSON.RawJSON(), true
+			},
+		},
+		{
+			name: "GlobalEvent",
+			consume: func(raw []byte) (string, bool) {
+				resp := newSSEResponse(sseEventFrame(raw))
+				stream := ssestream.NewStream[opencode.GlobalEvent](ssestream.NewDecoder(resp), nil)
+				defer stream.Close()
+				if !stream.Next() {
+					return "", false
+				}
+				return stream.Current().JSON.RawJSON(), true
+			},
+		},
+		{
+			name: "V2Event",
+			consume: func(raw []byte) (string, bool) {
+				resp := newSSEResponse(sseEventFrame(raw))
+				stream := ssestream.NewStream[opencode.V2Event](ssestream.NewDecoder(resp), nil)
+				defer stream.Close()
+				if !stream.Next() {
+					return "", false
+				}
+				return stream.Current().JSON.RawJSON(), true
+			},
+		},
+	} {
+		for _, raw := range scalars {
+			got, ok := tc.consume([]byte(raw))
+			if !ok {
+				t.Errorf("%s whole=%s: stream produced no event, want one degraded zero-value event", tc.name, raw)
+				continue
+			}
+			if got != raw {
+				t.Errorf("%s whole=%s: RawJSON() = %q, want original payload preserved", tc.name, raw, got)
+			}
 		}
 	}
 }
@@ -717,7 +817,7 @@ func TestReview2SSENonEmptyPayloadsStillDispatched(t *testing.T) {
 
 	// "null" 是合法 JSON 文档（非空 data 缓冲），绝不能被跳过逻辑吞掉。
 	// GlobalEvent 的 gjson 路径取值对非 object 根节点静默降级（见
-	// TestReview2SSEBareScalarWholeEventVaries），因此它能正向证明该帧确实
+	// TestReview2SSEBareScalarWholeEventTolerated），因此它能正向证明该帧确实
 	// 被派发并计数。
 	t.Run("data: null is dispatched on GlobalEvent chain", func(t *testing.T) {
 		n, err := sseCountGlobalEvent(
@@ -732,13 +832,17 @@ func TestReview2SSENonEmptyPayloadsStillDispatched(t *testing.T) {
 		}
 	})
 
-	// V2Event 顶层是 Union carrier，对裸标量返回 "was not able to coerce type
-	// as union"（既有行为，见 TestReview2SSEBareScalarWholeEventVaries）。这里
-	// 断言它确实抵达了 json.Unmarshal —— 若被空缓冲跳过逻辑误吞，err 会是 nil。
-	t.Run("data: null reaches Unmarshal on V2Event chain", func(t *testing.T) {
-		_, err := sseCountV2Event("data: null\n\n")
-		if err == nil {
-			t.Error("stream.Err() = nil — `null` appears to have been swallowed by the empty-buffer skip; only empty or whitespace-only buffers may be skipped")
+	// V2Event 顶层是 Union carrier。历史上对裸标量返回 "was not able to coerce
+	// type as union"；现已在 UnmarshalJSON 入口增加 IsObject 守卫，非对象载体
+	// 静默降级（见 TestReview2SSEBareScalarWholeEventTolerated）。这里改用计数
+	// 正向证明该帧确实被派发并消费——若被空缓冲跳过逻辑误吞，n 会是 0。
+	t.Run("data: null is dispatched on V2Event chain", func(t *testing.T) {
+		n, err := sseCountV2Event("data: null\n\n")
+		if err != nil {
+			t.Errorf("stream.Err() = %v, want nil", err)
+		}
+		if n != 1 {
+			t.Errorf("got %d events, want 1 (`null` is a valid JSON document and must not be skipped)", n)
 		}
 	})
 

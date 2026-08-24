@@ -166,6 +166,15 @@ func (r eventListResponseJSON) RawJSON() string {
 
 func (r *EventListResponse) UnmarshalJSON(data []byte) (err error) {
 	*r = EventListResponse{}
+	// The OpenAPI event union is an anyOf of object schemas only, so any
+	// non-object payload (null, bool, number, string, array) cannot match a
+	// variant. Skip union routing instead of failing, which would terminate
+	// the whole SSE stream. RawJSON() still exposes the original value so
+	// callers can distinguish a malformed frame from a routed event body.
+	if !gjson.ParseBytes(data).IsObject() {
+		r.JSON.raw = string(data)
+		return nil
+	}
 	err = apijson.UnmarshalRoot(data, &r.union)
 	if err != nil {
 		return err
