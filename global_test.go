@@ -291,3 +291,50 @@ func TestGlobalUpgradeResponseUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+// TestGlobalUpgradeBodyTargetRequired locks the contract introduced in
+// opencode v1.18.23: the /global/upgrade request body schema declares
+// `"required": ["target"]`, so the Go tag must carry the `required` marker
+// and serialization must emit the field only when set.
+func TestGlobalUpgradeBodyTargetRequired(t *testing.T) {
+	t.Parallel()
+
+	// 1. Tag contract: the json tag must be exactly `target,required`.
+	field, ok := reflect.TypeFor[opencode.GlobalUpgradeBody]().FieldByName("Target")
+	if !ok {
+		t.Fatal("GlobalUpgradeBody has no Target field")
+	}
+	if got, want := field.Tag.Get("json"), "target,required"; got != want {
+		t.Errorf("GlobalUpgradeBody.Target json tag = %q, want %q", got, want)
+	}
+
+	// 2. With Target set: the value must be serialized.
+	body := opencode.GlobalUpgradeBody{
+		Target: opencode.F("v1.18.23"),
+	}
+	data, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf("json.Marshal failed: %v", err)
+	}
+	var withTarget map[string]json.RawMessage
+	if err := json.Unmarshal(data, &withTarget); err != nil {
+		t.Fatalf("re-decode marshaled output %s failed: %v", data, err)
+	}
+	raw, ok := withTarget["target"]
+	if !ok {
+		t.Fatalf("Target set but marshaled output %s lacks \"target\" key", data)
+	}
+	if string(raw) != `"v1.18.23"` {
+		t.Errorf("marshaled target = %s, want %q", raw, `"v1.18.23"`)
+	}
+
+	// 3. Without Target: param.Field zero value is omitted client-side;
+	// required-ness is enforced by the server (apijson tags are metadata).
+	empty, err := json.Marshal(opencode.GlobalUpgradeBody{})
+	if err != nil {
+		t.Fatalf("json.Marshal failed: %v", err)
+	}
+	if string(empty) != "{}" {
+		t.Errorf("empty GlobalUpgradeBody marshaled to %s, want {}", empty)
+	}
+}

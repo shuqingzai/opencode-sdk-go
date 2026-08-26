@@ -113,7 +113,7 @@ func (r globalHealthResponseJSON) RawJSON() string {
 }
 
 type GlobalUpgradeBody struct {
-	Target param.Field[string] `json:"target"`
+	Target param.Field[string] `json:"target,required"`
 }
 
 func (r GlobalUpgradeBody) MarshalJSON() ([]byte, error) {
