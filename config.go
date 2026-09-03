@@ -1391,16 +1391,23 @@ type ConfigProviderOptions struct {
 	// [ConfigProviderOptionsTimeout.AsUnion] to get [shared.UnionInt] (an int64
 	// millisecond duration) or [shared.UnionBool] (always false).
 	Timeout ConfigProviderOptionsTimeout `json:"timeout"`
-	// Timeout in milliseconds to wait for response headers. Provider integrations
-	// may set defaults. Set to false to disable timeout.
+	// Timeout in milliseconds to wait for response headers (default: 300000).
+	// Set to false to disable timeout.
 	//
 	// Decodes to [ConfigProviderOptionsTimeout]; use
 	// [ConfigProviderOptionsTimeout.AsUnion] to get [shared.UnionInt] (an int64
 	// millisecond duration) or [shared.UnionBool] (always false).
 	HeaderTimeout ConfigProviderOptionsTimeout `json:"headerTimeout"`
-	ChunkTimeout  int64                        `json:"chunkTimeout"`
-	ExtraFields   map[string]any               `json:"-,extras"`
-	JSON          configProviderOptionsJSON    `json:"-"`
+	// Timeout in milliseconds between streamed SSE chunks for this provider
+	// (default: 300000). If no chunk arrives within this window, the request is
+	// aborted. Set to false to disable timeout.
+	//
+	// Decodes to [ConfigProviderOptionsTimeout]; use
+	// [ConfigProviderOptionsTimeout.AsUnion] to get [shared.UnionInt] (an int64
+	// millisecond duration) or [shared.UnionBool] (always false).
+	ChunkTimeout ConfigProviderOptionsTimeout `json:"chunkTimeout"`
+	ExtraFields  map[string]any               `json:"-,extras"`
+	JSON         configProviderOptionsJSON    `json:"-"`
 }
 
 // configProviderOptionsJSON contains the JSON metadata for the struct
@@ -1427,7 +1434,8 @@ func (r configProviderOptionsJSON) RawJSON() string {
 
 // ConfigProviderOptionsTimeoutUnion represents a timeout duration as either an
 // integer (milliseconds, > 0) or false (to disable). Used by
-// [ConfigProviderOptions.Timeout] and [ConfigProviderOptions.HeaderTimeout].
+// [ConfigProviderOptions.Timeout], [ConfigProviderOptions.HeaderTimeout] and
+// [ConfigProviderOptions.ChunkTimeout].
 //
 // Union satisfied by [shared.UnionInt] or [shared.UnionBool].
 type ConfigProviderOptionsTimeoutUnion interface {
@@ -1450,8 +1458,8 @@ func init() {
 }
 
 // ConfigProviderOptionsTimeout is the carrier for the OpenAPI
-// `ProviderConfig.options.timeout` / `headerTimeout` anyOf union: an integer
-// millisecond duration or false (to disable).
+// `ProviderConfig.options.timeout` / `headerTimeout` / `chunkTimeout` anyOf
+// union: an integer millisecond duration or false (to disable).
 //
 // The decoded union is available via [ConfigProviderOptionsTimeout.AsUnion].
 type ConfigProviderOptionsTimeout struct {
@@ -2760,10 +2768,15 @@ type ConfigProviderOptionsParam struct {
 	// Timeout in milliseconds for full requests to this provider. Set to false to
 	// disable timeout. Accepts [shared.UnionInt] or [shared.UnionBool].
 	Timeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"timeout"`
-	// Timeout in milliseconds to wait for response headers. Set to false to disable.
-	// Accepts [shared.UnionInt] or [shared.UnionBool].
+	// Timeout in milliseconds to wait for response headers (default: 300000).
+	// Set to false to disable timeout. Accepts [shared.UnionInt] or
+	// [shared.UnionBool].
 	HeaderTimeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"headerTimeout"`
-	ChunkTimeout  param.Field[int64]                             `json:"chunkTimeout"`
+	// Timeout in milliseconds between streamed SSE chunks for this provider
+	// (default: 300000). If no chunk arrives within this window, the request is
+	// aborted. Set to false to disable timeout. Accepts [shared.UnionInt] or
+	// [shared.UnionBool].
+	ChunkTimeout param.Field[ConfigProviderOptionsTimeoutUnion] `json:"chunkTimeout"`
 }
 
 func (r ConfigProviderOptionsParam) MarshalJSON() (data []byte, err error) {

@@ -896,13 +896,14 @@ func TestConfigRoundTripRawJSON(t *testing.T) {
 }
 
 // TestConfigProviderOptionsTimeoutUnion verifies the OpenAPI
-// `ProviderConfig.options.timeout` / `headerTimeout` anyOf:
+// `ProviderConfig.options.timeout` / `headerTimeout` / `chunkTimeout` anyOf:
 //
 //	anyOf: [ {type: integer, exclusiveMinimum: 0}, {type: boolean, enum: [false]} ]
 //
-// Both fields are statically typed as the carrier [opencode.ConfigProviderOptionsTimeout];
-// the registered union resolves to [shared.UnionInt] (int64 milliseconds) or
-// [shared.UnionBool] via [opencode.ConfigProviderOptionsTimeout.AsUnion].
+// All three fields are statically typed as the carrier
+// [opencode.ConfigProviderOptionsTimeout]; the registered union resolves to
+// [shared.UnionInt] (int64 milliseconds) or [shared.UnionBool] via
+// [opencode.ConfigProviderOptionsTimeout.AsUnion].
 // Declaring them `any` would silently yield float64 / bool, violating the
 // OpenAPI `integer` contract and losing precision above 2^53.
 //
@@ -913,7 +914,7 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 	t.Run("integer_variant", func(t *testing.T) {
 		t.Parallel()
 		var o opencode.ConfigProviderOptions
-		if err := json.Unmarshal([]byte(`{"timeout":600000,"headerTimeout":30000}`), &o); err != nil {
+		if err := json.Unmarshal([]byte(`{"timeout":600000,"headerTimeout":30000,"chunkTimeout":120000}`), &o); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
 		ms, ok := o.Timeout.AsUnion().(opencode.UnionInt)
@@ -930,17 +931,25 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 		if int64(hms) != 30000 {
 			t.Errorf("HeaderTimeout = %d, want 30000", int64(hms))
 		}
+		cms, ok := o.ChunkTimeout.AsUnion().(opencode.UnionInt)
+		if !ok {
+			t.Fatalf("ChunkTimeout runtime type = %T, want shared.UnionInt", o.ChunkTimeout.AsUnion())
+		}
+		if int64(cms) != 120000 {
+			t.Errorf("ChunkTimeout = %d, want 120000", int64(cms))
+		}
 	})
 
 	t.Run("false_variant", func(t *testing.T) {
 		t.Parallel()
 		var o opencode.ConfigProviderOptions
-		if err := json.Unmarshal([]byte(`{"timeout":false,"headerTimeout":false}`), &o); err != nil {
+		if err := json.Unmarshal([]byte(`{"timeout":false,"headerTimeout":false,"chunkTimeout":false}`), &o); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
 		for name, got := range map[string]any{
 			"timeout":       o.Timeout.AsUnion(),
 			"headerTimeout": o.HeaderTimeout.AsUnion(),
+			"chunkTimeout":  o.ChunkTimeout.AsUnion(),
 		} {
 			v, ok := got.(opencode.UnionBool)
 			if !ok {
@@ -981,6 +990,9 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 			if o.HeaderTimeout.AsUnion() != nil {
 				t.Errorf("%s: HeaderTimeout = %#v, want nil", body, o.HeaderTimeout.AsUnion())
 			}
+			if o.ChunkTimeout.AsUnion() != nil {
+				t.Errorf("%s: ChunkTimeout = %#v, want nil", body, o.ChunkTimeout.AsUnion())
+			}
 		}
 	})
 
@@ -1010,6 +1022,12 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 			{opencode.ConfigProviderOptionsParam{
 				HeaderTimeout: opencode.F[opencode.ConfigProviderOptionsTimeoutUnion](opencode.UnionBool(false)),
 			}, `{"headerTimeout":false}`},
+			{opencode.ConfigProviderOptionsParam{
+				ChunkTimeout: opencode.F[opencode.ConfigProviderOptionsTimeoutUnion](opencode.UnionInt(300000)),
+			}, `{"chunkTimeout":300000}`},
+			{opencode.ConfigProviderOptionsParam{
+				ChunkTimeout: opencode.F[opencode.ConfigProviderOptionsTimeoutUnion](opencode.UnionBool(false)),
+			}, `{"chunkTimeout":false}`},
 		}
 		for _, tc := range cases {
 			got, err := json.Marshal(tc.param)
@@ -1025,17 +1043,18 @@ func TestConfigProviderOptionsTimeoutUnion(t *testing.T) {
 	t.Run("response_value_reusable_as_request", func(t *testing.T) {
 		t.Parallel()
 		var src opencode.ConfigProviderOptions
-		if err := json.Unmarshal([]byte(`{"timeout":5000,"headerTimeout":false}`), &src); err != nil {
+		if err := json.Unmarshal([]byte(`{"timeout":5000,"headerTimeout":false,"chunkTimeout":false}`), &src); err != nil {
 			t.Fatalf("json.Unmarshal: %v", err)
 		}
 		got, err := json.Marshal(opencode.ConfigProviderOptionsParam{
 			Timeout:       opencode.F(src.Timeout.AsUnion()),
 			HeaderTimeout: opencode.F(src.HeaderTimeout.AsUnion()),
+			ChunkTimeout:  opencode.F(src.ChunkTimeout.AsUnion()),
 		})
 		if err != nil {
 			t.Fatalf("json.Marshal: %v", err)
 		}
-		const want = `{"headerTimeout":false,"timeout":5000}`
+		const want = `{"chunkTimeout":false,"headerTimeout":false,"timeout":5000}`
 		if string(got) != want {
 			t.Errorf("got %s, want %s", got, want)
 		}
